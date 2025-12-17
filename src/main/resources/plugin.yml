@@ -1,0 +1,8 @@
+name: BBTweaks
+main: me.blvckbytes.bbtweaks.BBTweaksPlugin
+version: ${project.version}
+author: BlvckBytes
+api-version: 1.21
+commands:
+  bbtweaks:
+    permission: bbtweaks.command
