@@ -45,6 +45,8 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     rdBreakTool = new RDBreakTool(this);
 
     getServer().getPluginManager().registerEvents(rdBreakTool, this);
+
+    getServer().getPluginManager().registerEvents(new LavaSponge(), this);
   }
 
   private YamlConfiguration loadConfiguration() {
