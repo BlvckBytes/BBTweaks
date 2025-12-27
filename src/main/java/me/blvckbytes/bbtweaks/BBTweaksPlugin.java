@@ -40,13 +40,17 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
     new ActionBarSleepMessage(this);
 
-    getServer().getPluginManager().registerEvents(new CommandSendListener(this), this);
-
     rdBreakTool = new RDBreakTool(this);
 
     getServer().getPluginManager().registerEvents(rdBreakTool, this);
 
     getServer().getPluginManager().registerEvents(new LavaSponge(), this);
+
+    var getUuidCommand = new GetUuidCommand(this);
+
+    Objects.requireNonNull(getCommand("getuuid")).setExecutor(getUuidCommand);
+
+    getServer().getPluginManager().registerEvents(getUuidCommand, this);
   }
 
   private YamlConfiguration loadConfiguration() {

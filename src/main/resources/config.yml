@@ -15,3 +15,7 @@ chat:
   configurationReloaded: '&7[&5BBTweaks&7] &aDie Konfiguration wurde erneut geladen.'
   setRdBreakerNoValidItem: '&7[&5BBTweaks&7] &cDu hältst kein valides Item in der Hand!'
   setRdBreakerMetadata: '&7[&5BBTweaks&7] &aDieses Item ist nun als RD-Breaker gekennzeichnet.'
+  getUuidUsage: '&7[&5BBTweaks&7] &cBenutzung: /{command_label} <Name>'
+  getUuidUnknownName: '&7[&5BBTweaks&7] &cKonnte zum Namen &4{name} &ckeine UUID finden!'
+  getUuidResult: '&7[&5BBTweaks&7] &7Die UUID von &a{name} &7ist &a{uuid}&7!'
+  getUuidResultHover: '&aKlicke, um die UUID zu kopieren!'

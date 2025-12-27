@@ -6,3 +6,6 @@ api-version: 1.21
 commands:
   bbtweaks:
     permission: bbtweaks.command
+  getuuid:
+    description: 'resolve the UUID of any given name'
+    permission: bbtweaks.getuuid
