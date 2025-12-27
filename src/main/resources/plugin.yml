@@ -9,3 +9,5 @@ commands:
   getuuid:
     description: 'resolve the UUID of any given name'
     permission: bbtweaks.getuuid
+  back:
+    permission: essentials.back

@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks;
 import me.blvckbytes.syllables_matcher.EnumMatcher;
 import me.blvckbytes.syllables_matcher.MatchableEnum;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
@@ -30,6 +32,9 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
   private YamlConfiguration configuration;
   private RDBreakTool rdBreakTool;
+  private LastLocationStore lastLocationStore;
+
+  private final List<Runnable> configReloadListeners = new ArrayList<>();
 
   @Override
   public void onEnable() {
@@ -51,6 +56,24 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     Objects.requireNonNull(getCommand("getuuid")).setExecutor(getUuidCommand);
 
     getServer().getPluginManager().registerEvents(getUuidCommand, this);
+
+    lastLocationStore = new LastLocationStore(this);
+
+    Bukkit.getScheduler().runTaskTimerAsynchronously(this, lastLocationStore::save, 20L * 60, 20L * 60);
+
+    var backOverrideCommand = new BackOverrideCommand(this, lastLocationStore);
+
+    Objects.requireNonNull(getCommand("back")).setExecutor(backOverrideCommand);
+
+    getServer().getPluginManager().registerEvents(backOverrideCommand, this);
+  }
+
+  @Override
+  public void onDisable() {
+    if (lastLocationStore != null) {
+      lastLocationStore.save();
+      lastLocationStore = null;
+    }
   }
 
   private YamlConfiguration loadConfiguration() {
@@ -86,6 +109,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     switch (action.constant) {
       case RELOAD -> {
         configuration = loadConfiguration();
+        configReloadListeners.forEach(Runnable::run);
         sender.sendMessage(accessConfigValue("chat.configurationReloaded"));
         return true;
       }
@@ -128,6 +152,14 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       return "§cUndefined config-value at " + path;
 
     return enableColors(value);
+  }
+
+  public YamlConfiguration getConfiguration() {
+    return configuration;
+  }
+
+  public void registerConfigReloadListener(Runnable handler) {
+    configReloadListeners.add(handler);
   }
 
   private static boolean isColorChar(char c) {

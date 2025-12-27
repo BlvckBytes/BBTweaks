@@ -19,3 +19,11 @@ chat:
   getUuidUnknownName: '&7[&5BBTweaks&7] &cKonnte zum Namen &4{name} &ckeine UUID finden!'
   getUuidResult: '&7[&5BBTweaks&7] &7Die UUID von &a{name} &7ist &a{uuid}&7!'
   getUuidResultHover: '&aKlicke, um die UUID zu kopieren!'
+  backCommandMessage: '&6Du kehrst zur letzten Position zurück.'
+
+# If some events of a teleportation are to be ignored selectively, they may be described as an entry of this list.
+# For example, the elevators of CraftBook would be "com.sk89q.craftbook.mechanics.Elevator#teleportPlayer".
+# Each entry down below can be made up of comma-separated and case-insensitive keywords, for abbreviation and generality.
+# Thus, "craftbook,elevator" would suffice to match the fully-qualified name mentioned above.
+back-in-listener-ignore-list:
+  - 'craftbook,elevator'
