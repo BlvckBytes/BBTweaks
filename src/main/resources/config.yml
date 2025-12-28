@@ -27,3 +27,17 @@ chat:
 # Thus, "craftbook,elevator" would suffice to match the fully-qualified name mentioned above.
 back-in-listener-ignore-list:
   - 'craftbook,elevator'
+
+additionalShapedRecipes:
+  light-blocks:
+    result: LIGHT
+    amount: 1
+    shape:
+      - AAA
+      - ABA
+      - AAA
+    ingredients:
+      A:
+        type: GLASS_PANE
+      B:
+        type: TORCH

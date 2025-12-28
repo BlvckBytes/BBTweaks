@@ -66,6 +66,8 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     Objects.requireNonNull(getCommand("back")).setExecutor(backOverrideCommand);
 
     getServer().getPluginManager().registerEvents(backOverrideCommand, this);
+
+    new AdditionalRecipes(this);
   }
 
   @Override
