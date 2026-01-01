@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +36,9 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
   public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
     if (!(sender instanceof Player player))
       return false;
+
+    if (!player.hasPermission("essentials.back"))
+      return true;
 
     var lastLocation = lastLocationStore.getLastLocation(player);
 
@@ -75,7 +79,10 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
 
   @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
   public void onPlayerTeleport(PlayerTeleportEvent event) {
-    Player player = event.getPlayer();
+    var player = event.getPlayer();
+
+    if (!player.hasPermission("essentials.back.onteleport"))
+      return;
 
     if (player.hasMetadata("NPC") || !(event.getCause() == PlayerTeleportEvent.TeleportCause.PLUGIN || event.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND))
       return;
@@ -83,7 +90,17 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
     if (isTeleportListenerIgnored())
       return;
 
-    lastLocationStore.setLastLocation(event.getPlayer(), event.getPlayer().getLocation());
+    lastLocationStore.setLastLocation(player, player.getLocation());
+  }
+
+  @EventHandler
+  public void onPlayerDeath(PlayerDeathEvent event) {
+    var player = event.getPlayer();
+
+    if (!player.hasPermission("essentials.back.ondeath"))
+      return;
+
+    lastLocationStore.setLastLocation(player, player.getLocation());
   }
 
   private boolean isTeleportListenerIgnored() {
