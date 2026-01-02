@@ -86,6 +86,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     // For obvious reasons...
     excludedUnCraftInputMaterials.add(Material.GOLDEN_APPLE);
     excludedUnCraftInputMaterials.add(Material.ENCHANTED_GOLDEN_APPLE);
+    excludedUnCraftInputMaterials.add(Material.DRIED_GHAST);
 
     for (Material material : Material.values()) {
       var name = material.name();
