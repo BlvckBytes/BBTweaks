@@ -453,6 +453,9 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     if (tokens.isEmpty())
       return;
 
+    if (tokens.get(0).startsWith("#"))
+      return;
+
     if (tokens.size() < 5)
       throw new IllegalStateException("Requiring at least five tokens per line: <amount> <input-type> -> <amount> <output-type>");
 
