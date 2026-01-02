@@ -3,9 +3,13 @@ main: me.blvckbytes.bbtweaks.BBTweaksPlugin
 version: ${project.version}
 author: BlvckBytes
 api-version: 1.21
+softdepend: [ItemPredicateParser]
 commands:
   bbtweaks:
     permission: bbtweaks.command
+  uncraft:
+    permission: bbtweaks.uncraft
+    aliases: [uc]
   getuuid:
     description: 'resolve the UUID of any given name'
     permission: bbtweaks.getuuid

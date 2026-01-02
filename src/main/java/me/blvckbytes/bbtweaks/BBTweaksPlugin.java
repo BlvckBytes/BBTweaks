@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks;
 
+import me.blvckbytes.bbtweaks.util.TypeNameResolver;
 import me.blvckbytes.syllables_matcher.EnumMatcher;
 import me.blvckbytes.syllables_matcher.MatchableEnum;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
@@ -68,6 +69,19 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     getServer().getPluginManager().registerEvents(backOverrideCommand, this);
 
     new AdditionalRecipes(this);
+
+    var typeNameResolver = TypeNameResolver.load(getLogger());
+
+    var unCraftCommand = new UnCraftCommand(this, typeNameResolver);
+
+    Objects.requireNonNull(getCommand("uncraft")).setExecutor(unCraftCommand);
+
+    configReloadListeners.add(unCraftCommand::loadRecipesFromFile);
+
+    Bukkit.getScheduler().runTaskLater(this, () -> {
+      unCraftCommand.discoverRecipesAndCreateTemplateFile();
+      unCraftCommand.loadRecipesFromFile();
+    }, 20);
   }
 
   @Override

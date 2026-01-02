@@ -21,6 +21,22 @@ chat:
   getUuidResultHover: '&aKlicke, um die UUID zu kopieren!'
   backCommandMessage: '&6Du kehrst zur letzten Position zurück.'
 
+unCraft:
+  chat:
+    inGameOnly: '&8[&6UC&8] &cDieser Befehl ist nur für Spieler verfügbar!'
+    missingPermission: '&8[&6UC&8] &cDir fehlt das nötige Recht, um diesen Befehl benutzen zu können!'
+    noItemInMainHand: '&8[&6UC&8] &cDu hältst kein Item in deiner Haupthand!'
+    unsupportedItem: '&8[&6UC&8] &cDas von dir gehaltene Item wird nicht unterstützt!'
+    invalidSelection: '&8[&6UC&8] &cUngültige Auswahl: &4{selection}&c!'
+    notEnoughItems: '&8[&6UC&8] &cVom Item &4{result_item} &cwerden mindestens &4{required_amount} Stück &cbenötigt!'
+    droppedItems: '&8[&6UC&8] &7Dein Inventar ist &6voll &7- items wurden &6gedroppt&7!'
+    resultEntry: '&a{result_amount}x {result_item}'
+    resultSeparator: '&7, '
+    choicesHeadline: '&8[&6UC&8] &7Bitte entscheide dich für ein Rezept mit &a/{label} <Nummer>&7:'
+    choicesEntry: '&7- &a#{choice_number}&7: &a{results}'
+    successfulUnCraftUnitOne: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{uncraft_count}x &7in insgesamt &a{results} &7zurückentwickelt!'
+    successfulUnCraftUnitMany: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{uncraft_count}x &7je &a{uncraft_unit} Stück &7in insgesamt &a{results} &7zurückentwickelt!'
+
 # If some events of a teleportation are to be ignored selectively, they may be described as an entry of this list.
 # For example, the elevators of CraftBook would be "com.sk89q.craftbook.mechanics.Elevator#teleportPlayer".
 # Each entry down below can be made up of comma-separated and case-insensitive keywords, for abbreviation and generality.
