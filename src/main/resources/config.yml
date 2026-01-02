@@ -37,13 +37,6 @@ unCraft:
     successfulUnCraftUnitOne: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{uncraft_count}x &7in insgesamt &a{results} &7zurückentwickelt!'
     successfulUnCraftUnitMany: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{uncraft_count}x &7je &a{uncraft_unit} Stück &7in insgesamt &a{results} &7zurückentwickelt!'
 
-# If some events of a teleportation are to be ignored selectively, they may be described as an entry of this list.
-# For example, the elevators of CraftBook would be "com.sk89q.craftbook.mechanics.Elevator#teleportPlayer".
-# Each entry down below can be made up of comma-separated and case-insensitive keywords, for abbreviation and generality.
-# Thus, "craftbook,elevator" would suffice to match the fully-qualified name mentioned above.
-back-in-listener-ignore-list:
-  - 'craftbook,elevator'
-
 additionalShapedRecipes:
   light-blocks:
     result: LIGHT

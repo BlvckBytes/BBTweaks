@@ -11,10 +11,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class BackOverrideCommand implements CommandExecutor, TabCompleter, Listener {
@@ -22,14 +22,9 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
   private final BBTweaksPlugin bbTweaksPlugin;
   private final LastLocationStore lastLocationStore;
 
-  private List<List<String>> ignoreList;
-
   public BackOverrideCommand(BBTweaksPlugin bbTweaksPlugin, LastLocationStore lastLocationStore) {
     this.bbTweaksPlugin = bbTweaksPlugin;
     this.lastLocationStore = lastLocationStore;
-
-    bbTweaksPlugin.registerConfigReloadListener(this::loadBackInListenerIgnoreList);
-    this.loadBackInListenerIgnoreList();
   }
 
   @Override
@@ -87,7 +82,8 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
     if (player.hasMetadata("NPC") || !(event.getCause() == PlayerTeleportEvent.TeleportCause.PLUGIN || event.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND))
       return;
 
-    if (isTeleportListenerIgnored())
+    //noinspection deprecation - f you, Paper!
+    if (player.getMetadata("essentials:ignore-teleport").stream().anyMatch(MetadataValue::asBoolean))
       return;
 
     lastLocationStore.setLastLocation(player, player.getLocation());
@@ -101,37 +97,5 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
       return;
 
     lastLocationStore.setLastLocation(player, player.getLocation());
-  }
-
-  private boolean isTeleportListenerIgnored() {
-    if (ignoreList.isEmpty())
-      return false;
-
-    for (StackTraceElement stackElement : Thread.currentThread().getStackTrace()) {
-      String representation = (stackElement.getClassName() + "#" + stackElement.getMethodName()).toLowerCase();
-
-      if (ignoreList.stream().anyMatch(keywords -> keywords.stream().allMatch(representation::contains)))
-        return true;
-    }
-
-    return false;
-  }
-
-  private void loadBackInListenerIgnoreList() {
-    this.ignoreList = new ArrayList<>();
-
-    for (String entry : bbTweaksPlugin.getConfiguration().getStringList("back-in-listener-ignore-list")) {
-      List<String> ignoreEntry = new ArrayList<>();
-
-      for (String keyword : entry.split(",")) {
-        keyword = keyword.trim();
-
-        if (!keyword.isEmpty())
-          ignoreEntry.add(keyword.toLowerCase());
-      }
-
-      if (!ignoreEntry.isEmpty())
-        ignoreList.add(ignoreEntry);
-    }
   }
 }
