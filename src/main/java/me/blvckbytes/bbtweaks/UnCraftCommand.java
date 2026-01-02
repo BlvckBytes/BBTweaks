@@ -29,6 +29,11 @@ import java.util.logging.Logger;
 
 public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
+  // TODO: Confirmable "round down" as to avoid all "min amount" restrictions
+  // TODO: Cooldown? Items per hour limit?
+  // TODO: Permission for /uc all
+  // TODO: Max dropped stack count until the loop is forcefully quit
+
   private static final Map<Tag<Material>, Material> preferredMaterials;
 
   private static final Set<Tag<Material>> excludedUnCraftInputTags;
@@ -40,13 +45,18 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   // Sadly, there are no tags for these yet
   private static final boolean excludeInputSmithingTemplates = true;
   private static final boolean excludeInputDyes = true;
+  // There are many occurrences of waxed blocks in the world, which would make farming bees somewhat obsolete
   private static final boolean excludeInputWaxedItems = true;
   private static final boolean excludeAllSameToBlock = true;
   private static final boolean excludeAllSameToIngot = true;
-  private static final boolean excludeInputStews = true;
+  private static final boolean excludeInputEdibles = true;
   private static final boolean excludeInputMusicDiscs = true;
   private static final boolean excludeOutputWoods = true;
   private static final boolean excludeOutputStripped = true;
+  // Bottles and buckets remain in the matrix when crafting (as empty).
+  // We just cannot handle that properly without a lot more effort.
+  private static final boolean excludeOutputBottles = true;
+  private static final boolean excludeOutputBuckets = true;
 
   static {
     excludedUnCraftInputTags = new HashSet<>();
@@ -65,6 +75,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     excludedUnCraftInputTags.add(Tag.ITEMS_SHOVELS);
     excludedUnCraftInputTags.add(Tag.ITEMS_HOES);
     excludedUnCraftInputTags.add(Tag.ITEMS_SWORDS);
+    excludedUnCraftInputTags.add(Tag.ITEMS_SPEARS);
 
     // These are already deconstructions
     excludedUnCraftInputMaterials.add(Material.WHEAT_SEEDS);
@@ -76,7 +87,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     // STICK:
     // 4x -> {OAK_PLANKS=2}
     // 1x -> {BAMBOO=2}
-    // Otherwise, one could convert between oak-planks and bamboo
+    // Otherwise, one could convert between oak-planks and bamboo. We can add the planks-recipe manually.
     excludedUnCraftInputMaterials.add(Material.STICK);
 
     // These are craftable, but would allow to access quartz
@@ -100,7 +111,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       if (excludeInputWaxedItems && name.startsWith("WAXED_"))
         excludedUnCraftInputMaterials.add(material);
 
-      if (excludeInputStews && name.endsWith("_STEW"))
+      if (excludeInputEdibles && material.isEdible())
         excludedUnCraftInputMaterials.add(material);
 
       if (excludeInputMusicDiscs && name.startsWith("MUSIC_DISC_"))
@@ -110,6 +121,12 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         excludedUnCraftOutputMaterials.add(material);
 
       if (excludeOutputStripped & name.startsWith("STRIPPED_"))
+        excludedUnCraftOutputMaterials.add(material);
+
+      if (excludeOutputBottles && name.endsWith("_BOTTLE"))
+        excludedUnCraftOutputMaterials.add(material);
+
+      if (excludeOutputBuckets && name.endsWith("_BUCKET"))
         excludedUnCraftOutputMaterials.add(material);
     }
 
@@ -122,6 +139,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     preferredMaterials.put(Tag.ITEMS_STONE_CRAFTING_MATERIALS, Material.COBBLESTONE);
 
     excludedUnCraftOutputMaterials.add(Material.WAXED_COPPER_BLOCK);
+    excludedUnCraftOutputMaterials.add(Material.GOLDEN_APPLE);
     excludedUnCraftOutputMaterials.add(Material.ENCHANTED_GOLDEN_APPLE);
 
     // Because that's just odd...
@@ -289,6 +307,8 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     // if we want the results to go into that same slot in the case that it could be reduced to
     // nothing, we need to postpone adding until the very end; otherwise, items will be added
     // elsewhere and subsequent adds will "magnetically" stack to that, which is undesired.
+
+    // TODO: Rather use Map<Material, Integer> again, as to accumulate and reduce the dropped individual stacks later on
     var itemsToAdd = new ArrayList<ItemStack>();
 
     for (var targetItem : targetItems) {
@@ -447,14 +467,14 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     return result;
   }
 
-  private void tryLoadRecipeLine(String line) {
+  private boolean tryLoadRecipeLine(String line) {
     var tokens = tokenizeRecipeLine(line);
 
     if (tokens.isEmpty())
-      return;
+      return false;
 
     if (tokens.get(0).startsWith("#"))
-      return;
+      return false;
 
     if (tokens.size() < 5)
       throw new IllegalStateException("Requiring at least five tokens per line: <amount> <input-type> -> <amount> <output-type>");
@@ -542,6 +562,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     var typeBucket = unCraftBucketByInputType.computeIfAbsent(inputMaterial, k -> new ArrayList<>());
 
     typeBucket.add(UnCraftEntry.tryCreateWithScaledSingleUnit(inputAmount, results));
+    return true;
   }
 
   public void loadRecipesFromFile() {
@@ -558,8 +579,8 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         ++lineNumber;
 
         try {
-          tryLoadRecipeLine(scanner.nextLine());
-          ++loadCounter;
+          if (tryLoadRecipeLine(scanner.nextLine()))
+            ++loadCounter;
         } catch (Throwable e) {
           logger.log(Level.WARNING, "Could not load line " + lineNumber + " of file " + unCraftRecipesFile, e);
         }
@@ -711,6 +732,8 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
     logger.info("Created uncraft-recipes template-file.");
   }
+
+  // TODO: Yes, we >do< need specific messages here; users need to know the details, or else, they'll ask.
 
   private @Nullable Material tryExtractMaterialFromItem(@Nullable ItemStack item) {
     if (item == null || item.getType().isAir())
