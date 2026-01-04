@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
 
 public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
-  // TODO: Reasons can be displayed duplicated (Luigi's example)
   // TODO: Subtraction rules, which the user has to accept with `-s` in order to retrieve
   //       the remaining results of the uncraft-input; example: colored terracotta -> terracotta (no dye)
 
@@ -45,6 +44,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   record ItemAndSlot(ItemStack item, int slot) {}
 
   private static final String REASON_MARKER = "Reason:";
+  private static final String REASON_SEPARATOR = "; ";
 
   private final Logger logger;
   private final UnCraftRecipeMap recipeMap;
@@ -190,7 +190,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       if (exclusionReasons.isEmpty())
         reason = plugin.accessConfigValue("unCraft.additionalReasons.noReasonGiven");
       else
-        reason = String.join("; ", exclusionReasons);
+        reason = String.join(REASON_SEPARATOR, exclusionReasons);
 
       sender.sendMessage(
         plugin.accessConfigValue("unCraft.chat.unsupportedItem")
@@ -486,7 +486,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     var loadedCounter = 0;
     var excludedCounter = 0;
 
-    String lastExclusionReason = null;
+    Set<String> lastExclusionReasons = new HashSet<>();
     int lastExclusionReasonLine = 0;
 
     try (
@@ -511,22 +511,29 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
           if (lineContents.startsWith(REASON_MARKER)) {
             isExclusionReason = true;
-            lastExclusionReason = lineContents.substring(REASON_MARKER.length()).trim();
+
+            lastExclusionReasons.clear();
+
+            var reasonTokens = lineContents.substring(REASON_MARKER.length()).split(REASON_SEPARATOR.trim());
+
+            for (var reasonToken : reasonTokens)
+              lastExclusionReasons.add(reasonToken.trim());
+
             lastExclusionReasonLine = lineNumber;
             break;
           }
         }
 
-        String exclusionReason = null;
+        Set<String> exclusionReasons = null;
 
         if (wasCommentedOut) {
           if (isExclusionReason)
             continue;
 
           if (lastExclusionReasonLine == lineNumber - 1)
-            exclusionReason = lastExclusionReason;
+            exclusionReasons = lastExclusionReasons;
           else
-            exclusionReason = plugin.accessConfigValue("unCraft.additionalReasons.noReasonGiven");
+            exclusionReasons = Collections.singleton(plugin.accessConfigValue("unCraft.additionalReasons.noReasonGiven"));
         }
 
         try {
@@ -535,10 +542,10 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
           var entry = UnCraftEntry.tryCreateWithScaledSingleUnit(
             parsedRecipe.uncraftedItemAmount(),
             parsedRecipe.uncraftResults(),
-            exclusionReason == null ? Collections.emptySet() : Set.of(exclusionReason)
+            exclusionReasons == null ? Collections.emptySet() : new HashSet<>(exclusionReasons)
           );
 
-          if (exclusionReason == null) {
+          if (exclusionReasons == null || exclusionReasons.isEmpty()) {
             // This check is of utmost importance. As an example, one can use WHITE_DYE with any wool-color
             // as to restore it back to white; the preferred materials mapping then collapses this wildcard
             // to white, as is desired for many other recipes, which then produces: 1 WHITE_WOOL -> 1 WHITE_DYE, 1 WHITE_WOOL.
@@ -777,7 +784,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
           var recipeLine = unCraftEntry.inputAmount + " " + entry.getKey() + " -> " + result;
 
           if (!unCraftEntry.exclusionReasons.isEmpty()) {
-            writer.write("# " + REASON_MARKER + " " + String.join("; ", unCraftEntry.exclusionReasons) + "\n");
+            writer.write("# " + REASON_MARKER + " " + String.join(REASON_SEPARATOR, unCraftEntry.exclusionReasons) + "\n");
             writer.write("# " + recipeLine + "\n");
             continue;
           }
