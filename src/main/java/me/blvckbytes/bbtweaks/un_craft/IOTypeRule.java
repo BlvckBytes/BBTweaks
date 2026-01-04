@@ -22,14 +22,6 @@ public class IOTypeRule extends TypeRule {
     if (materialType == MaterialType.UNCRAFT_RESULT && !onUnCraftResult)
       return false;
 
-    if (materials.contains(material))
-      return true;
-
-    for (var tag : tags) {
-      if (tag.isTagged(material))
-        return true;
-    }
-
-    return false;
+    return matches(material);
   }
 }

@@ -65,6 +65,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
   private final List<TypeExclusionRule> typeExclusionRules;
   private final List<IOTypeRule> typeInclusionRules;
+  private final List<ResultSubtractionRule> resultSubtractionRules;
   private final List<RecipeExclusionRule> recipeExclusionRules;
   private final List<PreferredMaterial> preferredMaterials;
   private final List<AdditionalRecipe> additionalRecipes;
@@ -80,6 +81,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     this.recipeMap = new UnCraftRecipeMap();
     this.typeExclusionRules = new ArrayList<>();
     this.typeInclusionRules = new ArrayList<>();
+    this.resultSubtractionRules = new ArrayList<>();
     this.recipeExclusionRules = new ArrayList<>();
     this.preferredMaterials = new ArrayList<>();
     this.additionalRecipes = new ArrayList<>();
@@ -218,7 +220,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
             plugin.accessConfigValue("unCraft.chat.choicesEntry")
               .replace("{label}", label)
               .replace("{choice_number}", String.valueOf(entryIndex + 1))
-              .replace("{results}", generateResultsString(player, entryResults.keySet(), entryResults::get))
+              .replace("{results}", generateAmountsString(player, entryResults.keySet(), entryResults::get, true))
           );
         }
 
@@ -279,7 +281,20 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     // elsewhere and subsequent adds will "magnetically" stack to that, which is undesired.
 
     var itemsToAdd = new HashMap<Material, MutableInt>();
+    var subtractedItems = new HashMap<Material, MutableInt>();
+
     var acceptReduced = argsAndFlags.flags().contains(CommandFlag.ACCEPT_REDUCED);
+    var acceptSubtracted = argsAndFlags.flags().contains(CommandFlag.ACCEPT_SUBTRACTED);
+
+    if (!acceptSubtracted && !targetEntry.subtractedResults.isEmpty()) {
+      player.sendMessage(
+        plugin.accessConfigValue("unCraft.chat." + (targetEntry.inputAmount == 1 ? "unacceptedSubtractionOne" : "unacceptedSubtractionMany"))
+          .replace("{uncraft_unit}", String.valueOf(targetEntry.inputAmount))
+          .replace("{subtracted_results}", generateAmountsString(player, targetEntry.subtractedResults, targetEntry.results::get, false))
+      );
+
+      return true;
+    }
 
     for (var targetItem : targetItems) {
       int remainingAmount;
@@ -298,10 +313,12 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
             break;
 
           for (var resultEntry : targetEntry.results.entrySet()) {
+            var resultType = resultEntry.getKey();
             var resultAmount = (int) Math.floor(resultEntry.getValue() * scalingFactor);
+            var targetMap = targetEntry.subtractedResults.contains(resultType) ? subtractedItems : itemsToAdd;
 
             if (resultAmount > 0)
-              itemsToAdd.computeIfAbsent(resultEntry.getKey(), k -> new MutableInt()).value += resultAmount;
+              targetMap.computeIfAbsent(resultType, k -> new MutableInt()).value += resultAmount;
           }
 
           newAmount = 0;
@@ -310,8 +327,11 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
         // Can still reduce by whole units
         else {
-          for (var resultEntry : targetEntry.results.entrySet())
-            itemsToAdd.computeIfAbsent(resultEntry.getKey(), k -> new MutableInt()).value += resultEntry.getValue();
+          for (var resultEntry : targetEntry.results.entrySet()) {
+            var resultType = resultEntry.getKey();
+            var targetMap = targetEntry.subtractedResults.contains(resultType) ? subtractedItems : itemsToAdd;
+            targetMap.computeIfAbsent(resultType, k -> new MutableInt()).value += resultEntry.getValue();
+          }
 
           newAmount = remainingAmount - targetEntry.inputAmount;
           ++wholeUnitsUnCraftCounter;
@@ -330,8 +350,17 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     if (wholeUnitsUnCraftCounter == 0 && reducedUnitsUnCraftAmounts.isEmpty()) {
       var requiredAmount = acceptReduced ? targetEntry.minRequiredAmount : targetEntry.inputAmount;
 
+      var message = plugin.accessConfigValue(
+        "unCraft.chat." + (
+          // Do not suggest the -r flag if accepting reduced results has no effect
+          (acceptReduced || targetEntry.inputAmount <= targetEntry.minRequiredAmount)
+            ? "notEnoughItemsReduced"
+            : "notEnoughItems"
+        )
+      );
+
       sender.sendMessage(
-        plugin.accessConfigValue("unCraft.chat.notEnoughItems")
+        message
           .replace("{required_amount}", String.valueOf(requiredAmount))
           .replace("{result_item}", typeNameResolver.resolve(player, heldType))
       );
@@ -357,13 +386,20 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         .replace("{uncrafted_item}", typeNameResolver.resolve(player, heldType))
         .replace("{whole_units_uncraft_count}", String.valueOf(wholeUnitsUnCraftCounter))
         .replace("{reduced_units_uncraft_count}", String.valueOf(reducedUnitsUnCraftAmounts.size()))
-        .replace("{results}", generateResultsString(player, itemsToAdd.keySet(), k -> itemsToAdd.get(k).value))
+        .replace("{results}", generateAmountsString(player, itemsToAdd.keySet(), k -> itemsToAdd.get(k).value, true))
         .replace("{uncraft_unit}", String.valueOf(targetEntry.inputAmount))
         .replace(
           "{reduced_amounts}",
           reducedUnitsUnCraftAmounts.stream()
             .map(amount -> plugin.accessConfigValue("unCraft.chat.reducedAmountsEntry").replace("{reduced_amount}", String.valueOf(amount)))
             .collect(Collectors.joining(plugin.accessConfigValue("unCraft.chat.reducedAmountsSeparator")))
+        )
+        .replace(
+          "{subtraction_message}",
+          subtractedItems.isEmpty()
+            ? ""
+            : plugin.accessConfigValue("unCraft.chat.subtractionMessage")
+                .replace("{subtracted_results}", generateAmountsString(player, subtractedItems.keySet(), k -> subtractedItems.get(k).value, false))
         )
     );
 
@@ -377,7 +413,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     if (!itemsToDrop.isEmpty()) {
       sender.sendMessage(
         plugin.accessConfigValue("unCraft.chat.droppedItems")
-          .replace("{items}", generateResultsString(player, itemsToDrop.keySet(), k -> itemsToDrop.get(k).value))
+          .replace("{items}", generateAmountsString(player, itemsToDrop.keySet(), k -> itemsToDrop.get(k).value, true))
       );
 
       forEachStackOfTypeCountMap(itemsToDrop, player::dropItem);
@@ -403,12 +439,12 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     }
   }
 
-  private String generateResultsString(Player player, Collection<Material> materials, ToIntFunction<Material> amountAccessor) {
-    var results = new StringJoiner(plugin.accessConfigValue("unCraft.chat.resultSeparator"));
+  private String generateAmountsString(Player player, Collection<Material> materials, ToIntFunction<Material> amountAccessor, boolean resultsOrSubtractions) {
+    var results = new StringJoiner(plugin.accessConfigValue("unCraft.chat." + (resultsOrSubtractions ? "resultSeparator" : "subtractionSeparator")));
 
     for (var material : materials) {
       results.add(
-        plugin.accessConfigValue("unCraft.chat.resultEntry")
+        plugin.accessConfigValue("unCraft.chat." + (resultsOrSubtractions ? "resultEntry" : "subtractionEntry"))
           .replace("{result_item}", typeNameResolver.resolve(player, material))
           .replace("{result_amount}", String.valueOf(amountAccessor.applyAsInt(material)))
       );
@@ -553,6 +589,21 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
           );
 
           additionalRecipe.ifPresent(recipe -> entry.additionalMessages.addAll(recipe.additionalMessages()));
+
+          for (var resultSubtractionRule : resultSubtractionRules) {
+            if (!resultSubtractionRule.matches(parsedRecipe.uncraftedItemType()))
+              continue;
+
+            for (var subtractedMaterial : resultSubtractionRule.subtractedMaterials) {
+              for (var uncraftResult : parsedRecipe.uncraftResults().keySet()) {
+                if (subtractedMaterial.matches(uncraftResult))
+                  entry.subtractedResults.add(uncraftResult);
+              }
+            }
+          }
+
+          if (entry.subtractedResults.containsAll(entry.results.keySet()))
+            throw new IllegalStateException("Recipe has no remaining results");
 
           // Skip this check on additional recipes - we know what we're doing; it's only supposed to
           // catch whatever the process of automatic filtering might have missed.
@@ -939,6 +990,10 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     recipeExclusionRules.clear();
     loadMapLists("unCraft.recipeExclusionRules", RecipeExclusionRule::fromConfig, recipeExclusionRules);
     logger.info("Loaded " + recipeExclusionRules.size() + " uncraft recipe-exclusion-rules");
+
+    resultSubtractionRules.clear();
+    loadMapLists("unCraft.resultSubtractionRules", section -> new ResultSubtractionRule(section, logger), resultSubtractionRules);
+    logger.info("Loaded " + resultSubtractionRules.size() + " uncraft result-subtraction-rules");
 
     preferredMaterials.clear();
     loadMapLists("unCraft.preferredMaterials", PreferredMaterial::new, preferredMaterials);

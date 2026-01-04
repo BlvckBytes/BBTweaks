@@ -116,4 +116,16 @@ public class TypeRule {
     this.materials = materials;
     this.tags = tags;
   }
+
+  public boolean matches(Material material) {
+    if (materials.contains(material))
+      return true;
+
+    for (var tag : tags) {
+      if (tag.isTagged(material))
+        return true;
+    }
+
+    return false;
+  }
 }

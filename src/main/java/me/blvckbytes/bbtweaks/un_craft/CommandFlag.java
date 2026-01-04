@@ -7,6 +7,7 @@ import java.util.*;
 public enum CommandFlag {
   ALL_MODE('a'),
   ACCEPT_REDUCED('r'),
+  ACCEPT_SUBTRACTED('s'),
   ;
 
   public record ArgsAndFlags(List<String> args, EnumSet<CommandFlag> flags) {}
