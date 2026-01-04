@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks;
 
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
+import me.blvckbytes.bbtweaks.util.ColorUtil;
 import me.blvckbytes.bbtweaks.util.TypeNameResolver;
 import me.blvckbytes.syllables_matcher.EnumMatcher;
 import me.blvckbytes.syllables_matcher.MatchableEnum;
@@ -163,7 +164,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     if (value == null)
       return "§cUndefined config-value at " + path;
 
-    return enableColors(value);
+    return ColorUtil.enableColors(value);
   }
 
   public YamlConfiguration getConfiguration() {
@@ -172,69 +173,5 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
   public void registerConfigReloadListener(Runnable handler) {
     configReloadListeners.add(handler);
-  }
-
-  private static boolean isColorChar(char c) {
-    return (c >= 'a' && c <= 'f') || (c >= '0' && c <= '9') || (c >= 'k' && c <= 'o') || c == 'r';
-  }
-
-  private static boolean isHexChar(char c) {
-    return (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F') || (c >= '0' && c <= '9');
-  }
-
-  private static String enableColors(String input) {
-    var inputLength = input.length();
-    var result = new StringBuilder(inputLength);
-
-    for (var charIndex = 0; charIndex < inputLength; ++charIndex) {
-      var currentChar = input.charAt(charIndex);
-      var remainingChars = inputLength - 1 - charIndex;
-
-      if (currentChar != '&' || remainingChars == 0) {
-        result.append(currentChar);
-        continue;
-      }
-
-      var nextChar = input.charAt(++charIndex);
-
-      // Possible hex-sequence of format &#RRGGBB
-      if (nextChar == '#' && remainingChars >= 6 + 1) {
-        var r1 = input.charAt(charIndex + 1);
-        var r2 = input.charAt(charIndex + 2);
-        var g1 = input.charAt(charIndex + 3);
-        var g2 = input.charAt(charIndex + 4);
-        var b1 = input.charAt(charIndex + 5);
-        var b2 = input.charAt(charIndex + 6);
-
-        if (
-          isHexChar(r1) && isHexChar(r2)
-            && isHexChar(g1) && isHexChar(g2)
-            && isHexChar(b1) && isHexChar(b2)
-        ) {
-          result
-            .append('§').append('x')
-            .append('§').append(r1)
-            .append('§').append(r2)
-            .append('§').append(g1)
-            .append('§').append(g2)
-            .append('§').append(b1)
-            .append('§').append(b2);
-
-          charIndex += 6;
-          continue;
-        }
-      }
-
-      // Vanilla color-sequence
-      if (isColorChar(nextChar)) {
-        result.append('§').append(nextChar);
-        continue;
-      }
-
-      // Wasn't a color-sequence, store as-is
-      result.append(currentChar).append(nextChar);
-    }
-
-    return result.toString();
   }
 }

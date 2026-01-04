@@ -213,7 +213,12 @@ unCraft:
         - '4 STICK -> 2 OAK_PLANKS'
       reason: Wird von einem Rezept mit schlechterer Umwandlungsrate ersetzt (8 für 1)
   additionalRecipes:
-    - '8 STICK -> 1 OAK_PLANKS'
+    -
+      recipe: '8 STICK -> 1 OAK_PLANKS'
+    -
+      recipe: '1 CAKE -> 1 CAKE'
+      additionalMessages:
+        - '&e&o*The cake is a lie!*'
   preferredMaterials:
     -
       tags:

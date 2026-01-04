@@ -67,7 +67,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   private final List<TypeInclusionRule> typeInclusionRules;
   private final List<RecipeExclusionRule> recipeExclusionRules;
   private final List<PreferredMaterial> preferredMaterials;
-  private final List<ParsedRecipe> additionalRecipes;
+  private final List<AdditionalRecipe> additionalRecipes;
 
   public UnCraftCommand(BBTweaksPlugin plugin, TypeNameResolver typeNameResolver) {
     this.plugin = plugin;
@@ -383,6 +383,9 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       forEachStackOfTypeCountMap(itemsToDrop, player::dropItem);
     }
 
+    for (var additionalMessage : targetEntry.additionalMessages)
+      player.sendMessage(additionalMessage);
+
     return true;
   }
 
@@ -539,13 +542,20 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         try {
           var parsedRecipe = RecipeSyntax.tryParseRecipe(lineContents);
 
+          var additionalRecipe = additionalRecipes.stream()
+            .filter(entry -> entry.recipe().equals(parsedRecipe))
+            .findFirst();
+
           var entry = UnCraftEntry.tryCreateWithScaledSingleUnit(
             parsedRecipe.uncraftedItemAmount(),
             parsedRecipe.uncraftResults(),
-            exclusionReasons == null ? Collections.emptySet() : new HashSet<>(exclusionReasons)
+            exclusionReasons == null ? Collections.emptySet() : new HashSet<>(exclusionReasons),
+            additionalRecipe.isPresent() ? additionalRecipe.get().additionalMessages() : Collections.emptyList()
           );
 
-          if (exclusionReasons == null || exclusionReasons.isEmpty()) {
+          // Skip this check on additional recipes - we know what we're doing; it's only supposed to
+          // catch whatever the process of automatic filtering might have missed.
+          if (additionalRecipe.isEmpty() && (exclusionReasons == null || exclusionReasons.isEmpty())) {
             // This check is of utmost importance. As an example, one can use WHITE_DYE with any wool-color
             // as to restore it back to white; the preferred materials mapping then collapses this wildcard
             // to white, as is desired for many other recipes, which then produces: 1 WHITE_WOOL -> 1 WHITE_DYE, 1 WHITE_WOOL.
@@ -683,7 +693,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
     var targetMap = recipe instanceof StonecuttingRecipe ? stonecutterMap : unCraftRecipeMap;
 
-    var entry = UnCraftEntry.tryCreateWithScaledSingleUnit(resultAmount, unCraftResults, exclusionReasons);
+    var entry = UnCraftEntry.tryCreateWithScaledSingleUnit(resultAmount, unCraftResults, exclusionReasons, Collections.emptyList());
 
     targetMap.addUnCraftingRecipe(recipeResultType, entry);
   }
@@ -743,12 +753,13 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
     for (var additionalRecipe : additionalRecipes) {
       var unCraftRecipe = UnCraftEntry.tryCreateWithScaledSingleUnit(
-        additionalRecipe.uncraftedItemAmount(),
-        additionalRecipe.uncraftResults(),
-        Collections.emptySet()
+        additionalRecipe.recipe().uncraftedItemAmount(),
+        additionalRecipe.recipe().uncraftResults(),
+        Collections.emptySet(),
+        additionalRecipe.additionalMessages()
       );
 
-      localUnCraftRecipeMap.addUnCraftingRecipe(additionalRecipe.uncraftedItemType(), unCraftRecipe);
+      localUnCraftRecipeMap.addUnCraftingRecipe(additionalRecipe.recipe().uncraftedItemType(), unCraftRecipe);
     }
 
     try (var writer = new FileWriter(unCraftRecipesTemplateFile)) {
@@ -934,13 +945,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     logger.info("Loaded " + preferredMaterials.size() + " uncraft preferred materials");
 
     additionalRecipes.clear();
-    for (var recipeString : plugin.getConfiguration().getStringList("unCraft.additionalRecipes")) {
-      try {
-        additionalRecipes.add(RecipeSyntax.tryParseRecipe(recipeString));
-      } catch (Throwable e) {
-        logger.warning("Could not parse additional recipe-syntax \"" + recipeString + "\": " + e.getMessage());
-      }
-    }
+    loadMapLists("unCraft.additionalRecipes", AdditionalRecipe::fromConfig, additionalRecipes);
     logger.info("Loaded " + additionalRecipes.size() + " additional uncraft-recipes");
   }
 
