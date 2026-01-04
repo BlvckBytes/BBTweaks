@@ -67,6 +67,11 @@ unCraft:
         - ITEMS_HOES
         - ITEMS_SWORDS
         - ITEMS_SPEARS
+      materials:
+        - FISHING_ROD
+        - FLINT_AND_STEEL
+        - SHEARS
+        - BRUSH
       reason: Rüstungen, Werkzeuge und Waffen werden durch die Wiederverwertungsblöcke (Salvage-Skill) von mcMMO gehandhabt
     -
       onUncraftedItem: true
@@ -213,6 +218,10 @@ unCraft:
       tags:
         - ITEMS_PLANKS
       preferredMaterial: OAK_PLANKS
+    -
+      tags:
+        - ITEMS_WOODEN_SLABS
+      preferredMaterial: OAK_SLAB
     -
       tags:
         - ITEMS_LOGS
