@@ -25,8 +25,9 @@ unCraft:
   chat:
     inGameOnly: '&8[&6UC&8] &cDieser Befehl ist nur für Spieler verfügbar!'
     missingPermission: '&8[&6UC&8] &cDir fehlt das nötige Recht, um diesen Befehl benutzen zu können!'
+    missingPermissionAllMode: '&8[&6UC&8] &cDir fehlt das nötige Recht, um den all-Modus benutzen zu können!'
     noItemInMainHand: '&8[&6UC&8] &cDu hältst kein Item in deiner Haupthand!'
-    unsupportedItem: '&8[&6UC&8] &cDas von dir gehaltene Item wird nicht unterstützt!'
+    unsupportedItem: '&8[&6UC&8] &cDas von dir gehaltene Item wird nicht unterstützt: &4{reason}&c!'
     invalidSelection: '&8[&6UC&8] &cUngültige Auswahl: &4{selection}&c!'
     notEnoughItems: '&8[&6UC&8] &cVom Item &4{result_item} &cwerden mindestens &4{required_amount} Stück &cbenötigt!'
     droppedItems: '&8[&6UC&8] &7Dein Inventar ist &6voll &7- items wurden &6gedroppt&7!'
@@ -36,6 +37,194 @@ unCraft:
     choicesEntry: '&7- &a#{choice_number}&7: &a{results}'
     successfulUnCraftUnitOne: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{uncraft_count}x &7in insgesamt &a{results} &7zurückentwickelt!'
     successfulUnCraftUnitMany: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{uncraft_count}x &7je &a{uncraft_unit} Stück &7in insgesamt &a{results} &7zurückentwickelt!'
+  additionalReasons:
+    hasDamage: Das Item ist bereits abgenutzt
+    hasName: Das Item hat einen besonderen Namen
+    hasLore: Das Item hat Lore-Zeilen
+    hasEnchants: Das Item hat Verzauberungen
+    hasAttributeModifiers: Das Item hat besondere Attribute
+    hasPdcKeys: Das Item hat besondere PDC-Werte gesetzt
+    hasInnerItems: Das Item trägt weitere Items in seinem Inventar
+    noEntryFound: Es konnte kein Rezepteintrag zu diesem Item gefunden werden
+    noReasonGiven: Es steht kein expliziter Grund zur Verfügung
+    recoloringRecipe: Das Rezept für dieses Item stellt bloß eine Umfärbung dar
+  # NOTE: Reasons may be concatenated with a semicolon if multiple match - do not terminate them with a dot.
+  typeExclusionRules:
+    -
+      onUncraftedItem: true
+      tags:
+        - ITEMS_HEAD_ARMOR
+        - ITEMS_CHEST_ARMOR
+        - ITEMS_LEG_ARMOR
+        - ITEMS_FOOT_ARMOR
+        - ITEMS_PICKAXES
+        - ITEMS_AXES
+        - ITEMS_SHOVELS
+        - ITEMS_HOES
+        - ITEMS_SWORDS
+        - ITEMS_SPEARS
+      reason: Rüstungen, Werkzeuge und Waffen werden durch die Wiederverwertungsblöcke (Salvage-Skill) von mcMMO gehandhabt
+    -
+      onUncraftedItem: true
+      materials:
+        - WHEAT_SEEDS
+        - MELON_SEEDS
+        - PUMPKIN_SEEDS
+        - SUGAR
+      reason: Dieses Item kann nicht weiter zurückentwickelt werden
+    -
+      onUncraftedItem: true
+      materialPatterns:
+        - '^(.*_)?COPPER_CHEST$'
+      reason: Kann durch einen Kupfergolem generiert werden
+    -
+      onUncraftedItem: true
+      materials:
+        - DIORITE
+        - GRANITE
+      reason: Enthält Quarz und kommt natürlich vor
+    -
+      onUncraftedItem: true
+      materials:
+        - NETHER_WART_BLOCK
+      reason: Enthält Netherwarzen und kommt natürlich vor
+    -
+      onUncraftedItem: true
+      materials:
+        - DRIED_GHAST
+      reason: Enthält Ghasttränen und kommt natürlich vor
+    -
+      onUncraftedItem: true
+      materialPatterns:
+        - '^.*_SMITHING_TEMPLATE$'
+      reason: Rezepte mit Schmiedevorlagen werden ausschließlich zum Vervielfachen benutzt
+    -
+      onUncraftedItem: true
+      materialPatterns:
+        - '^.*_DYE$'
+      reason: Farbstoffe haben oft keinen klaren Ursprung und würden unfaire Items erzeugen
+    -
+      onUncraftedItem: true
+      materialPatterns:
+        - '^WAXED_.*$'
+      reason: Das Wachs von gewachsten Items ist nicht zurückgewinnbar
+    -
+      onUncraftedItem: true
+      materialIsFlags:
+        - isEdible
+      reason: Nahrung enthält Items, die gefarmt werden müssten und kommt natürlich vor
+    -
+      onUncraftResult: true
+      materialPatterns:
+        - '^WAXED_.*$'
+      reason: Gewachste Kupferblöcke können zu Kupferbarren gecrafted werden - die Umkehr davon ist unsinnig
+    -
+      # Because that makes absolutely no sense in reverse - what would the map be filled with?
+      onUncraftResult: true
+      materials:
+        - FILLED_MAP
+      reason: Das Rezept mit einer gefüllten Karte wird ausschließlich zum Vervielfachen benutzt
+    -
+      onUncraftResult: true
+      materials:
+        - VINE
+      reason: Dieses Item beinhaltet Ranken und kommt natürlich vor
+    -
+      onUncraftResult: true
+      materials:
+        - MOSS_BLOCK
+        - PALE_MOSS_BLOCK
+      reason: Dieses Item beinhaltet Moos und kommt natürlich vor
+    -
+      onUncraftResult: true
+      materialPatterns:
+        - '^.*(_BOTTLE|_BUCKET)$'
+      reason: Das Rezept dieses Items beinhaltet Behälter wie Flaschen oder Eimer, die beim Craften leer retourniert wurden
+    -
+      onUncraftResult: true
+      tags:
+        - ITEMS_SKULLS
+      reason: Enthält Köpfe, die im Allgemeinen ausgenommen wurden
+    -
+      onUncraftResult: true
+      materialPatterns:
+        - '^.*_WOOD$'
+      reason: Holz (Stamm mit Rinde an allen Seiten) wird nicht ausgegeben
+    -
+      onUncraftResult: true
+      materialPatterns:
+        - '^STRIPPED_.*$'
+      reason: Entrindete Stämme werden nicht ausgegeben
+    -
+      onUncraftedItem: true
+      onUncraftResult: true
+      materials:
+        - GOLDEN_APPLE
+        - ENCHANTED_GOLDEN_APPLE
+      reason: Enthält Gold und kommt relativ häufig natürlich vor
+  typeInclusionRules:
+    -
+      onUncraftedItem: true
+      # These are only craftable with stripped logs/stems, which we normally do not hand out; let's make an exception.
+      materialPatterns:
+        - '^.*_HANGING_SIGN$'
+        - '^.*_SHELF$'
+  recipeExclusionRules:
+    -
+      # These are already deconstruction-recipes; inverting them again makes no sense.
+      recipes:
+        - '9 BONE_MEAL -> 1 BONE_BLOCK'
+        - '9 COAL -> 1 COAL_BLOCK'
+        - '9 COPPER_INGOT -> 1 COPPER_BLOCK'
+        - '9 COPPER_NUGGET -> 1 COPPER_INGOT'
+        - '9 DIAMOND -> 1 DIAMOND_BLOCK'
+        - '9 DRIED_KELP -> 1 DRIED_KELP_BLOCK'
+        - '9 EMERALD -> 1 EMERALD_BLOCK'
+        - '9 GOLD_INGOT -> 1 GOLD_BLOCK'
+        - '9 GOLD_NUGGET -> 1 GOLD_INGOT'
+        - '9 IRON_INGOT -> 1 IRON_BLOCK'
+        - '9 IRON_NUGGET -> 1 IRON_INGOT'
+        - '9 LAPIS_LAZULI -> 1 LAPIS_BLOCK'
+        - '9 NETHERITE_INGOT -> 1 NETHERITE_BLOCK'
+        - '9 RAW_COPPER -> 1 RAW_COPPER_BLOCK'
+        - '9 RAW_GOLD -> 1 RAW_GOLD_BLOCK'
+        - '9 RAW_IRON -> 1 RAW_IRON_BLOCK'
+        - '9 REDSTONE -> 1 REDSTONE_BLOCK'
+        - '9 RESIN_CLUMP -> 1 RESIN_BLOCK'
+        - '9 SLIME_BALL -> 1 SLIME_BLOCK'
+        - '9 WHEAT -> 1 HAY_BLOCK'
+      reason: Dieses Item kann nicht weiter zurückentwickelt werden
+    -
+      recipes:
+        - '1 STICK -> 2 BAMBOO'
+      reason: Würde die Umwandlung von Holz zu Bambus ermöglichen
+    -
+      recipes:
+        - '4 STICK -> 2 OAK_PLANKS'
+      reason: Wird von einem Rezept mit schlechterer Umwandlungsrate ersetzt (8 für 1)
+  additionalRecipes:
+    - '8 STICK -> 1 OAK_PLANKS'
+  preferredMaterials:
+    -
+      tags:
+        - ITEMS_PLANKS
+      preferredMaterial: OAK_PLANKS
+    -
+      tags:
+        - ITEMS_LOGS
+      preferredMaterial: OAK_LOG
+    -
+      tags:
+        - ITEMS_SAND
+      preferredMaterial: SAND
+    -
+      tags:
+        - ITEMS_WOOL
+      preferredMaterial: WHITE_WOOL
+    -
+      tags:
+        - ITEMS_STONE_CRAFTING_MATERIALS
+      preferredMaterial: COBBLESTONE
 
 additionalShapedRecipes:
   light-blocks:

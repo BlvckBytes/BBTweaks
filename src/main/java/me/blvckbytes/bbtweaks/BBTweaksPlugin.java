@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks;
 
+import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.util.TypeNameResolver;
 import me.blvckbytes.syllables_matcher.EnumMatcher;
 import me.blvckbytes.syllables_matcher.MatchableEnum;
@@ -36,6 +37,8 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
   private LastLocationStore lastLocationStore;
 
   private final List<Runnable> configReloadListeners = new ArrayList<>();
+
+  // TODO: Idea - /empty-out [all]
 
   @Override
   public void onEnable() {
@@ -75,13 +78,6 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     var unCraftCommand = new UnCraftCommand(this, typeNameResolver);
 
     Objects.requireNonNull(getCommand("uncraft")).setExecutor(unCraftCommand);
-
-    configReloadListeners.add(unCraftCommand::loadRecipesFromFile);
-
-    Bukkit.getScheduler().runTaskLater(this, () -> {
-      unCraftCommand.discoverRecipesAndCreateTemplateFile();
-      unCraftCommand.loadRecipesFromFile();
-    }, 20);
   }
 
   @Override
