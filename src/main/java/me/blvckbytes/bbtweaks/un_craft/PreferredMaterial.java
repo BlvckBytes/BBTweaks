@@ -1,17 +1,33 @@
 package me.blvckbytes.bbtweaks.un_craft;
 
 import org.bukkit.Material;
-import org.bukkit.Tag;
 import org.bukkit.configuration.ConfigurationSection;
 
 import java.util.List;
-import java.util.Set;
 
-public record PreferredMaterial(
-  Set<Material> materials,
-  Set<Tag<Material>> tags,
-  Material preferredMaterial
-) {
+public class PreferredMaterial extends TypeRule {
+
+  public final Material preferredMaterial;
+
+  public PreferredMaterial(ConfigurationSection section) {
+    super(section);
+
+    Material preferredMaterial;
+
+    var preferredMaterialName = section.getString("preferredMaterial");
+
+    if (preferredMaterialName == null)
+      throw new IllegalStateException("Missing \"preferredMaterial\"-key");
+
+    try {
+      preferredMaterial = Material.valueOf(preferredMaterialName.toUpperCase().trim());
+    } catch (IllegalArgumentException e) {
+      throw new IllegalStateException("Unknown preferred material: " + preferredMaterialName);
+    }
+
+    this.preferredMaterial = preferredMaterial;
+  }
+
   public boolean matches(List<Material> choices) {
     for (var choice : choices) {
       var didMatchChoice = false;
@@ -32,24 +48,5 @@ public record PreferredMaterial(
     }
 
     return true;
-  }
-
-  public static PreferredMaterial fromConfig(ConfigurationSection section) {
-    Material preferredMaterial;
-
-    var preferredMaterialName = section.getString("preferredMaterial");
-
-    if (preferredMaterialName == null)
-      throw new IllegalStateException("Missing \"preferredMaterial\"-key");
-
-    try {
-      preferredMaterial = Material.valueOf(preferredMaterialName.toUpperCase().trim());
-    } catch (IllegalArgumentException e) {
-      throw new IllegalStateException("Unknown preferred material: " + preferredMaterialName);
-    }
-
-    var inclusionRule = TypeInclusionRule.fromConfig(section);
-
-    return new PreferredMaterial(inclusionRule.materials(), inclusionRule.tags(), preferredMaterial);
   }
 }

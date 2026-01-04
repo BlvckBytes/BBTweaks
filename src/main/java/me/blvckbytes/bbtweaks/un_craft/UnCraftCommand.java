@@ -35,6 +35,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+// There are so many items that defining all un-craft recipes from a blank slate is near
+// impossible, at least with my level of patience. The way we go about it is to loop all
+// craftable recipes and simply turn them around - then apply some (more or less) clever
+// filtering as to exclude the obvious entries we dislike; the result is saved to a file.
+// This file then has to be visually inspected by a human, and copied over to the actual
+// input. When updating the server-version, new entries may appear - these must also be
+// merged in manually, as to ensure that no unwanted recipes slide in unknowingly.
+
 public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
   // TODO: Subtraction rules, which the user has to accept with `-s` in order to retrieve
@@ -49,14 +57,6 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   private final Logger logger;
   private final UnCraftRecipeMap recipeMap;
 
-  // There are so many items that defining all un-craft recipes from a blank slate is near
-  // impossible, at least with my level of patience. The way we go about it is to loop all
-  // craftable recipes and simply turn them around - then apply some (more or less) clever
-  // filtering as to exclude the obvious entries we dislike; the result is saved to a file.
-  // This file then has to be visually inspected by a human, and copied over to the actual
-  // input. When updating the server-version, new entries may appear - these must also be
-  // merged in manually, as to ensure that no unwanted recipes slide in unknowingly.
-
   private final BBTweaksPlugin plugin;
   private final TypeNameResolver typeNameResolver;
 
@@ -64,7 +64,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   private final File unCraftRecipesFile;
 
   private final List<TypeExclusionRule> typeExclusionRules;
-  private final List<TypeInclusionRule> typeInclusionRules;
+  private final List<IOTypeRule> typeInclusionRules;
   private final List<RecipeExclusionRule> recipeExclusionRules;
   private final List<PreferredMaterial> preferredMaterials;
   private final List<AdditionalRecipe> additionalRecipes;
@@ -435,7 +435,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         continue;
       }
 
-      exclusionRules.forEach(rule -> exclusionReasons.add(rule.reason()));
+      exclusionRules.forEach(rule -> exclusionReasons.add(rule.reason));
     }
 
     // If there is only a single valid choice, we're talking about specific recipes here, like
@@ -443,7 +443,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     if (permittedChoices.size() > 1) {
       for (var preferredMaterial : preferredMaterials) {
         if (preferredMaterial.matches(permittedChoices))
-          return preferredMaterial.preferredMaterial();
+          return preferredMaterial.preferredMaterial;
       }
     }
 
@@ -549,9 +549,10 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
           var entry = UnCraftEntry.tryCreateWithScaledSingleUnit(
             parsedRecipe.uncraftedItemAmount(),
             parsedRecipe.uncraftResults(),
-            exclusionReasons == null ? Collections.emptySet() : new HashSet<>(exclusionReasons),
-            additionalRecipe.isPresent() ? additionalRecipe.get().additionalMessages() : Collections.emptyList()
+            exclusionReasons == null ? Collections.emptySet() : new HashSet<>(exclusionReasons)
           );
+
+          additionalRecipe.ifPresent(recipe -> entry.additionalMessages.addAll(recipe.additionalMessages()));
 
           // Skip this check on additional recipes - we know what we're doing; it's only supposed to
           // catch whatever the process of automatic filtering might have missed.
@@ -662,7 +663,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       throw new InvalidRecipeException("Amount of result less than or equal to zero");
 
     for (var exclusionRule : getApplyingExclusionRules(recipeResultType, MaterialType.UNCRAFTED_ITEM))
-      exclusionReasons.add(exclusionRule.reason());
+      exclusionReasons.add(exclusionRule.reason);
 
     if (isRecoloringRecipe(recipeResultType, unCraftResults.keySet())) {
       var patchedSuccessfully = false;
@@ -693,7 +694,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
     var targetMap = recipe instanceof StonecuttingRecipe ? stonecutterMap : unCraftRecipeMap;
 
-    var entry = UnCraftEntry.tryCreateWithScaledSingleUnit(resultAmount, unCraftResults, exclusionReasons, Collections.emptyList());
+    var entry = UnCraftEntry.tryCreateWithScaledSingleUnit(resultAmount, unCraftResults, exclusionReasons);
 
     targetMap.addUnCraftingRecipe(recipeResultType, entry);
   }
@@ -755,8 +756,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       var unCraftRecipe = UnCraftEntry.tryCreateWithScaledSingleUnit(
         additionalRecipe.recipe().uncraftedItemAmount(),
         additionalRecipe.recipe().uncraftResults(),
-        Collections.emptySet(),
-        additionalRecipe.additionalMessages()
+        Collections.emptySet()
       );
 
       localUnCraftRecipeMap.addUnCraftingRecipe(additionalRecipe.recipe().uncraftedItemType(), unCraftRecipe);
@@ -929,11 +929,11 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
   private void loadConfig() {
     typeExclusionRules.clear();
-    loadMapLists("unCraft.typeExclusionRules", TypeExclusionRule::fromConfig, typeExclusionRules);
+    loadMapLists("unCraft.typeExclusionRules", TypeExclusionRule::new, typeExclusionRules);
     logger.info("Loaded " + typeExclusionRules.size() + " uncraft type-exclusion-rules");
 
     typeInclusionRules.clear();
-    loadMapLists("unCraft.typeInclusionRules", TypeInclusionRule::fromConfig, typeInclusionRules);
+    loadMapLists("unCraft.typeInclusionRules", IOTypeRule::new, typeInclusionRules);
     logger.info("Loaded " + typeInclusionRules.size() + " uncraft type-inclusion-rules");
 
     recipeExclusionRules.clear();
@@ -941,7 +941,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     logger.info("Loaded " + recipeExclusionRules.size() + " uncraft recipe-exclusion-rules");
 
     preferredMaterials.clear();
-    loadMapLists("unCraft.preferredMaterials", PreferredMaterial::fromConfig, preferredMaterials);
+    loadMapLists("unCraft.preferredMaterials", PreferredMaterial::new, preferredMaterials);
     logger.info("Loaded " + preferredMaterials.size() + " uncraft preferred materials");
 
     additionalRecipes.clear();

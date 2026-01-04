@@ -56,7 +56,7 @@ unCraft:
   # NOTE: Reasons may be concatenated with a semicolon if multiple match - do not terminate them with a dot.
   typeExclusionRules:
     -
-      onUncraftedItem: true
+      onUnCraftedItem: true
       tags:
         - ITEMS_HEAD_ARMOR
         - ITEMS_CHEST_ARMOR
@@ -75,7 +75,7 @@ unCraft:
         - BRUSH
       reason: Rüstungen, Werkzeuge und Waffen werden durch die Wiederverwertungsblöcke (Salvage-Skill) von mcMMO gehandhabt
     -
-      onUncraftedItem: true
+      onUnCraftedItem: true
       materials:
         - WHEAT_SEEDS
         - MELON_SEEDS
@@ -83,98 +83,98 @@ unCraft:
         - SUGAR
       reason: Dieses Item kann nicht weiter zurückentwickelt werden
     -
-      onUncraftedItem: true
+      onUnCraftedItem: true
       materialPatterns:
         - '^(.*_)?COPPER_CHEST$'
       reason: Kann durch einen Kupfergolem generiert werden
     -
-      onUncraftedItem: true
+      onUnCraftedItem: true
       materials:
         - DIORITE
         - GRANITE
       reason: Enthält Quarz und kommt natürlich vor
     -
-      onUncraftedItem: true
+      onUnCraftedItem: true
       materials:
         - NETHER_WART_BLOCK
       reason: Enthält Netherwarzen und kommt natürlich vor
     -
-      onUncraftedItem: true
+      onUnCraftedItem: true
       materials:
         - DRIED_GHAST
       reason: Enthält Ghasttränen und kommt natürlich vor
     -
-      onUncraftedItem: true
+      onUnCraftedItem: true
       materialPatterns:
         - '^.*_SMITHING_TEMPLATE$'
       reason: Rezepte mit Schmiedevorlagen werden ausschließlich zum Vervielfachen benutzt
     -
-      onUncraftedItem: true
+      onUnCraftedItem: true
       materialPatterns:
         - '^.*_DYE$'
       reason: Farbstoffe haben oft keinen klaren Ursprung und würden unfaire Items erzeugen
     -
-      onUncraftedItem: true
+      onUnCraftedItem: true
       materialPatterns:
         - '^WAXED_.*$'
       reason: Das Wachs von gewachsten Items ist nicht zurückgewinnbar
     -
-      onUncraftedItem: true
+      onUnCraftedItem: true
       materialIsFlags:
         - isEdible
       reason: Nahrung enthält Items, die gefarmt werden müssten und kommt natürlich vor
     -
-      onUncraftResult: true
+      onUnCraftResult: true
       materialPatterns:
         - '^WAXED_.*$'
       reason: Gewachste Kupferblöcke können zu Kupferbarren gecrafted werden - die Umkehr davon ist unsinnig
     -
       # Because that makes absolutely no sense in reverse - what would the map be filled with?
-      onUncraftResult: true
+      onUnCraftResult: true
       materials:
         - FILLED_MAP
       reason: Das Rezept mit einer gefüllten Karte wird ausschließlich zum Vervielfachen benutzt
     -
-      onUncraftResult: true
+      onUnCraftResult: true
       materials:
         - VINE
       reason: Dieses Item beinhaltet Ranken und kommt natürlich vor
     -
-      onUncraftResult: true
+      onUnCraftResult: true
       materials:
         - MOSS_BLOCK
         - PALE_MOSS_BLOCK
       reason: Dieses Item beinhaltet Moos und kommt natürlich vor
     -
-      onUncraftResult: true
+      onUnCraftResult: true
       materialPatterns:
         - '^.*(_BOTTLE|_BUCKET)$'
       reason: Das Rezept dieses Items beinhaltet Behälter wie Flaschen oder Eimer, die beim Craften leer retourniert wurden
     -
-      onUncraftResult: true
+      onUnCraftResult: true
       tags:
         - ITEMS_SKULLS
       reason: Enthält Köpfe, die im Allgemeinen ausgenommen wurden
     -
-      onUncraftResult: true
+      onUnCraftResult: true
       materialPatterns:
         - '^.*_WOOD$'
       reason: Holz (Stamm mit Rinde an allen Seiten) wird nicht ausgegeben
     -
-      onUncraftResult: true
+      onUnCraftResult: true
       materialPatterns:
         - '^STRIPPED_.*$'
       reason: Entrindete Stämme werden nicht ausgegeben
     -
-      onUncraftedItem: true
-      onUncraftResult: true
+      onUnCraftedItem: true
+      onUnCraftResult: true
       materials:
         - GOLDEN_APPLE
         - ENCHANTED_GOLDEN_APPLE
       reason: Enthält Gold und kommt relativ häufig natürlich vor
   typeInclusionRules:
     -
-      onUncraftedItem: true
+      onUnCraftedItem: true
       # These are only craftable with stripped logs/stems, which we normally do not hand out; let's make an exception.
       materialPatterns:
         - '^.*_HANGING_SIGN$'
