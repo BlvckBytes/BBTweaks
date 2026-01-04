@@ -38,7 +38,6 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
   // TODO: Confirmable "round down" as to avoid all "min amount" restrictions
   // TODO: Cooldown? Items per hour limit?
-  // TODO: Max dropped stack count until the loop is forcefully quit
 
   record MaterialExtractionResult(@Nullable Material material, String absenceReason) {}
   record ItemAndSlot(ItemStack item, int slot) {}
