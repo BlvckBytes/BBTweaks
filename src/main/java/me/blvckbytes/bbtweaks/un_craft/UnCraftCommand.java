@@ -37,13 +37,19 @@ import java.util.stream.Collectors;
 
 public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
+  // TODO: Reasons can be displayed duplicated (Luigi's example)
+  // TODO: Consider adding auto-disabled smithing-template recipes, as to provide proper
+  //       messages instead of stating "recipe not found"
+  // TODO: Subtraction rules, which the user has to accept with `-s` in order to retrieve
+  //       the remaining results of the uncraft-input; example: colored terracotta -> terracotta (no dye)
+
   record MaterialExtractionResult(@Nullable Material material, String absenceReason) {}
   record ItemAndSlot(ItemStack item, int slot) {}
 
   private static final String REASON_MARKER = "Reason:";
 
   private final Logger logger;
-  private final Map<Material, List<UnCraftEntry>> unCraftBucketByInputType;
+  private final UnCraftRecipeMap recipeMap;
 
   // There are so many items that defining all un-craft recipes from a blank slate is near
   // impossible, at least with my level of patience. The way we go about it is to loop all
@@ -73,7 +79,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     this.unCraftRecipesTemplateFile = createFileIfAbsent(plugin, "uncraft_recipes_template.txt");
     this.unCraftRecipesFile = createFileIfAbsent(plugin, "uncraft_recipes.txt");
 
-    this.unCraftBucketByInputType = new HashMap<>();
+    this.recipeMap = new UnCraftRecipeMap();
     this.typeExclusionRules = new ArrayList<>();
     this.typeInclusionRules = new ArrayList<>();
     this.recipeExclusionRules = new ArrayList<>();
@@ -157,7 +163,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     }
 
     var heldType = extractionResult.material;
-    var availableEntries = unCraftBucketByInputType.getOrDefault(heldType, Collections.emptyList());
+    var availableEntries = recipeMap.getRecipesFor(heldType);
 
     if (availableEntries.isEmpty()) {
       sender.sendMessage(
@@ -477,7 +483,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   }
 
   public void loadRecipesFromFile() {
-    this.unCraftBucketByInputType.clear();
+    this.recipeMap.clear();
 
     var loadedCounter = 0;
     var excludedCounter = 0;
@@ -554,9 +560,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
             }
           }
 
-          var unCraftBucket = unCraftBucketByInputType.computeIfAbsent(parsedRecipe.uncraftedItemType(), k -> new ArrayList<>());
-
-          unCraftBucket.add(entry);
+          recipeMap.addUnCraftingRecipe(parsedRecipe.uncraftedItemType(), entry);
 
           if (!entry.exclusionReasons.isEmpty())
             ++excludedCounter;
@@ -573,7 +577,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     logger.info("Loaded " + loadedCounter + " uncraft-recipes, of which " + excludedCounter + " were excluded (making for " + (loadedCounter - excludedCounter) + " active recipes)");
   }
 
-  private void handleRecipe(@NotNull Recipe recipe, Map<Material, List<UnCraftEntry>> outputBuckets) {
+  private void handleDiscoveredRecipe(@NotNull Recipe recipe, UnCraftRecipeMap unCraftRecipeMap, UnCraftRecipeMap stonecutterMap) {
     var exclusionReasons = new HashSet<String>();
     var unCraftResults = new HashMap<Material, Integer>();
 
@@ -607,6 +611,10 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
       // The "catalyst" (in the case of shulker-boxes, the dye)
       addChoiceToUnCraftResults(transmuteRecipe.getMaterial(), unCraftResults, exclusionReasons);
+    }
+
+    else if (recipe instanceof StonecuttingRecipe stonecuttingRecipe) {
+      addChoiceToUnCraftResults(stonecuttingRecipe.getInputChoice(), unCraftResults, exclusionReasons);
     }
 
     else {
@@ -658,12 +666,15 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         exclusionReasons.add(recipeExclusionRule.reason());
     }
 
+
     if (isRecipeIncluded(recipeResultType, unCraftResults.keySet()))
       exclusionReasons.clear();
 
+    var targetMap = recipe instanceof StonecuttingRecipe ? stonecutterMap : unCraftRecipeMap;
+
     var entry = UnCraftEntry.tryCreateWithScaledSingleUnit(resultAmount, unCraftResults, exclusionReasons);
 
-    outputBuckets.computeIfAbsent(recipeResultType, k -> new ArrayList<>()).add(entry);
+    targetMap.addUnCraftingRecipe(recipeResultType, entry);
   }
 
   private boolean isRecipeIncluded(Material uncraftedItem, Set<Material> unCraftResults) {
@@ -681,30 +692,56 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   }
 
   public void discoverRecipesAndCreateTemplateFile() {
-    var localBuckets = new HashMap<Material, List<UnCraftEntry>>();
+    var localUnCraftRecipeMap = new UnCraftRecipeMap();
+    var localStoneCutterRecipeMap = new UnCraftRecipeMap();
 
     for (var iterator = Bukkit.recipeIterator(); iterator.hasNext();) {
       var recipe = iterator.next();
 
       try {
-        handleRecipe(recipe, localBuckets);
+        handleDiscoveredRecipe(recipe, localUnCraftRecipeMap, localStoneCutterRecipeMap);
       } catch (InvalidRecipeException e) {
         logger.warning("Skipping invalid recipe, reason: " + e.reason + ", recipe: " + recipe);
       } catch (SkipRecipeException ignored) {}
     }
 
-    for (var additionalRecipe : additionalRecipes) {
-      var bucket = localBuckets.computeIfAbsent(additionalRecipe.uncraftedItemType(), k -> new ArrayList<>());
+    // Exchange "better" recipes from the stone-cutter for their worse crafting counterparts.
+    // When inverting, this will make the conversion-rate worse, as it should, to avoid generating items.
 
-      bucket.add(UnCraftEntry.tryCreateWithScaledSingleUnit(
+    for (var stoneCutterEntry : localStoneCutterRecipeMap.entrySet()) {
+      var stoneCutterUnCraftedType = stoneCutterEntry.getKey();
+      var workbenchRecipes = localUnCraftRecipeMap.getRecipesFor(stoneCutterUnCraftedType);
+
+      if (workbenchRecipes.isEmpty())
+        continue;
+
+      for (var stoneCutterRecipe : stoneCutterEntry.getValue()) {
+        var foundMatch = false;
+
+        for (var index = 0; index < workbenchRecipes.size(); ++index) {
+          if (stoneCutterRecipe.matchesResultTypes(workbenchRecipes.get(index))) {
+            if (foundMatch)
+              logger.warning("A stonecutter-recipe matched on more than one workbench recipes; investigate!");
+
+            foundMatch = true;
+            workbenchRecipes.set(index, stoneCutterRecipe);
+          }
+        }
+      }
+    }
+
+    for (var additionalRecipe : additionalRecipes) {
+      var unCraftRecipe = UnCraftEntry.tryCreateWithScaledSingleUnit(
         additionalRecipe.uncraftedItemAmount(),
         additionalRecipe.uncraftResults(),
         Collections.emptySet()
-      ));
+      );
+
+      localUnCraftRecipeMap.addUnCraftingRecipe(additionalRecipe.uncraftedItemType(), unCraftRecipe);
     }
 
     try (var writer = new FileWriter(unCraftRecipesTemplateFile)) {
-      var entries = new ArrayList<>(localBuckets.entrySet());
+      var entries = new ArrayList<>(localUnCraftRecipeMap.entrySet());
 
       // Important: ensure a well-defined order on the file-contents, as to be able to
       // easily diff on version-upgrades, without everything being scrambled again.

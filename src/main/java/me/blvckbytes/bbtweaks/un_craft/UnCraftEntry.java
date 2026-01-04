@@ -32,6 +32,10 @@ public class UnCraftEntry {
     this.minRequiredAmount = _minRequiredAmount;
   }
 
+  public boolean matchesResultTypes(UnCraftEntry other) {
+    return results.keySet().equals(other.results.keySet());
+  }
+
   public static UnCraftEntry tryCreateWithScaledSingleUnit(int inputAmount, Map<Material, Integer> results, Set<String> exclusionReasons) {
     // All ingredient-counts need to be a multiple of the result-amount for the scaling to succeed with whole numbers
     if (inputAmount == 0 || !results.values().stream().allMatch(resultAmount -> resultAmount % inputAmount == 0))
