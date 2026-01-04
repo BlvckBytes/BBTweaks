@@ -98,11 +98,33 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
   @Override
   public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-    // Either /uc <index> [all] or /uc [all]
-    if (args.length < 3 && !(args.length == 2 && args[0].equalsIgnoreCase("all")) && sender.hasPermission("bbtweaks.uncraft.all"))
-      return List.of("all");
+    String lastArg;
 
-    return List.of();
+    if (args.length != 0 && !(lastArg = args[args.length - 1]).isBlank()) {
+      var firstChar = lastArg.charAt(0);
+
+      // Do not suggest any flags if the user's entering a number (choice-index)
+      if (firstChar >= '0' && firstChar <= '9')
+        return List.of();
+
+      // Do not suggest flags if the user already selected (at least) one that's available
+      if (firstChar == '-') {
+        for (int charIndex = 1; charIndex < lastArg.length(); ++charIndex) {
+          if (CommandFlag.getFlagByChar(lastArg.charAt(charIndex)) != null)
+            return List.of();
+        }
+      }
+    }
+
+    var argsAndFlags = CommandFlag.parseFlags(args);
+    var suggestedFlags = new ArrayList<String>();
+
+    for (var commandFlag : CommandFlag.values()) {
+      if (!argsAndFlags.flags().contains(commandFlag))
+        suggestedFlags.add(commandFlag.representation);
+    }
+
+    return suggestedFlags;
   }
 
   @Override
@@ -176,16 +198,15 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       return true;
     }
 
-    UnCraftEntry targetEntry;
-    int argsOffset;
+    var argsAndFlags = CommandFlag.parseFlags(args);
 
-    if (permittedEntries.size() == 1) {
+    UnCraftEntry targetEntry;
+
+    if (permittedEntries.size() == 1)
       targetEntry = permittedEntries.get(0);
-      argsOffset = 0;
-    }
 
     else {
-      if (args.length == 0) {
+      if (argsAndFlags.args().isEmpty()) {
         sender.sendMessage(plugin.accessConfigValue("unCraft.chat.choicesHeadline").replace("{label}", label));
 
         for (var entryIndex = 0; entryIndex < permittedEntries.size(); ++entryIndex) {
@@ -202,40 +223,32 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         return true;
       }
 
+      var targetString = argsAndFlags.args().get(0);
       int targetNumber;
 
       try {
-        targetNumber = Integer.parseInt(args[0]);
+        targetNumber = Integer.parseInt(targetString);
       } catch (Throwable e) {
-        sender.sendMessage(plugin.accessConfigValue("unCraft.chat.invalidSelection").replace("{selection}", args[0]));
+        sender.sendMessage(plugin.accessConfigValue("unCraft.chat.invalidSelection").replace("{selection}", targetString));
         return true;
       }
 
       if (targetNumber <= 0 || targetNumber > permittedEntries.size()) {
-        sender.sendMessage(plugin.accessConfigValue("unCraft.chat.invalidSelection").replace("{selection}", args[0]));
+        sender.sendMessage(plugin.accessConfigValue("unCraft.chat.invalidSelection").replace("{selection}", targetString));
         return true;
       }
 
       targetEntry = permittedEntries.get(targetNumber - 1);
-      argsOffset = 1;
-    }
-
-    var isInAllMode = false;
-
-    if (args.length > argsOffset)
-      isInAllMode = args[argsOffset].equalsIgnoreCase("all");
-
-    if (isInAllMode && !player.hasPermission("bbtweaks.uncraft.all")) {
-      sender.sendMessage(plugin.accessConfigValue("unCraft.chat.missingPermissionAllMode"));
-      return true;
     }
 
     var targetItems = new ArrayList<ItemAndSlot>();
 
-    if (!isInAllMode)
-      targetItems.add(new ItemAndSlot(heldItem, inventory.getHeldItemSlot()));
+    if (argsAndFlags.flags().contains(CommandFlag.ALL_MODE)) {
+      if (!player.hasPermission("bbtweaks.uncraft.all")) {
+        sender.sendMessage(plugin.accessConfigValue("unCraft.chat.missingPermissionAllMode"));
+        return true;
+      }
 
-    else {
       for (var slotIndex = 0; slotIndex < inventory.getSize(); ++slotIndex) {
         var slotContents = inventory.getItem(slotIndex);
 
@@ -251,6 +264,9 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         targetItems.add(new ItemAndSlot(slotContents, slotIndex));
       }
     }
+
+    else
+      targetItems.add(new ItemAndSlot(heldItem, inventory.getHeldItemSlot()));
 
     var unCraftCounter = 0;
 
