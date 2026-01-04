@@ -38,8 +38,6 @@ import java.util.stream.Collectors;
 public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
   // TODO: Reasons can be displayed duplicated (Luigi's example)
-  // TODO: Consider adding auto-disabled smithing-template recipes, as to provide proper
-  //       messages instead of stating "recipe not found"
   // TODO: Subtraction rules, which the user has to accept with `-s` in order to retrieve
   //       the remaining results of the uncraft-input; example: colored terracotta -> terracotta (no dye)
 
@@ -617,8 +615,15 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       addChoiceToUnCraftResults(stonecuttingRecipe.getInputChoice(), unCraftResults, exclusionReasons);
     }
 
+    else if (recipe instanceof SmithingTransformRecipe smithingTransformRecipe) {
+      addChoiceToUnCraftResults(smithingTransformRecipe.getTemplate(), unCraftResults, exclusionReasons);
+      addChoiceToUnCraftResults(smithingTransformRecipe.getBase(), unCraftResults, exclusionReasons);
+      addChoiceToUnCraftResults(smithingTransformRecipe.getAddition(), unCraftResults, exclusionReasons);
+      exclusionReasons.add(plugin.accessConfigValue("unCraft.additionalReasons.smithingRecipe"));
+    }
+
     else {
-      // BlastingRecipe, SmithingTrimRecipe, SmokerRecipe, FurnaceRecipe, StonecuttingRecipe, etc.
+      // BlastingRecipe, SmokerRecipe, FurnaceRecipe, etc.
       return;
     }
 
@@ -665,7 +670,6 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       if (recipeExclusionRule.matches(recipeResultType, resultAmount, unCraftResults))
         exclusionReasons.add(recipeExclusionRule.reason());
     }
-
 
     if (isRecipeIncluded(recipeResultType, unCraftResults.keySet()))
       exclusionReasons.clear();
