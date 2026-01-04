@@ -33,6 +33,7 @@ import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
@@ -266,7 +267,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       targetItems.add(new ItemAndSlot(heldItem, inventory.getHeldItemSlot()));
 
     var wholeUnitsUnCraftCounter = 0;
-    var reducedUnitsUnCraftCounter = 0;
+    var reducedUnitsUnCraftAmounts = new ArrayList<Integer>();
 
     // Do not add to the inventory directly - we're (possibly) reducing the slot bit by bit, and
     // if we want the results to go into that same slot in the case that it could be reduced to
@@ -300,7 +301,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
           }
 
           newAmount = 0;
-          ++reducedUnitsUnCraftCounter;
+          reducedUnitsUnCraftAmounts.add(remainingAmount);
         }
 
         // Can still reduce by whole units
@@ -322,7 +323,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       }
     }
 
-    if (wholeUnitsUnCraftCounter == 0 && reducedUnitsUnCraftCounter == 0) {
+    if (wholeUnitsUnCraftCounter == 0 && reducedUnitsUnCraftAmounts.isEmpty()) {
       var requiredAmount = acceptReduced ? targetEntry.minRequiredAmount : targetEntry.inputAmount;
 
       sender.sendMessage(
@@ -341,7 +342,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     else {
       if (wholeUnitsUnCraftCounter == 0)
         message = plugin.accessConfigValue("unCraft.chat.successfulUnCraftUnitManyNoWholeAndReduced");
-      else if (reducedUnitsUnCraftCounter == 0)
+      else if (reducedUnitsUnCraftAmounts.isEmpty())
         message = plugin.accessConfigValue("unCraft.chat.successfulUnCraftUnitManyWholeAndNoReduced");
       else
         message = plugin.accessConfigValue("unCraft.chat.successfulUnCraftUnitManyWholeAndReduced");
@@ -351,9 +352,15 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       message
         .replace("{uncrafted_item}", typeNameResolver.resolve(player, heldType))
         .replace("{whole_units_uncraft_count}", String.valueOf(wholeUnitsUnCraftCounter))
-        .replace("{reduced_units_uncraft_count}", String.valueOf(reducedUnitsUnCraftCounter))
+        .replace("{reduced_units_uncraft_count}", String.valueOf(reducedUnitsUnCraftAmounts.size()))
         .replace("{results}", generateResultsString(player, itemsToAdd.keySet(), k -> itemsToAdd.get(k).value))
         .replace("{uncraft_unit}", String.valueOf(targetEntry.inputAmount))
+        .replace(
+          "{reduced_amounts}",
+          reducedUnitsUnCraftAmounts.stream()
+            .map(amount -> plugin.accessConfigValue("unCraft.chat.reducedAmountsEntry").replace("{reduced_amount}", String.valueOf(amount)))
+            .collect(Collectors.joining(plugin.accessConfigValue("unCraft.chat.reducedAmountsSeparator")))
+        )
     );
 
     var itemsToDrop = new HashMap<Material, MutableInt>();

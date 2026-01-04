@@ -31,14 +31,16 @@ unCraft:
     invalidSelection: '&8[&6UC&8] &cUngültige Auswahl: &4{selection}&c!'
     notEnoughItems: '&8[&6UC&8] &cVom Item &4{result_item} &cwerden mindestens &4{required_amount} Stück &cbenötigt!'
     droppedItems: '&8[&6UC&8] &7Dein Inventar &6ist voll&7; droppe Items: &a{items}&7!'
+    reducedAmountsEntry: '&a{reduced_amount} Stück'
+    reducedAmountsSeparator: '&7, '
     resultEntry: '&a{result_amount}x {result_item}'
     resultSeparator: '&7, '
     choicesHeadline: '&8[&6UC&8] &7Bitte entscheide dich für ein Rezept mit &a/{label} <Nummer>&7:'
     choicesEntry: '&7- &a#{choice_number}&7: &a{results}'
     successfulUnCraftUnitOne: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{whole_units_uncraft_count}x &7in insgesamt &a{results} &7zurückentwickelt!'
-    successfulUnCraftUnitManyNoWholeAndReduced: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{reduced_units_uncraft_count}x reduziert &7in insgesamt &a{results} &7zurückentwickelt!'
+    successfulUnCraftUnitManyNoWholeAndReduced: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{reduced_units_uncraft_count}x reduziert &7(&a{reduced_amounts}&7) in insgesamt &a{results} &7zurückentwickelt!'
     successfulUnCraftUnitManyWholeAndNoReduced: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{whole_units_uncraft_count}x &7je &a{uncraft_unit} Stück &7in insgesamt &a{results} &7zurückentwickelt!'
-    successfulUnCraftUnitManyWholeAndReduced: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{whole_units_uncraft_count}x &7je &a{uncraft_unit} Stück &7und &a{reduced_units_uncraft_count}x reduziert &7in insgesamt &a{results} &7zurückentwickelt!'
+    successfulUnCraftUnitManyWholeAndReduced: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{whole_units_uncraft_count}x &7je &a{uncraft_unit} Stück &7und &a{reduced_units_uncraft_count}x reduziert &7(&a{reduced_amounts}&7) in insgesamt &a{results} &7zurückentwickelt!'
   additionalReasons:
     hasDamage: Das Item ist bereits abgenutzt
     hasName: Das Item hat einen besonderen Namen
