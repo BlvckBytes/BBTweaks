@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.un_craft;
 
 import me.blvckbytes.bbtweaks.BBTweaksPlugin;
+import me.blvckbytes.bbtweaks.util.MutableInt;
 import me.blvckbytes.bbtweaks.util.TypeNameResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -27,7 +28,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.*;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.ToIntFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -187,11 +190,13 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(plugin.accessConfigValue("unCraft.chat.choicesHeadline").replace("{label}", label));
 
         for (var entryIndex = 0; entryIndex < permittedEntries.size(); ++entryIndex) {
+          var entryResults = permittedEntries.get(entryIndex).results;
+
           sender.sendMessage(
             plugin.accessConfigValue("unCraft.chat.choicesEntry")
               .replace("{label}", label)
               .replace("{choice_number}", String.valueOf(entryIndex + 1))
-              .replace("{results}", generateResultsString(player, permittedEntries.get(entryIndex).results))
+              .replace("{results}", generateResultsString(player, entryResults.keySet(), entryResults::get))
           );
         }
 
@@ -248,7 +253,6 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       }
     }
 
-    var totalResultCounters = new HashMap<Material, Integer>();
     var unCraftCounter = 0;
 
     // Do not add to the inventory directly - we're (possibly) reducing the slot bit by bit, and
@@ -256,21 +260,18 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     // nothing, we need to postpone adding until the very end; otherwise, items will be added
     // elsewhere and subsequent adds will "magnetically" stack to that, which is undesired.
 
-    // TODO: Rather use Map<Material, Integer> again, as to accumulate and reduce the dropped individual stacks later on
-    var itemsToAdd = new ArrayList<ItemStack>();
+    var itemsToAdd = new HashMap<Material, MutableInt>();
 
     for (var targetItem : targetItems) {
       while (targetItem.item.getAmount() >= targetEntry.inputAmount) {
         ++unCraftCounter;
 
+        for (var resultEntry : targetEntry.results.entrySet())
+          itemsToAdd.computeIfAbsent(resultEntry.getKey(), k -> new MutableInt()).value += resultEntry.getValue();
+
         int newAmount = targetItem.item.getAmount() - targetEntry.inputAmount;
 
         targetItem.item.setAmount(newAmount);
-
-        targetEntry.results.forEach((material, amount) -> {
-          itemsToAdd.add(new ItemStack(material, amount));
-          totalResultCounters.put(material, totalResultCounters.computeIfAbsent(material, k -> 0) + amount);
-        });
 
         if (newAmount <= 0) {
           inventory.setItem(targetItem.slot, null);
@@ -289,37 +290,55 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       return true;
     }
 
-    var itemsToDrop = new ArrayList<ItemStack>();
-
-    for (var itemToAdd : itemsToAdd)
-      itemsToDrop.addAll(inventory.addItem(itemToAdd).values());
-
     sender.sendMessage(
       plugin.accessConfigValue(targetEntry.inputAmount == 1 ? "unCraft.chat.successfulUnCraftUnitOne" : "unCraft.chat.successfulUnCraftUnitMany")
         .replace("{uncrafted_item}", typeNameResolver.resolve(player, heldType))
         .replace("{uncraft_count}", String.valueOf(unCraftCounter))
-        .replace("{results}", generateResultsString(player, totalResultCounters))
+        .replace("{results}", generateResultsString(player, itemsToAdd.keySet(), k -> itemsToAdd.get(k).value))
         .replace("{uncraft_unit}", String.valueOf(targetEntry.inputAmount))
     );
 
-    if (!itemsToDrop.isEmpty()) {
-      for (var remainder : itemsToDrop)
-        player.dropItem(remainder);
+    var itemsToDrop = new HashMap<Material, MutableInt>();
 
-      sender.sendMessage(plugin.accessConfigValue("unCraft.chat.droppedItems"));
+    forEachStackOfTypeCountMap(itemsToAdd, item -> {
+      for (var remainder : inventory.addItem(item).values())
+        itemsToDrop.computeIfAbsent(item.getType(), k -> new MutableInt()).value += remainder.getAmount();
+    });
+
+    if (!itemsToDrop.isEmpty()) {
+      sender.sendMessage(
+        plugin.accessConfigValue("unCraft.chat.droppedItems")
+          .replace("{items}", generateResultsString(player, itemsToDrop.keySet(), k -> itemsToDrop.get(k).value))
+      );
+
+      forEachStackOfTypeCountMap(itemsToDrop, player::dropItem);
     }
 
     return true;
   }
 
-  private String generateResultsString(Player player, Map<Material, Integer> resultMap) {
+  private void forEachStackOfTypeCountMap(Map<Material, MutableInt> typeCountMap, Consumer<ItemStack> itemHandler) {
+    for (var typeEntry : typeCountMap.entrySet()) {
+      var itemType = typeEntry.getKey();
+      var remainingAmount = typeEntry.getValue();
+
+      while (remainingAmount.value > 0) {
+        var stackSize = Math.min(itemType.getMaxStackSize(), remainingAmount.value);
+        remainingAmount.value -= stackSize;
+
+        itemHandler.accept(new ItemStack(itemType, stackSize));
+      }
+    }
+  }
+
+  private String generateResultsString(Player player, Collection<Material> materials, ToIntFunction<Material> amountAccessor) {
     var results = new StringJoiner(plugin.accessConfigValue("unCraft.chat.resultSeparator"));
 
-    for (var resultEntry : resultMap.entrySet()) {
+    for (var material : materials) {
       results.add(
         plugin.accessConfigValue("unCraft.chat.resultEntry")
-          .replace("{result_item}", typeNameResolver.resolve(player, resultEntry.getKey()))
-          .replace("{result_amount}", String.valueOf(resultEntry.getValue()))
+          .replace("{result_item}", typeNameResolver.resolve(player, material))
+          .replace("{result_amount}", String.valueOf(amountAccessor.applyAsInt(material)))
       );
     }
 
