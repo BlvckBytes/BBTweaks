@@ -274,6 +274,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     // elsewhere and subsequent adds will "magnetically" stack to that, which is undesired.
 
     var itemsToAdd = new HashMap<Material, MutableInt>();
+    var acceptReduced = argsAndFlags.flags().contains(CommandFlag.ACCEPT_REDUCED);
 
     for (var targetItem : targetItems) {
       int remainingAmount;
@@ -283,13 +284,12 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
         // Need to scale down the result-amounts, if applicable
         if (remainingAmount < targetEntry.inputAmount) {
-          if (!argsAndFlags.flags().contains(CommandFlag.ACCEPT_REDUCED))
+          if (!acceptReduced)
             break;
 
           var scalingFactor = (double) remainingAmount / targetEntry.inputAmount;
 
-          // Refuse to uncraft items which would not yield any results at all
-          if (targetEntry.results.values().stream().allMatch(amount -> Math.floor(amount * scalingFactor) == 0))
+          if (remainingAmount < targetEntry.minRequiredAmount)
             break;
 
           for (var resultEntry : targetEntry.results.entrySet()) {
@@ -323,9 +323,11 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     }
 
     if (wholeUnitsUnCraftCounter == 0 && reducedUnitsUnCraftCounter == 0) {
+      var requiredAmount = acceptReduced ? targetEntry.minRequiredAmount : targetEntry.inputAmount;
+
       sender.sendMessage(
         plugin.accessConfigValue("unCraft.chat.notEnoughItems")
-          .replace("{required_amount}", String.valueOf(targetEntry.inputAmount))
+          .replace("{required_amount}", String.valueOf(requiredAmount))
           .replace("{result_item}", typeNameResolver.resolve(player, heldType))
       );
 

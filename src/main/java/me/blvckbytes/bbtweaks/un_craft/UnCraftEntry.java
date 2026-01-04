@@ -8,6 +8,7 @@ import java.util.Set;
 public class UnCraftEntry {
 
   public final int inputAmount;
+  public final int minRequiredAmount;
   public final Map<Material, Integer> results;
   public final Set<String> exclusionReasons;
 
@@ -15,6 +16,20 @@ public class UnCraftEntry {
     this.inputAmount = inputAmount;
     this.results = results;
     this.exclusionReasons = exclusionReasons;
+
+    var _minRequiredAmount = inputAmount;
+
+    while (_minRequiredAmount > 1) {
+      var scalingFactor = (double) (_minRequiredAmount - 1) / inputAmount;
+
+      // Refuse to uncraft items which would not yield any results at all
+      if (results.values().stream().allMatch(amount -> Math.floor(amount * scalingFactor) == 0))
+        break;
+
+      --_minRequiredAmount;
+    }
+
+    this.minRequiredAmount = _minRequiredAmount;
   }
 
   public static UnCraftEntry tryCreateWithScaledSingleUnit(int inputAmount, Map<Material, Integer> results, Set<String> exclusionReasons) {
