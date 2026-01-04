@@ -6,8 +6,7 @@ import java.util.*;
 
 public enum CommandFlag {
   ALL_MODE('a'),
-  // TODO: Implement me next, :)
-//  ACCEPT_REDUCED('r'),
+  ACCEPT_REDUCED('r'),
   ;
 
   public record ArgsAndFlags(List<String> args, EnumSet<CommandFlag> flags) {}

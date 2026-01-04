@@ -35,8 +35,10 @@ unCraft:
     resultSeparator: '&7, '
     choicesHeadline: '&8[&6UC&8] &7Bitte entscheide dich für ein Rezept mit &a/{label} <Nummer>&7:'
     choicesEntry: '&7- &a#{choice_number}&7: &a{results}'
-    successfulUnCraftUnitOne: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{uncraft_count}x &7in insgesamt &a{results} &7zurückentwickelt!'
-    successfulUnCraftUnitMany: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{uncraft_count}x &7je &a{uncraft_unit} Stück &7in insgesamt &a{results} &7zurückentwickelt!'
+    successfulUnCraftUnitOne: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{whole_units_uncraft_count}x &7in insgesamt &a{results} &7zurückentwickelt!'
+    successfulUnCraftUnitManyNoWholeAndReduced: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{reduced_units_uncraft_count}x reduziert &7in insgesamt &a{results} &7zurückentwickelt!'
+    successfulUnCraftUnitManyWholeAndNoReduced: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{whole_units_uncraft_count}x &7je &a{uncraft_unit} Stück &7in insgesamt &a{results} &7zurückentwickelt!'
+    successfulUnCraftUnitManyWholeAndReduced: '&8[&6UC&8] &7Das Item &a{uncrafted_item} &7wurde &a{whole_units_uncraft_count}x &7je &a{uncraft_unit} Stück &7und &a{reduced_units_uncraft_count}x reduziert &7in insgesamt &a{results} &7zurückentwickelt!'
   additionalReasons:
     hasDamage: Das Item ist bereits abgenutzt
     hasName: Das Item hat einen besonderen Namen

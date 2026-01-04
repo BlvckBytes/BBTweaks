@@ -36,9 +36,6 @@ import java.util.logging.Logger;
 
 public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
-  // TODO: Confirmable "round down" as to avoid all "min amount" restrictions
-  // TODO: Cooldown? Items per hour limit?
-
   record MaterialExtractionResult(@Nullable Material material, String absenceReason) {}
   record ItemAndSlot(ItemStack item, int slot) {}
 
@@ -268,7 +265,8 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     else
       targetItems.add(new ItemAndSlot(heldItem, inventory.getHeldItemSlot()));
 
-    var unCraftCounter = 0;
+    var wholeUnitsUnCraftCounter = 0;
+    var reducedUnitsUnCraftCounter = 0;
 
     // Do not add to the inventory directly - we're (possibly) reducing the slot bit by bit, and
     // if we want the results to go into that same slot in the case that it could be reduced to
@@ -278,24 +276,53 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     var itemsToAdd = new HashMap<Material, MutableInt>();
 
     for (var targetItem : targetItems) {
-      while (targetItem.item.getAmount() >= targetEntry.inputAmount) {
-        ++unCraftCounter;
+      int remainingAmount;
 
-        for (var resultEntry : targetEntry.results.entrySet())
-          itemsToAdd.computeIfAbsent(resultEntry.getKey(), k -> new MutableInt()).value += resultEntry.getValue();
+      while ((remainingAmount = targetItem.item.getAmount()) > 0) {
+        int newAmount;
 
-        int newAmount = targetItem.item.getAmount() - targetEntry.inputAmount;
+        // Need to scale down the result-amounts, if applicable
+        if (remainingAmount < targetEntry.inputAmount) {
+          if (!argsAndFlags.flags().contains(CommandFlag.ACCEPT_REDUCED))
+            break;
 
-        targetItem.item.setAmount(newAmount);
+          var scalingFactor = (double) remainingAmount / targetEntry.inputAmount;
+
+          // Refuse to uncraft items which would not yield any results at all
+          if (targetEntry.results.values().stream().allMatch(amount -> Math.floor(amount * scalingFactor) == 0))
+            break;
+
+          for (var resultEntry : targetEntry.results.entrySet()) {
+            var resultAmount = (int) Math.floor(resultEntry.getValue() * scalingFactor);
+
+            if (resultAmount > 0)
+              itemsToAdd.computeIfAbsent(resultEntry.getKey(), k -> new MutableInt()).value += resultAmount;
+          }
+
+          newAmount = 0;
+          ++reducedUnitsUnCraftCounter;
+        }
+
+        // Can still reduce by whole units
+        else {
+          for (var resultEntry : targetEntry.results.entrySet())
+            itemsToAdd.computeIfAbsent(resultEntry.getKey(), k -> new MutableInt()).value += resultEntry.getValue();
+
+          newAmount = remainingAmount - targetEntry.inputAmount;
+          ++wholeUnitsUnCraftCounter;
+        }
 
         if (newAmount <= 0) {
+          targetItem.item.setAmount(0);
           inventory.setItem(targetItem.slot, null);
-          break;
+          continue;
         }
+
+        targetItem.item.setAmount(newAmount);
       }
     }
 
-    if (unCraftCounter == 0) {
+    if (wholeUnitsUnCraftCounter == 0 && reducedUnitsUnCraftCounter == 0) {
       sender.sendMessage(
         plugin.accessConfigValue("unCraft.chat.notEnoughItems")
           .replace("{required_amount}", String.valueOf(targetEntry.inputAmount))
@@ -305,10 +332,24 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       return true;
     }
 
+    String message;
+
+    if (targetEntry.inputAmount == 1)
+      message = plugin.accessConfigValue("unCraft.chat.successfulUnCraftUnitOne");
+    else {
+      if (wholeUnitsUnCraftCounter == 0)
+        message = plugin.accessConfigValue("unCraft.chat.successfulUnCraftUnitManyNoWholeAndReduced");
+      else if (reducedUnitsUnCraftCounter == 0)
+        message = plugin.accessConfigValue("unCraft.chat.successfulUnCraftUnitManyWholeAndNoReduced");
+      else
+        message = plugin.accessConfigValue("unCraft.chat.successfulUnCraftUnitManyWholeAndReduced");
+    }
+
     sender.sendMessage(
-      plugin.accessConfigValue(targetEntry.inputAmount == 1 ? "unCraft.chat.successfulUnCraftUnitOne" : "unCraft.chat.successfulUnCraftUnitMany")
+      message
         .replace("{uncrafted_item}", typeNameResolver.resolve(player, heldType))
-        .replace("{uncraft_count}", String.valueOf(unCraftCounter))
+        .replace("{whole_units_uncraft_count}", String.valueOf(wholeUnitsUnCraftCounter))
+        .replace("{reduced_units_uncraft_count}", String.valueOf(reducedUnitsUnCraftCounter))
         .replace("{results}", generateResultsString(player, itemsToAdd.keySet(), k -> itemsToAdd.get(k).value))
         .replace("{uncraft_unit}", String.valueOf(targetEntry.inputAmount))
     );
@@ -515,7 +556,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       logger.log(Level.SEVERE, "An error occurred while trying to load " + unCraftRecipesFile, e);
     }
 
-    logger.info("Loaded " + loadedCounter + " uncraft-recipes, of which " + excludedCounter + " were excluded (making for " + (loadedCounter - excludedCounter) + " active recipes), from the file!");
+    logger.info("Loaded " + loadedCounter + " uncraft-recipes, of which " + excludedCounter + " were excluded (making for " + (loadedCounter - excludedCounter) + " active recipes)");
   }
 
   private void handleRecipe(@NotNull Recipe recipe, Map<Material, List<UnCraftEntry>> outputBuckets) {
@@ -693,7 +734,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       logger.log(Level.SEVERE, "Could not generate the uncraft-recipes template-file", e);
     }
 
-    logger.info("Created uncraft-recipes template-file.");
+    logger.info("Created uncraft-recipes template-file");
   }
 
   private MaterialExtractionResult tryExtractMaterialFromItem(ItemStack item) {
