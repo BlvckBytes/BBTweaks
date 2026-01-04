@@ -464,6 +464,11 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       return;
     }
 
+    // As far as I know, exact choices represent choices which work via ItemStack#isSimilar and thus
+    // may require name, lore, enchantments and other fancy properties; we will never support those.
+    if (choice instanceof RecipeChoice.ExactChoice)
+      throw new SkipRecipeException();
+
     throw new InvalidRecipeException("Encountered choice-type of " + choice.getClass());
   }
 
@@ -685,7 +690,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         handleRecipe(recipe, localBuckets);
       } catch (InvalidRecipeException e) {
         logger.warning("Skipping invalid recipe, reason: " + e.reason + ", recipe: " + recipe);
-      }
+      } catch (SkipRecipeException ignored) {}
     }
 
     for (var additionalRecipe : additionalRecipes) {
