@@ -35,6 +35,32 @@ public class UnCraftEntry {
     this.minRequiredAmount = _minRequiredAmount;
   }
 
+  public List<SignEncodedResultEntry> getNonZeroResults() {
+    return makeScaledNonZeroResults(1);
+  }
+
+  public List<SignEncodedResultEntry> getScaledNonZeroResults(int providedAmount) {
+    return makeScaledNonZeroResults((double) providedAmount / inputAmount);
+  }
+
+  private List<SignEncodedResultEntry> makeScaledNonZeroResults(double scalingFactor) {
+    var entries = new ArrayList<SignEncodedResultEntry>();
+
+    for (var resultEntry : results.entrySet()) {
+      var resultType = resultEntry.getKey();
+      var resultAmount = (int) Math.floor(resultEntry.getValue() * scalingFactor);
+
+      if (resultAmount > 0) {
+        if (subtractedResults.contains(resultType))
+          resultAmount *= -1;
+
+        entries.add(new SignEncodedResultEntry(resultType, resultAmount));
+      }
+    }
+
+    return entries;
+  }
+
   public boolean matchesResultTypes(UnCraftEntry other) {
     return results.keySet().equals(other.results.keySet());
   }

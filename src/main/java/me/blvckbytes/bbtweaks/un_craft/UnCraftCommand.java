@@ -45,9 +45,6 @@ import java.util.stream.Collectors;
 
 public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
-  // TODO: Subtraction rules, which the user has to accept with `-s` in order to retrieve
-  //       the remaining results of the uncraft-input; example: colored terracotta -> terracotta (no dye)
-
   record MaterialExtractionResult(@Nullable Material material, String absenceReason) {}
   record ItemAndSlot(ItemStack item, int slot) {}
 
@@ -296,48 +293,73 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       return true;
     }
 
-    for (var targetItem : targetItems) {
+    /*
+      TODO: Uncrafting many stacks with -ra is a less than ideal, seeing how we could collect those single piece
+            items to provide better results automatically, although it may be hard to depict with this algorithm.
+
+      [UC] Das Item Birch Fence wurde 168x je 3 Stück und 8x reduziert (1 Stück, 1 Stück, 1 Stück,
+      1 Stück, 1 Stück, 1 Stück, 1 Stück, 1 Stück) in insgesamt 336x Stick, 680x Birch Planks zurückentwickelt!
+     */
+
+    // Simulate the remaining space of the inventory while accumulating results, since we're not
+    // immediately adding and thus receive no feedback regarding dropped items. The goal is to drop
+    // no items at all, because it can create needless lag - especially if abused wilfully.
+    var spaceSimulator = new SpaceSimulator(player.getInventory(), item -> tryExtractMaterialFromItem(item).material);
+
+    itemLoop: for (var targetItem : targetItems) {
       int remainingAmount;
 
       while ((remainingAmount = targetItem.item.getAmount()) > 0) {
+        var requiresScaling = remainingAmount < targetEntry.inputAmount;
+
         int newAmount;
+        List<SignEncodedResultEntry> resultEntries;
 
         // Need to scale down the result-amounts, if applicable
-        if (remainingAmount < targetEntry.inputAmount) {
+        if (requiresScaling) {
           if (!acceptReduced)
             break;
-
-          var scalingFactor = (double) remainingAmount / targetEntry.inputAmount;
 
           if (remainingAmount < targetEntry.minRequiredAmount)
             break;
 
-          for (var resultEntry : targetEntry.results.entrySet()) {
-            var resultType = resultEntry.getKey();
-            var resultAmount = (int) Math.floor(resultEntry.getValue() * scalingFactor);
-            var targetMap = targetEntry.subtractedResults.contains(resultType) ? subtractedItems : itemsToAdd;
-
-            if (resultAmount > 0)
-              targetMap.computeIfAbsent(resultType, k -> new MutableInt()).value += resultAmount;
-          }
-
+          resultEntries = targetEntry.getScaledNonZeroResults(remainingAmount);
           newAmount = 0;
-          reducedUnitsUnCraftAmounts.add(remainingAmount);
         }
 
-        // Can still reduce by whole units
+        // Can still uncraft by whole units
         else {
-          for (var resultEntry : targetEntry.results.entrySet()) {
-            var resultType = resultEntry.getKey();
-            var targetMap = targetEntry.subtractedResults.contains(resultType) ? subtractedItems : itemsToAdd;
-            targetMap.computeIfAbsent(resultType, k -> new MutableInt()).value += resultEntry.getValue();
-          }
-
+          resultEntries = targetEntry.getNonZeroResults();
           newAmount = remainingAmount - targetEntry.inputAmount;
-          ++wholeUnitsUnCraftCounter;
         }
 
-        if (newAmount <= 0) {
+        spaceSimulator.takeFromItem(targetItem.slot, remainingAmount - newAmount);
+
+        // Check whether we can still fit all results before actually adding them to the accumulator,
+        // making uncrafting items behave like an atomic transaction.
+        resultEntries.forEach(entry -> {
+          if (entry.amount() > 0)
+            spaceSimulator.addItem(entry.material(), entry.amount());
+        });
+
+        if (spaceSimulator.didDropItems())
+          break itemLoop;
+
+        // Now add to the accumulators, seeing how we're still within limits.
+        resultEntries.forEach(entry -> {
+          if (entry.amount() < 0)
+            subtractedItems.computeIfAbsent(entry.material(), k -> new MutableInt()).value += entry.amount() * -1;
+          else
+            itemsToAdd.computeIfAbsent(entry.material(), k -> new MutableInt()).value += entry.amount();
+        });
+
+        // Also only increment counters and add to trackers at this point, now that it actually went through.
+        if (requiresScaling)
+          reducedUnitsUnCraftAmounts.add(remainingAmount);
+        else
+          ++wholeUnitsUnCraftCounter;
+
+        if (newAmount == 0) {
           targetItem.item.setAmount(0);
           inventory.setItem(targetItem.slot, null);
           continue;
@@ -348,6 +370,11 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     }
 
     if (wholeUnitsUnCraftCounter == 0 && reducedUnitsUnCraftAmounts.isEmpty()) {
+      if (spaceSimulator.didDropItems()) {
+        sender.sendMessage(plugin.accessConfigValue("unCraft.chat.noSpaceAtAll"));
+        return true;
+      }
+
       var requiredAmount = acceptReduced ? targetEntry.minRequiredAmount : targetEntry.inputAmount;
 
       var message = plugin.accessConfigValue(
@@ -418,6 +445,9 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
       forEachStackOfTypeCountMap(itemsToDrop, player::dropItem);
     }
+
+    if (spaceSimulator.didDropItems())
+      sender.sendMessage(plugin.accessConfigValue("unCraft.chat.noMoreSpace"));
 
     for (var additionalMessage : targetEntry.additionalMessages)
       player.sendMessage(additionalMessage);

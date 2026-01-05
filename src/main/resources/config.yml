@@ -34,6 +34,8 @@ unCraft:
     notEnoughItems: '&8[&6UC&8] &cVom Item &4{result_item} &cwerden mindestens &4{required_amount} Stück &cbenötigt; nutze &4-r&c, um Reduzierungen zu akzeptieren!'
     notEnoughItemsReduced: '&8[&6UC&8] &cVom Item &4{result_item} &cwerden mindestens &4{required_amount} Stück &cbenötigt, da sonst keine Items übrig bleiben würden!'
     droppedItems: '&8[&6UC&8] &7Dein Inventar &6ist voll&7; droppe Items: &a{items}&7!'
+    noMoreSpace: '&8[&6UC&8] &7Du hast &6keinen Platz &7mehr im Inventar; &6breche vorzeitig ab&7!'
+    noSpaceAtAll: '&8[&6UC&8] &cDu hast keinen Platz im Inventar!'
     reducedAmountsEntry: '&a{reduced_amount} Stück'
     reducedAmountsSeparator: '&7, '
     resultEntry: '&a{result_amount}x {result_item}'
