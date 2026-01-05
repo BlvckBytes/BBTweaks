@@ -104,6 +104,12 @@ unCraft:
     -
       onUnCraftedItem: true
       materials:
+        - RED_SANDSTONE
+        - SANDSTONE
+      reason: Würde das Farmen von Sand stark vereinfachen
+    -
+      onUnCraftedItem: true
+      materials:
         - NETHER_WART_BLOCK
       reason: Enthält Netherwarzen und kommt natürlich vor
     -
