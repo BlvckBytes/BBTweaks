@@ -184,7 +184,9 @@ unCraft:
       onUnCraftedItem: true
       materials:
         - DARK_PRISMARINE
-      reason: Enthält Farbstoffe sowie Scherben und kommt häufig natürlich vor
+        - PRISMARINE
+        - PRISMARINE_BRICKS
+      reason: Enthält Farbstoffe und/oder Prismarinscherben und kommt häufig natürlich vor
   resultSubtractionRules:
     -
       materialPatterns:
