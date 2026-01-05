@@ -640,19 +640,9 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
             exclusionReasons == null ? Collections.emptySet() : new HashSet<>(exclusionReasons)
           );
 
+          entry.subtractedResults.addAll(parsedRecipe.subtractedResults());
+
           additionalRecipe.ifPresent(recipe -> entry.additionalMessages.addAll(recipe.additionalMessages()));
-
-          for (var resultSubtractionRule : resultSubtractionRules) {
-            if (!resultSubtractionRule.matches(parsedRecipe.uncraftedItemType()))
-              continue;
-
-            for (var subtractedMaterial : resultSubtractionRule.subtractedMaterials) {
-              for (var uncraftResult : parsedRecipe.uncraftResults().keySet()) {
-                if (subtractedMaterial.matches(uncraftResult))
-                  entry.subtractedResults.add(uncraftResult);
-              }
-            }
-          }
 
           if (entry.subtractedResults.containsAll(entry.results.keySet()))
             throw new IllegalStateException("Recipe has no remaining results");
@@ -795,11 +785,16 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     if (isRecipeIncluded(recipeResultType, unCraftResults.keySet()))
       exclusionReasons.clear();
 
-    var targetMap = recipe instanceof StonecuttingRecipe ? stonecutterMap : unCraftRecipeMap;
-
     var entry = UnCraftEntry.tryCreateWithScaledSingleUnit(resultAmount, unCraftResults, exclusionReasons);
 
-    targetMap.addUnCraftingRecipe(recipeResultType, entry);
+    if (recipe instanceof StonecuttingRecipe) {
+      stonecutterMap.addUnCraftingRecipe(recipeResultType, entry);
+      return;
+    }
+
+    applySubtractionRules(recipeResultType, entry);
+
+    unCraftRecipeMap.addUnCraftingRecipe(recipeResultType, entry);
   }
 
   private boolean isRecipeIncluded(Material uncraftedItem, Set<Material> unCraftResults) {
@@ -892,8 +887,15 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
           resultItemEntries.sort(Comparator.comparing(a -> a.getKey().name()));
 
-          for (var resultEntry : resultItemEntries)
-            result.add(resultEntry.getValue() + " " + resultEntry.getKey());
+          for (var resultEntry : resultItemEntries) {
+            var resultType = resultEntry.getKey();
+            var resultAmount = resultEntry.getValue();
+
+            if (unCraftEntry.subtractedResults.contains(resultType))
+              resultAmount *= -1;
+
+            result.add(resultAmount + " " + resultType);
+          }
 
           var recipeLine = unCraftEntry.inputAmount + " " + entry.getKey() + " -> " + result;
 
@@ -1069,6 +1071,20 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         output.add(mapper.apply(temporarySection));
       } catch (Throwable e) {
         logger.log(Level.SEVERE, "Could not parse the #" + entryNumber + " entry of " + path, e);
+      }
+    }
+  }
+
+  private void applySubtractionRules(Material recipeResultType, UnCraftEntry entry) {
+    for (var resultSubtractionRule : resultSubtractionRules) {
+      if (!resultSubtractionRule.matches(recipeResultType))
+        continue;
+
+      for (var subtractedMaterial : resultSubtractionRule.subtractedMaterials) {
+        for (var uncraftResult : entry.results.keySet()) {
+          if (subtractedMaterial.matches(uncraftResult))
+            entry.subtractedResults.add(uncraftResult);
+        }
       }
     }
   }

@@ -4,13 +4,15 @@ import org.bukkit.Material;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 
 public class RecipeSyntax {
 
   // The recipes-file takes one recipe per line, with blank lines simply being ignored.
   // A line is of the following syntax:
-  // <amount> <input-type> -> <amount> <output-type> [, <amount> <output-type>]
+  // <amount> <input-type> -> [-]<amount> <output-type> [, [-]<amount> <output-type>]
+  // Where negative amounts mark subtracted (excluded) results.
 
   public static ParsedRecipe tryParseRecipe(String line) {
     var tokens = tokenizeRecipeLine(line);
@@ -47,6 +49,7 @@ public class RecipeSyntax {
       throw new IllegalStateException("Expected arrow-operator after input-description: ->");
 
     var results = new HashMap<Material, Integer>();
+    var subtractedResults = new HashSet<Material>();
 
     for (var tokenIndex = 3; tokenIndex < tokens.size(); ++tokenIndex) {
       if (tokenIndex != 3) {
@@ -66,8 +69,8 @@ public class RecipeSyntax {
         throw new IllegalStateException("Malformed output-amount: " + tokens.get(tokenIndex));
       }
 
-      if (outputAmount <= 0)
-        throw new IllegalStateException("Output-amount cannot be less than or equal to zero");
+      if (outputAmount == 0)
+        throw new IllegalStateException("Output-amount cannot be equal to zero");
 
       if (tokenIndex == tokens.size() - 1)
         throw new IllegalStateException("Line cannot end with an amount - missing corresponding type");
@@ -80,13 +83,16 @@ public class RecipeSyntax {
         throw new IllegalStateException("Malformed output-type: " + tokens.get(tokenIndex + 1));
       }
 
-      if (results.put(outputMaterial, outputAmount) != null)
+      if (results.put(outputMaterial, Math.abs(outputAmount)) != null)
         throw new IllegalStateException("Duplicate output-material: " + outputMaterial);
+
+      if (outputAmount < 0)
+        subtractedResults.add(outputMaterial);
 
       ++tokenIndex;
     }
 
-    return new ParsedRecipe(inputMaterial, inputAmount, results);
+    return new ParsedRecipe(inputMaterial, inputAmount, results, subtractedResults);
   }
 
   private static List<String> tokenizeRecipeLine(String line) {
