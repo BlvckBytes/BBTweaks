@@ -293,24 +293,49 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       return true;
     }
 
-    /*
-      TODO: Uncrafting many stacks with -ra is a less than ideal, seeing how we could collect those single piece
-            items to provide better results automatically, although it may be hard to depict with this algorithm.
-
-      [UC] Das Item Birch Fence wurde 168x je 3 Stück und 8x reduziert (1 Stück, 1 Stück, 1 Stück,
-      1 Stück, 1 Stück, 1 Stück, 1 Stück, 1 Stück) in insgesamt 336x Stick, 680x Birch Planks zurückentwickelt!
-     */
-
     // Simulate the remaining space of the inventory while accumulating results, since we're not
     // immediately adding and thus receive no feedback regarding dropped items. The goal is to drop
     // no items at all, because it can create needless lag - especially if abused wilfully.
     var spaceSimulator = new SpaceSimulator(player.getInventory(), item -> tryExtractMaterialFromItem(item).material);
 
-    itemLoop: for (var targetItem : targetItems) {
-      int remainingAmount;
+    itemLoop: for (var currentIndex = 0; currentIndex < targetItems.size(); ++currentIndex) {
+      var currentItem = targetItems.get(currentIndex);
 
-      while ((remainingAmount = targetItem.item.getAmount()) > 0) {
-        var requiresScaling = remainingAmount < targetEntry.inputAmount;
+      while (currentItem.item.getAmount() > 0) {
+        var requiresScaling = currentItem.item.getAmount() < targetEntry.inputAmount;
+
+        // Try to move over as much as fits onto currentItem from subsequent items in
+        // order to maximize the output by avoiding scaling until the very end.
+        if (requiresScaling) {
+          for (var nextIndex = currentIndex + 1; nextIndex < targetItems.size(); ++nextIndex) {
+            var currentAmount = currentItem.item.getAmount();
+            var remainingSpace = currentItem.item.getMaxStackSize() - currentAmount;
+
+            if (remainingSpace <= 0)
+              break;
+
+            var nextItem = targetItems.get(nextIndex);
+            int nextAmount = nextItem.item.getAmount();
+
+            if (nextAmount <= 0)
+              continue;
+
+            var movedAmount = Math.min(remainingSpace, nextAmount);
+
+            currentItem.item.setAmount(currentAmount + movedAmount);
+            spaceSimulator.setAmount(currentIndex, currentAmount + movedAmount);
+
+            nextItem.item.setAmount(nextAmount - movedAmount);
+            spaceSimulator.setAmount(nextIndex, nextAmount - movedAmount);
+
+            if (movedAmount == nextAmount)
+              inventory.setItem(nextItem.slot, null);
+          }
+
+          requiresScaling = currentItem.item.getAmount() < targetEntry.inputAmount;
+        }
+
+        var remainingAmount = currentItem.item.getAmount();
 
         int newAmount;
         List<SignEncodedResultEntry> resultEntries;
@@ -333,7 +358,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
           newAmount = remainingAmount - targetEntry.inputAmount;
         }
 
-        spaceSimulator.takeFromItem(targetItem.slot, remainingAmount - newAmount);
+        spaceSimulator.takeFromItem(currentItem.slot, remainingAmount - newAmount);
 
         // Check whether we can still fit all results before actually adding them to the accumulator,
         // making uncrafting items behave like an atomic transaction.
@@ -359,13 +384,10 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         else
           ++wholeUnitsUnCraftCounter;
 
-        if (newAmount == 0) {
-          targetItem.item.setAmount(0);
-          inventory.setItem(targetItem.slot, null);
-          continue;
-        }
+        currentItem.item.setAmount(newAmount);
 
-        targetItem.item.setAmount(newAmount);
+        if (newAmount == 0)
+          inventory.setItem(currentItem.slot, null);
       }
     }
 
