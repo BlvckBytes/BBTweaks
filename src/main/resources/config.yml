@@ -21,6 +21,13 @@ chat:
   getUuidResultHover: '&aKlicke, um die UUID zu kopieren!'
   backCommandMessage: '&6Du kehrst zur letzten Position zurück.'
 
+ping:
+  noOtherPermission: '&7[&6Ping&7] &cDir fehlen die Zugriffsrechte, um den Ping anderer Spieler einzusehen!'
+  noTargetConsoleSender: '&7[&6Ping&7] &cDieser Befehl ist ohne explizitem Namen nur für Spieler verfügbar!'
+  targetNotOnline: '&7[&6Ping&7] &cDer Spieler &4{name} &cist nicht online!'
+  pingSelf: '&7[&6Ping&7] &7Dein Ping: &a{ping}ms'
+  pingOther: '&7[&6Ping&7] &a{name}''s &7Ping: &a{ping}ms'
+
 unCraft:
   chat:
     inGameOnly: '&8[&6UC&8] &cDieser Befehl ist nur für Spieler verfügbar!'

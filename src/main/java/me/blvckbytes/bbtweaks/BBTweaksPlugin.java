@@ -79,6 +79,13 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     var unCraftCommand = new UnCraftCommand(this, typeNameResolver);
 
     Objects.requireNonNull(getCommand("uncraft")).setExecutor(unCraftCommand);
+
+    var pingCommand = Objects.requireNonNull(getCommand("ping"));
+    var pingExecutor = new PingCommand(this, pingCommand);
+
+    getServer().getPluginManager().registerEvents(pingExecutor, this);
+
+    pingCommand.setExecutor(pingExecutor);
   }
 
   @Override
