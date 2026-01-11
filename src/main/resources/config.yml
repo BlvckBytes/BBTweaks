@@ -135,20 +135,15 @@ unCraft:
         - '^.*_DYE$'
       reason: Farbstoffe haben oft keinen klaren Ursprung und würden unfaire Items erzeugen
     -
-      onUnCraftedItem: true
+      onUnCraftResult: true
       materialPatterns:
         - '^WAXED_.*$'
-      reason: Das Wachs von gewachsten Items ist nicht zurückgewinnbar
+      reason: Gewachste Items werden niemals ausgegeben.
     -
       onUnCraftedItem: true
       materialIsFlags:
         - isEdible
       reason: Nahrung enthält Items, die gefarmt werden müssten und kommt natürlich vor
-    -
-      onUnCraftResult: true
-      materialPatterns:
-        - '^WAXED_.*$'
-      reason: Gewachste Kupferblöcke können zu Kupferbarren gecrafted werden - die Umkehr davon ist unsinnig
     -
       # Because that makes absolutely no sense in reverse - what would the map be filled with?
       onUnCraftResult: true
@@ -209,6 +204,13 @@ unCraft:
         -
           materialPatterns:
             - '^.*_DYE$'
+    -
+      materialPatterns:
+        - '^WAXED_.*$'
+      subtractedMaterials:
+        -
+          materials:
+            - HONEYCOMB
   typeInclusionRules:
     -
       onUnCraftedItem: true
