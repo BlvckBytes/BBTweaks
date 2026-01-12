@@ -31,6 +31,7 @@ import java.util.logging.Logger;
 public class FurnaceLevelDisplay implements Listener {
 
   private final BBTweaksPlugin plugin;
+  private final @Nullable McMMOIntegration mcMMOIntegration;
   private final Logger logger;
 
   private final Map<Class<? extends BlockState>, RecipesUsedAccessor> accessorByType;
@@ -41,8 +42,9 @@ public class FurnaceLevelDisplay implements Listener {
   private final MethodHandle resourceKeyGetIdentifier;
   private final MethodHandle identifierGetPath;
 
-  public FurnaceLevelDisplay(BBTweaksPlugin plugin) throws Exception {
+  public FurnaceLevelDisplay(BBTweaksPlugin plugin, McMMOIntegration mcMMOIntegration) throws Exception {
     this.plugin = plugin;
+    this.mcMMOIntegration = mcMMOIntegration;
     this.logger = plugin.getLogger();
 
     this.accessorByType = new HashMap<>();
@@ -272,6 +274,12 @@ public class FurnaceLevelDisplay implements Listener {
       //noinspection deprecation
       player.sendActionBar(plugin.accessConfigValue("furnaceLevelDisplay.noLevelsStored"));
       return;
+    }
+
+    if (mcMMOIntegration != null) {
+      var wholePart = (int) Math.floor(totalExperience);
+      var fractionalPart = totalExperience - wholePart;
+      totalExperience = mcMMOIntegration.vanillaXPBoost(player, wholePart) + fractionalPart;
     }
 
     var levelBefore = player.getLevel();

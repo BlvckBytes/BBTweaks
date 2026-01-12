@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks;
 
+import com.gmail.nossr50.util.player.UserManager;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
+import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.util.ColorUtil;
 import me.blvckbytes.bbtweaks.util.TypeNameResolver;
@@ -89,7 +91,22 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       pingCommand.setExecutor(pingExecutor);
 
-      var furnaceLevelDisplay = new FurnaceLevelDisplay(this);
+      McMMOIntegration mcMMOIntegration = null;
+
+      if (Bukkit.getPluginManager().isPluginEnabled("mcMMO")) {
+        mcMMOIntegration = ((player, experience) -> {
+          var internalPlayer = UserManager.getPlayer(player);
+
+          if (internalPlayer == null)
+            return experience;
+
+          return internalPlayer.getSmeltingManager().vanillaXPBoost(experience);
+        });
+
+        getLogger().info("Integrated with mcMMO as to boost XP");
+      }
+
+      var furnaceLevelDisplay = new FurnaceLevelDisplay(this, mcMMOIntegration);
 
       getServer().getPluginManager().registerEvents(furnaceLevelDisplay, this);
 
