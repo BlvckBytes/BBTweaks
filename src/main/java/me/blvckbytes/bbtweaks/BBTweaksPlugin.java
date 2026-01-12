@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks;
 
+import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.util.ColorUtil;
 import me.blvckbytes.bbtweaks.util.TypeNameResolver;
@@ -43,49 +44,68 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
   @Override
   public void onEnable() {
-    Objects.requireNonNull(getCommand("bbtweaks")).setExecutor(this);
+    try {
+      Objects.requireNonNull(getCommand("bbtweaks")).setExecutor(this);
 
-    saveDefaultConfig();
-    configuration = loadConfiguration();
+      saveDefaultConfig();
+      configuration = loadConfiguration();
 
-    new ActionBarSleepMessage(this);
+      new ActionBarSleepMessage(this);
 
-    rdBreakTool = new RDBreakTool(this);
+      rdBreakTool = new RDBreakTool(this);
 
-    getServer().getPluginManager().registerEvents(rdBreakTool, this);
+      getServer().getPluginManager().registerEvents(rdBreakTool, this);
 
-    getServer().getPluginManager().registerEvents(new LavaSponge(), this);
+      getServer().getPluginManager().registerEvents(new LavaSponge(), this);
 
-    var getUuidCommand = new GetUuidCommand(this);
+      var getUuidCommand = new GetUuidCommand(this);
 
-    Objects.requireNonNull(getCommand("getuuid")).setExecutor(getUuidCommand);
+      Objects.requireNonNull(getCommand("getuuid")).setExecutor(getUuidCommand);
 
-    getServer().getPluginManager().registerEvents(getUuidCommand, this);
+      getServer().getPluginManager().registerEvents(getUuidCommand, this);
 
-    lastLocationStore = new LastLocationStore(this);
+      lastLocationStore = new LastLocationStore(this);
 
-    Bukkit.getScheduler().runTaskTimerAsynchronously(this, lastLocationStore::save, 20L * 60, 20L * 60);
+      Bukkit.getScheduler().runTaskTimerAsynchronously(this, lastLocationStore::save, 20L * 60, 20L * 60);
 
-    var backOverrideCommand = new BackOverrideCommand(this, lastLocationStore);
+      var backOverrideCommand = new BackOverrideCommand(this, lastLocationStore);
 
-    Objects.requireNonNull(getCommand("back")).setExecutor(backOverrideCommand);
+      Objects.requireNonNull(getCommand("back")).setExecutor(backOverrideCommand);
 
-    getServer().getPluginManager().registerEvents(backOverrideCommand, this);
+      getServer().getPluginManager().registerEvents(backOverrideCommand, this);
 
-    new AdditionalRecipes(this);
+      new AdditionalRecipes(this);
 
-    var typeNameResolver = TypeNameResolver.load(getLogger());
+      var typeNameResolver = TypeNameResolver.load(getLogger());
 
-    var unCraftCommand = new UnCraftCommand(this, typeNameResolver);
+      var unCraftCommand = new UnCraftCommand(this, typeNameResolver);
 
-    Objects.requireNonNull(getCommand("uncraft")).setExecutor(unCraftCommand);
+      Objects.requireNonNull(getCommand("uncraft")).setExecutor(unCraftCommand);
 
-    var pingCommand = Objects.requireNonNull(getCommand("ping"));
-    var pingExecutor = new PingCommand(this, pingCommand);
+      var pingCommand = Objects.requireNonNull(getCommand("ping"));
+      var pingExecutor = new PingCommand(this, pingCommand);
 
-    getServer().getPluginManager().registerEvents(pingExecutor, this);
+      getServer().getPluginManager().registerEvents(pingExecutor, this);
 
-    pingCommand.setExecutor(pingExecutor);
+      pingCommand.setExecutor(pingExecutor);
+
+      var furnaceLevelDisplay = new FurnaceLevelDisplay(this);
+
+      getServer().getPluginManager().registerEvents(furnaceLevelDisplay, this);
+
+      Bukkit.getScheduler().runTaskLater(this, () -> {
+        if (!furnaceLevelDisplay.setUp()) {
+          getLogger().severe("Failed trying to set up furnace-level displays; disabling!");
+          Bukkit.getPluginManager().disablePlugin(this);
+          return;
+        }
+
+        getLogger().info("Successfully set up furnace-level displays!");
+      }, 10L);
+    } catch (Throwable e) {
+      getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
+      Bukkit.getPluginManager().disablePlugin(this);
+    }
   }
 
   @Override
