@@ -30,26 +30,30 @@ import java.util.logging.Logger;
 
 public class FurnaceLevelDisplay implements Listener {
 
+  private static class PlayerData {
+    long lastSendStamp;
+    long lastFurnaceBlockId;
+  }
+
   private final BBTweaksPlugin plugin;
   private final @Nullable McMMOIntegration mcMMOIntegration;
   private final Logger logger;
 
   private final Map<Class<? extends BlockState>, RecipesUsedAccessor> accessorByType;
-  private final Object2LongMap<UUID> lastSendStampByPlayerId;
+  private final Map<UUID, PlayerData> dataByPlayerId;
   private final Object2FloatMap<String> recipeExperienceByKey;
   private final CacheByPosition<Reference2IntMap<?>> recipesUsedCache;
 
   private final MethodHandle resourceKeyGetIdentifier;
   private final MethodHandle identifierGetPath;
 
-  public FurnaceLevelDisplay(BBTweaksPlugin plugin, McMMOIntegration mcMMOIntegration) throws Exception {
+  public FurnaceLevelDisplay(BBTweaksPlugin plugin, @Nullable McMMOIntegration mcMMOIntegration) throws Exception {
     this.plugin = plugin;
     this.mcMMOIntegration = mcMMOIntegration;
     this.logger = plugin.getLogger();
 
     this.accessorByType = new HashMap<>();
-    this.lastSendStampByPlayerId = new Object2LongOpenHashMap<>();
-    this.lastSendStampByPlayerId.defaultReturnValue(-1);
+    this.dataByPlayerId = new HashMap<>();
     this.recipeExperienceByKey = new Object2FloatOpenHashMap<>();
     this.recipeExperienceByKey.defaultReturnValue(-1);
     this.recipesUsedCache = new CacheByPosition<>();
@@ -65,12 +69,12 @@ public class FurnaceLevelDisplay implements Listener {
     // String net.minecraft.resources.Identifier#getPath
     identifierGetPath = publicLookup.findVirtual(identifierClass, "getPath", MethodType.methodType(String.class));
 
-    Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::handleDisplays, 0L, 2L);
+    Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::handleDisplays, 0L, 1L);
   }
 
   @EventHandler
   public void onQuit(PlayerQuitEvent event) {
-    lastSendStampByPlayerId.removeLong(event.getPlayer().getUniqueId());
+    dataByPlayerId.remove(event.getPlayer().getUniqueId());
   }
 
   @EventHandler
@@ -201,23 +205,27 @@ public class FurnaceLevelDisplay implements Listener {
   }
 
   private void handleDisplays() {
-    for (Player player : Bukkit.getOnlinePlayers()) {
+    for (var player : Bukkit.getOnlinePlayers()) {
       var targetBlock = getTargetedFurnaceBlock(player);
       var playerId = player.getUniqueId();
-      var lastSend = lastSendStampByPlayerId.getLong(playerId);
+      var playerData = dataByPlayerId.get(playerId);
 
       if (targetBlock == null) {
         // Immediately clear out the action-bar
-        if (System.currentTimeMillis() - lastSend < 3000) {
+        if (playerData != null && System.currentTimeMillis() - playerData.lastSendStamp < 3000) {
+          playerData.lastSendStamp = 0;
+          playerData.lastFurnaceBlockId = 0;
+
           player.sendActionBar(Component.text());
-          lastSendStampByPlayerId.removeLong(playerId);
         }
 
         continue;
       }
 
-      // Send roughly about twice a second
-      if (lastSend > 0 && System.currentTimeMillis() - lastSend < 500)
+      var blockId = CacheByPosition.computeWorldlessBlockId(targetBlock.getX(), targetBlock.getY(), targetBlock.getZ());
+
+      // Send roughly about twice a second, but allow for instant redraw if the player's looking at a different furnace
+      if (playerData != null && playerData.lastFurnaceBlockId == blockId && System.currentTimeMillis() - playerData.lastSendStamp < 500)
         continue;
 
       var recipesUsed = recipesUsedCache.computeIfAbsent(
@@ -237,7 +245,14 @@ public class FurnaceLevelDisplay implements Listener {
       if (recipesUsed == null)
         continue;
 
-      lastSendStampByPlayerId.put(playerId, System.currentTimeMillis());
+      if (playerData == null) {
+        playerData = new PlayerData();
+        dataByPlayerId.put(playerId, playerData);
+      }
+
+      playerData.lastSendStamp = System.currentTimeMillis();
+      playerData.lastFurnaceBlockId = blockId;
+
       displayForPlayer(player, recipesUsed);
     }
   }
