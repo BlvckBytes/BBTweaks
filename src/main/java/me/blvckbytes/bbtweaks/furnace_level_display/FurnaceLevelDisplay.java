@@ -297,6 +297,8 @@ public class FurnaceLevelDisplay implements Listener {
       totalExperience = mcMMOIntegration.vanillaXPBoost(player, wholePart) + fractionalPart;
     }
 
+    var formattedTotalExperience = String.format("%.1f", totalExperience);
+
     var levelBefore = player.getLevel();
     var levelAfter = levelBefore;
 
@@ -322,6 +324,7 @@ public class FurnaceLevelDisplay implements Listener {
         .replace("{old_level}", String.valueOf(levelBefore))
         .replace("{new_level}", String.valueOf(levelAfter))
         .replace("{next_level_progress}", formattedProgress)
+        .replace("{stored_experience}", formattedTotalExperience)
     );
   }
 
