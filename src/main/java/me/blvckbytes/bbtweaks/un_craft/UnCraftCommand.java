@@ -43,6 +43,13 @@ import java.util.stream.Collectors;
 // input. When updating the server-version, new entries may appear - these must also be
 // merged in manually, as to ensure that no unwanted recipes slide in unknowingly.
 
+// This system is not perfect, but it already generates 90%+ of the correct entries. What
+// must be taken care of manually are, for example, some of the planks, seeing how they
+// may have multiple input-types (stem, log, stripped-log, hyphae, etc.) which then falsely
+// triggers the preferred-material rule, and thus hands out the wrong wood-type (oak). Maybe
+// I can think about a better solution in the future, but for now, I take care of the few
+// entries manually.
+
 public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
   record MaterialExtractionResult(@Nullable Material material, String absenceReason) {}

@@ -181,11 +181,6 @@ unCraft:
         - '^.*_WOOD$'
       reason: Holz (Stamm mit Rinde an allen Seiten) wird nicht ausgegeben
     -
-      onUnCraftResult: true
-      materialPatterns:
-        - '^STRIPPED_.*$'
-      reason: Entrindete Stämme werden nicht ausgegeben
-    -
       onUnCraftedItem: true
       onUnCraftResult: true
       materials:
@@ -216,12 +211,6 @@ unCraft:
           materials:
             - HONEYCOMB
   typeInclusionRules:
-    -
-      onUnCraftedItem: true
-      # These are only craftable with stripped logs/stems, which we normally do not hand out; let's make an exception.
-      materialPatterns:
-        - '^.*_HANGING_SIGN$'
-        - '^.*_SHELF$'
   recipeExclusionRules:
     -
       # These are already deconstruction-recipes; inverting them again makes no sense.
