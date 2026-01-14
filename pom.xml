@@ -97,6 +97,7 @@
                             <include>me.blvckbytes:SyllablesMatcher</include>
                             <include>at.blvckbytes:ComponentMarkup</include>
                             <include>at.blvckbytes:CMMapper</include>
+                            <include>com.github.cryptomorin:XSeries</include>
                         </includes>
                     </artifactSet>
 
@@ -114,6 +115,11 @@
                         <relocation>
                             <pattern>at.blvckbytes.cm_mapper</pattern>
                             <shadedPattern>me.blvckbytes.bbtweaks.cm_mapper</shadedPattern>
+                        </relocation>
+
+                        <relocation>
+                            <pattern>com.cryptomorin.xseries</pattern>
+                            <shadedPattern>me.blvckbytes.bbtweaks.com.cryptomorin.xseries</shadedPattern>
                         </relocation>
                     </relocations>
 

@@ -27,6 +27,21 @@ ping:
   pingSelf: '{lut.ping_prefix} <&7>Dein Ping: <&a>{ping}ms'
   pingOther: '{lut.ping_prefix} <&a>{name}''s <&7>Ping: <&a>{ping}ms'
 
+additionalRecipes:
+  shapedRecipes:
+    light-blocks:
+      result: LIGHT
+      amount: 1
+      shape:
+        - AAA
+        - ABA
+        - AAA
+      ingredients:
+        A:
+          type: GLASS_PANE
+        B:
+          type: TORCH
+
 cLut:
   prefix: '<&7>[<&5>BBTweaks<&7>]'
   ping_prefix: '<&7>[<&6>Ping<&7>]'

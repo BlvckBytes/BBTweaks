@@ -4,13 +4,14 @@ import at.blvckbytes.cm_mapper.ConfigHandler;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import com.gmail.nossr50.util.player.UserManager;
 import me.blvckbytes.bbtweaks.ab_sleep.ActionBarSleepMessage;
+import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipesSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
 import me.blvckbytes.bbtweaks.back.LastLocationStore;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
-import me.blvckbytes.bbtweaks.recipes.AdditionalRecipes;
+import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.util.ColorUtil;
 import me.blvckbytes.bbtweaks.util.TypeNameResolver;
@@ -54,6 +55,8 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
   @Override
   public void onEnable() {
+    AdditionalRecipesSection.plugin = this;
+
     try {
       var configHandler = new ConfigHandler(this, "config");
       var config = new ConfigKeeper<>(configHandler, "config.yml", MainSection.class);
@@ -87,7 +90,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       getServer().getPluginManager().registerEvents(backOverrideCommand, this);
 
-      new AdditionalRecipes(this);
+      new AdditionalRecipes(getLogger(), config);
 
       var typeNameResolver = TypeNameResolver.load(getLogger());
 

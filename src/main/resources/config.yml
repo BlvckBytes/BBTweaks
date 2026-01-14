@@ -250,17 +250,3 @@ unCraft:
       tags:
         - ITEMS_STONE_CRAFTING_MATERIALS
       preferredMaterial: COBBLESTONE
-
-additionalShapedRecipes:
-  light-blocks:
-    result: LIGHT
-    amount: 1
-    shape:
-      - AAA
-      - ABA
-      - AAA
-    ingredients:
-      A:
-        type: GLASS_PANE
-      B:
-        type: TORCH
