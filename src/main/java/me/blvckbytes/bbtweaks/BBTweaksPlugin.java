@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks;
 
 import at.blvckbytes.cm_mapper.ConfigHandler;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import com.gmail.nossr50.util.player.UserManager;
 import me.blvckbytes.bbtweaks.ab_sleep.ActionBarSleepMessage;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipesSection;
@@ -161,52 +162,54 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
   }
 
   @Override
-  public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+  public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
     if (!sender.hasPermission("bbtweaks.command")) {
-      sender.sendMessage(accessConfigValue("chat.noCommandPermission"));
+      config.rootSection.mainCommand.noPermission.sendMessage(sender);
       return true;
     }
 
     NormalizedConstant<Action> action;
 
     if (args.length == 0 || (action = Action.matcher.matchFirst(args[0])) == null) {
-      sender.sendMessage(
-        accessConfigValue("chat.commandUsage")
-          .replace("{command_label}", label)
-          .replace("{action_list}", String.join(", ", Action.matcher.createCompletions(null)))
+      config.rootSection.mainCommand.commandUsage.sendMessage(
+        sender,
+        new InterpretationEnvironment()
+          .withVariable("command_label", label)
+          .withVariable("actions", Action.matcher.createCompletions(null))
       );
+
       return true;
     }
 
     switch (action.constant) {
       case RELOAD -> {
-        configuration = loadConfiguration();
-        configReloadListeners.forEach(Runnable::run);
         try {
           config.reload();
+          configuration = loadConfiguration();
+          configReloadListeners.forEach(Runnable::run);
+          config.rootSection.mainCommand.configReloadSuccess.sendMessage(sender);
         } catch (Exception e) {
-          sender.sendMessage("§cAn error occurred while trying to reload the CM-config; see console!");
+          config.rootSection.mainCommand.configReloadError.sendMessage(sender);
         }
-        sender.sendMessage(accessConfigValue("chat.configurationReloaded"));
         return true;
       }
 
       case RD_BREAKER -> {
         if (!(sender instanceof Player player)) {
-          sender.sendMessage("§cThis command is only available to players!");
+          config.rootSection.mainCommand.setRdBreakerPlayersOnly.sendMessage(sender);
           return false;
         }
 
         var heldItem = player.getInventory().getItemInMainHand();
 
         if (heldItem.getType().isAir()) {
-          sender.sendMessage(accessConfigValue("chat.setRdBreakerNoValidItem"));
+          config.rootSection.mainCommand.setRdBreakerNoValidItem.sendMessage(sender);
           return true;
         }
 
         rdBreakTool.modifyItemToBecomeRdBreaker(heldItem);
 
-        sender.sendMessage(accessConfigValue("chat.setRdBreakerMetadata"));
+        config.rootSection.mainCommand.setRdBreakerMetadata.sendMessage(sender);
         return true;
       }
     }
@@ -215,7 +218,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
   }
 
   @Override
-  public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
+  public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String @NotNull [] args) {
     if (!sender.hasPermission("bbtweaks.command") || args.length != 1)
       return List.of();
 

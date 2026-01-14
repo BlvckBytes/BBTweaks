@@ -14,6 +14,7 @@ import me.blvckbytes.bbtweaks.ping.PingSection;
 @CSAlways
 public class MainSection extends ConfigSection {
 
+  public MainCommandSection mainCommand;
   public ABSleepSection abSleep;
   public BackOverrideSection backOverride;
   public FurnaceLevelSection furnaceLevel;

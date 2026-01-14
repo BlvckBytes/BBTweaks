@@ -1,3 +1,15 @@
+mainCommand:
+  noPermission: '{lut.prefix} <&c>Dir fehlen die Zugriffsrechte für diesen Befehl!'
+  commandUsage: |
+    {lut.prefix} <&c>Benutzung: /{command_label} <&7>\<
+      <&e *for-action="actions" *for-separator={<&7>,<space/>}>{action}</>
+    <&7>>
+  configReloadSuccess: '{lut.prefix} <&a>Die Konfiguration wurde neu geladen.'
+  configReloadError: '{lut.prefix} <&c>Die Konfiguration konnte nicht erfolgreich neu geladen werden; siehe Konsole!'
+  setRdBreakerNoValidItem: '{lut.prefix} <&c>Du hältst kein valides Item in der Hand!'
+  setRdBreakerMetadata: '{lut.prefix} <&a>Dieses Item ist nun als RD-Breaker gekennzeichnet.'
+  setRdBreakerPlayersOnly: '{lut.prefix} <&c>Dieser Befehl ist nur Spielern zugänglich!'
+
 abSleep:
   thresholdNotYetReached: '<&a>Es sind <&2>{sleeping_count}<&a>/<&2>{threshold_count} <&a>benötigen Spielern im Bett'
   thresholdReached: '<&a>Die Nacht wird durchgeschlafen'

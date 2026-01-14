@@ -1,11 +1,3 @@
-chat:
-  noCommandPermission: '&7[&5BBTweaks&7] &cDir fehlen die Zugriffsrechte für diesen Befehl!'
-  # - {command_label}
-  commandUsage: '&7[&5BBTweaks&7] &cBenutzung: /{command_label} <{action_list}>'
-  configurationReloaded: '&7[&5BBTweaks&7] &aDie Konfiguration wurde erneut geladen.'
-  setRdBreakerNoValidItem: '&7[&5BBTweaks&7] &cDu hältst kein valides Item in der Hand!'
-  setRdBreakerMetadata: '&7[&5BBTweaks&7] &aDieses Item ist nun als RD-Breaker gekennzeichnet.'
-
 unCraft:
   chat:
     inGameOnly: '&8[&6UC&8] &cDieser Befehl ist nur für Spieler verfügbar!'
