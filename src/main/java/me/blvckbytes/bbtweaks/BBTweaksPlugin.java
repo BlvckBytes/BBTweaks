@@ -2,7 +2,6 @@ package me.blvckbytes.bbtweaks;
 
 import at.blvckbytes.cm_mapper.ConfigHandler;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
-import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import com.gmail.nossr50.util.player.UserManager;
 import me.blvckbytes.bbtweaks.ab_sleep.ActionBarSleepMessage;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipesSection;
@@ -11,24 +10,17 @@ import me.blvckbytes.bbtweaks.back.LastLocationStore;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
+import me.blvckbytes.bbtweaks.main_command.MainCommand;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.util.ColorUtil;
 import me.blvckbytes.bbtweaks.util.TypeNameResolver;
-import me.blvckbytes.syllables_matcher.EnumMatcher;
-import me.blvckbytes.syllables_matcher.MatchableEnum;
-import me.blvckbytes.syllables_matcher.NormalizedConstant;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -38,18 +30,8 @@ import java.util.logging.Level;
 
 public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCompleter {
 
-  private enum Action implements MatchableEnum {
-    RELOAD,
-    RD_BREAKER,
-    ;
-
-    static final EnumMatcher<Action> matcher = new EnumMatcher<>(values());
-  }
-
   private YamlConfiguration configuration;
-  private RDBreakTool rdBreakTool;
   private LastLocationStore lastLocationStore;
-  private ConfigKeeper<MainSection> config;
 
   private final List<Runnable> configReloadListeners = new ArrayList<>();
 
@@ -61,18 +43,24 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
     try {
       var configHandler = new ConfigHandler(this, "config");
-      config = new ConfigKeeper<>(configHandler, "config.yml", MainSection.class);
-
-      Objects.requireNonNull(getCommand("bbtweaks")).setExecutor(this);
+      var config = new ConfigKeeper<>(configHandler, "config.yml", MainSection.class);
 
       saveDefaultConfig();
       configuration = loadConfiguration();
 
       new ActionBarSleepMessage(this, config);
 
-      rdBreakTool = new RDBreakTool(this);
+      var rdBreakTool = new RDBreakTool(this);
 
       getServer().getPluginManager().registerEvents(rdBreakTool, this);
+
+      // TODO: Remove this callback as an arg as soon as everything's migrated to CMMapper
+      var mainCommandExecutor = new MainCommand(config, rdBreakTool, () -> {
+        this.configuration = loadConfiguration();
+        this.configReloadListeners.forEach(Runnable::run);
+      });
+
+      Objects.requireNonNull(getCommand("bbtweaks")).setExecutor(mainCommandExecutor);
 
       getServer().getPluginManager().registerEvents(new LavaSponge(), this);
 
@@ -161,69 +149,6 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     return configuration;
   }
 
-  @Override
-  public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-    if (!sender.hasPermission("bbtweaks.command")) {
-      config.rootSection.mainCommand.noPermission.sendMessage(sender);
-      return true;
-    }
-
-    NormalizedConstant<Action> action;
-
-    if (args.length == 0 || (action = Action.matcher.matchFirst(args[0])) == null) {
-      config.rootSection.mainCommand.commandUsage.sendMessage(
-        sender,
-        new InterpretationEnvironment()
-          .withVariable("command_label", label)
-          .withVariable("actions", Action.matcher.createCompletions(null))
-      );
-
-      return true;
-    }
-
-    switch (action.constant) {
-      case RELOAD -> {
-        try {
-          config.reload();
-          configuration = loadConfiguration();
-          configReloadListeners.forEach(Runnable::run);
-          config.rootSection.mainCommand.configReloadSuccess.sendMessage(sender);
-        } catch (Exception e) {
-          config.rootSection.mainCommand.configReloadError.sendMessage(sender);
-        }
-        return true;
-      }
-
-      case RD_BREAKER -> {
-        if (!(sender instanceof Player player)) {
-          config.rootSection.mainCommand.setRdBreakerPlayersOnly.sendMessage(sender);
-          return false;
-        }
-
-        var heldItem = player.getInventory().getItemInMainHand();
-
-        if (heldItem.getType().isAir()) {
-          config.rootSection.mainCommand.setRdBreakerNoValidItem.sendMessage(sender);
-          return true;
-        }
-
-        rdBreakTool.modifyItemToBecomeRdBreaker(heldItem);
-
-        config.rootSection.mainCommand.setRdBreakerMetadata.sendMessage(sender);
-        return true;
-      }
-    }
-
-    return true;
-  }
-
-  @Override
-  public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String @NotNull [] args) {
-    if (!sender.hasPermission("bbtweaks.command") || args.length != 1)
-      return List.of();
-
-    return Action.matcher.createCompletions(args[0]);
-  }
 
   public String accessConfigValue(String path) {
     var value = configuration.getString(path);

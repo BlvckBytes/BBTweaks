@@ -9,6 +9,7 @@ import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipesSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideSection;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
+import me.blvckbytes.bbtweaks.main_command.MainCommandSection;
 import me.blvckbytes.bbtweaks.ping.PingSection;
 
 @CSAlways

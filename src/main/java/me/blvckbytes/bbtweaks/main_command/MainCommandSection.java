@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks;
+package me.blvckbytes.bbtweaks.main_command;
 
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
