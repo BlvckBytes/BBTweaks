@@ -14,7 +14,6 @@ import me.blvckbytes.bbtweaks.main_command.MainCommand;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
-import me.blvckbytes.bbtweaks.util.ColorUtil;
 import me.blvckbytes.bbtweaks.util.TypeNameResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
@@ -84,7 +83,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       var typeNameResolver = TypeNameResolver.load(getLogger());
 
-      var unCraftCommand = new UnCraftCommand(this, typeNameResolver);
+      var unCraftCommand = new UnCraftCommand(this, config, typeNameResolver);
 
       Objects.requireNonNull(getCommand("uncraft")).setExecutor(unCraftCommand);
 
@@ -147,16 +146,6 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     }
 
     return configuration;
-  }
-
-
-  public String accessConfigValue(String path) {
-    var value = configuration.getString(path);
-
-    if (value == null)
-      return "§cUndefined config-value at " + path;
-
-    return ColorUtil.enableColors(value);
   }
 
   public YamlConfiguration getConfiguration() {

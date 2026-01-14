@@ -54,6 +54,55 @@ additionalRecipes:
         B:
           type: TORCH
 
+unCraft:
+  inGameOnly: '{lut.uc_prefix} <&c>Dieser Befehl ist nur für Spieler verfügbar!'
+  missingPermission: '{lut.uc_prefix} <&c>Dir fehlt das nötige Recht, um diesen Befehl benutzen zu können!'
+  missingPermissionAllMode: '{lut.uc_prefix} <&c>Dir fehlt das nötige Recht, um den all-Modus benutzen zu können!'
+  noItemInMainHand: '{lut.uc_prefix} <&c>Du hältst kein Item in deiner Haupthand!'
+  unsupportedItem: '{lut.uc_prefix} <&c>Das von dir gehaltene Item wird nicht unterstützt: <&4>{reason}<&c>!'
+  choicesScreen: |
+    {lut.uc_prefix} <&7>Bitte entscheide dich für ein Rezept mit <&a>/{label} \<Nummer><&7>:<br/>
+    <&7 *for-choice="choices" *for-separator={<br/>}>
+      - <&a>#{choice.number}<&7>: {choice.results}
+  invalidSelection: '{lut.uc_prefix} <&c>Ungültige Auswahl: <&4>{selection}<&c>!'
+  unacceptedSubtraction: '{lut.uc_prefix} <&7>Bitte akzeptiere zuerst die Einbehaltung von <&c>{subtracted_results} <&7>je <&c>{uncraft_unit eq 1 then "" else `{uncraft_unit} `}Stück <&7>mit <&c>-s<&7>!'
+  notEnoughItems: '{lut.uc_prefix} <&c>Vom Item <&4>{result_item} <&c>werden mindestens <&4>{required_amount} Stück <&c>benötigt; nutze <&4>-r<&c>, um Reduzierungen zu akzeptieren!'
+  notEnoughItemsReduced: '{lut.uc_prefix} <&c>Vom Item <&4>{result_item} <&c>werden mindestens <&4>{required_amount} Stück <&c>benötigt, da sonst keine Items übrig bleiben würden!'
+  droppedItems: '{lut.uc_prefix} <&7>Dein Inventar <&6>ist voll<&7>; droppe Items: <&a>{items}<&7>!'
+  noMoreSpace: '{lut.uc_prefix} <&7>Du hast <&6>keinen Platz <&7>mehr im Inventar; <&6>breche vorzeitig ab<&7>!'
+  notEnoughSpace: '{lut.uc_prefix} <&c>Du hast nicht genug Platz im Inventar!'
+  resultOverview: '<&a *for-item="items" *for-separator={<&7>,<space/>}>{item.amount}x {item.type}'
+  subtractionOverview: '<&c *for-item="items" *for-separator={<&7>,<space/>}>{item.amount}x {item.type}'
+  successfulUnCraft: |
+    {lut.uc_prefix} <&7>Das Item <&a>{uncrafted_item} <&7>wurde
+    <container *if="whole_units_uncraft_count > 0">
+      <space/><&a>{whole_units_uncraft_count}x
+      <container *if="uncraft_unit neq 1">
+        <space/><&7>je <&a>{uncraft_unit} Stück
+      </container>
+    </container>
+    <container *if="len(reduced_amounts) > 0">
+      <space/>
+      <&7 *if="whole_units_uncraft_count > 0">und </>
+      <&a>{len(reduced_amounts)}x reduziert <&7>(<&a *for-amount="reduced_amounts">{amount} Stück</><&7>)
+    </container>
+    <space/><&7>in insgesamt {results} <&7>zurückentwickelt
+    <container *if="subtracted_items"><&7>; einbehalten wurde {subtracted_items}</container>
+    <&7>!
+  additionalReasons:
+    hasDamage: Das Item ist bereits abgenutzt
+    hasName: Das Item hat einen besonderen Namen
+    hasLore: Das Item hat Lore-Zeilen
+    hasEnchants: Das Item hat Verzauberungen
+    hasAttributeModifiers: Das Item hat besondere Attribute
+    hasPdcKeys: Das Item hat besondere PDC-Werte gesetzt
+    hasInnerItems: Das Item trägt weitere Items in seinem Inventar
+    noEntryFound: Es konnte kein Rezepteintrag zu diesem Item gefunden werden
+    noReasonGiven: Es steht kein expliziter Grund zur Verfügung
+    recoloringRecipe: Das Rezept für dieses Item stellt bloß eine Umfärbung dar
+    smithingRecipe: Das Rezept für dieses Item stammt aus dem Schmiedetisch
+
 cLut:
   prefix: '<&7>[<&5>BBTweaks<&7>]'
   ping_prefix: '<&7>[<&6>Ping<&7>]'
+  uc_prefix: '<&7>[<&6>UC<&7>]'

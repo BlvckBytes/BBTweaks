@@ -1,8 +1,15 @@
 package me.blvckbytes.bbtweaks.un_craft;
 
+import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.constructor.SlotType;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.BBTweaksPlugin;
+import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.un_craft.config.ChoiceEntry;
+import me.blvckbytes.bbtweaks.un_craft.config.OverviewEntry;
 import me.blvckbytes.bbtweaks.util.MutableInt;
 import me.blvckbytes.bbtweaks.util.TypeNameResolver;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
 import org.bukkit.Material;
@@ -33,7 +40,6 @@ import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 // There are so many items that defining all un-craft recipes from a blank slate is near
 // impossible, at least with my level of patience. The way we go about it is to loop all
@@ -62,6 +68,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   private final UnCraftRecipeMap recipeMap;
 
   private final BBTweaksPlugin plugin;
+  private final ConfigKeeper<MainSection> config;
   private final TypeNameResolver typeNameResolver;
 
   private final File unCraftRecipesTemplateFile;
@@ -74,8 +81,13 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   private final List<PreferredMaterial> preferredMaterials;
   private final List<AdditionalRecipe> additionalRecipes;
 
-  public UnCraftCommand(BBTweaksPlugin plugin, TypeNameResolver typeNameResolver) {
+  public UnCraftCommand(
+    BBTweaksPlugin plugin,
+    ConfigKeeper<MainSection> config,
+    TypeNameResolver typeNameResolver
+  ) {
     this.plugin = plugin;
+    this.config = config;
     this.typeNameResolver = typeNameResolver;
     this.logger = plugin.getLogger();
 
@@ -138,12 +150,12 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   @Override
   public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
     if (!(sender instanceof Player player)) {
-      sender.sendMessage(plugin.accessConfigValue("unCraft.chat.inGameOnly"));
+      config.rootSection.unCraft.inGameOnly.sendMessage(sender);
       return true;
     }
 
     if (!player.hasPermission("bbtweaks.uncraft")) {
-      sender.sendMessage(plugin.accessConfigValue("unCraft.chat.missingPermission"));
+      config.rootSection.unCraft.missingPermission.sendMessage(sender);
       return true;
     }
 
@@ -151,16 +163,17 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     var heldItem = inventory.getItemInMainHand();
 
     if (heldItem.getType().isAir()) {
-      sender.sendMessage(plugin.accessConfigValue("unCraft.chat.noItemInMainHand"));
+      config.rootSection.unCraft.noItemInMainHand.sendMessage(sender);
       return true;
     }
 
     var extractionResult = tryExtractMaterialFromItem(heldItem);
 
     if (extractionResult.material == null) {
-      sender.sendMessage(
-        plugin.accessConfigValue("unCraft.chat.unsupportedItem")
-          .replace("{reason}", extractionResult.absenceReason)
+      config.rootSection.unCraft.unsupportedItem.sendMessage(
+        sender,
+        new InterpretationEnvironment()
+          .withVariable("reason", extractionResult.absenceReason)
       );
 
       return true;
@@ -170,9 +183,12 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     var availableEntries = recipeMap.getRecipesFor(heldType);
 
     if (availableEntries.isEmpty()) {
-      sender.sendMessage(
-        plugin.accessConfigValue("unCraft.chat.unsupportedItem")
-          .replace("{reason}", plugin.accessConfigValue("unCraft.additionalReasons.noEntryFound"))
+      var reason = config.rootSection.unCraft.additionalReasons.noEntryFound.interpret(SlotType.SINGLE_LINE_CHAT, null);
+
+      config.rootSection.unCraft.unsupportedItem.sendMessage(
+        sender,
+        new InterpretationEnvironment()
+          .withVariable("reason", reason)
       );
 
       return true;
@@ -191,16 +207,17 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     }
 
     if (permittedEntries.isEmpty()) {
-      String reason;
+      Object reason;
 
       if (exclusionReasons.isEmpty())
-        reason = plugin.accessConfigValue("unCraft.additionalReasons.noReasonGiven");
+        reason = config.rootSection.unCraft.additionalReasons.noReasonGiven.interpret(SlotType.SINGLE_LINE_CHAT, null);
       else
         reason = String.join(REASON_SEPARATOR, exclusionReasons);
 
-      sender.sendMessage(
-        plugin.accessConfigValue("unCraft.chat.unsupportedItem")
-          .replace("{reason}", reason)
+      config.rootSection.unCraft.unsupportedItem.sendMessage(
+        sender,
+        new InterpretationEnvironment()
+          .withVariable("reason", reason)
       );
 
       return true;
@@ -215,18 +232,19 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
     else {
       if (argsAndFlags.args().isEmpty()) {
-        sender.sendMessage(plugin.accessConfigValue("unCraft.chat.choicesHeadline").replace("{label}", label));
+        var choices = new ArrayList<ChoiceEntry>();
 
         for (var entryIndex = 0; entryIndex < permittedEntries.size(); ++entryIndex) {
           var entryResults = permittedEntries.get(entryIndex).results;
-
-          sender.sendMessage(
-            plugin.accessConfigValue("unCraft.chat.choicesEntry")
-              .replace("{label}", label)
-              .replace("{choice_number}", String.valueOf(entryIndex + 1))
-              .replace("{results}", generateAmountsString(player, entryResults.keySet(), entryResults::get, true))
-          );
+          choices.add(new ChoiceEntry(entryIndex + 1, generateOverview(player, entryResults.keySet(), entryResults::get, true)));
         }
+
+        config.rootSection.unCraft.choicesScreen.sendMessage(
+          sender,
+          new InterpretationEnvironment()
+            .withVariable("label", label)
+            .withVariable("choices", choices)
+        );
 
         return true;
       }
@@ -237,12 +255,22 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       try {
         targetNumber = Integer.parseInt(targetString);
       } catch (Throwable e) {
-        sender.sendMessage(plugin.accessConfigValue("unCraft.chat.invalidSelection").replace("{selection}", targetString));
+        config.rootSection.unCraft.invalidSelection.sendMessage(
+          sender,
+          new InterpretationEnvironment()
+            .withVariable("selection", targetString)
+        );
+
         return true;
       }
 
       if (targetNumber <= 0 || targetNumber > permittedEntries.size()) {
-        sender.sendMessage(plugin.accessConfigValue("unCraft.chat.invalidSelection").replace("{selection}", targetString));
+        config.rootSection.unCraft.invalidSelection.sendMessage(
+          sender,
+          new InterpretationEnvironment()
+            .withVariable("selection", targetString)
+        );
+
         return true;
       }
 
@@ -253,7 +281,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
     if (argsAndFlags.flags().contains(CommandFlag.ALL_MODE)) {
       if (!player.hasPermission("bbtweaks.uncraft.all")) {
-        sender.sendMessage(plugin.accessConfigValue("unCraft.chat.missingPermissionAllMode"));
+        config.rootSection.unCraft.missingPermissionAllMode.sendMessage(sender);
         return true;
       }
 
@@ -291,10 +319,11 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     var acceptSubtracted = argsAndFlags.flags().contains(CommandFlag.ACCEPT_SUBTRACTED);
 
     if (!acceptSubtracted && !targetEntry.subtractedResults.isEmpty()) {
-      player.sendMessage(
-        plugin.accessConfigValue("unCraft.chat." + (targetEntry.inputAmount == 1 ? "unacceptedSubtractionOne" : "unacceptedSubtractionMany"))
-          .replace("{uncraft_unit}", String.valueOf(targetEntry.inputAmount))
-          .replace("{subtracted_results}", generateAmountsString(player, targetEntry.subtractedResults, targetEntry.results::get, false))
+      config.rootSection.unCraft.unacceptedSubtraction.sendMessage(
+        sender,
+        new InterpretationEnvironment()
+          .withVariable("uncraft_unit", targetEntry.inputAmount)
+          .withVariable("subtracted_results", generateOverview(player, targetEntry.subtractedResults, targetEntry.results::get, false))
       );
 
       return true;
@@ -400,63 +429,46 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
     if (wholeUnitsUnCraftCounter == 0 && reducedUnitsUnCraftAmounts.isEmpty()) {
       if (spaceSimulator.didDropItems()) {
-        sender.sendMessage(plugin.accessConfigValue("unCraft.chat.noSpaceAtAll"));
+        config.rootSection.unCraft.notEnoughSpace.sendMessage(sender);
         return true;
       }
 
       var requiredAmount = acceptReduced ? targetEntry.minRequiredAmount : targetEntry.inputAmount;
 
-      var message = plugin.accessConfigValue(
-        "unCraft.chat." + (
-          // Do not suggest the -r flag if accepting reduced results has no effect
-          (acceptReduced || targetEntry.inputAmount <= targetEntry.minRequiredAmount)
-            ? "notEnoughItemsReduced"
-            : "notEnoughItems"
-        )
+      var message = (
+        // Do not suggest the -r flag if accepting reduced results has no effect
+        (acceptReduced || targetEntry.inputAmount <= targetEntry.minRequiredAmount)
+          ? config.rootSection.unCraft.notEnoughItemsReduced
+          : config.rootSection.unCraft.notEnoughItems
       );
 
-      sender.sendMessage(
-        message
-          .replace("{required_amount}", String.valueOf(requiredAmount))
-          .replace("{result_item}", typeNameResolver.resolve(player, heldType))
+      message.sendMessage(
+        sender,
+        new InterpretationEnvironment()
+          .withVariable("required_amount", requiredAmount)
+          .withVariable("result_item", typeNameResolver.resolve(player, heldType))
       );
 
       return true;
     }
 
-    String message;
+    var subtractedItemsPart = (
+      subtractedItems.isEmpty()
+        ? null
+        : generateOverview(player, subtractedItems.keySet(), k -> subtractedItems.get(k).value, false)
+    );
 
-    if (targetEntry.inputAmount == 1)
-      message = plugin.accessConfigValue("unCraft.chat.successfulUnCraftUnitOne");
-    else {
-      if (wholeUnitsUnCraftCounter == 0)
-        message = plugin.accessConfigValue("unCraft.chat.successfulUnCraftUnitManyNoWholeAndReduced");
-      else if (reducedUnitsUnCraftAmounts.isEmpty())
-        message = plugin.accessConfigValue("unCraft.chat.successfulUnCraftUnitManyWholeAndNoReduced");
-      else
-        message = plugin.accessConfigValue("unCraft.chat.successfulUnCraftUnitManyWholeAndReduced");
-    }
+    var resultsPart = generateOverview(player, itemsToAdd.keySet(), k -> itemsToAdd.get(k).value, true);
 
-    sender.sendMessage(
-      message
-        .replace("{uncrafted_item}", typeNameResolver.resolve(player, heldType))
-        .replace("{whole_units_uncraft_count}", String.valueOf(wholeUnitsUnCraftCounter))
-        .replace("{reduced_units_uncraft_count}", String.valueOf(reducedUnitsUnCraftAmounts.size()))
-        .replace("{results}", generateAmountsString(player, itemsToAdd.keySet(), k -> itemsToAdd.get(k).value, true))
-        .replace("{uncraft_unit}", String.valueOf(targetEntry.inputAmount))
-        .replace(
-          "{reduced_amounts}",
-          reducedUnitsUnCraftAmounts.stream()
-            .map(amount -> plugin.accessConfigValue("unCraft.chat.reducedAmountsEntry").replace("{reduced_amount}", String.valueOf(amount)))
-            .collect(Collectors.joining(plugin.accessConfigValue("unCraft.chat.reducedAmountsSeparator")))
-        )
-        .replace(
-          "{subtraction_message}",
-          subtractedItems.isEmpty()
-            ? ""
-            : plugin.accessConfigValue("unCraft.chat.subtractionMessage")
-                .replace("{subtracted_results}", generateAmountsString(player, subtractedItems.keySet(), k -> subtractedItems.get(k).value, false))
-        )
+    config.rootSection.unCraft.successfulUnCraft.sendMessage(
+      sender,
+      new InterpretationEnvironment()
+        .withVariable("uncrafted_item", typeNameResolver.resolve(player, heldType))
+        .withVariable("whole_units_uncraft_count", wholeUnitsUnCraftCounter)
+        .withVariable("results", resultsPart)
+        .withVariable("uncraft_unit", targetEntry.inputAmount)
+        .withVariable("reduced_amounts", reducedUnitsUnCraftAmounts)
+        .withVariable("subtracted_items", subtractedItemsPart)
     );
 
     var itemsToDrop = new HashMap<Material, MutableInt>();
@@ -467,16 +479,17 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     });
 
     if (!itemsToDrop.isEmpty()) {
-      sender.sendMessage(
-        plugin.accessConfigValue("unCraft.chat.droppedItems")
-          .replace("{items}", generateAmountsString(player, itemsToDrop.keySet(), k -> itemsToDrop.get(k).value, true))
+      config.rootSection.unCraft.droppedItems.sendMessage(
+        sender,
+        new InterpretationEnvironment()
+          .withVariable("items", generateOverview(player, itemsToDrop.keySet(), k -> itemsToDrop.get(k).value, true))
       );
 
       forEachStackOfTypeCountMap(itemsToDrop, player::dropItem);
     }
 
     if (spaceSimulator.didDropItems())
-      sender.sendMessage(plugin.accessConfigValue("unCraft.chat.noMoreSpace"));
+      config.rootSection.unCraft.noMoreSpace.sendMessage(sender);
 
     for (var additionalMessage : targetEntry.additionalMessages)
       player.sendMessage(additionalMessage);
@@ -498,18 +511,18 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     }
   }
 
-  private String generateAmountsString(Player player, Collection<Material> materials, ToIntFunction<Material> amountAccessor, boolean resultsOrSubtractions) {
-    var results = new StringJoiner(plugin.accessConfigValue("unCraft.chat." + (resultsOrSubtractions ? "resultSeparator" : "subtractionSeparator")));
+  private List<Component> generateOverview(Player player, Collection<Material> materials, ToIntFunction<Material> amountAccessor, boolean resultsOrSubtractions) {
+    var message = resultsOrSubtractions ? config.rootSection.unCraft.resultOverview : config.rootSection.unCraft.subtractionOverview;
+    var items = new ArrayList<OverviewEntry>();
 
-    for (var material : materials) {
-      results.add(
-        plugin.accessConfigValue("unCraft.chat." + (resultsOrSubtractions ? "resultEntry" : "subtractionEntry"))
-          .replace("{result_item}", typeNameResolver.resolve(player, material))
-          .replace("{result_amount}", String.valueOf(amountAccessor.applyAsInt(material)))
-      );
-    }
+    for (var material : materials)
+      items.add(new OverviewEntry(typeNameResolver.resolve(player, material), amountAccessor.applyAsInt(material)));
 
-    return results.toString();
+    return message.interpret(
+      SlotType.SINGLE_LINE_CHAT,
+      new InterpretationEnvironment()
+        .withVariable("items", items)
+    );
   }
 
   private @NotNull Material decideChoiceMaterial(RecipeChoice.MaterialChoice materialChoice, Set<String> exclusionReasonsOutput) {
@@ -631,7 +644,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
           if (lastExclusionReasonLine == lineNumber - 1)
             exclusionReasons = lastExclusionReasons;
           else
-            exclusionReasons = Collections.singleton(plugin.accessConfigValue("unCraft.additionalReasons.noReasonGiven"));
+            exclusionReasons = Collections.singleton(config.rootSection.unCraft.additionalReasons.noReasonGiven.asPlainString(null));
         }
 
         try {
@@ -737,7 +750,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       addChoiceToUnCraftResults(smithingTransformRecipe.getTemplate(), unCraftResults, exclusionReasons);
       addChoiceToUnCraftResults(smithingTransformRecipe.getBase(), unCraftResults, exclusionReasons);
       addChoiceToUnCraftResults(smithingTransformRecipe.getAddition(), unCraftResults, exclusionReasons);
-      exclusionReasons.add(plugin.accessConfigValue("unCraft.additionalReasons.smithingRecipe"));
+      exclusionReasons.add(config.rootSection.unCraft.additionalReasons.smithingRecipe.asPlainString(null));
     }
 
     else {
@@ -781,7 +794,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       }
 
       if (!patchedSuccessfully)
-        exclusionReasons.add(plugin.accessConfigValue("unCraft.additionalReasons.recoloringRecipe"));
+        exclusionReasons.add(config.rootSection.unCraft.additionalReasons.recoloringRecipe.asPlainString(null));
     }
 
     for (var recipeExclusionRule : recipeExclusionRules) {
@@ -929,30 +942,30 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       return new MaterialExtractionResult(item.getType(), "");
 
     if (meta instanceof Damageable d && d.hasDamage())
-      return new MaterialExtractionResult(null, plugin.accessConfigValue("unCraft.additionalReasons.hasDamage"));
+      return new MaterialExtractionResult(null, config.rootSection.unCraft.additionalReasons.hasDamage.asPlainString(null));
 
     if (meta.hasDisplayName())
-      return new MaterialExtractionResult(null, plugin.accessConfigValue("unCraft.additionalReasons.hasName"));
+      return new MaterialExtractionResult(null, config.rootSection.unCraft.additionalReasons.hasName.asPlainString(null));
 
     if (meta.hasLore())
-      return new MaterialExtractionResult(null, plugin.accessConfigValue("unCraft.additionalReasons.hasLore"));
+      return new MaterialExtractionResult(null, config.rootSection.unCraft.additionalReasons.hasLore.asPlainString(null));
 
     if (meta.hasEnchants())
-      return new MaterialExtractionResult(null, plugin.accessConfigValue("unCraft.additionalReasons.hasEnchants"));
+      return new MaterialExtractionResult(null, config.rootSection.unCraft.additionalReasons.hasEnchants.asPlainString(null));
 
     if (meta.hasAttributeModifiers())
-      return new MaterialExtractionResult(null, plugin.accessConfigValue("unCraft.additionalReasons.hasAttributeModifiers"));
+      return new MaterialExtractionResult(null, config.rootSection.unCraft.additionalReasons.hasAttributeModifiers.asPlainString(null));
 
     var pdc = meta.getPersistentDataContainer();
 
     if (!pdc.getKeys().isEmpty())
-      return new MaterialExtractionResult(null, plugin.accessConfigValue("unCraft.additionalReasons.hasPdcKeys"));
+      return new MaterialExtractionResult(null, config.rootSection.unCraft.additionalReasons.hasPdcKeys.asPlainString(null));
 
     var innerItems = getInnerItems(meta);
 
     // Cannot uncraft items which contain other items, as they would be lost.
     if (innerItems != null && innerItems.stream().anyMatch(inner -> inner != null && !inner.getType().isAir()))
-      return new MaterialExtractionResult(null, plugin.accessConfigValue("unCraft.additionalReasons.hasInnerItems"));
+      return new MaterialExtractionResult(null, config.rootSection.unCraft.additionalReasons.hasInnerItems.asPlainString(null));
 
     return new MaterialExtractionResult(item.getType(), null);
   }
