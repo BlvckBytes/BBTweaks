@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.ping;
 
-import me.blvckbytes.bbtweaks.BBTweaksPlugin;
+import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import me.blvckbytes.bbtweaks.MainSection;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -20,12 +22,12 @@ import java.util.List;
 
 public class PingCommand implements CommandExecutor, TabCompleter, Listener {
 
-  private final BBTweaksPlugin plugin;
   private final Command command;
+  private final ConfigKeeper<MainSection> config;
 
-  public PingCommand(BBTweaksPlugin plugin, Command command) {
-    this.plugin = plugin;
+  public PingCommand(Command command, ConfigKeeper<MainSection> config) {
     this.command = command;
+    this.config = config;
   }
 
   @Override
@@ -36,28 +38,34 @@ public class PingCommand implements CommandExecutor, TabCompleter, Listener {
       pingTarget = Bukkit.getPlayer(args[0]);
 
       if (pingTarget == null) {
-        sender.sendMessage(plugin.accessConfigValue("ping.targetNotOnline").replace("{name}", args[0]));
+        config.rootSection.ping.targetNotOnline.sendMessage(
+          sender,
+          new InterpretationEnvironment()
+            .withVariable("name", args[0])
+        );
+
         return true;
       }
 
       if (pingTarget != sender && !sender.hasPermission("bbtweaks.ping.other")) {
-        sender.sendMessage(plugin.accessConfigValue("ping.noOtherPermission"));
+        config.rootSection.ping.noOtherPermission.sendMessage(sender);
         return true;
       }
     }
 
     if (pingTarget == null) {
-      sender.sendMessage(plugin.accessConfigValue("ping.noTargetConsoleSender"));
+      config.rootSection.ping.noTargetConsoleSender.sendMessage(sender);
       return true;
     }
 
     var pingOfTarget = pingTarget.getPing();
-    var message = plugin.accessConfigValue("ping." + (pingTarget == sender ? "pingSelf" : "pingOther"));
+    var message = pingTarget == sender ? config.rootSection.ping.pingSelf : config.rootSection.ping.pingOther;
 
-    sender.sendMessage(
-      message
-        .replace("{ping}", String.valueOf(pingOfTarget))
-        .replace("{name}", pingTarget.getName())
+    message.sendMessage(
+      sender,
+      new InterpretationEnvironment()
+        .withVariable("ping", pingOfTarget)
+        .withVariable("name", pingTarget.getName())
     );
 
     return true;

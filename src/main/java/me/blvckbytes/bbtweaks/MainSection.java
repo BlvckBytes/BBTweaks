@@ -8,6 +8,7 @@ import me.blvckbytes.bbtweaks.ab_sleep.ABSleepSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideSection;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
+import me.blvckbytes.bbtweaks.ping.PingSection;
 
 @CSAlways
 public class MainSection extends ConfigSection {
@@ -16,6 +17,7 @@ public class MainSection extends ConfigSection {
   public BackOverrideSection backOverride;
   public FurnaceLevelSection furnaceLevel;
   public GetUuidSection getUuid;
+  public PingSection ping;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

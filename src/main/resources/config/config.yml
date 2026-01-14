@@ -20,5 +20,13 @@ getUuid:
           {uuid}
     </u><&7>!
 
+ping:
+  noOtherPermission: '{lut.ping_prefix} <&c>Dir fehlen die Zugriffsrechte, um den Ping anderer Spieler einzusehen!'
+  noTargetConsoleSender: '{lut.ping_prefix} <&c>Dieser Befehl ist ohne explizitem Namen nur für Spieler verfügbar!'
+  targetNotOnline: '{lut.ping_prefix} <&c>Der Spieler <&4>{name} <&c>ist nicht online!'
+  pingSelf: '{lut.ping_prefix} <&7>Dein Ping: <&a>{ping}ms'
+  pingOther: '{lut.ping_prefix} <&a>{name}''s <&7>Ping: <&a>{ping}ms'
+
 cLut:
   prefix: '<&7>[<&5>BBTweaks<&7>]'
+  ping_prefix: '<&7>[<&6>Ping<&7>]'
