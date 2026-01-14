@@ -17,10 +17,6 @@ ping:
   pingSelf: '&7[&6Ping&7] &7Dein Ping: &a{ping}ms'
   pingOther: '&7[&6Ping&7] &a{name}''s &7Ping: &a{ping}ms'
 
-furnaceLevelDisplay:
-  noLevelsStored: '&7[XP] Keine Level gespeichert'
-  levelsStored: '&6[XP] {old_level} → {new_level} &7({next_level_progress}% ↑)'
-
 unCraft:
   chat:
     inGameOnly: '&8[&6UC&8] &cDieser Befehl ist nur für Spieler verfügbar!'

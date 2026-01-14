@@ -117,7 +117,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
         getLogger().info("Integrated with mcMMO as to boost XP");
       }
 
-      var furnaceLevelDisplay = new FurnaceLevelDisplay(this, mcMMOIntegration);
+      var furnaceLevelDisplay = new FurnaceLevelDisplay(this, mcMMOIntegration, config);
 
       getServer().getPluginManager().registerEvents(furnaceLevelDisplay, this);
 

@@ -6,12 +6,14 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import me.blvckbytes.bbtweaks.ab_sleep.ABSleepSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideSection;
+import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
 
 @CSAlways
 public class MainSection extends ConfigSection {
 
   public ABSleepSection abSleep;
   public BackOverrideSection backOverride;
+  public FurnaceLevelSection furnaceLevel;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

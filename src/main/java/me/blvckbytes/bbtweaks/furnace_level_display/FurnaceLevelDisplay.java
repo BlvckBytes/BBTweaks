@@ -1,7 +1,9 @@
 package me.blvckbytes.bbtweaks.furnace_level_display;
 
+import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import it.unimi.dsi.fastutil.objects.*;
-import me.blvckbytes.bbtweaks.BBTweaksPlugin;
+import me.blvckbytes.bbtweaks.MainSection;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.*;
@@ -13,6 +15,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.CookingRecipe;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.invoke.MethodHandle;
@@ -35,8 +38,8 @@ public class FurnaceLevelDisplay implements Listener {
     long lastFurnaceBlockId;
   }
 
-  private final BBTweaksPlugin plugin;
   private final @Nullable McMMOIntegration mcMMOIntegration;
+  private final ConfigKeeper<MainSection> config;
   private final Logger logger;
 
   private final Map<Class<? extends BlockState>, RecipesUsedAccessor> accessorByType;
@@ -47,10 +50,14 @@ public class FurnaceLevelDisplay implements Listener {
   private final MethodHandle resourceKeyGetIdentifier;
   private final MethodHandle identifierGetPath;
 
-  public FurnaceLevelDisplay(BBTweaksPlugin plugin, @Nullable McMMOIntegration mcMMOIntegration) throws Exception {
-    this.plugin = plugin;
-    this.mcMMOIntegration = mcMMOIntegration;
+  public FurnaceLevelDisplay(
+    Plugin plugin,
+    @Nullable McMMOIntegration mcMMOIntegration,
+    ConfigKeeper<MainSection> config
+  ) throws Exception {
     this.logger = plugin.getLogger();
+    this.mcMMOIntegration = mcMMOIntegration;
+    this.config = config;
 
     this.accessorByType = new HashMap<>();
     this.dataByPlayerId = new HashMap<>();
@@ -286,8 +293,7 @@ public class FurnaceLevelDisplay implements Listener {
     }
 
     if (totalExperience == 0) {
-      //noinspection deprecation
-      player.sendActionBar(plugin.accessConfigValue("furnaceLevelDisplay.noLevelsStored"));
+      config.rootSection.furnaceLevel.noLevelsStored.sendActionBar(player);
       return;
     }
 
@@ -318,14 +324,13 @@ public class FurnaceLevelDisplay implements Listener {
     var progressNextLevel = remainingAvailableExperience / (float) getExperiencePointsNeededForLevel(levelAfter) * 100;
     var formattedProgress = String.format("%.1f", progressNextLevel);
 
-    //noinspection deprecation
-    player.sendActionBar(
-      plugin.accessConfigValue("furnaceLevelDisplay.levelsStored")
-        .replace("{old_level}", String.valueOf(levelBefore))
-        .replace("{new_level}", String.valueOf(levelAfter))
-        .replace("{next_level_progress}", formattedProgress)
-        .replace("{stored_experience}", formattedTotalExperience)
-    );
+    var environment = new InterpretationEnvironment()
+      .withVariable("old_level", levelBefore)
+      .withVariable("new_level", levelAfter)
+      .withVariable("next_level_progress", formattedProgress)
+      .withVariable("stored_experience", formattedTotalExperience);
+
+    config.rootSection.furnaceLevel.levelsStored.sendActionBar(player, environment);
   }
 
   // See: https://minecraft.wiki/w/Experience#Leveling_up

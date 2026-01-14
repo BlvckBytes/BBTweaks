@@ -4,3 +4,7 @@ abSleep:
 
 backOverride:
   teleportedBack: '<&6>Du kehrst zur letzten Position zurück.'
+
+furnaceLevel:
+  noLevelsStored: '<&7>[XP] Keine Level gespeichert'
+  levelsStored: '<&6>[XP] {old_level} → {new_level} <&7>({next_level_progress}% ↑)'
