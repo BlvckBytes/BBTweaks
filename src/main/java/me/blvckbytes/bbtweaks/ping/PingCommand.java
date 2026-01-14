@@ -1,5 +1,6 @@
-package me.blvckbytes.bbtweaks;
+package me.blvckbytes.bbtweaks.ping;
 
+import me.blvckbytes.bbtweaks.BBTweaksPlugin;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;

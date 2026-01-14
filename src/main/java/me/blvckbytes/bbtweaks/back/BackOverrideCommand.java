@@ -1,5 +1,6 @@
-package me.blvckbytes.bbtweaks;
+package me.blvckbytes.bbtweaks.back;
 
+import me.blvckbytes.bbtweaks.BBTweaksPlugin;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;

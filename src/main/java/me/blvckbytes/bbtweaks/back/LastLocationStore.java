@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks;
+package me.blvckbytes.bbtweaks.back;
 
 import com.google.gson.*;
 import org.bukkit.Bukkit;

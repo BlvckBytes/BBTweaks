@@ -1,5 +1,6 @@
-package me.blvckbytes.bbtweaks;
+package me.blvckbytes.bbtweaks.ab_sleep;
 
+import me.blvckbytes.bbtweaks.BBTweaksPlugin;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;

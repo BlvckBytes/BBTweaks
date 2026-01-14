@@ -1,5 +1,6 @@
-package me.blvckbytes.bbtweaks;
+package me.blvckbytes.bbtweaks.recipes;
 
+import me.blvckbytes.bbtweaks.BBTweaksPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
