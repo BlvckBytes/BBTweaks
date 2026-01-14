@@ -48,6 +48,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
   private YamlConfiguration configuration;
   private RDBreakTool rdBreakTool;
   private LastLocationStore lastLocationStore;
+  private ConfigKeeper<MainSection> config;
 
   private final List<Runnable> configReloadListeners = new ArrayList<>();
 
@@ -59,7 +60,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
     try {
       var configHandler = new ConfigHandler(this, "config");
-      var config = new ConfigKeeper<>(configHandler, "config.yml", MainSection.class);
+      config = new ConfigKeeper<>(configHandler, "config.yml", MainSection.class);
 
       Objects.requireNonNull(getCommand("bbtweaks")).setExecutor(this);
 
@@ -181,8 +182,12 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       case RELOAD -> {
         configuration = loadConfiguration();
         configReloadListeners.forEach(Runnable::run);
+        try {
+          config.reload();
+        } catch (Exception e) {
+          sender.sendMessage("§cAn error occurred while trying to reload the CM-config; see console!");
+        }
         sender.sendMessage(accessConfigValue("chat.configurationReloaded"));
-        // TODO: Also reload the config-keeper
         return true;
       }
 

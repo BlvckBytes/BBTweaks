@@ -37,7 +37,7 @@ public class AdditionalRecipesSection extends ConfigSection {
     recipeLoop: for (var shapedRecipeEntry : shapedRecipes.entrySet()) {
       var recipeName = new NamespacedKey(plugin, shapedRecipeEntry.getKey());
       var recipeSection = shapedRecipeEntry.getValue();
-      var shapedRecipe = new ShapedRecipe(recipeName, new ItemStack(recipeSection._result, recipeSection._amount));
+      var shapedRecipe = new ShapedRecipe(recipeName, new ItemStack(recipeSection.result, recipeSection.amount));
 
       var shapeLines = recipeSection.shape.stream().map(it -> it.asPlainString(null)).toList();
 
@@ -89,7 +89,7 @@ public class AdditionalRecipesSection extends ConfigSection {
 
         var ingredient = recipeSection.ingredients.get(ingredientName);
 
-        shapedRecipe.setIngredient(c, ingredient._type);
+        shapedRecipe.setIngredient(c, ingredient.type);
       }
 
       if (!requiredIngredients.isEmpty()) {
