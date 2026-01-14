@@ -8,3 +8,17 @@ backOverride:
 furnaceLevel:
   noLevelsStored: '<&7>[XP] Keine Level gespeichert'
   levelsStored: '<&6>[XP] {old_level} → {new_level} <&7>({next_level_progress}% ↑)'
+
+getUuid:
+  noPermission: '{lut.prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  commandUsage: '{lut.prefix} <&c>Benutzung: /{command_label} \<Name>'
+  unknownName: '{lut.prefix} <&c>Konnte zum Namen <&4>{name} <&c>keine UUID finden!'
+  resultMessage: |
+    {lut.prefix} <&7>Die UUID von <&a>{name} <&7>ist <&a><u>
+      <hover-text value={<&a>Klicke, um die UUID zu kopieren!}>
+        <to-clipboard [value]="uuid">
+          {uuid}
+    </u><&7>!
+
+cLut:
+  prefix: '<&7>[<&5>BBTweaks<&7>]'

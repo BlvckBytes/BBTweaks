@@ -71,7 +71,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       getServer().getPluginManager().registerEvents(new LavaSponge(), this);
 
-      var getUuidCommand = new GetUuidCommand(this);
+      var getUuidCommand = new GetUuidCommand(config);
 
       Objects.requireNonNull(getCommand("getuuid")).setExecutor(getUuidCommand);
 

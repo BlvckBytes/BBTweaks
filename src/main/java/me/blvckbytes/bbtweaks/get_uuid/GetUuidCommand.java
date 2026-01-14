@@ -1,6 +1,9 @@
 package me.blvckbytes.bbtweaks.get_uuid;
 
+import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.BBTweaksPlugin;
+import me.blvckbytes.bbtweaks.MainSection;
 import net.md_5.bungee.api.chat.ClickEvent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.chat.HoverEvent;
@@ -21,13 +24,13 @@ import java.util.*;
 
 public class GetUuidCommand implements CommandExecutor, TabCompleter, Listener {
 
-  private final BBTweaksPlugin plugin;
+  private final ConfigKeeper<MainSection> config;
 
   private final Set<String> knownNames;
   private final Map<String, UUID> idByNameLower;
 
-  public GetUuidCommand(BBTweaksPlugin plugin) {
-    this.plugin = plugin;
+  public GetUuidCommand(ConfigKeeper<MainSection> config) {
+    this.config = config;
     this.knownNames = new HashSet<>();
     this.idByNameLower = new HashMap<>();
 
@@ -38,12 +41,17 @@ public class GetUuidCommand implements CommandExecutor, TabCompleter, Listener {
   @Override
   public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
     if (!(sender.hasPermission("bbtweaks.getuuid"))) {
-      sender.sendMessage(plugin.accessConfigValue("chat.noCommandPermission"));
+      config.rootSection.getUuid.noPermission.sendMessage(sender);
       return true;
     }
 
     if (args.length != 1) {
-      sender.sendMessage(plugin.accessConfigValue("chat.getUuidUsage").replace("{command_label}", label));
+      config.rootSection.getUuid.commandUsage.sendMessage(
+        sender,
+        new InterpretationEnvironment()
+          .withVariable("command_label", label)
+      );
+
       return true;
     }
 
@@ -51,21 +59,20 @@ public class GetUuidCommand implements CommandExecutor, TabCompleter, Listener {
     var uuid = idByNameLower.get(name.toLowerCase());
 
     if (uuid == null) {
-      sender.sendMessage(plugin.accessConfigValue("chat.getUuidUnknownName").replace("{name}", name));
+      config.rootSection.getUuid.unknownName.sendMessage(
+        sender,
+        new InterpretationEnvironment()
+          .withVariable("name", name)
+      );
+
       return true;
     }
 
-    var resultMessage = plugin.accessConfigValue("chat.getUuidResult")
-      .replace("{name}", name)
-      .replace("{uuid}", uuid.toString());
-
-    var hoverMessage = plugin.accessConfigValue("chat.getUuidResultHover");
-
-    sender.spigot().sendMessage(
-      new ComponentBuilder(resultMessage)
-        .event(new ClickEvent(ClickEvent.Action.COPY_TO_CLIPBOARD, uuid.toString()))
-        .event(new HoverEvent(HoverEvent.Action.SHOW_TEXT, new ComponentBuilder(hoverMessage).create()))
-        .create()
+    config.rootSection.getUuid.resultMessage.sendMessage(
+      sender,
+      new InterpretationEnvironment()
+        .withVariable("name", name)
+        .withVariable("uuid", uuid.toString())
     );
 
     return true;
