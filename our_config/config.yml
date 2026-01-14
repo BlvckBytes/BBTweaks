@@ -1,5 +1,4 @@
 unCraft:
-  # NOTE: Reasons may be concatenated with a semicolon if multiple match - do not terminate them with a dot.
   typeExclusionRules:
     -
       onUnCraftedItem: true
@@ -171,6 +170,19 @@ unCraft:
       recipes:
         - '4 STICK -> 2 OAK_PLANKS'
       reason: Wird von einem Rezept mit schlechterer Umwandlungsrate ersetzt (8 für 1)
+    -
+      recipes:
+        - '4 ACACIA_PLANKS -> 1 OAK_LOG'
+        - '4 BIRCH_PLANKS -> 1 OAK_LOG'
+        - '4 CHERRY_PLANKS -> 1 OAK_LOG'
+        - '4 CRIMSON_PLANKS -> 1 OAK_LOG'
+        - '4 DARK_OAK_PLANKS -> 1 OAK_LOG'
+        - '4 JUNGLE_PLANKS -> 1 OAK_LOG'
+        - '4 MANGROVE_PLANKS -> 1 OAK_LOG'
+        - '4 PALE_OAK_PLANKS -> 1 OAK_LOG'
+        - '4 SPRUCE_PLANKS -> 1 OAK_LOG'
+        - '4 WARPED_PLANKS -> 1 OAK_LOG'
+      reason: Wird von Rezepten mit spezifischer Sorte überschrieben (Schwachstelle meines automatischen Filters)
   additionalRecipes:
     -
       recipe: '8 STICK -> 1 OAK_PLANKS'
@@ -178,6 +190,16 @@ unCraft:
       recipe: '1 CAKE -> 1 CAKE'
       additionalMessages:
         - '<&e><&o>*The cake is a lie!*'
+    - recipe: '4 ACACIA_PLANKS -> 1 ACACIA_LOG'
+    - recipe: '4 BIRCH_PLANKS -> 1 BIRCH_LOG'
+    - recipe: '4 CHERRY_PLANKS -> 1 CHERRY_LOG'
+    - recipe: '4 CRIMSON_PLANKS -> 1 CRIMSON_STEM'
+    - recipe: '4 DARK_OAK_PLANKS -> 1 DARK_OAK_LOG'
+    - recipe: '4 JUNGLE_PLANKS -> 1 JUNGLE_LOG'
+    - recipe: '4 MANGROVE_PLANKS -> 1 MANGROVE_LOG'
+    - recipe: '4 PALE_OAK_PLANKS -> 1 PALE_OAK_LOG'
+    - recipe: '4 SPRUCE_PLANKS -> 1 SPRUCE_LOG'
+    - recipe: '4 WARPED_PLANKS -> 1 WARPED_STEM'
   preferredMaterials:
     -
       tags:
