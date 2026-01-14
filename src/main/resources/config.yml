@@ -1,13 +1,3 @@
-actionBar:
-  # - {sleeping_count}
-  # - {candidate_count}
-  # - {threshold_count}
-  thresholdNotYetReached: '&aEs sind &2{sleeping_count}&a/&2{threshold_count} &abenötigen Spielern im Bett'
-  # - {sleeping_count}
-  # - {candidate_count}
-  # - {threshold_count}
-  thresholdReached: '&aDie Nacht wird durchgeschlafen'
-
 chat:
   noCommandPermission: '&7[&5BBTweaks&7] &cDir fehlen die Zugriffsrechte für diesen Befehl!'
   # - {command_label}
@@ -19,7 +9,6 @@ chat:
   getUuidUnknownName: '&7[&5BBTweaks&7] &cKonnte zum Namen &4{name} &ckeine UUID finden!'
   getUuidResult: '&7[&5BBTweaks&7] &7Die UUID von &a{name} &7ist &a{uuid}&7!'
   getUuidResultHover: '&aKlicke, um die UUID zu kopieren!'
-  backCommandMessage: '&6Du kehrst zur letzten Position zurück.'
 
 ping:
   noOtherPermission: '&7[&6Ping&7] &cDir fehlen die Zugriffsrechte, um den Ping anderer Spieler einzusehen!'

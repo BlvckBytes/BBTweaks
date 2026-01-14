@@ -81,7 +81,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       Bukkit.getScheduler().runTaskTimerAsynchronously(this, lastLocationStore::save, 20L * 60, 20L * 60);
 
-      var backOverrideCommand = new BackOverrideCommand(this, lastLocationStore);
+      var backOverrideCommand = new BackOverrideCommand(lastLocationStore, config);
 
       Objects.requireNonNull(getCommand("back")).setExecutor(backOverrideCommand);
 
@@ -179,6 +179,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
         configuration = loadConfiguration();
         configReloadListeners.forEach(Runnable::run);
         sender.sendMessage(accessConfigValue("chat.configurationReloaded"));
+        // TODO: Also reload the config-keeper
         return true;
       }
 

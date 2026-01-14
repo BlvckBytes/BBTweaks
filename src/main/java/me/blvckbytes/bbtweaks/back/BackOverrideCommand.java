@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.back;
 
-import me.blvckbytes.bbtweaks.BBTweaksPlugin;
+import at.blvckbytes.cm_mapper.ConfigKeeper;
+import me.blvckbytes.bbtweaks.MainSection;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,12 +21,12 @@ import java.util.List;
 
 public class BackOverrideCommand implements CommandExecutor, TabCompleter, Listener {
 
-  private final BBTweaksPlugin bbTweaksPlugin;
   private final LastLocationStore lastLocationStore;
+  private final ConfigKeeper<MainSection> config;
 
-  public BackOverrideCommand(BBTweaksPlugin bbTweaksPlugin, LastLocationStore lastLocationStore) {
-    this.bbTweaksPlugin = bbTweaksPlugin;
+  public BackOverrideCommand(LastLocationStore lastLocationStore, ConfigKeeper<MainSection> config) {
     this.lastLocationStore = lastLocationStore;
+    this.config = config;
   }
 
   @Override
@@ -42,7 +43,7 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
       return true;
 
     player.teleport(lastLocation);
-    player.sendMessage(bbTweaksPlugin.accessConfigValue("chat.backCommandMessage"));
+    config.rootSection.backOverride.teleportedBack.sendMessage(player);
     return true;
   }
 
