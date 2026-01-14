@@ -59,6 +59,11 @@
             <artifactId>ItemPredicateParser</artifactId>
             <version>0.0.25</version>
         </dependency>
+        <dependency>
+            <groupId>at.blvckbytes</groupId>
+            <artifactId>CMMapper</artifactId>
+            <version>0.0.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -69,6 +74,7 @@
                 <includes>
                     <include>plugin.yml</include>
                     <include>config.yml</include>
+                    <include>config/config.yml</include>
                 </includes>
             </resource>
         </resources>
@@ -89,15 +95,25 @@
                     <artifactSet>
                         <includes>
                             <include>me.blvckbytes:SyllablesMatcher</include>
+                            <include>at.blvckbytes:ComponentMarkup</include>
+                            <include>at.blvckbytes:CMMapper</include>
                         </includes>
                     </artifactSet>
 
                     <relocations>
-                        <!-- Relocate all libs into the root package -->
                         <relocation>
-                            <pattern>me/blvckbytes/(syllables_matcher)/(.*)</pattern>
-                            <shadedPattern>me/blvckbytes/bbtweaks/$1/$2</shadedPattern>
-                            <rawString>true</rawString>
+                            <pattern>me.blvckbytes.syllables_matcher</pattern>
+                            <shadedPattern>me.blvckbytes.bbtweaks.syllables_matcher</shadedPattern>
+                        </relocation>
+
+                        <relocation>
+                            <pattern>at.blvckbytes.component_markup</pattern>
+                            <shadedPattern>me.blvckbytes.bbtweaks.component_markup</shadedPattern>
+                        </relocation>
+
+                        <relocation>
+                            <pattern>at.blvckbytes.cm_mapper</pattern>
+                            <shadedPattern>me.blvckbytes.bbtweaks.cm_mapper</shadedPattern>
                         </relocation>
                     </relocations>
 

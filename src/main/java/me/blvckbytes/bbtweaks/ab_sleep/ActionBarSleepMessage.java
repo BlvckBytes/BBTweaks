@@ -1,18 +1,30 @@
 package me.blvckbytes.bbtweaks.ab_sleep;
 
-import me.blvckbytes.bbtweaks.BBTweaksPlugin;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
+import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.constructor.SlotType;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import me.blvckbytes.bbtweaks.MainSection;
 import org.bukkit.Bukkit;
-import org.bukkit.GameRule;
+import org.bukkit.GameRules;
+import org.bukkit.plugin.Plugin;
 
 public class ActionBarSleepMessage {
 
-  public ActionBarSleepMessage(BBTweaksPlugin plugin) {
+  private final Plugin plugin;
+  private final ConfigKeeper<MainSection> config;
+
+  public ActionBarSleepMessage(Plugin plugin, ConfigKeeper<MainSection> config) {
+    this.plugin = plugin;
+    this.config = config;
+
+    this.startTimer();
+  }
+
+  private void startTimer() {
     Bukkit.getScheduler().runTaskTimer(plugin, () -> {
       for (var world : Bukkit.getWorlds()) {
         var worldMembers = world.getPlayers();
-        var sleepingPercentage = world.getGameRuleValue(GameRule.PLAYERS_SLEEPING_PERCENTAGE);
+        var sleepingPercentage = world.getGameRuleValue(GameRules.PLAYERS_SLEEPING_PERCENTAGE);
 
         if (sleepingPercentage == null)
           sleepingPercentage = 50;
@@ -40,20 +52,18 @@ public class ActionBarSleepMessage {
 
         var thresholdCount = (int) Math.ceil(nonIgnoredSleepCandidateCount * (sleepingPercentage / 100.0));
         var reachedThreshold = nonIgnoredSleepingCount >= thresholdCount;
-        var configuredMessage = plugin.accessConfigValue(
-          "actionBar." + (reachedThreshold ? "thresholdReached" : "thresholdNotYetReached")
-        );
 
-        //noinspection deprecation
-        var parameterizedMessage = TextComponent.fromLegacyText(
-          configuredMessage
-            .replace("{sleeping_count}", String.valueOf(nonIgnoredSleepingCount))
-            .replace("{candidate_count}", String.valueOf(nonIgnoredSleepCandidateCount))
-            .replace("{threshold_count}", String.valueOf(thresholdCount))
-        );
+        var message = reachedThreshold ? config.rootSection.abSleep.thresholdReached : config.rootSection.abSleep.thresholdNotYetReached;
+
+        var environment = new InterpretationEnvironment()
+          .withVariable("sleeping_count", nonIgnoredSleepingCount)
+          .withVariable("candidate_count", nonIgnoredSleepCandidateCount)
+          .withVariable("threshold_count", thresholdCount);
+
+        var component = message.interpret(SlotType.SINGLE_LINE_CHAT, environment).get(0);
 
         for (var worldMember : worldMembers)
-          worldMember.spigot().sendMessage(ChatMessageType.ACTION_BAR, parameterizedMessage);
+          worldMember.sendActionBar(component);
       }
     }, 0, 5);
   }

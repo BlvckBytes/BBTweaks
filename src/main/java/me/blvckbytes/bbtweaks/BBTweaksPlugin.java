@@ -1,5 +1,7 @@
 package me.blvckbytes.bbtweaks;
 
+import at.blvckbytes.cm_mapper.ConfigHandler;
+import at.blvckbytes.cm_mapper.ConfigKeeper;
 import com.gmail.nossr50.util.player.UserManager;
 import me.blvckbytes.bbtweaks.ab_sleep.ActionBarSleepMessage;
 import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
@@ -53,12 +55,15 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
   @Override
   public void onEnable() {
     try {
+      var configHandler = new ConfigHandler(this, "config");
+      var config = new ConfigKeeper<>(configHandler, "config.yml", MainSection.class);
+
       Objects.requireNonNull(getCommand("bbtweaks")).setExecutor(this);
 
       saveDefaultConfig();
       configuration = loadConfiguration();
 
-      new ActionBarSleepMessage(this);
+      new ActionBarSleepMessage(this, config);
 
       rdBreakTool = new RDBreakTool(this);
 

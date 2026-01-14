@@ -1,0 +1,3 @@
+abSleep:
+  thresholdNotYetReached: '<&a>Es sind <&2>{sleeping_count}<&a>/<&2>{threshold_count} <&a>benötigen Spielern im Bett'
+  thresholdReached: '<&a>Die Nacht wird durchgeschlafen'
