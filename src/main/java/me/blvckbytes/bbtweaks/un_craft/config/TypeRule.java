@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.un_craft.config;
 
+import at.blvckbytes.cm_mapper.mapper.MappingError;
 import at.blvckbytes.cm_mapper.mapper.section.CSIgnore;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
@@ -44,7 +45,7 @@ public class TypeRule extends ConfigSection {
       var tag = ItemMaterialTagRegistry.getByName(tagName.toLowerCase().trim());
 
       if (tag == null)
-        throw new IllegalStateException("Unknown tag: " + tagName);
+        throw new MappingError("Unknown tag: " + tagName);
 
       _tags.add(tag);
     }
@@ -70,7 +71,7 @@ public class TypeRule extends ConfigSection {
             try {
               matches = (boolean) isFlag.invoke(material);
             } catch (Throwable e) {
-              throw new IllegalStateException("Could not call isFlag-Method " + isFlag, e);
+              throw new MappingError("Could not call isFlag-Method " + isFlag + ": " + e.getMessage());
             }
 
             if (matches)
@@ -96,7 +97,7 @@ public class TypeRule extends ConfigSection {
       try {
         patterns.add(Pattern.compile(materialPattern));
       } catch (PatternSyntaxException e) {
-        throw new IllegalStateException("Malformed pattern \"" + materialPattern + "\"", e);
+        throw new MappingError("Malformed pattern \"" + materialPattern + "\": " + e.getMessage());
       }
     }
 
@@ -114,7 +115,7 @@ public class TypeRule extends ConfigSection {
       } catch (NoSuchMethodException ignored) {}
 
       if (targetMethod == null)
-        throw new IllegalStateException("Unknown is-flag: " + isFlagName);
+        throw new MappingError("Unknown is-flag: " + isFlagName);
 
       var modifiers = targetMethod.getModifiers();
 
@@ -124,11 +125,12 @@ public class TypeRule extends ConfigSection {
           || targetMethod.getParameterCount() != 0
           || targetMethod.getReturnType() != boolean.class
       )
-        throw new IllegalStateException("Unknown is-flag: " + isFlagName);
+        throw new MappingError("Unknown is-flag: " + isFlagName);
 
       if (!methods.add(targetMethod))
-        throw new IllegalStateException("Duplicate is-flag: " + isFlagName);
+        throw new MappingError("Duplicate is-flag: " + isFlagName);
     }
+
     return methods;
   }
 
