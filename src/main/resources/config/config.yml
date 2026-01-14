@@ -1,14 +1,14 @@
 mainCommand:
-  noPermission: '{lut.prefix} <&c>Dir fehlen die Zugriffsrechte für diesen Befehl!'
+  noPermission: '{lut.main_prefix} <&c>Dir fehlen die Zugriffsrechte für diesen Befehl!'
   commandUsage: |
-    {lut.prefix} <&c>Benutzung: /{command_label} <&7>\<
+    {lut.main_prefix} <&c>Benutzung: /{command_label} <&7>\<
       <&e *for-action="actions" *for-separator={<&7>,<space/>}>{action}</>
     <&7>>
-  configReloadSuccess: '{lut.prefix} <&a>Die Konfiguration wurde neu geladen.'
-  configReloadError: '{lut.prefix} <&c>Die Konfiguration konnte nicht erfolgreich neu geladen werden; siehe Konsole!'
-  setRdBreakerNoValidItem: '{lut.prefix} <&c>Du hältst kein valides Item in der Hand!'
-  setRdBreakerMetadata: '{lut.prefix} <&a>Dieses Item ist nun als RD-Breaker gekennzeichnet.'
-  setRdBreakerPlayersOnly: '{lut.prefix} <&c>Dieser Befehl ist nur Spielern zugänglich!'
+  configReloadSuccess: '{lut.main_prefix} <&a>Die Konfiguration wurde neu geladen.'
+  configReloadError: '{lut.main_prefix} <&c>Die Konfiguration konnte nicht erfolgreich neu geladen werden; siehe Konsole!'
+  setRdBreakerNoValidItem: '{lut.main_prefix} <&c>Du hältst kein valides Item in der Hand!'
+  setRdBreakerMetadata: '{lut.main_prefix} <&a>Dieses Item ist nun als RD-Breaker gekennzeichnet.'
+  setRdBreakerPlayersOnly: '{lut.main_prefix} <&c>Dieser Befehl ist nur Spielern zugänglich!'
 
 abSleep:
   thresholdNotYetReached: '<&a>Es sind <&2>{sleeping_count}<&a>/<&2>{threshold_count} <&a>benötigen Spielern im Bett'
@@ -22,11 +22,11 @@ furnaceLevel:
   levelsStored: '<&6>[XP] {old_level} → {new_level} <&7>({next_level_progress}% ↑)'
 
 getUuid:
-  noPermission: '{lut.prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
-  commandUsage: '{lut.prefix} <&c>Benutzung: /{command_label} \<Name>'
-  unknownName: '{lut.prefix} <&c>Konnte zum Namen <&4>{name} <&c>keine UUID finden!'
+  noPermission: '{lut.main_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  commandUsage: '{lut.main_prefix} <&c>Benutzung: /{command_label} \<Name>'
+  unknownName: '{lut.main_prefix} <&c>Konnte zum Namen <&4>{name} <&c>keine UUID finden!'
   resultMessage: |
-    {lut.prefix} <&7>Die UUID von <&a>{name} <&7>ist <&a><u>
+    {lut.main_prefix} <&7>Die UUID von <&a>{name} <&7>ist <&a><u>
       <hover-text value={<&a>Klicke, um die UUID zu kopieren!}>
         <to-clipboard [value]="uuid">
           {uuid}
@@ -109,6 +109,6 @@ unCraft:
   preferredMaterials:
 
 cLut:
-  prefix: '<&7>[<&5>BBTweaks<&7>]'
+  main_prefix: '<&7>[<&5>BBTweaks<&7>]'
   ping_prefix: '<&7>[<&6>Ping<&7>]'
   uc_prefix: '<&7>[<&6>UC<&7>]'
