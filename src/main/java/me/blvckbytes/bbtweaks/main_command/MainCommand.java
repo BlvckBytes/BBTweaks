@@ -16,6 +16,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class MainCommand implements CommandExecutor, TabExecutor {
 
@@ -29,12 +31,16 @@ public class MainCommand implements CommandExecutor, TabExecutor {
 
   private final ConfigKeeper<MainSection> config;
   private final RDBreakTool rdBreakTool;
-  private final Runnable configReloadHandler;
+  private final Logger logger;
 
-  public MainCommand(ConfigKeeper<MainSection> config, RDBreakTool rdBreakTool, Runnable configReloadHandler) {
+  public MainCommand(
+    ConfigKeeper<MainSection> config,
+    RDBreakTool rdBreakTool,
+    Logger logger
+  ) {
     this.config = config;
     this.rdBreakTool = rdBreakTool;
-    this.configReloadHandler = configReloadHandler;
+    this.logger = logger;
   }
 
   @Override
@@ -61,10 +67,10 @@ public class MainCommand implements CommandExecutor, TabExecutor {
       case RELOAD -> {
         try {
           config.reload();
-          configReloadHandler.run();
           config.rootSection.mainCommand.configReloadSuccess.sendMessage(sender);
         } catch (Exception e) {
           config.rootSection.mainCommand.configReloadError.sendMessage(sender);
+          logger.log(Level.SEVERE, "An error occurred while trying to reload the config", e);
         }
         return true;
       }

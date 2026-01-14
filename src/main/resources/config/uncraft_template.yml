@@ -177,7 +177,7 @@ unCraft:
     -
       recipe: '1 CAKE -> 1 CAKE'
       additionalMessages:
-        - '&e&o*The cake is a lie!*'
+        - '<&e><&o>*The cake is a lie!*'
   preferredMaterials:
     -
       tags:

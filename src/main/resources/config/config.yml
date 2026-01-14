@@ -101,6 +101,12 @@ unCraft:
     noReasonGiven: Es steht kein expliziter Grund zur Verfügung
     recoloringRecipe: Das Rezept für dieses Item stellt bloß eine Umfärbung dar
     smithingRecipe: Das Rezept für dieses Item stammt aus dem Schmiedetisch
+  typeExclusionRules:
+  resultSubtractionRules:
+  typeInclusionRules:
+  recipeExclusionRules:
+  additionalRecipes:
+  preferredMaterials:
 
 cLut:
   prefix: '<&7>[<&5>BBTweaks<&7>]'

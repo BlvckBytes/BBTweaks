@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.BBTweaksPlugin;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.un_craft.config.ChoiceEntry;
 import me.blvckbytes.bbtweaks.un_craft.config.OverviewEntry;
+import me.blvckbytes.bbtweaks.un_craft.config.TypeExclusionRule;
 import me.blvckbytes.bbtweaks.util.MutableInt;
 import me.blvckbytes.bbtweaks.util.TypeNameResolver;
 import net.kyori.adventure.text.Component;
@@ -19,8 +20,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.BlockStateMeta;
@@ -36,7 +35,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.util.*;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.ToIntFunction;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,26 +65,17 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   private final Logger logger;
   private final UnCraftRecipeMap recipeMap;
 
-  private final BBTweaksPlugin plugin;
   private final ConfigKeeper<MainSection> config;
   private final TypeNameResolver typeNameResolver;
 
   private final File unCraftRecipesTemplateFile;
   private final File unCraftRecipesFile;
 
-  private final List<TypeExclusionRule> typeExclusionRules;
-  private final List<IOTypeRule> typeInclusionRules;
-  private final List<ResultSubtractionRule> resultSubtractionRules;
-  private final List<RecipeExclusionRule> recipeExclusionRules;
-  private final List<PreferredMaterial> preferredMaterials;
-  private final List<AdditionalRecipe> additionalRecipes;
-
   public UnCraftCommand(
     BBTweaksPlugin plugin,
     ConfigKeeper<MainSection> config,
     TypeNameResolver typeNameResolver
   ) {
-    this.plugin = plugin;
     this.config = config;
     this.typeNameResolver = typeNameResolver;
     this.logger = plugin.getLogger();
@@ -95,22 +84,14 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     this.unCraftRecipesFile = createFileIfAbsent(plugin, "uncraft_recipes.txt");
 
     this.recipeMap = new UnCraftRecipeMap();
-    this.typeExclusionRules = new ArrayList<>();
-    this.typeInclusionRules = new ArrayList<>();
-    this.resultSubtractionRules = new ArrayList<>();
-    this.recipeExclusionRules = new ArrayList<>();
-    this.preferredMaterials = new ArrayList<>();
-    this.additionalRecipes = new ArrayList<>();
 
     // Give it some delay as for other plugins to register their recipes
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
-      loadConfig();
       discoverRecipesAndCreateTemplateFile();
       loadRecipesFromFile();
     }, 10);
 
-    plugin.registerConfigReloadListener(() -> {
-      loadConfig();
+    config.registerReloadListener(() -> {
       discoverRecipesAndCreateTemplateFile();
       loadRecipesFromFile();
     });
@@ -492,7 +473,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       config.rootSection.unCraft.noMoreSpace.sendMessage(sender);
 
     for (var additionalMessage : targetEntry.additionalMessages)
-      player.sendMessage(additionalMessage);
+      additionalMessage.sendMessage(player);
 
     return true;
   }
@@ -549,7 +530,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     // If there is only a single valid choice, we're talking about specific recipes here, like
     // a block of a certain wood-type, or an item of a certain dye; keep these.
     if (permittedChoices.size() > 1) {
-      for (var preferredMaterial : preferredMaterials) {
+      for (var preferredMaterial : config.rootSection.unCraft.preferredMaterials) {
         if (preferredMaterial.matches(permittedChoices))
           return preferredMaterial.preferredMaterial;
       }
@@ -588,7 +569,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   }
 
   private List<TypeExclusionRule> getApplyingExclusionRules(Material material, MaterialType materialType) {
-    return typeExclusionRules.stream().filter(rule -> rule.matches(material, materialType)).toList();
+    return config.rootSection.unCraft.typeExclusionRules.stream().filter(rule -> rule.matches(material, materialType)).toList();
   }
 
   public void loadRecipesFromFile() {
@@ -650,8 +631,8 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         try {
           var parsedRecipe = RecipeSyntax.tryParseRecipe(lineContents);
 
-          var additionalRecipe = additionalRecipes.stream()
-            .filter(entry -> entry.recipe().equals(parsedRecipe))
+          var additionalRecipe = config.rootSection.unCraft.additionalRecipes.stream()
+            .filter(entry -> entry._recipe.equals(parsedRecipe))
             .findFirst();
 
           var entry = UnCraftEntry.tryCreateWithScaledSingleUnit(
@@ -662,7 +643,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
           entry.subtractedResults.addAll(parsedRecipe.subtractedResults());
 
-          additionalRecipe.ifPresent(recipe -> entry.additionalMessages.addAll(recipe.additionalMessages()));
+          additionalRecipe.ifPresent(recipe -> entry.additionalMessages.addAll(recipe.additionalMessages));
 
           if (entry.subtractedResults.containsAll(entry.results.keySet()))
             throw new IllegalStateException("Recipe has no remaining results");
@@ -797,9 +778,9 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         exclusionReasons.add(config.rootSection.unCraft.additionalReasons.recoloringRecipe.asPlainString(null));
     }
 
-    for (var recipeExclusionRule : recipeExclusionRules) {
+    for (var recipeExclusionRule : config.rootSection.unCraft.recipeExclusionRules) {
       if (recipeExclusionRule.matches(recipeResultType, resultAmount, unCraftResults))
-        exclusionReasons.add(recipeExclusionRule.reason());
+        exclusionReasons.add(recipeExclusionRule.reason);
     }
 
     if (isRecipeIncluded(recipeResultType, unCraftResults.keySet()))
@@ -818,7 +799,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   }
 
   private boolean isRecipeIncluded(Material uncraftedItem, Set<Material> unCraftResults) {
-    for (var typeInclusionRule : typeInclusionRules) {
+    for (var typeInclusionRule : config.rootSection.unCraft.typeInclusionRules) {
       if (typeInclusionRule.matches(uncraftedItem, MaterialType.UNCRAFTED_ITEM))
         return true;
 
@@ -870,14 +851,14 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       }
     }
 
-    for (var additionalRecipe : additionalRecipes) {
+    for (var additionalRecipe : config.rootSection.unCraft.additionalRecipes) {
       var unCraftRecipe = UnCraftEntry.tryCreateWithScaledSingleUnit(
-        additionalRecipe.recipe().uncraftedItemAmount(),
-        additionalRecipe.recipe().uncraftResults(),
+        additionalRecipe._recipe.uncraftedItemAmount(),
+        additionalRecipe._recipe.uncraftResults(),
         Collections.emptySet()
       );
 
-      localUnCraftRecipeMap.addUnCraftingRecipe(additionalRecipe.recipe().uncraftedItemType(), unCraftRecipe);
+      localUnCraftRecipeMap.addUnCraftingRecipe(additionalRecipe._recipe.uncraftedItemType(), unCraftRecipe);
     }
 
     try (var writer = new FileWriter(unCraftRecipesTemplateFile)) {
@@ -1052,51 +1033,8 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     return null;
   }
 
-  private void loadConfig() {
-    typeExclusionRules.clear();
-    loadMapLists("unCraft.typeExclusionRules", TypeExclusionRule::new, typeExclusionRules);
-    logger.info("Loaded " + typeExclusionRules.size() + " uncraft type-exclusion-rules");
-
-    typeInclusionRules.clear();
-    loadMapLists("unCraft.typeInclusionRules", IOTypeRule::new, typeInclusionRules);
-    logger.info("Loaded " + typeInclusionRules.size() + " uncraft type-inclusion-rules");
-
-    recipeExclusionRules.clear();
-    loadMapLists("unCraft.recipeExclusionRules", RecipeExclusionRule::fromConfig, recipeExclusionRules);
-    logger.info("Loaded " + recipeExclusionRules.size() + " uncraft recipe-exclusion-rules");
-
-    resultSubtractionRules.clear();
-    loadMapLists("unCraft.resultSubtractionRules", section -> new ResultSubtractionRule(section, logger), resultSubtractionRules);
-    logger.info("Loaded " + resultSubtractionRules.size() + " uncraft result-subtraction-rules");
-
-    preferredMaterials.clear();
-    loadMapLists("unCraft.preferredMaterials", PreferredMaterial::new, preferredMaterials);
-    logger.info("Loaded " + preferredMaterials.size() + " uncraft preferred materials");
-
-    additionalRecipes.clear();
-    loadMapLists("unCraft.additionalRecipes", AdditionalRecipe::fromConfig, additionalRecipes);
-    logger.info("Loaded " + additionalRecipes.size() + " additional uncraft-recipes");
-  }
-
-  private <T> void loadMapLists(String path, Function<ConfigurationSection, T> mapper, List<T> output) {
-    var temporaryConfig = new YamlConfiguration();
-
-    int entryNumber = 0;
-
-    for (Map<?, ?> exclusionRule : plugin.getConfiguration().getMapList(path)) {
-      var temporarySection = temporaryConfig.createSection("root", exclusionRule);
-      ++entryNumber;
-
-      try {
-        output.add(mapper.apply(temporarySection));
-      } catch (Throwable e) {
-        logger.log(Level.SEVERE, "Could not parse the #" + entryNumber + " entry of " + path, e);
-      }
-    }
-  }
-
   private void applySubtractionRules(Material recipeResultType, UnCraftEntry entry) {
-    for (var resultSubtractionRule : resultSubtractionRules) {
+    for (var resultSubtractionRule : config.rootSection.unCraft.resultSubtractionRules) {
       if (!resultSubtractionRule.matches(recipeResultType))
         continue;
 

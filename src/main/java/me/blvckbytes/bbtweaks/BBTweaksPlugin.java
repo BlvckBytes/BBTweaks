@@ -18,21 +18,14 @@ import me.blvckbytes.bbtweaks.util.TypeNameResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 
 public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCompleter {
 
-  private YamlConfiguration configuration;
   private LastLocationStore lastLocationStore;
-
-  private final List<Runnable> configReloadListeners = new ArrayList<>();
 
   // TODO: Idea - /empty-out [all]
 
@@ -44,20 +37,13 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       var configHandler = new ConfigHandler(this, "config");
       var config = new ConfigKeeper<>(configHandler, "config.yml", MainSection.class);
 
-      saveDefaultConfig();
-      configuration = loadConfiguration();
-
       new ActionBarSleepMessage(this, config);
 
       var rdBreakTool = new RDBreakTool(this);
 
       getServer().getPluginManager().registerEvents(rdBreakTool, this);
 
-      // TODO: Remove this callback as an arg as soon as everything's migrated to CMMapper
-      var mainCommandExecutor = new MainCommand(config, rdBreakTool, () -> {
-        this.configuration = loadConfiguration();
-        this.configReloadListeners.forEach(Runnable::run);
-      });
+      var mainCommandExecutor = new MainCommand(config, rdBreakTool, getLogger());
 
       Objects.requireNonNull(getCommand("bbtweaks")).setExecutor(mainCommandExecutor);
 
@@ -134,25 +120,5 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       lastLocationStore.save();
       lastLocationStore = null;
     }
-  }
-
-  private YamlConfiguration loadConfiguration() {
-    var configuration = new YamlConfiguration();
-
-    try {
-      configuration.load(new File(getDataFolder(), "config.yml"));
-    } catch (Exception e) {
-      getLogger().log(Level.SEVERE, "Could not load the configuration-file", e);
-    }
-
-    return configuration;
-  }
-
-  public YamlConfiguration getConfiguration() {
-    return configuration;
-  }
-
-  public void registerConfigReloadListener(Runnable handler) {
-    configReloadListeners.add(handler);
   }
 }

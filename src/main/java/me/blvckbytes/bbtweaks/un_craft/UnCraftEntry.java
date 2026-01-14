@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.un_craft;
 
+import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import org.bukkit.Material;
 
 import java.util.*;
@@ -11,7 +12,7 @@ public class UnCraftEntry {
   public final Map<Material, Integer> results;
   public final Set<Material> subtractedResults;
   public final Set<String> exclusionReasons;
-  public final List<String> additionalMessages;
+  public final List<ComponentMarkup> additionalMessages;
 
   private UnCraftEntry(int inputAmount, Map<Material, Integer> results, Set<String> exclusionReasons) {
     this.inputAmount = inputAmount;
