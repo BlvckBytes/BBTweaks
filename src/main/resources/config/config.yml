@@ -83,7 +83,7 @@ unCraft:
     <container *if="len(reduced_amounts) > 0">
       <space/>
       <&7 *if="whole_units_uncraft_count > 0">und </>
-      <&a>{len(reduced_amounts)}x reduziert <&7>(<&a *for-amount="reduced_amounts">{amount} Stück</><&7>)
+      <&a>{len(reduced_amounts)}x reduziert <&7>(<&a *for-amount="reduced_amounts" *for-separator={<&7>,<space/>}>{amount} Stück</><&7>)
     </container>
     <space/><&7>in insgesamt <&a>{results} <&7>zurückentwickelt
     <container *if="subtracted_items"><&7>; einbehalten wurde <&c>{subtracted_items}</container>
