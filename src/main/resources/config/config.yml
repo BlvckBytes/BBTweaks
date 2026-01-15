@@ -28,7 +28,7 @@ getUuid:
   resultMessage: |
     {lut.main_prefix} <&7>Die UUID von <&a>{name} <&7>ist <&a><u>
       <hover-text value={<&a>Klicke, um die UUID zu kopieren!}>
-        <to-clipboard [value]="uuid">
+        <to-clipboard value=`{uuid}`>
           {uuid}
     </u><&7>!
 
@@ -66,14 +66,14 @@ unCraft:
       - <&a>#{choice.number}<&7>: <&a>{choice.results}
   invalidSelection: '{lut.uc_prefix} <&c>Ungültige Auswahl: <&4>{selection}<&c>!'
   unacceptedSubtraction: '{lut.uc_prefix} <&7>Bitte akzeptiere zuerst die Einbehaltung von <&c>{subtracted_results} <&7>je <&c>{uncraft_unit eq 1 then "" else `{uncraft_unit} `}Stück <&7>mit <&c>-s<&7>!'
-  notEnoughItems: '{lut.uc_prefix} <&c>Vom Item <&4><tr [key]="result_key"/> <&c>werden mindestens <&4>{required_amount} Stück <&c>benötigt; nutze <&4>-r<&c>, um Reduzierungen zu akzeptieren!'
-  notEnoughItemsReduced: '{lut.uc_prefix} <&c>Vom Item <&4><tr [key]="result_key"/> <&c>werden mindestens <&4>{required_amount} Stück <&c>benötigt, da sonst keine Items übrig bleiben würden!'
+  notEnoughItems: '{lut.uc_prefix} <&c>Vom Item <&4><tr key=`{result_key}`/> <&c>werden mindestens <&4>{required_amount} Stück <&c>benötigt; nutze <&4>-r<&c>, um Reduzierungen zu akzeptieren!'
+  notEnoughItemsReduced: '{lut.uc_prefix} <&c>Vom Item <&4><tr key=`{result_key}`/> <&c>werden mindestens <&4>{required_amount} Stück <&c>benötigt, da sonst keine Items übrig bleiben würden!'
   droppedItems: '{lut.uc_prefix} <&7>Dein Inventar <&6>ist voll<&7>; droppe Items: <&6>{items}<&7>!'
   noMoreSpace: '{lut.uc_prefix} <&7>Du hast <&6>keinen Platz <&7>mehr im Inventar; <&6>breche vorzeitig ab<&7>!'
   notEnoughSpace: '{lut.uc_prefix} <&c>Du hast nicht genug Platz im Inventar!'
-  itemOverview: '<container *for-item="items" *for-separator={<&7>,<space/>}>{item.amount}x <tr [key]="item.key"/>'
+  itemOverview: '<container *for-item="items" *for-separator={<&7>,<space/>}>{item.amount}x <tr key=`{item.key}`/>'
   successfulUnCraft: |
-    {lut.uc_prefix} <&7>Das Item <&a><tr [key]="uncrafted_key"/> <&7>wurde
+    {lut.uc_prefix} <&7>Das Item <&a><tr key=`{uncrafted_key}`/> <&7>wurde
     <container *if="whole_units_uncraft_count > 0">
       <space/><&a>{whole_units_uncraft_count}x
       <container *if="uncraft_unit neq 1">
