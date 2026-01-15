@@ -6,10 +6,9 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.BBTweaksPlugin;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.un_craft.config.ChoiceEntry;
-import me.blvckbytes.bbtweaks.un_craft.config.OverviewEntry;
+import me.blvckbytes.bbtweaks.un_craft.config.OverviewItem;
 import me.blvckbytes.bbtweaks.un_craft.config.TypeExclusionRule;
 import me.blvckbytes.bbtweaks.util.MutableInt;
-import me.blvckbytes.bbtweaks.util.TypeNameResolver;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -66,18 +65,12 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   private final UnCraftRecipeMap recipeMap;
 
   private final ConfigKeeper<MainSection> config;
-  private final TypeNameResolver typeNameResolver;
 
   private final File unCraftRecipesTemplateFile;
   private final File unCraftRecipesFile;
 
-  public UnCraftCommand(
-    BBTweaksPlugin plugin,
-    ConfigKeeper<MainSection> config,
-    TypeNameResolver typeNameResolver
-  ) {
+  public UnCraftCommand(BBTweaksPlugin plugin, ConfigKeeper<MainSection> config) {
     this.config = config;
-    this.typeNameResolver = typeNameResolver;
     this.logger = plugin.getLogger();
 
     this.unCraftRecipesTemplateFile = createFileIfAbsent(plugin, "uncraft_recipes_template.txt");
@@ -217,7 +210,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
         for (var entryIndex = 0; entryIndex < permittedEntries.size(); ++entryIndex) {
           var entryResults = permittedEntries.get(entryIndex).results;
-          choices.add(new ChoiceEntry(entryIndex + 1, generateOverview(player, entryResults.keySet(), entryResults::get)));
+          choices.add(new ChoiceEntry(entryIndex + 1, generateOverview(entryResults.keySet(), entryResults::get)));
         }
 
         config.rootSection.unCraft.choicesScreen.sendMessage(
@@ -304,7 +297,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         sender,
         new InterpretationEnvironment()
           .withVariable("uncraft_unit", targetEntry.inputAmount)
-          .withVariable("subtracted_results", generateOverview(player, targetEntry.subtractedResults, targetEntry.results::get))
+          .withVariable("subtracted_results", generateOverview(targetEntry.subtractedResults, targetEntry.results::get))
       );
 
       return true;
@@ -427,7 +420,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         sender,
         new InterpretationEnvironment()
           .withVariable("required_amount", requiredAmount)
-          .withVariable("result_item", typeNameResolver.resolve(player, heldType))
+          .withVariable("result_key", heldType.translationKey())
       );
 
       return true;
@@ -436,15 +429,15 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     var subtractedItemsPart = (
       subtractedItems.isEmpty()
         ? null
-        : generateOverview(player, subtractedItems.keySet(), k -> subtractedItems.get(k).value)
+        : generateOverview(subtractedItems.keySet(), k -> subtractedItems.get(k).value)
     );
 
-    var resultsPart = generateOverview(player, itemsToAdd.keySet(), k -> itemsToAdd.get(k).value);
+    var resultsPart = generateOverview(itemsToAdd.keySet(), k -> itemsToAdd.get(k).value);
 
     config.rootSection.unCraft.successfulUnCraft.sendMessage(
       sender,
       new InterpretationEnvironment()
-        .withVariable("uncrafted_item", typeNameResolver.resolve(player, heldType))
+        .withVariable("uncrafted_key", heldType.translationKey())
         .withVariable("whole_units_uncraft_count", wholeUnitsUnCraftCounter)
         .withVariable("results", resultsPart)
         .withVariable("uncraft_unit", targetEntry.inputAmount)
@@ -463,7 +456,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       config.rootSection.unCraft.droppedItems.sendMessage(
         sender,
         new InterpretationEnvironment()
-          .withVariable("items", generateOverview(player, itemsToDrop.keySet(), k -> itemsToDrop.get(k).value))
+          .withVariable("items", generateOverview(itemsToDrop.keySet(), k -> itemsToDrop.get(k).value))
       );
 
       forEachStackOfTypeCountMap(itemsToDrop, player::dropItem);
@@ -492,11 +485,11 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     }
   }
 
-  private List<Component> generateOverview(Player player, Collection<Material> materials, ToIntFunction<Material> amountAccessor) {
-    var items = new ArrayList<OverviewEntry>();
+  private List<Component> generateOverview(Collection<Material> materials, ToIntFunction<Material> amountAccessor) {
+    var items = new ArrayList<OverviewItem>();
 
     for (var material : materials)
-      items.add(new OverviewEntry(typeNameResolver.resolve(player, material), amountAccessor.applyAsInt(material)));
+      items.add(new OverviewItem(material.translationKey(), amountAccessor.applyAsInt(material)));
 
     return config.rootSection.unCraft.itemOverview.interpret(
       SlotType.SINGLE_LINE_CHAT,

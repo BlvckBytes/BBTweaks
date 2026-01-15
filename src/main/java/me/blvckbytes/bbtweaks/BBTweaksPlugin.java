@@ -14,7 +14,6 @@ import me.blvckbytes.bbtweaks.main_command.MainCommand;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
-import me.blvckbytes.bbtweaks.util.TypeNameResolver;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
@@ -67,9 +66,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       new AdditionalRecipes(getLogger(), config);
 
-      var typeNameResolver = TypeNameResolver.load(getLogger());
-
-      var unCraftCommand = new UnCraftCommand(this, config, typeNameResolver);
+      var unCraftCommand = new UnCraftCommand(this, config);
 
       Objects.requireNonNull(getCommand("uncraft")).setExecutor(unCraftCommand);
 

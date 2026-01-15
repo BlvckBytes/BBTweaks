@@ -5,12 +5,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
-public record OverviewEntry(String type, int amount) implements DirectFieldAccess {
+public record OverviewItem(String key, int amount) implements DirectFieldAccess {
 
   @Override
   public @Nullable Object accessField(String rawIdentifier) {
     return switch (rawIdentifier) {
-      case "type" -> type;
+      case "key" -> key;
       case "amount" -> amount;
       default -> DirectFieldAccess.UNKNOWN_FIELD_SENTINEL;
     };
@@ -18,6 +18,6 @@ public record OverviewEntry(String type, int amount) implements DirectFieldAcces
 
   @Override
   public Set<String> getAvailableFields() {
-    return Set.of("type", "amount");
+    return Set.of("key", "amount");
   }
 }
