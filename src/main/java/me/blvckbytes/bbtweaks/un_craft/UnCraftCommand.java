@@ -217,7 +217,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
         for (var entryIndex = 0; entryIndex < permittedEntries.size(); ++entryIndex) {
           var entryResults = permittedEntries.get(entryIndex).results;
-          choices.add(new ChoiceEntry(entryIndex + 1, generateOverview(player, entryResults.keySet(), entryResults::get, true)));
+          choices.add(new ChoiceEntry(entryIndex + 1, generateOverview(player, entryResults.keySet(), entryResults::get)));
         }
 
         config.rootSection.unCraft.choicesScreen.sendMessage(
@@ -304,7 +304,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         sender,
         new InterpretationEnvironment()
           .withVariable("uncraft_unit", targetEntry.inputAmount)
-          .withVariable("subtracted_results", generateOverview(player, targetEntry.subtractedResults, targetEntry.results::get, false))
+          .withVariable("subtracted_results", generateOverview(player, targetEntry.subtractedResults, targetEntry.results::get))
       );
 
       return true;
@@ -436,10 +436,10 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     var subtractedItemsPart = (
       subtractedItems.isEmpty()
         ? null
-        : generateOverview(player, subtractedItems.keySet(), k -> subtractedItems.get(k).value, false)
+        : generateOverview(player, subtractedItems.keySet(), k -> subtractedItems.get(k).value)
     );
 
-    var resultsPart = generateOverview(player, itemsToAdd.keySet(), k -> itemsToAdd.get(k).value, true);
+    var resultsPart = generateOverview(player, itemsToAdd.keySet(), k -> itemsToAdd.get(k).value);
 
     config.rootSection.unCraft.successfulUnCraft.sendMessage(
       sender,
@@ -463,7 +463,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       config.rootSection.unCraft.droppedItems.sendMessage(
         sender,
         new InterpretationEnvironment()
-          .withVariable("items", generateOverview(player, itemsToDrop.keySet(), k -> itemsToDrop.get(k).value, true))
+          .withVariable("items", generateOverview(player, itemsToDrop.keySet(), k -> itemsToDrop.get(k).value))
       );
 
       forEachStackOfTypeCountMap(itemsToDrop, player::dropItem);
@@ -492,14 +492,13 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
     }
   }
 
-  private List<Component> generateOverview(Player player, Collection<Material> materials, ToIntFunction<Material> amountAccessor, boolean resultsOrSubtractions) {
-    var message = resultsOrSubtractions ? config.rootSection.unCraft.resultOverview : config.rootSection.unCraft.subtractionOverview;
+  private List<Component> generateOverview(Player player, Collection<Material> materials, ToIntFunction<Material> amountAccessor) {
     var items = new ArrayList<OverviewEntry>();
 
     for (var material : materials)
       items.add(new OverviewEntry(typeNameResolver.resolve(player, material), amountAccessor.applyAsInt(material)));
 
-    return message.interpret(
+    return config.rootSection.unCraft.itemOverview.interpret(
       SlotType.SINGLE_LINE_CHAT,
       new InterpretationEnvironment()
         .withVariable("items", items)

@@ -24,8 +24,7 @@ public class UnCraftSection extends ConfigSection {
   public ComponentMarkup droppedItems;
   public ComponentMarkup noMoreSpace;
   public ComponentMarkup notEnoughSpace;
-  public ComponentMarkup resultOverview;
-  public ComponentMarkup subtractionOverview;
+  public ComponentMarkup itemOverview;
   public ComponentMarkup successfulUnCraft;
 
   public @CSAlways AdditionalReasonsSection additionalReasons;
