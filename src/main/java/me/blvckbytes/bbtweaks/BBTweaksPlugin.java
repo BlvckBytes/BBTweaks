@@ -11,6 +11,7 @@ import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.main_command.MainCommand;
+import me.blvckbytes.bbtweaks.mechanic.SignMechanicManager;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
@@ -25,6 +26,7 @@ import java.util.logging.Level;
 public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCompleter {
 
   private LastLocationStore lastLocationStore;
+  private SignMechanicManager mechanicManager;
 
   // TODO: Idea - /empty-out [all]
 
@@ -105,6 +107,8 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
         getLogger().info("Successfully set up furnace-level displays!");
       }, 10L);
+
+      mechanicManager = new SignMechanicManager(this, config);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);
@@ -116,6 +120,11 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     if (lastLocationStore != null) {
       lastLocationStore.save();
       lastLocationStore = null;
+    }
+
+    if (mechanicManager != null) {
+      mechanicManager.shutdown();
+      mechanicManager = null;
     }
   }
 }

@@ -10,6 +10,7 @@ import me.blvckbytes.bbtweaks.back.BackOverrideSection;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
 import me.blvckbytes.bbtweaks.main_command.MainCommandSection;
+import me.blvckbytes.bbtweaks.mechanic.MechanicSection;
 import me.blvckbytes.bbtweaks.ping.PingSection;
 import me.blvckbytes.bbtweaks.un_craft.config.UnCraftSection;
 
@@ -24,6 +25,7 @@ public class MainSection extends ConfigSection {
   public PingSection ping;
   public AdditionalRecipesSection additionalRecipes;
   public UnCraftSection unCraft;
+  public MechanicSection mechanic;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

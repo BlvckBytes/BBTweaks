@@ -107,7 +107,17 @@ unCraft:
   additionalRecipes:
   preferredMaterials:
 
+mechanic:
+  clock:
+    noPermission: '{lut.clock_prefix} <&c>Dir fehlen die Zugriffsrechte, um eine Clock zu erstellen!'
+    periodDurationAbsent: '{lut.clock_prefix} <&c>Fehlende Periodendauer in der dritten Zeile des Schildes!'
+    periodDurationNoPositiveInt: '{lut.clock_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>ist keine positive Ganzzahl!'
+    periodDurationTooLow: '{lut.clock_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>unterschreitet den Minimalwert von <&4>{min_duration}<&c>!'
+    periodDurationUneven: '{lut.clock_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>ist ungerade; Periodendauer = 2 * Umschaltdauer!'
+    creationSuccess: '{lut.clock_prefix} <&7>Die Clock bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit einer Periodendauer von <&a>{duration} Ticks <&7>erstellt!'
+
 cLut:
   main_prefix: '<&7>[<&5>BBTweaks<&7>]'
   ping_prefix: '<&7>[<&6>Ping<&7>]'
   uc_prefix: '<&7>[<&6>UC<&7>]'
+  clock_prefix: '<&7>[<&6>Clock<&7>]'

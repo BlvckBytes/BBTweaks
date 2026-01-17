@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.furnace_level_display;
+package me.blvckbytes.bbtweaks.util;
 
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
@@ -15,6 +15,31 @@ public class CacheByPosition<T> {
 
   public CacheByPosition() {
     this.cachedItemByFastHashByWorldId = new HashMap<>();
+  }
+
+  public void forEachValue(IterationHandler<T> handler) {
+    for (var bucket : cachedItemByFastHashByWorldId.values()) {
+      for (var itemIterator = bucket.values().iterator(); itemIterator.hasNext();) {
+        var decision = handler.handle(itemIterator.next());
+
+        if (decision == IterationDecision.REMOVE_AND_CONTINUE || decision == IterationDecision.REMOVE_AND_BREAK)
+          itemIterator.remove();
+
+        if (decision == IterationDecision.BREAK || decision == IterationDecision.REMOVE_AND_BREAK)
+          return;
+      }
+    }
+  }
+
+  public void clear() {
+    this.cachedItemByFastHashByWorldId.clear();
+  }
+
+  public T put(World world, int x, int y, int z, T value) {
+    var worldId = world.getUID();
+    var worldBucket = cachedItemByFastHashByWorldId.computeIfAbsent(worldId, k -> new Long2ObjectOpenHashMap<>());
+    var blockId = computeWorldlessBlockId(x, y, z);
+    return worldBucket.put(blockId, value);
   }
 
   public T computeIfAbsent(World world, int x, int y, int z, Supplier<T> computeFunction) {
