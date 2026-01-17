@@ -15,6 +15,8 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.CookingRecipe;
+import org.bukkit.inventory.FurnaceInventory;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,9 +25,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -38,14 +38,34 @@ public class FurnaceLevelDisplay implements Listener {
     long lastFurnaceBlockId;
   }
 
+  private record FurnaceAccess(
+    Reference2IntMap<?> recipesUsed,
+    FurnaceInventory inventory
+  ) {}
+
+  private static final List<Tag<Material>> ORE_TAGS = List.of(
+    Tag.ITEMS_COAL_ORES,
+    Tag.ITEMS_COPPER_ORES,
+    Tag.ITEMS_DIAMOND_ORES,
+    Tag.ITEMS_GOLD_ORES,
+    Tag.ITEMS_IRON_ORES,
+    Tag.ITEMS_LAPIS_ORES,
+    Tag.ITEMS_EMERALD_ORES,
+    Tag.ITEMS_REDSTONE_ORES
+  );
+
   private final @Nullable McMMOIntegration mcMMOIntegration;
   private final ConfigKeeper<MainSection> config;
   private final Logger logger;
 
   private final Map<Class<? extends BlockState>, RecipesUsedAccessor> accessorByType;
   private final Map<UUID, PlayerData> dataByPlayerId;
+
   private final Object2FloatMap<String> recipeExperienceByKey;
-  private final CacheByPosition<Reference2IntMap<?>> recipesUsedCache;
+  private final HashSet<String> oreRecipeKeys;
+  private final HashSet<Material> oreRecipeResults;
+
+  private final CacheByPosition<FurnaceAccess> furnaceAccessCache;
 
   private final MethodHandle resourceKeyGetIdentifier;
   private final MethodHandle identifierGetPath;
@@ -63,7 +83,9 @@ public class FurnaceLevelDisplay implements Listener {
     this.dataByPlayerId = new HashMap<>();
     this.recipeExperienceByKey = new Object2FloatOpenHashMap<>();
     this.recipeExperienceByKey.defaultReturnValue(-1);
-    this.recipesUsedCache = new CacheByPosition<>();
+    this.oreRecipeKeys = new HashSet<>();
+    this.oreRecipeResults = new HashSet<>();
+    this.furnaceAccessCache = new CacheByPosition<>();
 
     var publicLookup = MethodHandles.publicLookup();
 
@@ -90,20 +112,20 @@ public class FurnaceLevelDisplay implements Listener {
       if (!(tileEntity instanceof Furnace))
         continue;
 
-      recipesUsedCache.invalidate(tileEntity.getWorld(), tileEntity.getX(), tileEntity.getY(), tileEntity.getZ());
+      furnaceAccessCache.invalidate(tileEntity.getWorld(), tileEntity.getX(), tileEntity.getY(), tileEntity.getZ());
     }
   }
 
   @EventHandler(ignoreCancelled = true)
   public void onBreak(BlockBreakEvent event) {
     var block = event.getBlock();
-    recipesUsedCache.invalidate(block.getWorld(), block.getX(), block.getY(), block.getZ());
+    furnaceAccessCache.invalidate(block.getWorld(), block.getX(), block.getY(), block.getZ());
   }
 
   @EventHandler(ignoreCancelled = true)
   public void onPlace(BlockPlaceEvent event) {
     var block = event.getBlock();
-    recipesUsedCache.invalidate(block.getWorld(), block.getX(), block.getY(), block.getZ());
+    furnaceAccessCache.invalidate(block.getWorld(), block.getX(), block.getY(), block.getZ());
   }
 
   public boolean setUp() {
@@ -119,8 +141,29 @@ public class FurnaceLevelDisplay implements Listener {
       if (!(recipeIterator.next() instanceof CookingRecipe<?> cookingRecipe))
         continue;
 
-      recipeExperienceByKey.put(cookingRecipe.getKey().getKey(), cookingRecipe.getExperience());
+      var key = cookingRecipe.getKey().getKey();
+
+      recipeExperienceByKey.put(key, cookingRecipe.getExperience());
+
+      if (isOreRecipe(cookingRecipe)) {
+        oreRecipeKeys.add(key);
+        oreRecipeResults.add(cookingRecipe.getResult().getType());
+      }
     }
+  }
+
+  private boolean isOreRecipe(CookingRecipe<?> cookingRecipe) {
+    if (!(cookingRecipe.getInputChoice() instanceof RecipeChoice.MaterialChoice materialChoice))
+      return false;
+
+    for (var inputChoice : materialChoice.getChoices()) {
+      for (var oreTag : ORE_TAGS) {
+        if (oreTag.isTagged(inputChoice))
+          return true;
+      }
+    }
+
+    return false;
   }
 
   private boolean setUpAccessors() {
@@ -235,7 +278,7 @@ public class FurnaceLevelDisplay implements Listener {
       if (playerData != null && playerData.lastFurnaceBlockId == blockId && System.currentTimeMillis() - playerData.lastSendStamp < 500)
         continue;
 
-      var recipesUsed = recipesUsedCache.computeIfAbsent(
+      var furnaceAccess = furnaceAccessCache.computeIfAbsent(
         targetBlock.getWorld(),
         targetBlock.getX(), targetBlock.getY(), targetBlock.getZ(),
         () -> {
@@ -245,11 +288,14 @@ public class FurnaceLevelDisplay implements Listener {
           if (accessor == null)
             return null;
 
-          return accessor.access(furnaceState);
+          var accessedRecipesUsed = accessor.access(furnaceState);
+          var inventory = ((Furnace) furnaceState).getInventory();
+
+          return new FurnaceAccess(accessedRecipesUsed, inventory);
         }
       );
 
-      if (recipesUsed == null)
+      if (furnaceAccess == null)
         continue;
 
       if (playerData == null) {
@@ -260,14 +306,15 @@ public class FurnaceLevelDisplay implements Listener {
       playerData.lastSendStamp = System.currentTimeMillis();
       playerData.lastFurnaceBlockId = blockId;
 
-      displayForPlayer(player, recipesUsed);
+      displayForPlayer(player, furnaceAccess);
     }
   }
 
-  private void displayForPlayer(Player player, Reference2IntMap<?> recipesUsed) {
+  private void displayForPlayer(Player player, FurnaceAccess furnaceAccess) {
     float totalExperience = 0;
+    var encounteredOreRecipe = false;
 
-    for (var recipeEntry : recipesUsed.reference2IntEntrySet()) {
+    for (var recipeEntry : furnaceAccess.recipesUsed.reference2IntEntrySet()) {
       var recipeKey = recipeEntry.getKey();
 
       String recipePath;
@@ -290,6 +337,9 @@ public class FurnaceLevelDisplay implements Listener {
       var totalRecipeSmeltCount = recipeEntry.getIntValue();
 
       totalExperience += recipeExperience * totalRecipeSmeltCount;
+
+      if (!encounteredOreRecipe)
+        encounteredOreRecipe = oreRecipeKeys.contains(recipePath);
     }
 
     if (totalExperience == 0) {
@@ -297,7 +347,14 @@ public class FurnaceLevelDisplay implements Listener {
       return;
     }
 
-    if (mcMMOIntegration != null) {
+    var furnaceResult = furnaceAccess.inventory.getResult();
+    var outputType = furnaceResult == null ? null : furnaceResult.getType();
+
+    // Let's be lenient and allow for a vacant result-slot
+    var hasOreResultInOutput = outputType == null || outputType.isAir() || oreRecipeResults.contains(outputType);
+
+    // The mcMMO xp-boost only applies if the item the user took out is an ore.
+    if (mcMMOIntegration != null && encounteredOreRecipe && hasOreResultInOutput) {
       var wholePart = (int) Math.floor(totalExperience);
       var fractionalPart = totalExperience - wholePart;
       totalExperience = mcMMOIntegration.vanillaXPBoost(player, wholePart) + fractionalPart;
