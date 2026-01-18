@@ -63,17 +63,17 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
       return false;
     }
 
-    if (signalLength < config.rootSection.mechanic.pulseExtender._minSignalLength) {
+    if (signalLength < config.rootSection.mechanic.pulseExtender.minSignalLength) {
       if (creator != null) {
         config.rootSection.mechanic.pulseExtender.signalLengthTooLow.sendMessage(
           creator,
           new InterpretationEnvironment()
             .withVariable("signal_length", signalLength)
-            .withVariable("min_signal_length", config.rootSection.mechanic.pulseExtender._minSignalLength)
+            .withVariable("min_signal_length", config.rootSection.mechanic.pulseExtender.minSignalLength)
         );
       }
 
-      signalLength = config.rootSection.mechanic.pulseExtender._minSignalLength;
+      signalLength = config.rootSection.mechanic.pulseExtender.minSignalLength;
       SignUtil.setPlainTextLine(sign, SIGNAL_LENGTH_LINE_INDEX, String.valueOf(signalLength), true);
     }
 

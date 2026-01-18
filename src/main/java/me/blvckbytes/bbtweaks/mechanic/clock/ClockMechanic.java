@@ -75,17 +75,17 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
       return false;
     }
 
-    if (periodDuration < config.rootSection.mechanic.clock._minTickPeriod) {
+    if (periodDuration < config.rootSection.mechanic.clock.minTickPeriod) {
       if (creator != null) {
         config.rootSection.mechanic.clock.periodDurationTooLow.sendMessage(
           creator,
           new InterpretationEnvironment()
             .withVariable("duration", periodDuration)
-            .withVariable("min_duration", config.rootSection.mechanic.clock._minTickPeriod)
+            .withVariable("min_duration", config.rootSection.mechanic.clock.minTickPeriod)
         );
       }
 
-      periodDuration = config.rootSection.mechanic.clock._minTickPeriod;
+      periodDuration = config.rootSection.mechanic.clock.minTickPeriod;
       SignUtil.setPlainTextLine(sign, PERIOD_DURATION_LINE_INDEX, String.valueOf(periodDuration), true);
     }
 
