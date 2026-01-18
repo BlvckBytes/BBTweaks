@@ -110,15 +110,22 @@ unCraft:
 mechanic:
   clock:
     minTickPeriod: 4
-    noPermission: '{lut.clock_prefix} <&c>Dir fehlen die Zugriffsrechte, um eine Clock zu erstellen!'
-    periodDurationAbsent: '{lut.clock_prefix} <&c>Fehlende Periodendauer in der dritten Zeile des Schildes!'
-    periodDurationNoPositiveInt: '{lut.clock_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>ist keine positive Ganzzahl!'
-    periodDurationTooLow: '{lut.clock_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>unterschreitet den Minimalwert von <&4>{min_duration}<&c>!'
-    periodDurationUneven: '{lut.clock_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>ist ungerade; Periodendauer = 2 * Umschaltdauer!'
-    creationSuccess: '{lut.clock_prefix} <&7>Die Clock bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit einer Periodendauer von <&a>{duration} Ticks <&7>erstellt!'
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um eine Clock zu erstellen!'
+    periodDurationAbsent: '{lut.mechanic_prefix} <&c>Fehlende Periodendauer in der dritten Zeile des Schildes!'
+    periodDurationNoPositiveInt: '{lut.mechanic_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>ist keine positive Ganzzahl!'
+    periodDurationTooLow: '{lut.mechanic_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>unterschreitet den Minimalwert von <&4>{min_duration}<&c>!'
+    periodDurationUneven: '{lut.mechanic_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>ist ungerade; Periodendauer = 2 * Umschaltdauer!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Die <&a>Clock <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit einer Periodendauer von <&a>{duration} Ticks <&7>erstellt!'
+  pulseExtender:
+    minSignalLength: 5
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen Pulse-Extender zu erstellen!'
+    signalLengthAbsent: '{lut.mechanic_prefix} <&c>Fehlende Signallänge in der dritten Zeile des Schildes!'
+    signalLengthNoPositiveInt: '{lut.mechanic_prefix} <&c>Die Signallänge von <&4>{signal_length} <&c>ist keine positive Ganzzahl!'
+    signalLengthTooLow: '{lut.mechanic_prefix} <&c>Die Signallänge von <&4>{signal_length} <&c>unterschreitet den Minimalwert von <&4>{min_signal_length}<&c>!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Pulse-Extender <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit einer Signallänge von <&a>{signal_length} Ticks <&7>erstellt!'
 
 cLut:
   main_prefix: '<&7>[<&5>BBTweaks<&7>]'
   ping_prefix: '<&7>[<&6>Ping<&7>]'
   uc_prefix: '<&7>[<&6>UC<&7>]'
-  clock_prefix: '<&7>[<&6>Clock<&7>]'
+  mechanic_prefix: '<&7>[<&6>Mechanic<&7>]'

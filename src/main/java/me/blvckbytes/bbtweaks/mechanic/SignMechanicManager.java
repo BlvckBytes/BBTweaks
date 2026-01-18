@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.mechanic;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.clock.ClockMechanic;
+import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderMechanic;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Tag;
@@ -39,6 +40,7 @@ public class SignMechanicManager implements Listener {
     this.signMechanicByDiscriminatorLower = new HashMap<>();
 
     registerMechanic(new ClockMechanic(config));
+    registerMechanic(new PulseExtenderMechanic(config));
 
     tickerTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 0, 1);
 
