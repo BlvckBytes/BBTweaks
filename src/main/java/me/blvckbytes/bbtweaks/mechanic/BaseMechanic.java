@@ -12,10 +12,6 @@ import java.util.ArrayList;
 
 public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic {
 
-  // TODO: Do not pop off signs, but rather auto-migrate to sane defaults. This will be useful when
-  //       editing the config, reloading and not having all signs become unusable just because a
-  //       parameter-limit changed.
-
   protected final ConfigKeeper<MainSection> config;
 
   protected final CacheByPosition<InstanceType> instanceBySignPosition;

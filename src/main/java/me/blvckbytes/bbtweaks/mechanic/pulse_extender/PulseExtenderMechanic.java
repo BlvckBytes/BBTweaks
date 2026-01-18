@@ -14,6 +14,8 @@ import java.util.List;
 
 public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
 
+  private static final int SIGNAL_LENGTH_LINE_INDEX = 2;
+
   public PulseExtenderMechanic(ConfigKeeper<MainSection> config) {
     super(config);
   }
@@ -33,10 +35,12 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
       return false;
     }
 
-    var parameterLine = SignUtil.getPlainTextLine(sign, 2);
+    var parameterLine = SignUtil.getPlainTextLine(sign, SIGNAL_LENGTH_LINE_INDEX);
 
     if (parameterLine.isBlank()) {
-      config.rootSection.mechanic.pulseExtender.signalLengthAbsent.sendMessage(creator);
+      if (creator != null)
+        config.rootSection.mechanic.pulseExtender.signalLengthAbsent.sendMessage(creator);
+
       return false;
     }
 
@@ -60,14 +64,17 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
     }
 
     if (signalLength < config.rootSection.mechanic.pulseExtender._minSignalLength) {
-      config.rootSection.mechanic.pulseExtender.signalLengthTooLow.sendMessage(
-        creator,
-        new InterpretationEnvironment()
-          .withVariable("signal_length", signalLength)
-          .withVariable("min_signal_length", config.rootSection.mechanic.pulseExtender._minSignalLength)
-      );
+      if (creator != null) {
+        config.rootSection.mechanic.pulseExtender.signalLengthTooLow.sendMessage(
+          creator,
+          new InterpretationEnvironment()
+            .withVariable("signal_length", signalLength)
+            .withVariable("min_signal_length", config.rootSection.mechanic.pulseExtender._minSignalLength)
+        );
+      }
 
-      return false;
+      signalLength = config.rootSection.mechanic.pulseExtender._minSignalLength;
+      SignUtil.setPlainTextLine(sign, SIGNAL_LENGTH_LINE_INDEX, String.valueOf(signalLength), true);
     }
 
     var signBlock = sign.getBlock();
