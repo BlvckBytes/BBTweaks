@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.mechanic.clock;
 
 import at.blvckbytes.cm_mapper.cm.ComponentExpression;
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
+import at.blvckbytes.cm_mapper.mapper.MappingError;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
@@ -30,5 +31,8 @@ public class ClockSection extends ConfigSection {
     super.afterParsing(fields);
 
     _minTickPeriod = ComponentExpression.asInt(minTickPeriod, null);
+
+    if (_minTickPeriod == 0 || _minTickPeriod % 2 != 0)
+      throw new MappingError("\"minTickPeriod\" must not be zero and has to be divisible by two");
   }
 }

@@ -113,7 +113,7 @@ mechanic:
     noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um eine Clock zu erstellen!'
     periodDurationAbsent: '{lut.mechanic_prefix} <&c>Fehlende Periodendauer in der dritten Zeile des Schildes!'
     periodDurationNoPositiveInt: '{lut.mechanic_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>ist keine positive Ganzzahl!'
-    periodDurationTooLow: '{lut.mechanic_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>unterschreitet den Minimalwert von <&4>{min_duration}<&c>!'
+    periodDurationTooLow: '{lut.mechanic_prefix} <&7>Die Periodendauer von <&c>{duration} <&7>unterschreitet den Minimalwert von <&c>{min_duration}<&7>; falle auf diesen Wert zurück!'
     periodDurationUneven: '{lut.mechanic_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>ist ungerade; Periodendauer = 2 * Umschaltdauer!'
     creationSuccess: '{lut.mechanic_prefix} <&7>Die <&a>Clock <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit einer Periodendauer von <&a>{duration} Ticks <&7>erstellt!'
   pulseExtender:

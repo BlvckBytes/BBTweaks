@@ -14,6 +14,8 @@ import java.util.List;
 
 public class ClockMechanic extends BaseMechanic<ClockInstance> {
 
+  private static final int PERIOD_DURATION_LINE_INDEX = 2;
+
   public ClockMechanic(ConfigKeeper<MainSection> config) {
     super(config);
   }
@@ -33,10 +35,12 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
       return false;
     }
 
-    var parameterLine = SignUtil.getPlainTextLine(sign, 2);
+    var parameterLine = SignUtil.getPlainTextLine(sign, PERIOD_DURATION_LINE_INDEX);
 
     if (parameterLine.isBlank()) {
-      config.rootSection.mechanic.clock.periodDurationAbsent.sendMessage(creator);
+      if (creator != null)
+        config.rootSection.mechanic.clock.periodDurationAbsent.sendMessage(creator);
+
       return false;
     }
 
@@ -59,25 +63,30 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
       return false;
     }
 
-    if (periodDuration < config.rootSection.mechanic.clock._minTickPeriod) {
-      config.rootSection.mechanic.clock.periodDurationTooLow.sendMessage(
-        creator,
-        new InterpretationEnvironment()
-          .withVariable("duration", periodDuration)
-          .withVariable("min_duration", config.rootSection.mechanic.clock._minTickPeriod)
-      );
+    if (periodDuration % 2 != 0) {
+      if (creator != null) {
+        config.rootSection.mechanic.clock.periodDurationUneven.sendMessage(
+          creator,
+          new InterpretationEnvironment()
+            .withVariable("duration", periodDuration)
+        );
+      }
 
       return false;
     }
 
-    if (periodDuration % 2 != 0) {
-      config.rootSection.mechanic.clock.periodDurationUneven.sendMessage(
-        creator,
-        new InterpretationEnvironment()
-          .withVariable("duration", periodDuration)
-      );
+    if (periodDuration < config.rootSection.mechanic.clock._minTickPeriod) {
+      if (creator != null) {
+        config.rootSection.mechanic.clock.periodDurationTooLow.sendMessage(
+          creator,
+          new InterpretationEnvironment()
+            .withVariable("duration", periodDuration)
+            .withVariable("min_duration", config.rootSection.mechanic.clock._minTickPeriod)
+        );
+      }
 
-      return false;
+      periodDuration = config.rootSection.mechanic.clock._minTickPeriod;
+      SignUtil.setPlainTextLine(sign, PERIOD_DURATION_LINE_INDEX, String.valueOf(periodDuration), true);
     }
 
     var signBlock = sign.getBlock();

@@ -7,6 +7,14 @@ import org.bukkit.block.sign.Side;
 
 public class SignUtil {
 
+  public static void setPlainTextLine(Sign sign, int lineIndex, String value, boolean update) {
+    var front = sign.getSide(Side.FRONT);
+    front.line(lineIndex, Component.text(value));
+
+    if (update)
+      sign.update(true, false);
+  }
+
   public static String getPlainTextLine(Sign sign, int lineIndex) {
     var frontLines = sign.getSide(Side.FRONT).lines();
 
