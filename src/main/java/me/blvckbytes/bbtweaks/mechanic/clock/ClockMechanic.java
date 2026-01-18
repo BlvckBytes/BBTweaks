@@ -19,6 +19,9 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
   }
 
   @Override
+  protected void onConfigReload() {}
+
+  @Override
   public List<String> getDiscriminators() {
     return List.of("Clock");
   }

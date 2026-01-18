@@ -14,6 +14,7 @@ public abstract class SISOInstance implements MechanicInstance {
     BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
   };
 
+  private final Block signBlock;
   private final Block mountBlock;
   private final Block inputBlock;
   private final BlockFace signFacing;
@@ -25,10 +26,16 @@ public abstract class SISOInstance implements MechanicInstance {
   private boolean lastOutputState;
 
   public SISOInstance(Block signBlock, BlockFace signFacing) {
+    this.signBlock = signBlock;
     this.mountBlock = signBlock.getRelative(signFacing.getOppositeFace());
     this.inputBlock = signBlock.getRelative(signFacing);
     this.signFacing = signFacing;
     this.world = signBlock.getWorld();
+  }
+
+  @Override
+  public Block getSignBlock() {
+    return signBlock;
   }
 
   protected @Nullable Integer tryReadInputPower() {

@@ -8,13 +8,13 @@ import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+
 public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic {
 
   // TODO: Do not pop off signs, but rather auto-migrate to sane defaults. This will be useful when
   //       editing the config, reloading and not having all signs become unusable just because a
   //       parameter-limit changed.
-
-  // TODO: Reload all currently loaded mechanics on a config-reload
 
   protected final ConfigKeeper<MainSection> config;
 
@@ -25,11 +25,10 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
 
     this.instanceBySignPosition = new CacheByPosition<>();
 
-    this.loadConfig();
-    config.registerReloadListener(this::loadConfig);
+    config.registerReloadListener(this::_onConfigReload);
   }
 
-  protected void loadConfig() {}
+  protected abstract void onConfigReload();
 
   @Override
   public boolean onSignLoad(Sign sign) {
@@ -60,5 +59,27 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
       instance.tick(time);
       return IterationDecision.CONTINUE;
     });
+  }
+
+  private void _onConfigReload() {
+    var mechanicSigns = new ArrayList<Sign>();
+
+    instanceBySignPosition.forEachValue(instance -> {
+      var signBlock = instance.getSignBlock();
+
+      if (!(signBlock.getState() instanceof Sign sign))
+        return IterationDecision.REMOVE_AND_CONTINUE;
+
+      mechanicSigns.add(sign);
+      return IterationDecision.CONTINUE;
+    });
+
+    for (var sign : mechanicSigns)
+      onSignUnload(sign);
+
+    for (var sign : mechanicSigns)
+      onSignLoad(sign);
+
+    onConfigReload();
   }
 }

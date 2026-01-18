@@ -19,6 +19,9 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
   }
 
   @Override
+  protected void onConfigReload() {}
+
+  @Override
   public List<String> getDiscriminators() {
     return List.of("PulseExtender");
   }
