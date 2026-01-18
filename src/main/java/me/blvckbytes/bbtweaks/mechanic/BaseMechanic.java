@@ -10,6 +10,12 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic {
 
+  // TODO: Do not pop off signs, but rather auto-migrate to sane defaults. This will be useful when
+  //       editing the config, reloading and not having all signs become unusable just because a
+  //       parameter-limit changed.
+
+  // TODO: Reload all currently loaded mechanics on a config-reload
+
   protected final ConfigKeeper<MainSection> config;
 
   protected final CacheByPosition<InstanceType> instanceBySignPosition;

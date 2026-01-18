@@ -6,6 +6,7 @@ api-version: 1.21
 softdepend: [mcMMO]
 commands:
   bbtweaks:
+    description: 'Administrative base-command of this plugin'
     permission: bbtweaks.command
   uncraft:
     permission: bbtweaks.uncraft
@@ -14,5 +15,18 @@ commands:
     description: 'resolve the UUID of any given name'
     permission: bbtweaks.getuuid
   back:
+    description: 'Teleport to a previous location'
     permission: essentials.back
   ping:
+    description: 'Get the ping of yourself (and possibly others)'
+permissions:
+  bbtweaks.uncraft.all:
+    description: 'Uncraft all available items similar to the one held in one go'
+  bbtweaks.ping.other:
+    description: 'Access the ping-value of other players'
+  bbtweaks.lava-sponge:
+    description: 'Use wet sponges to soak up lava and have them be dried'
+  bbtweaks.mechanic.clock:
+    description: 'Use the clock mechanic'
+  bbtweaks.mechanic.pulse-extender:
+    description: 'Use the pulse-extender mechanic'

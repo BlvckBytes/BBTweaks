@@ -25,7 +25,6 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
 
   @Override
   public boolean onSignCreate(@Nullable Player creator, Sign sign) {
-    // TODO: Register these permissions in the plugin.yml (and some others just as well)
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.pulse-extender")) {
       config.rootSection.mechanic.pulseExtender.noPermission.sendMessage(creator);
       return false;
