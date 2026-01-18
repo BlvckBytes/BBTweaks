@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.mechanic.clock;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.cm.ComponentExpression;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.SignMechanic;
@@ -16,14 +17,21 @@ import java.util.List;
 
 public class ClockMechanic implements SignMechanic {
 
-  private static final int MIN_TICK_PERIOD = 8;
-
   private final ConfigKeeper<MainSection> config;
   private final CacheByPosition<ClockInstance> clockBySignPosition;
+
+  private int minTickPeriod;
 
   public ClockMechanic(ConfigKeeper<MainSection> config) {
     this.config = config;
     this.clockBySignPosition = new CacheByPosition<>();
+
+    this.loadConfig();
+    config.registerReloadListener(this::loadConfig);
+  }
+
+  private void loadConfig() {
+    this.minTickPeriod = ComponentExpression.asInt(config.rootSection.mechanic.clock.minTickPeriod, null);
   }
 
   @Override
@@ -85,12 +93,12 @@ public class ClockMechanic implements SignMechanic {
       return false;
     }
 
-    if (periodDuration < MIN_TICK_PERIOD) {
+    if (periodDuration < minTickPeriod) {
       config.rootSection.mechanic.clock.periodDurationTooLow.sendMessage(
         creator,
         new InterpretationEnvironment()
           .withVariable("duration", periodDuration)
-          .withVariable("min_duration", MIN_TICK_PERIOD)
+          .withVariable("min_duration", minTickPeriod)
       );
 
       return false;

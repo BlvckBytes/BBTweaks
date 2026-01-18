@@ -109,6 +109,7 @@ unCraft:
 
 mechanic:
   clock:
+    minTickPeriod: 4
     noPermission: '{lut.clock_prefix} <&c>Dir fehlen die Zugriffsrechte, um eine Clock zu erstellen!'
     periodDurationAbsent: '{lut.clock_prefix} <&c>Fehlende Periodendauer in der dritten Zeile des Schildes!'
     periodDurationNoPositiveInt: '{lut.clock_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>ist keine positive Ganzzahl!'
