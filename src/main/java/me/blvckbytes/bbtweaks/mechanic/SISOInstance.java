@@ -3,6 +3,8 @@ package me.blvckbytes.bbtweaks.mechanic;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
+import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Powerable;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,26 +15,26 @@ public abstract class SISOInstance implements MechanicInstance {
     BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
   };
 
-  protected final Block signBlock;
+  protected final Sign sign;
+  protected final BlockFace signFacing;
   protected final Block mountBlock;
   protected final Block inputBlock;
-  protected final BlockFace signFacing;
 
   private @Nullable Block cachedOutputBlock;
   private @Nullable Powerable cachedOutputBlockData;
 
   private boolean lastOutputState;
 
-  public SISOInstance(Block signBlock, BlockFace signFacing) {
-    this.signBlock = signBlock;
-    this.mountBlock = signBlock.getRelative(signFacing.getOppositeFace());
-    this.inputBlock = signBlock.getRelative(signFacing);
-    this.signFacing = signFacing;
+  public SISOInstance(Sign sign) {
+    this.sign = sign;
+    this.signFacing = ((Directional) sign.getBlockData()).getFacing();
+    this.mountBlock = sign.getBlock().getRelative(signFacing.getOppositeFace());
+    this.inputBlock = sign.getBlock().getRelative(signFacing);
   }
 
   @Override
-  public Block getSignBlock() {
-    return signBlock;
+  public Sign getSign() {
+    return sign;
   }
 
   protected @Nullable Integer tryReadInputPower() {

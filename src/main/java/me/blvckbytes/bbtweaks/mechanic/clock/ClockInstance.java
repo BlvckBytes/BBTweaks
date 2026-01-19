@@ -1,15 +1,14 @@
 package me.blvckbytes.bbtweaks.mechanic.clock;
 
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
 
 public class ClockInstance extends SISOInstance {
 
   private final int toggleDuration;
 
-  public ClockInstance(int periodDuration, Block signBlock, BlockFace signFacing) {
-    super(signBlock, signFacing);
+  public ClockInstance(int periodDuration, Sign sign) {
+    super(sign);
 
     this.toggleDuration = periodDuration / 2;
   }

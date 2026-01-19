@@ -6,7 +6,6 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.block.Sign;
-import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -83,9 +82,7 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
       SignUtil.setPlainTextLine(sign, SIGNAL_LENGTH_LINE_INDEX, String.valueOf(signalLength), true);
     }
 
-    var signBlock = sign.getBlock();
-    var signFacing = ((Directional) sign.getBlockData()).getFacing();
-    var instance = new PulseExtenderInstance(signalLength, signBlock, signFacing);
+    var instance = new PulseExtenderInstance(signalLength, sign);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
@@ -94,9 +91,9 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
         creator,
         new InterpretationEnvironment()
           .withVariable("signal_length", signalLength)
-          .withVariable("x", signBlock.getX())
-          .withVariable("y", signBlock.getY())
-          .withVariable("z", signBlock.getZ())
+          .withVariable("x", sign.getX())
+          .withVariable("y", sign.getY())
+          .withVariable("z", sign.getZ())
       );
     }
 

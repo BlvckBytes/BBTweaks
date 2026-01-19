@@ -164,7 +164,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
 
     // TODO: Allow to create and set filters, probably using ipp (still requires more brainstorming)
 
-    var instance = new MagnetInstance(signBlock, signFacing, cuboid, null);
+    var instance = new MagnetInstance(sign, cuboid, null);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
     instanceCuboidRegistry.register(instance);

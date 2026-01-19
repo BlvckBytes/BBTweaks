@@ -6,7 +6,6 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.block.Sign;
-import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -95,9 +94,7 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
       SignUtil.setPlainTextLine(sign, PERIOD_DURATION_LINE_INDEX, String.valueOf(periodDuration), true);
     }
 
-    var signBlock = sign.getBlock();
-    var signFacing = ((Directional) sign.getBlockData()).getFacing();
-    var instance = new ClockInstance(periodDuration, signBlock, signFacing);
+    var instance = new ClockInstance(periodDuration, sign);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
@@ -106,9 +103,9 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
         creator,
         new InterpretationEnvironment()
           .withVariable("duration", periodDuration)
-          .withVariable("x", signBlock.getX())
-          .withVariable("y", signBlock.getY())
-          .withVariable("z", signBlock.getZ())
+          .withVariable("x", sign.getX())
+          .withVariable("y", sign.getY())
+          .withVariable("z", sign.getZ())
       );
     }
 

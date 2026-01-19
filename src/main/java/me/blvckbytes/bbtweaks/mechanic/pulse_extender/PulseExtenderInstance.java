@@ -1,8 +1,7 @@
 package me.blvckbytes.bbtweaks.mechanic.pulse_extender;
 
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
 
 public class PulseExtenderInstance extends SISOInstance {
 
@@ -10,8 +9,8 @@ public class PulseExtenderInstance extends SISOInstance {
 
   private int lastSignalTime;
 
-  public PulseExtenderInstance(int signalLength, Block signBlock, BlockFace signFacing) {
-    super(signBlock, signFacing);
+  public PulseExtenderInstance(int signalLength, Sign sign) {
+    super(sign);
 
     this.signalLength = signalLength;
   }

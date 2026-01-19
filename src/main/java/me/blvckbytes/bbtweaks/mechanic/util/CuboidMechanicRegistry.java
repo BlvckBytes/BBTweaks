@@ -52,7 +52,7 @@ public class CuboidMechanicRegistry<InstanceType extends CuboidMechanicInstance>
   }
 
   public void register(InstanceType instance) {
-    var worldId = instance.getSignBlock().getWorld().getUID();
+    var worldId = instance.getSign().getWorld().getUID();
     var worldBucket = instanceByChunkIdByWorldId.computeIfAbsent(worldId, k -> new WorldBucket<>());
 
     instance.getCuboid().forEachXYZChunk((chunkX, chunkY, chunkZ) -> {
@@ -69,7 +69,7 @@ public class CuboidMechanicRegistry<InstanceType extends CuboidMechanicInstance>
   }
 
   public void unregister(InstanceType instance) {
-    var worldId = instance.getSignBlock().getWorld().getUID();
+    var worldId = instance.getSign().getWorld().getUID();
     var worldBucket = instanceByChunkIdByWorldId.get(worldId);
 
     if (worldBucket == null)
@@ -80,7 +80,7 @@ public class CuboidMechanicRegistry<InstanceType extends CuboidMechanicInstance>
       var chunkBucket = worldBucket.instanceByXYZChunkId.get(xyzChunkId);
 
       if (chunkBucket != null)
-        chunkBucket.removeIf(entry -> entry.getSignBlock().equals(instance.getSignBlock()));
+        chunkBucket.removeIf(entry -> entry.getSign().getBlock().equals(instance.getSign().getBlock()));
     });
 
     instance.getCuboid().forEachXZChunk((chunkX, chunkZ) -> {
@@ -88,7 +88,7 @@ public class CuboidMechanicRegistry<InstanceType extends CuboidMechanicInstance>
       var chunkBucket = worldBucket.instanceByXZTuple.get(xzTuple);
 
       if (chunkBucket != null)
-        chunkBucket.removeIf(entry -> entry.getSignBlock().equals(instance.getSignBlock()));
+        chunkBucket.removeIf(entry -> entry.getSign().getBlock().equals(instance.getSign().getBlock()));
     });
   }
 
@@ -107,7 +107,7 @@ public class CuboidMechanicRegistry<InstanceType extends CuboidMechanicInstance>
       if (predicate != null && !predicate.test(candidate))
         continue;
 
-      var distanceSquared = distanceSquared(candidate.getSignBlock(), location);
+      var distanceSquared = distanceSquared(candidate.getSign().getBlock(), location);
 
       if (minDistanceInstance == null || distanceSquared < minDistanceSquared) {
         minDistanceSquared = distanceSquared;

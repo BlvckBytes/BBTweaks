@@ -1,10 +1,11 @@
 package me.blvckbytes.bbtweaks.mechanic;
 
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 
 public interface MechanicInstance {
 
-  Block getSignBlock();
+  Sign getSign();
 
   /**
    * @return Whether the tick was successful; unsuccessful ticks will result in self-destruction.
@@ -13,7 +14,7 @@ public interface MechanicInstance {
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   default boolean isBlockLoaded(Block block) {
-    var signBlock = getSignBlock();
+    var signBlock = getSign().getBlock();
 
     var signChunkX = signBlock.getX() >> 4;
     var signChunkZ = signBlock.getZ() >> 4;

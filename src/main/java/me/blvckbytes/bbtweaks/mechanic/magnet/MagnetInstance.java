@@ -4,9 +4,8 @@ import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicInstance;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
+import org.bukkit.block.Sign;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -22,11 +21,8 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
   private @Nullable Material containerType;
   private boolean enabled;
 
-  public MagnetInstance(
-    Block signBlock, BlockFace signFacing,
-    Cuboid cuboid, @Nullable Predicate<ItemStack> filter
-  ) {
-    super(signBlock, signFacing);
+  public MagnetInstance(Sign sign, Cuboid cuboid, @Nullable Predicate<ItemStack> filter) {
+    super(sign);
 
     this.cuboid = cuboid;
     this.filter = filter;
@@ -87,11 +83,6 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
     inventory.addItem(item)
       .values()
       .forEach(remainder -> mountBlock.getWorld().dropItem(mountBlock.getLocation(), remainder));
-  }
-
-  @Override
-  public Block getSignBlock() {
-    return signBlock;
   }
 
   @Override
