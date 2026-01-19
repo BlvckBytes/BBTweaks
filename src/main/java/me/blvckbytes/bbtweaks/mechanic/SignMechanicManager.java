@@ -11,9 +11,11 @@ import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPhysicsEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.plugin.Plugin;
@@ -39,8 +41,8 @@ public class SignMechanicManager implements Listener {
 
     this.signMechanicByDiscriminatorLower = new HashMap<>();
 
-    registerMechanic(new ClockMechanic(config));
-    registerMechanic(new PulseExtenderMechanic(config));
+    registerMechanic(new ClockMechanic(plugin, config));
+    registerMechanic(new PulseExtenderMechanic(plugin, config));
 
     tickerTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 0, 1);
 
@@ -55,7 +57,13 @@ public class SignMechanicManager implements Listener {
       tickerTask = null;
     }
 
-    signMechanicByDiscriminatorLower.values().forEach(SignMechanic::onMechanicUnload);
+    signMechanicByDiscriminatorLower.values().forEach(mechanic -> {
+      mechanic.onMechanicUnload();
+
+      if (mechanic instanceof Listener listener)
+        HandlerList.unregisterAll(listener);
+    });
+
     signMechanicByDiscriminatorLower.clear();
   }
 
@@ -149,6 +157,24 @@ public class SignMechanicManager implements Listener {
     }
   }
 
+  @EventHandler
+  public void onInteract(PlayerInteractEvent event) {
+    var block = event.getClickedBlock();
+
+    if (block == null || !Tag.WALL_SIGNS.isTagged(block.getType()))
+      return;
+
+    if (!(block.getState() instanceof Sign sign))
+      return;
+
+    var wasLeftClick = event.getAction() == Action.LEFT_CLICK_BLOCK;
+
+    correspondSign(sign, mechanic -> {
+      if (mechanic.onSignClick(event.getPlayer(), sign, wasLeftClick))
+        event.setCancelled(true);
+    });
+  }
+
   private void correspondSign(Sign sign, Consumer<SignMechanic<?>> handler) {
     var discriminator = SignUtil.getPlainTextLine(sign, 1);
     var length = discriminator.length();
@@ -174,6 +200,9 @@ public class SignMechanicManager implements Listener {
       if (existingHandler != null)
         throw new IllegalArgumentException("Duplicate sign-mechanic for discriminator \"" + discriminator + "\" detected: " + existingHandler.getClass());
     }
+
+    if (mechanic instanceof Listener listener)
+      Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
 
     mechanic.onMechanicLoad();
   }

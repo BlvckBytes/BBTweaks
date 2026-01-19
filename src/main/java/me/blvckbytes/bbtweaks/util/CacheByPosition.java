@@ -43,6 +43,18 @@ public class CacheByPosition<T> {
     return worldBucket.put(blockId, value);
   }
 
+  public @Nullable T get(World world, int x, int y, int z) {
+    var worldId = world.getUID();
+    var worldBucket = cachedItemByFastHashByWorldId.get(worldId);
+
+    if (worldBucket == null)
+      return null;
+
+    var blockId = computeWorldlessBlockId(x, y, z);
+
+    return worldBucket.get(blockId);
+  }
+
   public T computeIfAbsent(World world, int x, int y, int z, Supplier<T> computeFunction) {
     var worldId = world.getUID();
     var worldBucket = cachedItemByFastHashByWorldId.computeIfAbsent(worldId, k -> new Long2ObjectOpenHashMap<>());

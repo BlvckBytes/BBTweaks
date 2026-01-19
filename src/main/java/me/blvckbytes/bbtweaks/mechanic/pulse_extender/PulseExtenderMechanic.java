@@ -8,6 +8,7 @@ import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -16,12 +17,17 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
 
   private static final int SIGNAL_LENGTH_LINE_INDEX = 2;
 
-  public PulseExtenderMechanic(ConfigKeeper<MainSection> config) {
-    super(config);
+  public PulseExtenderMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
+    super(plugin, config);
   }
 
   @Override
   protected void onConfigReload() {}
+
+  @Override
+  public boolean onInstanceClick(Player player, PulseExtenderInstance instance, boolean wasLeftClick) {
+    return false;
+  }
 
   @Override
   public List<String> getDiscriminators() {

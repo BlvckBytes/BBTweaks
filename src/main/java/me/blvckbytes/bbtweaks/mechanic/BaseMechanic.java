@@ -6,17 +6,20 @@ import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import me.blvckbytes.bbtweaks.util.IterationDecision;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
 public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic<InstanceType> {
 
+  protected final Plugin plugin;
   protected final ConfigKeeper<MainSection> config;
 
   protected final CacheByPosition<InstanceType> instanceBySignPosition;
 
-  public BaseMechanic(ConfigKeeper<MainSection> config) {
+  public BaseMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
+    this.plugin = plugin;
     this.config = config;
 
     this.instanceBySignPosition = new CacheByPosition<>();
@@ -40,6 +43,18 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
   public @Nullable InstanceType onSignDestroy(@Nullable Player destroyer, Sign sign) {
     return instanceBySignPosition.invalidate(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ());
   }
+
+  @Override
+  public boolean onSignClick(Player player, Sign sign, boolean wasLeftClick) {
+    var instance = instanceBySignPosition.get(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ());
+
+    if (instance != null)
+      return onInstanceClick(player, instance, wasLeftClick);
+
+    return false;
+  }
+
+  public abstract boolean onInstanceClick(Player player, InstanceType instance, boolean wasLeftClick);
 
   @Override
   public void onMechanicLoad() {}

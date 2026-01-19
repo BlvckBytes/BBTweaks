@@ -30,6 +30,11 @@ public interface SignMechanic<InstanceType extends MechanicInstance> {
    */
   @Nullable InstanceType onSignDestroy(@Nullable Player destroyer, Sign sign);
 
+  /**
+   * @return Whether to cancel the corresponding event
+   */
+  boolean onSignClick(Player player, Sign sign, boolean wasLeftClick);
+
   void onMechanicLoad();
 
   void onMechanicUnload();
