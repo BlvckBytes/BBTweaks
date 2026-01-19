@@ -135,7 +135,7 @@ mechanic:
     editModeCancelled: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>abgebrochen<&7>!'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Magnet <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
     editDisplay:
-      title: '<&8>Magnet <&e>{magnet_x} <&e>{magnet_y} <&e>{magnet_z}'
+      title: '<&8>Magnet <&e>{magnet_x} {magnet_y} {magnet_z}'
       rows: 2
       items:
         selectParameterExtentX:
@@ -233,7 +233,7 @@ cLut:
         <&8>♦ <&7>Aktueller Wert: <&e>{env(name)}
         <container *if="env(`{name}_did_exceed_limit`)">
           <space/>
-          <&c>(Limit)
+          <&c><i>(Limit)
         </container>
         <br/>
         {lut.spacer}<br/>
