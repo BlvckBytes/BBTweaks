@@ -123,6 +123,18 @@ mechanic:
     signalLengthNoPositiveInt: '{lut.mechanic_prefix} <&c>Die Signallänge von <&4>{signal_length} <&c>ist keine positive Ganzzahl!'
     signalLengthTooLow: '{lut.mechanic_prefix} <&7>Die Signallänge von <&c>{signal_length} <&7>unterschreitet den Minimalwert von <&c>{min_signal_length}<&7>; falle auf diesen Wert zurück!'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Pulse-Extender <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit einer Signallänge von <&a>{signal_length} Ticks <&7>erstellt!'
+  magnet:
+    maxWidthOrDepth: 10
+    maxHeight: 20
+    collectionPeriodTicks: 5
+    visualization:
+      durationMs: 5000
+      periodTicks: 8
+      stepSize: .125
+      colorRed: 255
+      colorGreen: 25
+      colorBlue: 25
+      dustSize: 1
 
 cLut:
   main_prefix: '<&7>[<&5>BBTweaks<&7>]'

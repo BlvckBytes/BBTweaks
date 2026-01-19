@@ -30,3 +30,5 @@ permissions:
     description: 'Use the clock mechanic'
   bbtweaks.mechanic.pulse-extender:
     description: 'Use the pulse-extender mechanic'
+  bbtweaks.mechanic.magnet:
+    description: 'Use the magnet mechanic'
