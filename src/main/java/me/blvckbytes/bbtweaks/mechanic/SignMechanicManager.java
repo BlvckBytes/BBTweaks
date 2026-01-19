@@ -28,7 +28,7 @@ public class SignMechanicManager implements Listener {
 
   private final Plugin plugin;
 
-  private final Map<String, SignMechanic> signMechanicByDiscriminatorLower;
+  private final Map<String, SignMechanic<?>> signMechanicByDiscriminatorLower;
 
   private @Nullable BukkitTask tickerTask;
 
@@ -120,7 +120,7 @@ public class SignMechanicManager implements Listener {
         return;
 
       correspondSign(newSign, mechanic -> {
-        if (!mechanic.onSignCreate(event.getPlayer(), newSign))
+        if (mechanic.onSignCreate(event.getPlayer(), newSign) == null)
           newSign.getBlock().breakNaturally();
       });
     }, 1);
@@ -133,7 +133,7 @@ public class SignMechanicManager implements Listener {
         continue;
 
       correspondSign(sign, mechanic -> {
-        if (!mechanic.onSignLoad(sign))
+        if (mechanic.onSignLoad(sign) == null)
           sign.getBlock().breakNaturally();
       });
     }
@@ -149,7 +149,7 @@ public class SignMechanicManager implements Listener {
     }
   }
 
-  private void correspondSign(Sign sign, Consumer<SignMechanic> handler) {
+  private void correspondSign(Sign sign, Consumer<SignMechanic<?>> handler) {
     var discriminator = SignUtil.getPlainTextLine(sign, 1);
     var length = discriminator.length();
 
@@ -166,7 +166,7 @@ public class SignMechanicManager implements Listener {
     handler.accept(mechanic);
   }
 
-  private void registerMechanic(SignMechanic mechanic) {
+  private void registerMechanic(SignMechanic<?> mechanic) {
     for (var discriminator : mechanic.getDiscriminators()) {
       var lowerDiscriminator = discriminator.trim().toLowerCase();
       var existingHandler = signMechanicByDiscriminatorLower.put(lowerDiscriminator, mechanic);

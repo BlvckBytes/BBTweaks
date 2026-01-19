@@ -29,10 +29,10 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
   }
 
   @Override
-  public boolean onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable PulseExtenderInstance onSignCreate(@Nullable Player creator, Sign sign) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.pulse-extender")) {
       config.rootSection.mechanic.pulseExtender.noPermission.sendMessage(creator);
-      return false;
+      return null;
     }
 
     var parameterLine = SignUtil.getPlainTextLine(sign, SIGNAL_LENGTH_LINE_INDEX);
@@ -41,7 +41,7 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
       if (creator != null)
         config.rootSection.mechanic.pulseExtender.signalLengthAbsent.sendMessage(creator);
 
-      return false;
+      return null;
     }
 
     int signalLength;
@@ -60,7 +60,7 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
         );
       }
 
-      return false;
+      return null;
     }
 
     if (signalLength < config.rootSection.mechanic.pulseExtender.minSignalLength) {
@@ -79,11 +79,9 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
 
     var signBlock = sign.getBlock();
     var signFacing = ((Directional) sign.getBlockData()).getFacing();
+    var instance = new PulseExtenderInstance(signalLength, signBlock, signFacing);
 
-    instanceBySignPosition.put(
-      sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(),
-      new PulseExtenderInstance(signalLength, signBlock, signFacing)
-    );
+    instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
     if (creator != null) {
       config.rootSection.mechanic.pulseExtender.creationSuccess.sendMessage(
@@ -96,6 +94,6 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
       );
     }
 
-    return true;
+    return instance;
   }
 }

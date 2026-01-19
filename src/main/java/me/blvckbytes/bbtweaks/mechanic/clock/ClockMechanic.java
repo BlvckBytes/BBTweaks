@@ -29,10 +29,10 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
   }
 
   @Override
-  public boolean onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable ClockInstance onSignCreate(@Nullable Player creator, Sign sign) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.clock")) {
       config.rootSection.mechanic.clock.noPermission.sendMessage(creator);
-      return false;
+      return null;
     }
 
     var parameterLine = SignUtil.getPlainTextLine(sign, PERIOD_DURATION_LINE_INDEX);
@@ -41,7 +41,7 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
       if (creator != null)
         config.rootSection.mechanic.clock.periodDurationAbsent.sendMessage(creator);
 
-      return false;
+      return null;
     }
 
     int periodDuration;
@@ -60,7 +60,7 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
         );
       }
 
-      return false;
+      return null;
     }
 
     if (periodDuration % 2 != 0) {
@@ -72,7 +72,7 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
         );
       }
 
-      return false;
+      return null;
     }
 
     if (periodDuration < config.rootSection.mechanic.clock.minTickPeriod) {
@@ -91,11 +91,9 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
 
     var signBlock = sign.getBlock();
     var signFacing = ((Directional) sign.getBlockData()).getFacing();
+    var instance = new ClockInstance(periodDuration, signBlock, signFacing);
 
-    instanceBySignPosition.put(
-      sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(),
-      new ClockInstance(periodDuration, signBlock, signFacing)
-    );
+    instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
     if (creator != null) {
       config.rootSection.mechanic.clock.creationSuccess.sendMessage(
@@ -108,6 +106,6 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
       );
     }
 
-    return true;
+    return instance;
   }
 }

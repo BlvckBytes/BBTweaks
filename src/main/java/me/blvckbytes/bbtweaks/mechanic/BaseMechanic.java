@@ -10,7 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 
-public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic {
+public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic<InstanceType> {
 
   protected final ConfigKeeper<MainSection> config;
 
@@ -27,18 +27,18 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
   protected abstract void onConfigReload();
 
   @Override
-  public boolean onSignLoad(Sign sign) {
+  public @Nullable InstanceType onSignLoad(Sign sign) {
     return onSignCreate(null, sign);
   }
 
   @Override
-  public void onSignUnload(Sign sign) {
-    onSignDestroy(null, sign);
+  public @Nullable InstanceType onSignUnload(Sign sign) {
+    return onSignDestroy(null, sign);
   }
 
   @Override
-  public void onSignDestroy(@Nullable Player destroyer, Sign sign) {
-    instanceBySignPosition.invalidate(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ());
+  public @Nullable InstanceType onSignDestroy(@Nullable Player destroyer, Sign sign) {
+    return instanceBySignPosition.invalidate(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ());
   }
 
   @Override

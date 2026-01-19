@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.util;
 import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.bukkit.World;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,14 +50,14 @@ public class CacheByPosition<T> {
     return worldBucket.computeIfAbsent(blockId, k -> computeFunction.get());
   }
 
-  public void invalidate(World world, int x, int y, int z) {
+  public @Nullable T invalidate(World world, int x, int y, int z) {
     var worldId = world.getUID();
     var worldBucket = cachedItemByFastHashByWorldId.get(worldId);
 
     if (worldBucket == null)
-      return;
+      return null;
 
-    worldBucket.remove(computeWorldlessBlockId(x, y, z));
+    return worldBucket.remove(computeWorldlessBlockId(x, y, z));
   }
 
   public static long computeWorldlessBlockId(int x, int y, int z) {
@@ -68,7 +69,6 @@ public class CacheByPosition<T> {
     return (
       // 2^9 - 1 = 0x1FF
       // 2^26 - 1 = 0x3FFFFFF
-      // 2^3 - 1 = 0x7
       ((y + 64) & 0x1FF)
         | (((x + 30_000_000L) & 0x3FFFFFF) << 9)
         | (((z + 30_000_000L) & 0x3FFFFFF) << (9 + 26))

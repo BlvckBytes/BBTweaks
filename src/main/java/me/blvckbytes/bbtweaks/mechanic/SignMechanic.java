@@ -6,17 +6,29 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public interface SignMechanic {
+public interface SignMechanic<InstanceType extends MechanicInstance> {
 
   List<String> getDiscriminators();
 
-  boolean onSignLoad(Sign sign);
+  /**
+   * @return null if the sign was invalid and is to be destroyed
+   */
+  @Nullable InstanceType onSignLoad(Sign sign);
 
-  boolean onSignCreate(@Nullable Player creator, Sign sign);
+  /**
+   * @return null if the sign was invalid and is to be destroyed
+   */
+  @Nullable InstanceType onSignCreate(@Nullable Player creator, Sign sign);
 
-  void onSignUnload(Sign sign);
+  /**
+   * @return The unloaded instance, if any
+   */
+  @Nullable InstanceType onSignUnload(Sign sign);
 
-  void onSignDestroy(@Nullable Player destroyer, Sign sign);
+  /**
+   * @return The unloaded instance, if any
+   */
+  @Nullable InstanceType onSignDestroy(@Nullable Player destroyer, Sign sign);
 
   void onMechanicLoad();
 
