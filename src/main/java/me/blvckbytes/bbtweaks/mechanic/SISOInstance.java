@@ -1,7 +1,6 @@
 package me.blvckbytes.bbtweaks.mechanic;
 
 import org.bukkit.Material;
-import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Powerable;
@@ -18,7 +17,6 @@ public abstract class SISOInstance implements MechanicInstance {
   protected final Block mountBlock;
   protected final Block inputBlock;
   protected final BlockFace signFacing;
-  protected final World world;
 
   private @Nullable Block cachedOutputBlock;
   private @Nullable Powerable cachedOutputBlockData;
@@ -30,7 +28,6 @@ public abstract class SISOInstance implements MechanicInstance {
     this.mountBlock = signBlock.getRelative(signFacing.getOppositeFace());
     this.inputBlock = signBlock.getRelative(signFacing);
     this.signFacing = signFacing;
-    this.world = signBlock.getWorld();
   }
 
   @Override
@@ -40,7 +37,7 @@ public abstract class SISOInstance implements MechanicInstance {
 
   protected @Nullable Integer tryReadInputPower() {
     // Undefined input-state
-    if (!world.isChunkLoaded(inputBlock.getX() >> 4, inputBlock.getZ() >> 4))
+    if (!isBlockLoaded(inputBlock))
       return null;
 
     return inputBlock.getBlockPower();
@@ -66,7 +63,7 @@ public abstract class SISOInstance implements MechanicInstance {
   }
 
   private boolean isValidLeverBlock(Block block) {
-    if (!world.isChunkLoaded(block.getX() >> 4, block.getZ() >> 4))
+    if (!isBlockLoaded(block))
       return false;
 
     return block.getType() == Material.LEVER;
