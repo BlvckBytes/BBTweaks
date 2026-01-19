@@ -1,27 +1,33 @@
 package me.blvckbytes.bbtweaks.mechanic.magnet;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
+import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.EditDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicRegistry;
-import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
-import org.bukkit.event.player.PlayerItemHeldEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.logging.Level;
 
 public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements Listener {
 
@@ -29,18 +35,26 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
   private final Map<UUID, List<ShowSession>> showSessionsByPlayerId;
   private final Map<UUID, EditSession> editSessionByPlayerId;
 
+  private final EditDisplayHandler displayHandler;
+
   public MagnetMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
     super(plugin, config);
 
     this.instanceCuboidRegistry = new CuboidMechanicRegistry<>();
     this.showSessionsByPlayerId = new HashMap<>();
     this.editSessionByPlayerId = new HashMap<>();
+
+    this.displayHandler = new EditDisplayHandler(config, plugin);
+
+    Bukkit.getServer().getPluginManager().registerEvents(displayHandler, plugin);
   }
 
   @Override
   public void onMechanicUnload() {
     super.onMechanicUnload();
     instanceCuboidRegistry.clear();
+    this.displayHandler.onShutdown();
+    HandlerList.unregisterAll(this.displayHandler);
   }
 
   @Override
@@ -95,38 +109,90 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     for (var visualizationIterator = sessions.iterator(); visualizationIterator.hasNext();) {
       var visualization = visualizationIterator.next();
 
-      // TODO: Expire edit-sessions if the player's XZ-distance to the sign exceeded a threshold
+      if (!isSignRegistered(visualization.sign)) {
+        if (visualization instanceof EditSession editSession)
+          editSession.cancel();
+
+        continue;
+      }
+
       if (visualization.isExpired() || !visualization.player.isOnline()) {
         visualizationIterator.remove();
         continue;
       }
 
       if (visualization instanceof EditSession editSession) {
-        updateActionbarFor(visualization.player, editSession);
-        visualizeCuboidFor(visualization.player, visualization.getCuboid(), true);
+        var player = editSession.player.getLocation();
+
+        var distanceSquared = -1;
+
+        if (player.getWorld().equals(visualization.sign.getWorld())) {
+          var distanceX = visualization.sign.getX() - player.getBlockX();
+          var distanceZ = visualization.sign.getZ() - player.getBlockZ();
+          distanceSquared = distanceX * distanceX + distanceZ * distanceZ;
+        }
+
+        var maxDistance = config.rootSection.mechanic.magnet.visualization.editModeMaxXZDistance;
+
+        if (distanceSquared < 0 || distanceSquared >= maxDistance * maxDistance) {
+          config.rootSection.mechanic.magnet.editModeDistanceExceeded.sendMessage(
+            editSession.player,
+            new InterpretationEnvironment()
+              .withVariable("x", visualization.sign.getX())
+              .withVariable("y", visualization.sign.getY())
+              .withVariable("z", visualization.sign.getZ())
+              .withVariable("max_distance", maxDistance)
+          );
+
+          editSession.cancel();
+          continue;
+        }
+
+        visualizeEditSessionFor(visualization.player, editSession);
         continue;
       }
 
-      visualizeCuboidFor(visualization.player, visualization.getCuboid(), false);
+      visualizeCuboidFor(visualization.player, visualization.getCuboid());
     }
   }
 
-  private void updateActionbarFor(Player player, EditSession editSession) {
-    var parameter = editSession.getCurrentParameter();
-    player.sendActionBar(Component.text(parameter.name + " " + parameter.getValue()));
-  }
-
-  private void visualizeCuboidFor(Player player, Cuboid cuboid, boolean isEdit) {
+  private void visualizeEditSessionFor(Player player, EditSession editSession) {
     var stepSize = config.rootSection.mechanic.magnet.visualization.stepSize;
 
-    var dustOptions = new Particle.DustOptions(
-      isEdit
-        ? config.rootSection.mechanic.magnet.visualization.editColor._color
-        : config.rootSection.mechanic.magnet.visualization.visualizeColor._color,
+    var normalOptions = new Particle.DustOptions(
+      config.rootSection.mechanic.magnet.visualization.editColor._color,
       (float) config.rootSection.mechanic.magnet.visualization.dustSize
     );
 
-    cuboid.forEachLine((minX, minY, minZ, maxX, maxY, maxZ) -> {
+    var highlightOptions = new Particle.DustOptions(
+      config.rootSection.mechanic.magnet.visualization.editHighlightColor._color,
+      (float) config.rootSection.mechanic.magnet.visualization.dustSize
+    );
+
+    var currentlySelectedAxis = editSession.getCurrentlySelectedAxis();
+
+    editSession.getCuboid().forEachLine((minX, minY, minZ, maxX, maxY, maxZ, axis) -> {
+      var usedOptions = (currentlySelectedAxis != null && axis == currentlySelectedAxis) ? highlightOptions : normalOptions;
+
+      for (double x = minX; x <= maxX; x += stepSize) {
+        for (double y = minY; y <= maxY; y += stepSize) {
+          for (double z = minZ; z <= maxZ; z += stepSize) {
+            player.spawnParticle(Particle.DUST, x, y, z, 1, usedOptions);
+          }
+        }
+      }
+    });
+  }
+
+  private void visualizeCuboidFor(Player player, Cuboid cuboid) {
+    var stepSize = config.rootSection.mechanic.magnet.visualization.stepSize;
+
+    var dustOptions = new Particle.DustOptions(
+      config.rootSection.mechanic.magnet.visualization.visualizeColor._color,
+      (float) config.rootSection.mechanic.magnet.visualization.dustSize
+    );
+
+    cuboid.forEachLine((minX, minY, minZ, maxX, maxY, maxZ, axis) -> {
       for (double x = minX; x <= maxX; x += stepSize) {
         for (double y = minY; y <= maxY; y += stepSize) {
           for (double z = minZ; z <= maxZ; z += stepSize) {
@@ -146,38 +212,22 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
   }
 
   @EventHandler
-  public void onHotbarSlotChange(PlayerItemHeldEvent event) {
+  public void onSneakToggle(PlayerToggleSneakEvent event) {
+    if (event.isSneaking())
+      return;
+
     var session = editSessionByPlayerId.get(event.getPlayer().getUniqueId());
 
     if (session == null)
       return;
 
-    var isScrollingRight = (event.getNewSlot() - event.getPreviousSlot() + 9) % 9 == 1;
-
-    if (isScrollingRight) {
-      session.increaseParameter();
-      return;
-    }
-
-    session.decreaseParameter();
-  }
-
-  @EventHandler
-  public void onSneakToggle(PlayerToggleSneakEvent event) {
-    if (!event.isSneaking())
-      return;
-
-    var session = editSessionByPlayerId.get(event.getPlayer().getUniqueId());
-
-    // TODO: From a UX sandpoint, this *sucks*. Maybe a 9x1 UI would be better? Could also contain the save-button.
-    if (session != null)
-      session.nextParameter();
+    displayHandler.show(event.getPlayer(), session);
   }
 
   @Override
   public @Nullable MagnetInstance onSignCreate(@Nullable Player creator, Sign sign) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.magnet")) {
-      creator.sendMessage("§cNo permission!");
+      config.rootSection.mechanic.magnet.noPermission.sendMessage(creator);
       return null;
     }
 
@@ -187,7 +237,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
 
     if (!(mountBlock.getState() instanceof Container)) {
       if (creator != null)
-        creator.sendMessage("§cMagnets may only be mounted on containers!");
+        config.rootSection.mechanic.magnet.noContainer.sendMessage(creator);
 
       return null;
     }
@@ -206,8 +256,15 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
     instanceCuboidRegistry.register(instance);
 
-    if (creator != null)
-      creator.sendMessage("§aMagnet created!");
+    if (creator != null) {
+      config.rootSection.mechanic.magnet.creationSuccess.sendMessage(
+        creator,
+        new InterpretationEnvironment()
+          .withVariable("x", sign.getX())
+          .withVariable("y", sign.getY())
+          .withVariable("z", sign.getZ())
+      );
+    }
 
     return instance;
   }
@@ -224,36 +281,68 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
 
   @Override
   public boolean onInstanceClick(Player player, MagnetInstance instance, boolean wasLeftClick) {
-    if (player.isSneaking()) {
-      var playerId = player.getUniqueId();
+    var sign = instance.getSign();
 
-      if (wasLeftClick) {
-        var playerBucket = showSessionsByPlayerId.computeIfAbsent(playerId, k -> new ArrayList<>());
-        playerBucket.removeIf(entry -> entry.getCuboid().doBoundsEqual(instance.getCuboid()));
-        playerBucket.add(new ShowSession(player, instance.getCuboid(), config));
-        player.sendMessage("§aVisualizing cuboid!");
-        return true;
-      }
+    if (!canEditSign(player, sign))
+      return true;
 
-      var existingSession = editSessionByPlayerId.remove(playerId);
+    var environment = new InterpretationEnvironment()
+      .withVariable("x", sign.getX())
+      .withVariable("y", sign.getY())
+      .withVariable("z", sign.getZ());
 
-      if (existingSession != null) {
-        existingSession.parameters.writeIfDirty();
-        onSignUnload(existingSession.parameters.sign);
-        onSignLoad(existingSession.parameters.sign);
-        player.sendMessage("§aFinished edit-session!");
-        return true;
-      }
+    var playerId = player.getUniqueId();
+    var existingSession = editSessionByPlayerId.get(playerId);
 
-      var parameters = new MagnetParameters(instance.getSign(), config);
-      parameters.read();
-
-      editSessionByPlayerId.put(playerId, new EditSession(player, parameters));
-      player.sendMessage("§aStarted edit-session");
+    if (existingSession != null) {
+      config.rootSection.mechanic.magnet.signClickedInEditMode.sendMessage(player, environment);
       return true;
     }
 
-    return false;
+    if (!player.isSneaking())
+      return false;
+
+    if (wasLeftClick) {
+      var durationMs = config.rootSection.mechanic.magnet.visualization.durationMs;
+      var playerBucket = showSessionsByPlayerId.computeIfAbsent(playerId, k -> new ArrayList<>());
+
+      playerBucket.removeIf(entry -> entry.sign.getLocation().equals(sign.getLocation()));
+      playerBucket.add(new ShowSession(player, sign, instance.getCuboid(), durationMs));
+
+      config.rootSection.mechanic.magnet.visualizationInitialized.sendMessage(
+        player,
+        environment
+          .withVariable("visualization_duration", durationMs / 1000)
+      );
+      return true;
+    }
+
+    var parameters = new MagnetParameters(sign, config);
+    parameters.read();
+
+    editSessionByPlayerId.put(playerId, new EditSession(
+      player, parameters,
+      didWrite -> {
+        editSessionByPlayerId.remove(playerId);
+
+        if (didWrite) {
+          onSignUnload(instance.getSign());
+          onSignLoad(instance.getSign());
+          config.rootSection.mechanic.magnet.editModeSaved.sendMessage(player, environment);
+          return;
+        }
+
+        config.rootSection.mechanic.magnet.editModeSavedNoChanges.sendMessage(player, environment);
+      },
+      () -> {
+        // Seeing how we're also using this branch if the mechanic is destroyed; make sure the UI is getting closed also.
+        player.closeInventory();
+        config.rootSection.mechanic.magnet.editModeCancelled.sendMessage(player, environment);
+      }
+    ));
+
+    config.rootSection.mechanic.magnet.editModeInitialized.sendMessage(player, environment);
+    return true;
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -286,5 +375,26 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     var playerId = event.getPlayer().getUniqueId();
     showSessionsByPlayerId.remove(playerId);
     editSessionByPlayerId.remove(playerId);
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private boolean canEditSign(Player player, Sign sign) {
+    var side = sign.getSide(Side.FRONT);
+    var fakeEvent = new SignChangeEvent(sign.getBlock(), player, side.lines(), Side.FRONT);
+    callFakeEvent(fakeEvent);
+    return !fakeEvent.isCancelled();
+  }
+
+  private void callFakeEvent(Event event) {
+    for(var listener : event.getHandlers().getRegisteredListeners()) {
+      if (listener.getPlugin().equals(plugin))
+        continue;
+
+      try {
+        listener.callEvent(event);
+      } catch (Exception e) {
+        plugin.getLogger().log(Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + listener.getPlugin().getName(), e);
+      }
+    }
   }
 }

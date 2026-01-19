@@ -8,6 +8,7 @@ import org.bukkit.block.Sign;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.IntSupplier;
 
 public class MagnetParameters {
@@ -34,14 +35,24 @@ public class MagnetParameters {
     this.extentY = new MagnetParameter("EXTENT_Y", config.rootSection.mechanic.magnet.defaultHeight, clampMinOneMaxValue(config.rootSection.mechanic.magnet.maxHeight));
     this.extentZ = new MagnetParameter("EXTENT_Z", config.rootSection.mechanic.magnet.defaultWidthAndDepth, clampMinOneMaxValue(config.rootSection.mechanic.magnet.maxWidthOrDepth));
 
-    this.offsetX = new MagnetParameter("OFFSET_X", config.rootSection.mechanic.magnet.defaultOffsetX, clampMinNegativeSupplierMaxZero(extentX::getValue));
-    this.offsetY = new MagnetParameter("OFFSET_Y", config.rootSection.mechanic.magnet.defaultOffsetY, clampMinNegativeSupplierMaxZero(extentY::getValue));
-    this.offsetZ = new MagnetParameter("OFFSET_Z", config.rootSection.mechanic.magnet.defaultOffsetZ, clampMinNegativeSupplierMaxZero(extentZ::getValue));
+    this.offsetX = new MagnetParameter("OFFSET_X", config.rootSection.mechanic.magnet.defaultOffsetX, clampMinNegativeSupplierExclusiveMaxZero(extentX::getValue));
+    this.offsetY = new MagnetParameter("OFFSET_Y", config.rootSection.mechanic.magnet.defaultOffsetY, clampMinNegativeSupplierExclusiveMaxZero(extentY::getValue));
+    this.offsetZ = new MagnetParameter("OFFSET_Z", config.rootSection.mechanic.magnet.defaultOffsetZ, clampMinNegativeSupplierExclusiveMaxZero(extentZ::getValue));
 
     this.parameters = new MagnetParameter[] {
       extentX, extentY, extentZ,
       offsetX, offsetY, offsetZ,
     };
+  }
+
+  public void forEach(Consumer<MagnetParameter> handler) {
+    for (var parameter : parameters)
+      handler.accept(parameter);
+  }
+
+  public void updateAll() {
+    for (var parameter : parameters)
+      parameter.setValueAndGetIfValid(parameter.getValue());
   }
 
   public Cuboid makeCuboid() {
@@ -71,7 +82,7 @@ public class MagnetParameters {
     offsetZ.readFromToken(getOrEmpty(offsetsTokens, 2));
   }
 
-  public void writeIfDirty() {
+  public boolean writeIfDirty() {
     var isDirty = false;
 
     if (extentX.isDirtySinceLastRead() || extentY.isDirtySinceLastRead() || extentZ.isDirtySinceLastRead()) {
@@ -86,36 +97,20 @@ public class MagnetParameters {
 
     if (isDirty)
       sign.update(true, false);
+
+    return isDirty;
   }
 
   public MagnetParameter getFirst() {
     return parameters[0];
   }
 
-  private int indexOf(MagnetParameter parameter) {
-    for (var index = 0; index < parameters.length; ++index) {
-      if (parameters[index] == parameter)
-        return index;
-    }
-
-    return -1;
-  }
-
-  public MagnetParameter getNext(MagnetParameter parameter) {
-    var parameterIndex = indexOf(parameter);
-
-    if (parameterIndex < 0)
-      return getFirst();
-
-    return parameters[(parameterIndex + 1) % parameters.length];
-  }
-
   private ParameterClamp clampMinOneMaxValue(int max) {
     return value -> Math.max(1, Math.min(value, max));
   }
 
-  private ParameterClamp clampMinNegativeSupplierMaxZero(IntSupplier min) {
-    return value -> Math.max(-min.getAsInt(), Math.min(value, 0));
+  private ParameterClamp clampMinNegativeSupplierExclusiveMaxZero(IntSupplier min) {
+    return value -> Math.max(-(min.getAsInt() - 1), Math.min(value, 0));
   }
 
   private List<String> getTokens(String input) {

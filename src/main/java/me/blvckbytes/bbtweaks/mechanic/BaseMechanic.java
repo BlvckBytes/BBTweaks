@@ -54,6 +54,10 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     return false;
   }
 
+  public boolean isSignRegistered(Sign sign) {
+    return instanceBySignPosition.get(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ()) != null;
+  }
+
   public abstract boolean onInstanceClick(Player player, InstanceType instance, boolean wasLeftClick);
 
   @Override

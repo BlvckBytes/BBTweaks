@@ -1,5 +1,6 @@
-package me.blvckbytes.bbtweaks.mechanic.magnet;
+package me.blvckbytes.bbtweaks.mechanic.magnet.config;
 
+import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import at.blvckbytes.cm_mapper.mapper.MappingError;
 import at.blvckbytes.cm_mapper.mapper.section.CSAlways;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
@@ -10,6 +11,19 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 public class MagnetSection extends ConfigSection {
+
+  public ComponentMarkup noPermission;
+  public ComponentMarkup noContainer;
+  public ComponentMarkup visualizationInitialized;
+  public ComponentMarkup signClickedInEditMode;
+  public ComponentMarkup creationSuccess;
+  public ComponentMarkup editModeDistanceExceeded;
+  public ComponentMarkup editModeInitialized;
+  public ComponentMarkup editModeSaved;
+  public ComponentMarkup editModeSavedNoChanges;
+  public ComponentMarkup editModeCancelled;
+
+  public @CSAlways EditGuiSection editDisplay;
 
   public int maxWidthOrDepth;
   public int maxHeight;

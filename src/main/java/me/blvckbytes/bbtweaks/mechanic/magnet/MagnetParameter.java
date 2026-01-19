@@ -12,6 +12,8 @@ public class MagnetParameter {
   private final int defaultValue;
   private final ParameterClamp clamp;
 
+  private boolean didLastSetSucceed;
+
   public MagnetParameter(String name, int defaultValue, ParameterClamp clamp) {
     this.name = name;
     this.defaultValue = clamp.apply(defaultValue);
@@ -23,6 +25,10 @@ public class MagnetParameter {
     return lastReadValue == null || lastReadValue != value;
   }
 
+  public boolean didLastSetExceedLimit() {
+    return !didLastSetSucceed;
+  }
+
   public int getValue() {
     return value;
   }
@@ -30,7 +36,7 @@ public class MagnetParameter {
   public boolean setValueAndGetIfValid(int value) {
     var clampedValue = clamp.apply(value);
     this.value = clampedValue;
-    return value == clampedValue;
+    return (didLastSetSucceed = (value == clampedValue));
   }
 
   public void readFromToken(String token) {
@@ -41,5 +47,8 @@ public class MagnetParameter {
     }
 
     setValueAndGetIfValid(lastReadValue == null ? defaultValue : lastReadValue);
+
+    // Do not show limits regarding tokens that have been constrained automatically.
+    didLastSetSucceed = true;
   }
 }

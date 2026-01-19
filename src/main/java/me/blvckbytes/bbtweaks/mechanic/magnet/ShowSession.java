@@ -1,16 +1,15 @@
 package me.blvckbytes.bbtweaks.mechanic.magnet;
 
-import at.blvckbytes.cm_mapper.ConfigKeeper;
-import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
 public class ShowSession extends VisualizeSession {
 
   private final Cuboid cuboid;
 
-  public ShowSession(Player player, Cuboid cuboid, ConfigKeeper<MainSection> config) {
-    super(player, config.rootSection.mechanic.magnet.visualization.durationMs);
+  public ShowSession(Player player, Sign sign, Cuboid cuboid, long durationMs) {
+    super(player, sign, durationMs);
 
     this.cuboid = cuboid;
   }

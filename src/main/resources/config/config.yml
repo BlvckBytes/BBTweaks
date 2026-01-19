@@ -124,30 +124,119 @@ mechanic:
     signalLengthTooLow: '{lut.mechanic_prefix} <&7>Die Signallänge von <&c>{signal_length} <&7>unterschreitet den Minimalwert von <&c>{min_signal_length}<&7>; falle auf diesen Wert zurück!'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Pulse-Extender <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit einer Signallänge von <&a>{signal_length} Ticks <&7>erstellt!'
   magnet:
-    maxWidthOrDepth: 10
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen Magneten zu erstellen!'
+    noContainer: '{lut.mechanic_prefix} <&c>Ein Magnet kann nur an einem Behälterblock angebracht werden!'
+    visualizationInitialized: '{lut.mechanic_prefix} <&7>Die Region des Magnetes bei <&a>{x} {y} {z} <&7>wird nun für <&a>{visualization_duration}s <&7>angezeigt!'
+    signClickedInEditMode: '{lut.mechanic_prefix} <&c>Bitte breche die Bearbeitung im Menü (sneaken) ab, bevor du das Schild manuell editierst!'
+    editModeDistanceExceeded: '{lut.mechanic_prefix} <&c>Du hast dich weiter als <&4>{max_distance} <&c>Blöcke vom Magneten bei <&4>{x} {y} {z} <&c>wegbewegt; breche die Bearbeitung ab!'
+    editModeInitialized: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>begonnen<&7>; <&a>sneake <&7>jederzeit, um das <&a>Menü <&7>zu öffnen!'
+    editModeSaved: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>abgeschlossen<&7>; Änderungen wurden auf das Schild <&a>geschrieben<&7>!'
+    editModeSavedNoChanges: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>abgeschlossen<&7>; es wurden <&a>keine Änderungen <&7>vorgenommen!'
+    editModeCancelled: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>abgebrochen<&7>!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Magnet <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
+    editDisplay:
+      title: '<&8>Magnet <&e>{magnet_x} <&e>{magnet_y} <&e>{magnet_z}'
+      rows: 2
+      items:
+        selectParameterExtentX:
+          type: '<container +let-name="EXTENT_X">{lut.parameters.type}'
+          slots: 2
+          name: '<container +let-name="EXTENT_X" *let-desc={Durchmesser in <b><u>X</b>-Richtung}>{lut.parameters.name}'
+          lore: '<container +let-name="EXTENT_X">{lut.parameters.lore}'
+        selectParameterExtentY:
+          type: '<container +let-name="EXTENT_Y">{lut.parameters.type}'
+          slots: 3
+          name: '<container +let-name="EXTENT_Y" *let-desc={Durchmesser in <b><u>Y</b>-Richtung}>{lut.parameters.name}'
+          lore: '<container +let-name="EXTENT_Y">{lut.parameters.lore}'
+        selectParameterExtentZ:
+          type: '<container +let-name="EXTENT_Z">{lut.parameters.type}'
+          slots: 4
+          name: '<container +let-name="EXTENT_Z" *let-desc={Durchmesser in <b><u>Z</b>-Richtung}>{lut.parameters.name}'
+          lore: '<container +let-name="EXTENT_Z">{lut.parameters.lore}'
+        selectParameterOffsetX:
+          type: '<container +let-name="OFFSET_X">{lut.parameters.type}'
+          slots: 11
+          name: '<container +let-name="OFFSET_X" *let-desc={Verschiebung in <b><u>X</b>-Richtung}>{lut.parameters.name}'
+          lore: '<container +let-name="OFFSET_X">{lut.parameters.lore}'
+        selectParameterOffsetY:
+          type: '<container +let-name="OFFSET_Y">{lut.parameters.type}'
+          slots: 12
+          name: '<container +let-name="OFFSET_Y" *let-desc={Verschiebung in <b><u>Y</b>-Richtung}>{lut.parameters.name}'
+          lore: '<container +let-name="OFFSET_Y">{lut.parameters.lore}'
+        selectParameterOffsetZ:
+          type: '<container +let-name="OFFSET_Z">{lut.parameters.type}'
+          slots: 13
+          name: '<container +let-name="OFFSET_Z" *let-desc={Verschiebung in <b><u>Z</b>-Richtung}>{lut.parameters.name}'
+          lore: '<container +let-name="OFFSET_Z">{lut.parameters.lore}'
+        filler:
+          type: BLACK_STAINED_GLASS_PANE
+          name: ' '
+          slots: '0..last_slot'
+        save:
+          type: GREEN_CONCRETE
+          slots: 6
+          name: '<reset><&8>» <&a>Speichern <&8>«'
+          lore: |
+            <reset>
+              <br/>
+              <&7>Schreibt die Änderungen<br/>
+              und verlässt den Modus.
+        cancel:
+          type: RED_CONCRETE
+          slots: 15
+          name: '<reset><&8>» <&c>Abbrechen <&8>«'
+          lore: |
+            <reset>
+              <br/>
+              <&7>Verwirft die Änderungen<br/>
+              und verlässt den Modus.
+    maxWidthOrDepth: 15
     maxHeight: 20
     collectionPeriodTicks: 5
     defaultWidthAndDepth: 5
     defaultHeight: 5
-    defaultOffsetX: 0
+    defaultOffsetX: -2
     defaultOffsetY: 0
-    defaultOffsetZ: 0
+    defaultOffsetZ: -2
     visualization:
       durationMs: 5000
       periodTicks: 5
       stepSize: .1
       dustSize: 1
+      editModeMaxXZDistance: 40
       visualizeColor:
-        red: 255
-        green: 25
-        blue: 25
-      editColor:
-        red: 25
-        green: 25
+        red: 85
+        green: 255
         blue: 255
+      editColor:
+        red: 255
+        green: 255
+        blue: 85
+      editHighlightColor:
+        red: 255
+        green: 170
+        blue: 0
 
 cLut:
   main_prefix: '<&7>[<&5>BBTweaks<&7>]'
   ping_prefix: '<&7>[<&6>Ping<&7>]'
   uc_prefix: '<&7>[<&6>UC<&7>]'
   mechanic_prefix: '<&7>[<&6>Mechanic<&7>]'
+  spacer: '<&8><&m>{" " ** 55}'
+  parameters:
+    type: '{current_parameter eq name then "ORANGE_CONCRETE" else "GRAY_CONCRETE"}'
+    name: '<reset><&8>» <&7><&6 *use="current_parameter eq name">{desc} <&8>«'
+    lore: |
+      <reset>
+        <br/>
+        {lut.spacer}<br/>
+        <&8>♦ <&7>Aktueller Wert: <&e>{env(name)}
+        <container *if="env(`{name}_did_exceed_limit`)">
+          <space/>
+          <&c>(Limit)
+        </container>
+        <br/>
+        {lut.spacer}<br/>
+        <&8>➥ <&e>Linksklick <&7>Parameter verringern<br/>
+        <&8>➥ <&e>Rechtsklick/Werfen <&7>Parameter erhöhen<br/>
+        {lut.spacer}

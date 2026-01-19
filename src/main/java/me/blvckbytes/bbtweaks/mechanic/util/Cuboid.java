@@ -23,14 +23,6 @@ public record Cuboid(Block minPosition, Block maxPosition) {
     }
   }
 
-  public boolean doBoundsEqual(Cuboid other) {
-    return doCoordinatesEqual(minPosition, other.minPosition) && doCoordinatesEqual(maxPosition, other.maxPosition);
-  }
-
-  private boolean doCoordinatesEqual(Block a, Block b) {
-    return a.getX() == b.getX() && a.getY() == b.getY() && a.getZ() == b.getZ();
-  }
-
   public void forEachLine(LineHandler lineHandler) {
     // Let there be a cuboid sitting at the origin of a cartesian coordinate-system with its
     // bottom left near corner, such that said corner will be the min-position, while the
@@ -58,7 +50,8 @@ public record Cuboid(Block minPosition, Block maxPosition) {
   private void makeVerticalLine(LineHandler lineHandler, int x, int z) {
     lineHandler.handle(
       x, minPosition.getY(), z,
-      x, maxPosition.getY(), z
+      x, maxPosition.getY(), z,
+      Axis.Y
     );
   }
 
@@ -66,25 +59,29 @@ public record Cuboid(Block minPosition, Block maxPosition) {
     // Left near corner <-> Right near corner
     lineHandler.handle(
       minPosition.getX(), y, minPosition.getZ(),
-      maxPosition.getX(), y, minPosition.getZ()
+      maxPosition.getX(), y, minPosition.getZ(),
+      Axis.X
     );
 
     // Right near corner <-> Right far corner
     lineHandler.handle(
       maxPosition.getX(), y, minPosition.getZ(),
-      maxPosition.getX(), y, maxPosition.getZ()
+      maxPosition.getX(), y, maxPosition.getZ(),
+      Axis.Z
     );
 
     // Right far corner <-> Left far corner
     lineHandler.handle(
       minPosition.getX(), y, maxPosition.getZ(),
-      maxPosition.getX(), y, maxPosition.getZ()
+      maxPosition.getX(), y, maxPosition.getZ(),
+      Axis.X
     );
 
     // Left far corner <-> Left near corner
     lineHandler.handle(
       minPosition.getX(), y, minPosition.getZ(),
-      minPosition.getX(), y, maxPosition.getZ()
+      minPosition.getX(), y, maxPosition.getZ(),
+      Axis.Z
     );
   }
 
