@@ -267,7 +267,7 @@ public class FurnaceLevelDisplay implements Listener {
           playerData.lastSendStamp = 0;
           playerData.lastFurnaceBlockId = 0;
 
-          player.sendActionBar(Component.text());
+          player.sendActionBar(Component.text(" "));
         }
 
         continue;
