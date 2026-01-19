@@ -1,0 +1,147 @@
+package me.blvckbytes.bbtweaks.mechanic.magnet;
+
+import at.blvckbytes.cm_mapper.ConfigKeeper;
+import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
+import me.blvckbytes.bbtweaks.util.SignUtil;
+import org.bukkit.block.Sign;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.IntSupplier;
+
+public class MagnetParameters {
+
+  private static final int EXTENTS_LINE_INDEX = 2;
+  private static final int OFFSETS_LINE_INDEX = 3;
+
+  public final Sign sign;
+
+  private final MagnetParameter[] parameters;
+
+  public final MagnetParameter extentX;
+  public final MagnetParameter extentY;
+  public final MagnetParameter extentZ;
+
+  public final MagnetParameter offsetX;
+  public final MagnetParameter offsetY;
+  public final MagnetParameter offsetZ;
+
+  public MagnetParameters(Sign sign, ConfigKeeper<MainSection> config) {
+    this.sign = sign;
+
+    this.extentX = new MagnetParameter("EXTENT_X", config.rootSection.mechanic.magnet.defaultWidthAndDepth, clampMinOneMaxValue(config.rootSection.mechanic.magnet.maxWidthOrDepth));
+    this.extentY = new MagnetParameter("EXTENT_Y", config.rootSection.mechanic.magnet.defaultHeight, clampMinOneMaxValue(config.rootSection.mechanic.magnet.maxHeight));
+    this.extentZ = new MagnetParameter("EXTENT_Z", config.rootSection.mechanic.magnet.defaultWidthAndDepth, clampMinOneMaxValue(config.rootSection.mechanic.magnet.maxWidthOrDepth));
+
+    this.offsetX = new MagnetParameter("OFFSET_X", config.rootSection.mechanic.magnet.defaultOffsetX, clampMinNegativeSupplierMaxZero(extentX::getValue));
+    this.offsetY = new MagnetParameter("OFFSET_Y", config.rootSection.mechanic.magnet.defaultOffsetY, clampMinNegativeSupplierMaxZero(extentY::getValue));
+    this.offsetZ = new MagnetParameter("OFFSET_Z", config.rootSection.mechanic.magnet.defaultOffsetZ, clampMinNegativeSupplierMaxZero(extentZ::getValue));
+
+    this.parameters = new MagnetParameter[] {
+      extentX, extentY, extentZ,
+      offsetX, offsetY, offsetZ,
+    };
+  }
+
+  public Cuboid makeCuboid() {
+    var minBlock = sign.getBlock().getRelative(offsetX.getValue(), offsetY.getValue(), offsetZ.getValue());
+    var maxBlock = minBlock.getRelative(extentX.getValue(), extentY.getValue(), extentZ.getValue());
+    return new Cuboid(minBlock, maxBlock);
+  }
+
+  private String getOrEmpty(List<String> values, int index) {
+    if (index < 0 || index >= values.size())
+      return "";
+
+    return values.get(index);
+  }
+
+  public void read() {
+    var extentsTokens = getTokens(SignUtil.getPlainTextLine(sign, EXTENTS_LINE_INDEX));
+
+    extentX.readFromToken(getOrEmpty(extentsTokens, 0));
+    extentY.readFromToken(getOrEmpty(extentsTokens, 1));
+    extentZ.readFromToken(getOrEmpty(extentsTokens, 2));
+
+    var offsetsTokens = getTokens(SignUtil.getPlainTextLine(sign, OFFSETS_LINE_INDEX));
+
+    offsetX.readFromToken(getOrEmpty(offsetsTokens, 0));
+    offsetY.readFromToken(getOrEmpty(offsetsTokens, 1));
+    offsetZ.readFromToken(getOrEmpty(offsetsTokens, 2));
+  }
+
+  public void writeIfDirty() {
+    var isDirty = false;
+
+    if (extentX.isDirtySinceLastRead() || extentY.isDirtySinceLastRead() || extentZ.isDirtySinceLastRead()) {
+      SignUtil.setPlainTextLine(sign, EXTENTS_LINE_INDEX, extentX.getValue() + " " + extentY.getValue() + " " + extentZ.getValue(), false);
+      isDirty = true;
+    }
+
+    if (offsetX.isDirtySinceLastRead() || offsetY.isDirtySinceLastRead() || offsetZ.isDirtySinceLastRead()) {
+      SignUtil.setPlainTextLine(sign, OFFSETS_LINE_INDEX, offsetX.getValue() + " " + offsetY.getValue() + " " + offsetZ.getValue(), false);
+      isDirty = true;
+    }
+
+    if (isDirty)
+      sign.update(true, false);
+  }
+
+  public MagnetParameter getFirst() {
+    return parameters[0];
+  }
+
+  private int indexOf(MagnetParameter parameter) {
+    for (var index = 0; index < parameters.length; ++index) {
+      if (parameters[index] == parameter)
+        return index;
+    }
+
+    return -1;
+  }
+
+  public MagnetParameter getNext(MagnetParameter parameter) {
+    var parameterIndex = indexOf(parameter);
+
+    if (parameterIndex < 0)
+      return getFirst();
+
+    return parameters[(parameterIndex + 1) % parameters.length];
+  }
+
+  private ParameterClamp clampMinOneMaxValue(int max) {
+    return value -> Math.max(1, Math.min(value, max));
+  }
+
+  private ParameterClamp clampMinNegativeSupplierMaxZero(IntSupplier min) {
+    return value -> Math.max(-min.getAsInt(), Math.min(value, 0));
+  }
+
+  private List<String> getTokens(String input) {
+    var result = new ArrayList<String>();
+    var tokenBeginIndex = -1;
+
+    for (var charIndex = 0; charIndex < input.length(); ++charIndex) {
+      var currentChar = input.charAt(charIndex);
+      var isWhitespace = Character.isWhitespace(currentChar);
+
+      if (isWhitespace) {
+        if (tokenBeginIndex < 0)
+          continue;
+
+        result.add(input.substring(tokenBeginIndex, charIndex));
+        tokenBeginIndex = -1;
+        continue;
+      }
+
+      if (tokenBeginIndex < 0)
+        tokenBeginIndex = charIndex;
+    }
+
+    if (tokenBeginIndex >= 0)
+      result.add(input.substring(tokenBeginIndex));
+
+    return result;
+  }
+}

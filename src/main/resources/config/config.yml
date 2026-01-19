@@ -127,14 +127,24 @@ mechanic:
     maxWidthOrDepth: 10
     maxHeight: 20
     collectionPeriodTicks: 5
+    defaultWidthAndDepth: 5
+    defaultHeight: 5
+    defaultOffsetX: 0
+    defaultOffsetY: 0
+    defaultOffsetZ: 0
     visualization:
       durationMs: 5000
-      periodTicks: 8
-      stepSize: .125
-      colorRed: 255
-      colorGreen: 25
-      colorBlue: 25
+      periodTicks: 5
+      stepSize: .1
       dustSize: 1
+      visualizeColor:
+        red: 255
+        green: 25
+        blue: 25
+      editColor:
+        red: 25
+        green: 25
+        blue: 255
 
 cLut:
   main_prefix: '<&7>[<&5>BBTweaks<&7>]'
