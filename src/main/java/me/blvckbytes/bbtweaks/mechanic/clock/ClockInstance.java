@@ -15,20 +15,21 @@ public class ClockInstance extends SISOInstance {
   }
 
   @Override
-  public void tick(int time) {
+  public boolean tick(int time) {
     if (time % toggleDuration != 0)
-      return;
+      return true;
 
     var inputPower = tryReadInputPower();
 
     if (inputPower == null)
-      return;
+      return true;
 
     if (inputPower == 0) {
       tryWriteOutputState(false);
-      return;
+      return true;
     }
 
     tryWriteOutputState(!getLastOutputState());
+    return true;
   }
 }

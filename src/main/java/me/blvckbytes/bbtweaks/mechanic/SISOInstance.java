@@ -14,11 +14,11 @@ public abstract class SISOInstance implements MechanicInstance {
     BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
   };
 
-  private final Block signBlock;
-  private final Block mountBlock;
-  private final Block inputBlock;
-  private final BlockFace signFacing;
-  private final World world;
+  protected final Block signBlock;
+  protected final Block mountBlock;
+  protected final Block inputBlock;
+  protected final BlockFace signFacing;
+  protected final World world;
 
   private @Nullable Block cachedOutputBlock;
   private @Nullable Powerable cachedOutputBlockData;

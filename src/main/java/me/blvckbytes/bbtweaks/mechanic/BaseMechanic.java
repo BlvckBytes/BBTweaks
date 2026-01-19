@@ -67,7 +67,11 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
   @Override
   public void tick(int time) {
     instanceBySignPosition.forEachValue(instance -> {
-      instance.tick(time);
+      if (!instance.tick(time)) {
+        instance.getSignBlock().breakNaturally();
+        return IterationDecision.REMOVE_AND_CONTINUE;
+      }
+
       return IterationDecision.CONTINUE;
     });
   }

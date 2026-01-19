@@ -6,6 +6,9 @@ public interface MechanicInstance {
 
   Block getSignBlock();
 
-  void tick(int time);
+  /**
+   * @return Whether the tick was successful; unsuccessful ticks will result in self-destruction.
+   */
+  boolean tick(int time);
 
 }

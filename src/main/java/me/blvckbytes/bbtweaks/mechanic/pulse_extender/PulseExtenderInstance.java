@@ -17,15 +17,16 @@ public class PulseExtenderInstance extends SISOInstance {
   }
 
   @Override
-  public void tick(int time) {
+  public boolean tick(int time) {
     var inputPower = tryReadInputPower();
 
     if (inputPower == null)
-      return;
+      return true;
 
     if (inputPower > 0)
       lastSignalTime = time;
 
     tryWriteOutputState(time - lastSignalTime <= signalLength);
+    return true;
   }
 }
