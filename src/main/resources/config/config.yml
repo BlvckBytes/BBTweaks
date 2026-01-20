@@ -134,39 +134,45 @@ mechanic:
     editModeSavedNoChanges: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>abgeschlossen<&7>; es wurden <&a>keine Änderungen <&7>vorgenommen!'
     editModeCancelled: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>abgebrochen<&7>!'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Magnet <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
+    editModeClickDetectionActionbar: |
+      <&7>{lut.parameter_description[current_parameter]}: <&6>{env(current_parameter)}
+      <container *if="env(`{current_parameter}_did_exceed_limit`)">
+        <space/>
+        <&c><i>(Limit)
+      </container>
     editDisplay:
       title: '<&8>Magnet <&e>{magnet_x} {magnet_y} {magnet_z}'
       rows: 2
       items:
         selectParameterExtentX:
           type: '<container +let-name="EXTENT_X">{lut.parameters.type}'
-          slots: 2
-          name: '<container +let-name="EXTENT_X" *let-desc={Durchmesser in <b><u>X</b>-Richtung}>{lut.parameters.name}'
+          slots: 1
+          name: '<container +let-name="EXTENT_X">{lut.parameters.name}'
           lore: '<container +let-name="EXTENT_X">{lut.parameters.lore}'
         selectParameterExtentY:
           type: '<container +let-name="EXTENT_Y">{lut.parameters.type}'
-          slots: 3
-          name: '<container +let-name="EXTENT_Y" *let-desc={Durchmesser in <b><u>Y</b>-Richtung}>{lut.parameters.name}'
+          slots: 2
+          name: '<container +let-name="EXTENT_Y">{lut.parameters.name}'
           lore: '<container +let-name="EXTENT_Y">{lut.parameters.lore}'
         selectParameterExtentZ:
           type: '<container +let-name="EXTENT_Z">{lut.parameters.type}'
-          slots: 4
-          name: '<container +let-name="EXTENT_Z" *let-desc={Durchmesser in <b><u>Z</b>-Richtung}>{lut.parameters.name}'
+          slots: 3
+          name: '<container +let-name="EXTENT_Z">{lut.parameters.name}'
           lore: '<container +let-name="EXTENT_Z">{lut.parameters.lore}'
         selectParameterOffsetX:
           type: '<container +let-name="OFFSET_X">{lut.parameters.type}'
-          slots: 11
-          name: '<container +let-name="OFFSET_X" *let-desc={Verschiebung in <b><u>X</b>-Richtung}>{lut.parameters.name}'
+          slots: 10
+          name: '<container +let-name="OFFSET_X">{lut.parameters.name}'
           lore: '<container +let-name="OFFSET_X">{lut.parameters.lore}'
         selectParameterOffsetY:
           type: '<container +let-name="OFFSET_Y">{lut.parameters.type}'
-          slots: 12
-          name: '<container +let-name="OFFSET_Y" *let-desc={Verschiebung in <b><u>Y</b>-Richtung}>{lut.parameters.name}'
+          slots: 11
+          name: '<container +let-name="OFFSET_Y">{lut.parameters.name}'
           lore: '<container +let-name="OFFSET_Y">{lut.parameters.lore}'
         selectParameterOffsetZ:
           type: '<container +let-name="OFFSET_Z">{lut.parameters.type}'
-          slots: 13
-          name: '<container +let-name="OFFSET_Z" *let-desc={Verschiebung in <b><u>Z</b>-Richtung}>{lut.parameters.name}'
+          slots: 12
+          name: '<container +let-name="OFFSET_Z">{lut.parameters.name}'
           lore: '<container +let-name="OFFSET_Z">{lut.parameters.lore}'
         filler:
           type: BLACK_STAINED_GLASS_PANE
@@ -174,7 +180,7 @@ mechanic:
           slots: '0..last_slot'
         save:
           type: GREEN_CONCRETE
-          slots: 6
+          slots: 5
           name: '<reset><&8>» <&a>Speichern <&8>«'
           lore: |
             <reset>
@@ -183,13 +189,33 @@ mechanic:
               und verlässt den Modus.
         cancel:
           type: RED_CONCRETE
-          slots: 15
+          slots: 14
           name: '<reset><&8>» <&c>Abbrechen <&8>«'
           lore: |
             <reset>
               <br/>
               <&7>Verwirft die Änderungen<br/>
               und verlässt den Modus.
+        toggleClickDetection:
+          type: '{click_detection then "LIME_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+          slots: 16
+          name: |
+            <reset>
+              <&8>»
+                <space/>
+                <&a *if="click_detection">Klick-Detektion aktiviert</>
+                <&7 *else>Klick-Detektion deaktiviert</>
+                <space/>
+              <&8>«
+          lore: |
+            <reset>
+              <br/>
+              <&7>Schalte um, ob Mausklicks außerhalb<br/>
+              des Menüs erkannt werden sollen, um<br/>
+              den aktuellen Parameter zu verändern.<br/>
+              <br/>
+              <&e><i>Diese Funktion erfordert, dass du ein<br/>
+              beliebiges Item in deiner Hand hältst!
     maxWidthOrDepth: 15
     maxHeight: 20
     collectionPeriodTicks: 5
@@ -229,9 +255,16 @@ cLut:
     <container *else>
       <&8><&m>{" " ** 55}
     </container>
+  parameter_description:
+    EXTENT_X: 'Durchmesser in <b><u>X</b>-Richtung'
+    EXTENT_Y: 'Durchmesser in <b><u>Y</b>-Richtung'
+    EXTENT_Z: 'Durchmesser in <b><u>Z</b>-Richtung'
+    OFFSET_X: 'Verschiebung in <b><u>X</b>-Richtung'
+    OFFSET_Y: 'Verschiebung in <b><u>Y</b>-Richtung'
+    OFFSET_Z: 'Verschiebung in <b><u>Z</b>-Richtung'
   parameters:
     type: '{current_parameter eq name then "ORANGE_CONCRETE" else "GRAY_CONCRETE"}'
-    name: '<reset><&8>» <&7><&6 *use="current_parameter eq name">{desc} <&8>«'
+    name: '<reset><&8>» <&7><&6 *use="current_parameter eq name">{lut.parameter_description[name]} <&8>«'
     lore: |
       <reset>
         <br/>
@@ -243,11 +276,16 @@ cLut:
         </container>
         <br/>
         {lut.spacer}<br/>
-        <&8>➥ <&e>Linksklick <&7>Parameter verringern<br/>
-        <container *if="is_floodgate">
-          <&8>➥ <&e>Werfen <&7>Parameter erhöhen<br/>
+        <container *if="current_parameter eq name">
+          <&8>➥ <&e>Linksklick <&7>Parameter verringern<br/>
+          <container *if="is_floodgate">
+            <&8>➥ <&e>Werfen <&7>Parameter erhöhen<br/>
+          </container>
+          <container *else>
+            <&8>➥ <&e>Rechtsklick <&7>Parameter erhöhen<br/>
+          </container>
         </container>
         <container *else>
-          <&8>➥ <&e>Rechtsklick <&7>Parameter erhöhen<br/>
+          <&8>➥ <&e>Linksklick <&7>Parameter auswählen<br/>
         </container>
         {lut.spacer}

@@ -40,13 +40,25 @@ public class EditDisplayHandler extends DisplayHandler<EditDisplay, EditSession>
       return;
     }
 
+    if (config.rootSection.mechanic.magnet.editDisplay.items.toggleClickDetection.getDisplaySlots().contains(slot)) {
+      display.displayData.clickDetection ^= true;
+      display.renderItems();
+      return;
+    }
+
     MagnetParameter targetParameter = decideMagnetParameter(display, slot);
 
     if (targetParameter == null)
       return;
 
-    if (display.displayData.getCurrentParameter() != targetParameter)
-      display.displayData.setParameter(targetParameter);
+    if (display.displayData.getCurrentParameter() != targetParameter) {
+      if (clickType == ClickType.LEFT) {
+        display.displayData.setParameter(targetParameter);
+        display.renderItems();
+      }
+
+      return;
+    }
 
     if (clickType == ClickType.LEFT) {
       display.displayData.decreaseParameter();
@@ -54,7 +66,7 @@ public class EditDisplayHandler extends DisplayHandler<EditDisplay, EditSession>
       return;
     }
 
-    if (clickType == ClickType.RIGHT || clickType == ClickType.DROP) {
+    if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
       display.displayData.increaseParameter();
       display.renderItems();
     }

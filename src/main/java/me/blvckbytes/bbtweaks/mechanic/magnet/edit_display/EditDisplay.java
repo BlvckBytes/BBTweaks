@@ -12,7 +12,7 @@ import org.bukkit.plugin.Plugin;
 
 public class EditDisplay extends Display<EditSession> {
 
-  private final FloodgateIntegration floodgateIntegration;
+  public final boolean isFloodgate;
 
   public EditDisplay(
     Player player,
@@ -23,7 +23,7 @@ public class EditDisplay extends Display<EditSession> {
   ) {
     super(player, displayData, config, plugin);
 
-    this.floodgateIntegration = floodgateIntegration;
+    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
 
     show();
   }
@@ -45,6 +45,7 @@ public class EditDisplay extends Display<EditSession> {
 
     config.rootSection.mechanic.magnet.editDisplay.items.save.renderInto(inventory, environment);
     config.rootSection.mechanic.magnet.editDisplay.items.cancel.renderInto(inventory, environment);
+    config.rootSection.mechanic.magnet.editDisplay.items.toggleClickDetection.renderInto(inventory, environment);
   }
 
   @Override
@@ -56,21 +57,7 @@ public class EditDisplay extends Display<EditSession> {
   public void onConfigReload() {}
 
   private InterpretationEnvironment createEnvironment() {
-    var environment = new InterpretationEnvironment()
-      .withVariable("magnet_x", displayData.parameters.sign.getX())
-      .withVariable("magnet_y", displayData.parameters.sign.getY())
-      .withVariable("magnet_z", displayData.parameters.sign.getZ())
-      .withVariable("current_parameter", displayData.getCurrentParameter().name)
-      .withVariable("is_floodgate", floodgateIntegration.isFloodgatePlayer(player));
-
-    displayData.parameters.forEach(parameter -> {
-      var variableName = parameter.name.toLowerCase();
-
-      environment
-        .withVariable(variableName, parameter.getValue())
-        .withVariable(variableName + "_did_exceed_limit", parameter.didLastSetExceedLimit());
-    });
-
-    return environment;
+    return displayData.makeEnvironment()
+      .withVariable("is_floodgate", isFloodgate);
   }
 }

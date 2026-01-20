@@ -19,6 +19,7 @@ public class EditDisplayItemsSection extends ConfigSection {
   public GuiItemStackSection filler;
   public GuiItemStackSection save;
   public GuiItemStackSection cancel;
+  public GuiItemStackSection toggleClickDetection;
 
   public EditDisplayItemsSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

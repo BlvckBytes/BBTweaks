@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.mechanic.magnet;
 
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.mechanic.util.Axis;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import org.bukkit.entity.Player;
@@ -13,6 +14,8 @@ public class EditSession extends VisualizeSession {
 
   private final Consumer<Boolean> afterWriting;
   private final Runnable afterCancelling;
+
+  public boolean clickDetection;
 
   private MagnetParameter currentParameter;
   private Cuboid currentCuboid;
@@ -81,5 +84,24 @@ public class EditSession extends VisualizeSession {
   @Override
   public Cuboid getCuboid() {
     return currentCuboid;
+  }
+
+  public InterpretationEnvironment makeEnvironment() {
+    var environment = new InterpretationEnvironment()
+      .withVariable("magnet_x", parameters.sign.getX())
+      .withVariable("magnet_y", parameters.sign.getY())
+      .withVariable("magnet_z", parameters.sign.getZ())
+      .withVariable("current_parameter", getCurrentParameter().name)
+      .withVariable("click_detection", clickDetection);
+
+    parameters.forEach(parameter -> {
+      var variableName = parameter.name.toLowerCase();
+
+      environment
+        .withVariable(variableName, parameter.getValue())
+        .withVariable(variableName + "_did_exceed_limit", parameter.didLastSetExceedLimit());
+    });
+
+    return environment;
   }
 }

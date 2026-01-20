@@ -22,6 +22,7 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.plugin.Plugin;
@@ -149,6 +150,9 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
           continue;
         }
 
+        if (editSession.clickDetection)
+          config.rootSection.mechanic.magnet.editModeClickDetectionActionbar.sendActionBar(editSession.player, editSession.makeEnvironment());
+
         visualizeEditSessionFor(visualization.player, editSession);
         continue;
       }
@@ -223,6 +227,30 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
       return;
 
     displayHandler.show(event.getPlayer(), session);
+  }
+
+  @EventHandler
+  public void onInteract(PlayerInteractEvent event) {
+    var session = editSessionByPlayerId.get(event.getPlayer().getUniqueId());
+
+    if (session == null || !session.clickDetection)
+      return;
+
+    var block = event.getClickedBlock();
+
+    if (block != null && block.equals(session.sign.getBlock()))
+      return;
+
+    var action = event.getAction();
+
+    if (action.isLeftClick())
+      session.decreaseParameter();
+    else
+      session.increaseParameter();
+
+    config.rootSection.mechanic.magnet.editModeClickDetectionActionbar.sendActionBar(session.player, session.makeEnvironment());
+
+    event.setCancelled(true);
   }
 
   @Override

@@ -22,6 +22,7 @@ public class MagnetSection extends ConfigSection {
   public ComponentMarkup editModeSaved;
   public ComponentMarkup editModeSavedNoChanges;
   public ComponentMarkup editModeCancelled;
+  public ComponentMarkup editModeClickDetectionActionbar;
 
   public @CSAlways EditGuiSection editDisplay;
 
