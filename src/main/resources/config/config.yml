@@ -222,7 +222,13 @@ cLut:
   ping_prefix: '<&7>[<&6>Ping<&7>]'
   uc_prefix: '<&7>[<&6>UC<&7>]'
   mechanic_prefix: '<&7>[<&6>Mechanic<&7>]'
-  spacer: '<&8><&m>{" " ** 55}'
+  spacer: |
+    <container *if="is_floodgate">
+      <&8>{"-" ** 45}
+    </container>
+    <container *else>
+      <&8><&m>{" " ** 55}
+    </container>
   parameters:
     type: '{current_parameter eq name then "ORANGE_CONCRETE" else "GRAY_CONCRETE"}'
     name: '<reset><&8>» <&7><&6 *use="current_parameter eq name">{desc} <&8>«'
@@ -238,5 +244,10 @@ cLut:
         <br/>
         {lut.spacer}<br/>
         <&8>➥ <&e>Linksklick <&7>Parameter verringern<br/>
-        <&8>➥ <&e>Rechtsklick/Werfen <&7>Parameter erhöhen<br/>
+        <container *if="is_floodgate">
+          <&8>➥ <&e>Werfen <&7>Parameter erhöhen<br/>
+        </container>
+        <container *else>
+          <&8>➥ <&e>Rechtsklick <&7>Parameter erhöhen<br/>
+        </container>
         {lut.spacer}

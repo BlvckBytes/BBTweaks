@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.EditDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicRegistry;
+import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.block.Container;
@@ -44,7 +45,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     this.showSessionsByPlayerId = new HashMap<>();
     this.editSessionByPlayerId = new HashMap<>();
 
-    this.displayHandler = new EditDisplayHandler(config, plugin);
+    this.displayHandler = new EditDisplayHandler(FloodgateIntegration.load(plugin.getLogger()), config, plugin);
 
     Bukkit.getServer().getPluginManager().registerEvents(displayHandler, plugin);
   }

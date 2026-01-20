@@ -5,6 +5,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.EditSession;
 import me.blvckbytes.bbtweaks.mechanic.magnet.MagnetParameter;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
+import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;
@@ -12,13 +13,17 @@ import org.jetbrains.annotations.Nullable;
 
 public class EditDisplayHandler extends DisplayHandler<EditDisplay, EditSession> {
 
-  public EditDisplayHandler(ConfigKeeper<MainSection> config, Plugin plugin) {
+  private final FloodgateIntegration floodgateIntegration;
+
+  public EditDisplayHandler(FloodgateIntegration floodgateIntegration, ConfigKeeper<MainSection> config, Plugin plugin) {
     super(config, plugin);
+
+    this.floodgateIntegration = floodgateIntegration;
   }
 
   @Override
   public EditDisplay instantiateDisplay(Player player, EditSession displayData) {
-    return new EditDisplay(player, displayData, config, plugin);
+    return new EditDisplay(player, displayData, config, floodgateIntegration, plugin);
   }
 
   @Override

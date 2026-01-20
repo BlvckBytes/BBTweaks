@@ -5,14 +5,25 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.EditSession;
 import me.blvckbytes.bbtweaks.util.Display;
+import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
 public class EditDisplay extends Display<EditSession> {
 
-  public EditDisplay(Player player, EditSession displayData, ConfigKeeper<MainSection> config, Plugin plugin) {
+  private final FloodgateIntegration floodgateIntegration;
+
+  public EditDisplay(
+    Player player,
+    EditSession displayData,
+    ConfigKeeper<MainSection> config,
+    FloodgateIntegration floodgateIntegration,
+    Plugin plugin
+  ) {
     super(player, displayData, config, plugin);
+
+    this.floodgateIntegration = floodgateIntegration;
 
     show();
   }
@@ -49,7 +60,8 @@ public class EditDisplay extends Display<EditSession> {
       .withVariable("magnet_x", displayData.parameters.sign.getX())
       .withVariable("magnet_y", displayData.parameters.sign.getY())
       .withVariable("magnet_z", displayData.parameters.sign.getZ())
-      .withVariable("current_parameter", displayData.getCurrentParameter().name);
+      .withVariable("current_parameter", displayData.getCurrentParameter().name)
+      .withVariable("is_floodgate", floodgateIntegration.isFloodgatePlayer(player));
 
     displayData.parameters.forEach(parameter -> {
       var variableName = parameter.name.toLowerCase();
