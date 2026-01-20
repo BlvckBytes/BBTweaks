@@ -16,6 +16,7 @@ public class MagnetSection extends ConfigSection {
   public ComponentMarkup noContainer;
   public ComponentMarkup visualizationInitialized;
   public ComponentMarkup signClickedInEditMode;
+  public ComponentMarkup alreadyInAnEditSession;
   public ComponentMarkup creationSuccess;
   public ComponentMarkup editModeDistanceExceeded;
   public ComponentMarkup editModeInitialized;

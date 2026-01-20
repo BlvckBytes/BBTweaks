@@ -114,8 +114,6 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
       if (!isSignRegistered(visualization.sign)) {
         if (visualization instanceof EditSession editSession)
           editSession.cancel();
-
-        continue;
       }
 
       if (visualization.isExpired() || !visualization.player.isOnline()) {
@@ -323,7 +321,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     var playerId = player.getUniqueId();
     var existingSession = editSessionByPlayerId.get(playerId);
 
-    if (existingSession != null) {
+    if (existingSession != null && existingSession.sign.getBlock().equals(sign.getBlock())) {
       config.rootSection.mechanic.magnet.signClickedInEditMode.sendMessage(player, environment);
       return true;
     }
@@ -346,6 +344,11 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
       return true;
     }
 
+    if (existingSession != null) {
+      config.rootSection.mechanic.magnet.alreadyInAnEditSession.sendMessage(player, environment);
+      return true;
+    }
+
     var parameters = new MagnetParameters(sign, config);
     parameters.read();
 
@@ -365,7 +368,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
       },
       () -> {
         // Seeing how we're also using this branch if the mechanic is destroyed; make sure the UI is getting closed also.
-        player.closeInventory();
+        displayHandler.close(player);
         config.rootSection.mechanic.magnet.editModeCancelled.sendMessage(player, environment);
       }
     ));

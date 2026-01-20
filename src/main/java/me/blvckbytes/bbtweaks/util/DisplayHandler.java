@@ -50,6 +50,13 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
     displayByPlayerId.put(player.getUniqueId(), instantiateDisplay(player, displayData));
   }
 
+  public void close(Player player) {
+    var display = displayByPlayerId.remove(player.getUniqueId());
+
+    if (display != null)
+      display.onShutdown();
+  }
+
   protected abstract void handleClick(Player player, DisplayType display, ClickType clickType, int slot);
 
   public void onShutdown() {
