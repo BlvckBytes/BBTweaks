@@ -226,7 +226,7 @@ mechanic:
               <&e><i>Diese Funktion erfordert, dass du ein<br/>
               beliebiges Item in deiner Hand hältst!
     maxWidthOrDepth: 15
-    maxHeight: 20
+    maxHeight: 30
     collectionPeriodTicks: 5
     defaultWidthAndDepth: 5
     defaultHeight: 5
