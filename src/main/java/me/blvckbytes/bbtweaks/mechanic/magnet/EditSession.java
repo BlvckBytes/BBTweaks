@@ -44,6 +44,10 @@ public class EditSession extends VisualizeSession {
     manuallyExpire();
   }
 
+  public void setFilter(@Nullable PredicateAndLanguage filter) {
+    // TODO: Implement me! :)
+  }
+
   public void setParameter(MagnetParameter parameter) {
     currentParameter = parameter;
   }

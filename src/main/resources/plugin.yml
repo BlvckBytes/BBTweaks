@@ -3,6 +3,7 @@ main: me.blvckbytes.bbtweaks.BBTweaksPlugin
 version: ${project.version}
 author: BlvckBytes
 api-version: 1.21
+depend: [ItemPredicateParser]
 softdepend: [mcMMO, floodgate]
 commands:
   bbtweaks:
@@ -19,6 +20,10 @@ commands:
     permission: essentials.back
   ping:
     description: 'Get the ping of yourself (and possibly others)'
+  mfilter:
+    description: 'Used to set the filter-predicate of a magnet during an edit-session using the language selected via IPP'
+  mfilterl:
+    description: 'Used to set the filter-predicate of a magnet during an edit-session using a custom language'
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

@@ -20,6 +20,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +38,7 @@ public class SignMechanicManager implements Listener {
 
   private int time;
 
-  public SignMechanicManager(Plugin plugin, ConfigKeeper<MainSection> config) {
+  public SignMechanicManager(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
     this.plugin = plugin;
 
     this.signMechanicByDiscriminatorLower = new HashMap<>();

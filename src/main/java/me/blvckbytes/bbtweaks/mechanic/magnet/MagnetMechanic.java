@@ -8,12 +8,15 @@ import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.EditDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicRegistry;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
+import org.bukkit.command.Command;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -25,7 +28,7 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -39,7 +42,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
 
   private final EditDisplayHandler displayHandler;
 
-  public MagnetMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
+  public MagnetMechanic(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
     super(plugin, config);
 
     this.instanceCuboidRegistry = new CuboidMechanicRegistry<>();
@@ -47,6 +50,25 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     this.editSessionByPlayerId = new HashMap<>();
 
     this.displayHandler = new EditDisplayHandler(FloodgateIntegration.load(plugin.getLogger()), config, plugin);
+
+    var defaultLanguageCommand = Objects.requireNonNull(plugin.getCommand("mfilter"));
+    var customLanguageCommand = Objects.requireNonNull(plugin.getCommand("mfilterl"));
+
+    var ipp = ItemPredicateParserPlugin.getInstance();
+
+    if (!Bukkit.getServer().getPluginManager().isPluginEnabled("ItemPredicateParser") || ipp == null)
+      throw new IllegalArgumentException("Expected plugin ItemPredicateParser to have been loaded at this point");
+
+    var commandExecutor = new MFilterCommand(
+      defaultLanguageCommand,
+      customLanguageCommand,
+      editSessionByPlayerId::get,
+      ipp.getPredicateHelper(),
+      config
+    );
+
+    defaultLanguageCommand.setExecutor(commandExecutor);
+    customLanguageCommand.setExecutor(commandExecutor);
 
     Bukkit.getServer().getPluginManager().registerEvents(displayHandler, plugin);
   }

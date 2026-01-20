@@ -141,6 +141,13 @@ mechanic:
         <space/>
         <&c><i>(Limit)
       </container>
+    filterCommandPlayersOnly: '{lut.mechanic_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+    filterCommandNoEditSession: '{lut.mechanic_prefix} <&c>Du befindest dich aktuell in keiner Bearbeitung eines Magnetes!'
+    filterCommandFilterSet: '{lut.mechanic_prefix} <&7>Der Filter <&a>{predicate} <&7>in der Sprache <&a>{language} <&7>wurde gesetzt.'
+    filterCommandMissingLanguage: '{lut.mechanic_prefix} <&c>Der Befehl <&4>/{label} <&c>erfordert eine Sprachauswahl als ersten Parameter!'
+    filterCommandUnknownLanguage: '{lut.mechanic_prefix} <&c>Die Sprache <&4>{input} <&c>stellt keine gültige Auswahl dar; wähle aus: <&4 *for-language="languages" *for-separator={<&c>,<space/>}>{language}</><&c>.'
+    filterCommandPredicateError: '{lut.mechanic_prefix} <&c>Ungültiger Filter: <&4>{error}<&c>.'
+    filterCommandEmptyPredicate: '{lut.mechanic_prefix} <&c>Bitte gib einen gültigen Filter an!'
     editDisplay:
       title: '<&8>Magnet <&e>{magnet_x} {magnet_y} {magnet_z}'
       rows: 2
