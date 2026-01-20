@@ -46,6 +46,11 @@ public class EditDisplayHandler extends DisplayHandler<EditDisplay, EditSession>
       return;
     }
 
+    if (config.rootSection.mechanic.magnet.editDisplay.items.modifyFilter.getDisplaySlots().contains(slot)) {
+      // TODO: Implement me!
+      return;
+    }
+
     MagnetParameter targetParameter = decideMagnetParameter(display, slot);
 
     if (targetParameter == null)

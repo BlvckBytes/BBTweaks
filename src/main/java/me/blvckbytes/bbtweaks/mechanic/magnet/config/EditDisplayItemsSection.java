@@ -18,6 +18,7 @@ public class EditDisplayItemsSection extends ConfigSection {
 
   public GuiItemStackSection filler;
   public GuiItemStackSection save;
+  public GuiItemStackSection modifyFilter;
   public GuiItemStackSection cancel;
   public GuiItemStackSection toggleClickDetection;
 
