@@ -31,6 +31,7 @@ import java.util.function.Consumer;
 public class SignMechanicManager implements Listener {
 
   private final Plugin plugin;
+  private final ConfigKeeper<MainSection> config;
 
   private final Map<String, SignMechanic<?>> signMechanicByDiscriminatorLower;
 
@@ -40,6 +41,7 @@ public class SignMechanicManager implements Listener {
 
   public SignMechanicManager(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
     this.plugin = plugin;
+    this.config = config;
 
     this.signMechanicByDiscriminatorLower = new HashMap<>();
 
@@ -118,9 +120,6 @@ public class SignMechanicManager implements Listener {
   public void onSignChange(SignChangeEvent event) {
     var block = event.getBlock();
 
-    if (!Tag.WALL_SIGNS.isTagged(block.getType()))
-      return;
-
     if (!(block.getState() instanceof Sign oldSign))
       return;
 
@@ -131,8 +130,14 @@ public class SignMechanicManager implements Listener {
         return;
 
       correspondSign(newSign, mechanic -> {
+        if (!Tag.WALL_SIGNS.isTagged(block.getType())) {
+          config.rootSection.mechanic.noWallSign.sendMessage(event.getPlayer());
+          block.breakNaturally();
+          return;
+        }
+
         if (mechanic.onSignCreate(event.getPlayer(), newSign) == null)
-          newSign.getBlock().breakNaturally();
+          block.breakNaturally();
       });
     }, 1);
   }
