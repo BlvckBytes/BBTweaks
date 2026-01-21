@@ -11,12 +11,13 @@ import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Particle;
+import org.bukkit.Tag;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
-import org.bukkit.command.Command;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -28,6 +29,7 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -35,6 +37,10 @@ import java.util.*;
 import java.util.logging.Level;
 
 public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements Listener {
+
+  private static final BlockFace[] SIGN_FACES = new BlockFace[] {
+    BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
+  };
 
   private final CuboidMechanicRegistry<MagnetInstance> instanceCuboidRegistry;
   private final Map<UUID, List<ShowSession>> showSessionsByPlayerId;
@@ -280,13 +286,25 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
       return null;
     }
 
+    var environment = new InterpretationEnvironment()
+      .withVariable("x", sign.getX())
+      .withVariable("y", sign.getY())
+      .withVariable("z", sign.getZ());
+
     var signBlock = sign.getBlock();
     var signFacing = ((Directional) sign.getBlockData()).getFacing();
     var mountBlock = signBlock.getRelative(signFacing.getOppositeFace());
 
-    if (!(mountBlock.getState() instanceof Container)) {
+    if (!(mountBlock.getState() instanceof Container container)) {
       if (creator != null)
-        config.rootSection.mechanic.magnet.noContainer.sendMessage(creator);
+        config.rootSection.mechanic.magnet.noContainer.sendMessage(creator, environment);
+
+      return null;
+    }
+
+    if (hasRegisteredSigns(container)) {
+      if (creator != null)
+        config.rootSection.mechanic.magnet.existingSign.sendMessage(creator, environment);
 
       return null;
     }
@@ -305,15 +323,8 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
     instanceCuboidRegistry.register(instance);
 
-    if (creator != null) {
-      config.rootSection.mechanic.magnet.creationSuccess.sendMessage(
-        creator,
-        new InterpretationEnvironment()
-          .withVariable("x", sign.getX())
-          .withVariable("y", sign.getY())
-          .withVariable("z", sign.getZ())
-      );
-    }
+    if (creator != null)
+      config.rootSection.mechanic.magnet.creationSuccess.sendMessage(creator, environment);
 
     return instance;
   }
@@ -450,5 +461,34 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
         plugin.getLogger().log(Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + listener.getPlugin().getName(), e);
       }
     }
+  }
+
+  private boolean hasRegisteredSigns(Container container) {
+    var containerBlocks = new ArrayList<Block>(2);
+
+    if (container.getInventory() instanceof DoubleChestInventory doubleInventory) {
+      if (doubleInventory.getRightSide().getHolder() instanceof Container rightContainer)
+        containerBlocks.add(rightContainer.getBlock());
+
+      if (doubleInventory.getLeftSide().getHolder() instanceof Container leftContainer)
+        containerBlocks.add(leftContainer.getBlock());
+    }
+
+    else
+      containerBlocks.add(container.getBlock());
+
+    for (var containerBlock : containerBlocks) {
+      for (var signFace : SIGN_FACES) {
+        var possibleSignBlock = containerBlock.getRelative(signFace);
+
+        if (!(Tag.WALL_SIGNS.isTagged(possibleSignBlock.getType())))
+          continue;
+
+        if (isSignRegistered((Sign) possibleSignBlock.getState()))
+          return true;
+      }
+    }
+
+    return false;
   }
 }
