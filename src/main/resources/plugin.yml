@@ -22,8 +22,10 @@ commands:
     description: 'Get the ping of yourself (and possibly others)'
   mfilter:
     description: 'Used to set the filter-predicate of a magnet during an edit-session using the language selected via IPP'
+    permission: bbtweaks.mechanic.magnet
   mfilterl:
     description: 'Used to set the filter-predicate of a magnet during an edit-session using a custom language'
+    permission: bbtweaks.mechanic.magnet
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
