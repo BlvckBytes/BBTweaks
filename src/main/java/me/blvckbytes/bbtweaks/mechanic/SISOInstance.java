@@ -1,9 +1,9 @@
 package me.blvckbytes.bbtweaks.mechanic;
 
 import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Sign;
+import org.bukkit.Tag;
+import org.bukkit.block.*;
+import org.bukkit.block.data.AnaloguePowerable;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Powerable;
 import org.jetbrains.annotations.Nullable;
@@ -42,7 +42,46 @@ public abstract class SISOInstance implements MechanicInstance {
     if (!isBlockLoaded(inputBlock))
       return null;
 
+    var blockData = inputBlock.getBlockData();
+    var blockMaterial = blockData.getMaterial();
+
+    if (isPowerBlock(blockMaterial))
+      return 15;
+
+    if (blockData instanceof Directional directional && !isDirectionalInvariant(blockMaterial)) {
+      // I have no idea why the facing always points the opposite way - that's just what experiments showed.
+      var outputFacing = directional.getFacing().getOppositeFace();
+
+      // Whatever could be powering this input is not facing the sign's way - disregard it.
+      if (!inputBlock.getRelative(outputFacing).equals(sign.getBlock()))
+        return 0;
+    }
+
+    if (blockData instanceof Powerable powerable)
+      return powerable.isPowered() ? 15 : 0;
+
+    if (blockData instanceof AnaloguePowerable analoguePowerable)
+      return analoguePowerable.getPower();
+
+    // Exclude blocks like glass and other see-through variants
+    if (blockMaterial.isAir() || !blockMaterial.isSolid() || !blockMaterial.isOccluding())
+      return 0;
+
     return inputBlock.getBlockPower();
+  }
+
+  private boolean isDirectionalInvariant(Material type) {
+    return switch (type) {
+      case LEVER, TRIPWIRE_HOOK, TRIPWIRE, LECTERN -> true;
+      default -> Tag.BUTTONS.isTagged(type);
+    };
+  }
+
+  private boolean isPowerBlock(Material type) {
+    return switch (type) {
+      case REDSTONE_BLOCK, REDSTONE_TORCH, REDSTONE_WALL_TORCH -> true;
+      default -> false;
+    };
   }
 
   protected void tryWriteOutputState(boolean state) {
