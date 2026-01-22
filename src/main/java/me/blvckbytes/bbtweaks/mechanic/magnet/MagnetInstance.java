@@ -3,9 +3,9 @@ package me.blvckbytes.bbtweaks.mechanic.magnet;
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicInstance;
-import org.bukkit.Material;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
+import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -17,8 +17,14 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
   private final Cuboid cuboid;
   private final @Nullable Predicate<ItemStack> filter;
 
+  // It is impossible to cache the inventory-reference over the span of multiple ticks, seeing how
+  // there are countless ways for it to get out-of-sync; instead, we cache it for a single tick, which
+  // still massively reduces computation as many items can be sucked up all at once.
   private @Nullable Inventory inventory;
-  private @Nullable Material containerType;
+  private boolean isReferenceUpToDate;
+  private boolean didAddItems;
+  private boolean wasMissingContainer;
+
   private boolean enabled;
 
   public MagnetInstance(Sign sign, Cuboid cuboid, @Nullable Predicate<ItemStack> filter) {
@@ -65,7 +71,12 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
   }
 
   public boolean acceptsItem(ItemStack item) {
-    if (inventory == null || !enabled)
+    if (!enabled)
+      return false;
+
+    possiblyUpdateInventoryReference();
+
+    if (inventory == null)
       return false;
 
     if (filter != null && !filter.test(item))
@@ -75,6 +86,8 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
   }
 
   public void addItem(ItemStack item) {
+    possiblyUpdateInventoryReference();
+
     // Unreachable, given that the caller made use of #acceptsItem.
     if (inventory == null)
       return;
@@ -83,6 +96,8 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
     inventory.addItem(item)
       .values()
       .forEach(remainder -> mountBlock.getWorld().dropItem(mountBlock.getLocation(), remainder));
+
+    didAddItems = true;
   }
 
   @Override
@@ -92,37 +107,54 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
 
   @Override
   public boolean tick(int time) {
-    var inputPower = tryReadInputPower();
-    enabled = inputPower == null || inputPower == 0;
-    return updateInventoryReference();
-  }
+    isReferenceUpToDate = false;
 
-  private boolean updateInventoryReference() {
-    if (!isBlockLoaded(mountBlock)) {
-      inventory = null;
-      containerType = null;
-
-      // Let's not self-destruct just because the chunk is unloaded;
-      // rather wait until we can verify container-presence again.
-      return true;
-    }
-
-    var mountBlockType = mountBlock.getType();
-
-    if (inventory != null && containerType != null) {
-      if (mountBlockType == containerType)
-        return true;
-
-      inventory = null;
-      containerType = null;
-    }
-
-    if (!(mountBlock.getState() instanceof Container container))
+    if (wasMissingContainer)
       return false;
 
-    inventory = container.getInventory();
-    containerType = mountBlockType;
+    var inputPower = tryReadInputPower();
+    enabled = inputPower == null || inputPower == 0;
+
+    if (!didAddItems)
+      return true;
+
+    didAddItems = false;
+
+    if (!(inventory instanceof DoubleChestInventory doubleChestInventory))
+      return true;
+
+    if (doubleChestInventory.getRightSide().getHolder() instanceof Container rightContainer) {
+      if (!mountBlock.equals(rightContainer.getBlock())) {
+        rightContainer.update(true, true);
+        return true;
+      }
+    }
+
+    if (doubleChestInventory.getLeftSide().getHolder() instanceof Container leftContainer) {
+      if (!mountBlock.equals(leftContainer.getBlock()))
+        leftContainer.update(true, true);
+    }
 
     return true;
+  }
+
+  private void possiblyUpdateInventoryReference() {
+    if (isReferenceUpToDate)
+      return;
+
+    isReferenceUpToDate = true;
+
+    if (!isBlockLoaded(mountBlock)) {
+      inventory = null;
+      return;
+    }
+
+    if (!(mountBlock.getState() instanceof Container container)) {
+      inventory = null;
+      wasMissingContainer = true;
+      return;
+    }
+
+    inventory = container.getInventory();
   }
 }
