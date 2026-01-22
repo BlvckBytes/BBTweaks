@@ -82,7 +82,7 @@ public class MagnetParameters {
     offsetZ.readFromToken(getOrEmpty(offsetsTokens, 2));
   }
 
-  public boolean writeIfDirty() {
+  public boolean writeIfDirty(boolean updateIfDirty) {
     var isDirty = false;
 
     if (extentX.isDirtySinceLastRead() || extentY.isDirtySinceLastRead() || extentZ.isDirtySinceLastRead()) {
@@ -95,7 +95,7 @@ public class MagnetParameters {
       isDirty = true;
     }
 
-    if (isDirty)
+    if (updateIfDirty && isDirty)
       sign.update(true, false);
 
     return isDirty;

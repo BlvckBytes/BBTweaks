@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.mechanic.magnet;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.EditDisplayHandler;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
@@ -18,7 +19,6 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Function;
@@ -28,6 +28,7 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
   private final Command defaultLanguageCommand;
   private final Command customLanguageCommand;
   private final Function<UUID, EditSession> editSessionAccessor;
+  private final EditDisplayHandler editDisplayHandler;
   private final PredicateHelper predicateHelper;
   private final ConfigKeeper<MainSection> config;
 
@@ -35,12 +36,14 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
     Command defaultLanguageCommand,
     Command customLanguageCommand,
     Function<UUID, EditSession> editSessionAccessor,
+    EditDisplayHandler editDisplayHandler,
     PredicateHelper predicateHelper,
     ConfigKeeper<MainSection> config
   ) {
     this.defaultLanguageCommand = defaultLanguageCommand;
     this.customLanguageCommand = customLanguageCommand;
     this.editSessionAccessor = editSessionAccessor;
+    this.editDisplayHandler = editDisplayHandler;
     this.predicateHelper = predicateHelper;
     this.config = config;
   }
@@ -67,7 +70,7 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
     if (result == null)
       return true;
 
-    editSession.setFilter(result);
+    editSession.filter = result;
 
     config.rootSection.mechanic.magnet.filterCommandFilterSet.sendMessage(
       sender,
@@ -75,6 +78,8 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
         .withVariable("language", TranslationLanguage.matcher.getNormalizedName(result.language()))
         .withVariable("predicate", new StringifyState(true).appendPredicate(result.predicate()).toString())
     );
+
+    editDisplayHandler.show(player, editSession);
 
     return true;
   }

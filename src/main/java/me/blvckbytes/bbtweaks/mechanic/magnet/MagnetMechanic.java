@@ -10,6 +10,7 @@ import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicRegistry;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -48,6 +49,9 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
 
   private final EditDisplayHandler displayHandler;
 
+  private final NamespacedKey filterPredicateKey;
+  private final NamespacedKey filterLanguageKey;
+
   public MagnetMechanic(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
     super(plugin, config);
 
@@ -55,21 +59,24 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     this.showSessionsByPlayerId = new HashMap<>();
     this.editSessionByPlayerId = new HashMap<>();
 
-    this.displayHandler = new EditDisplayHandler(FloodgateIntegration.load(plugin.getLogger()), config, plugin);
-
-    var defaultLanguageCommand = Objects.requireNonNull(plugin.getCommand("mfilter"));
-    var customLanguageCommand = Objects.requireNonNull(plugin.getCommand("mfilterl"));
-
     var ipp = ItemPredicateParserPlugin.getInstance();
 
     if (!Bukkit.getServer().getPluginManager().isPluginEnabled("ItemPredicateParser") || ipp == null)
       throw new IllegalArgumentException("Expected plugin ItemPredicateParser to have been loaded at this point");
 
+    var predicateHelper = ipp.getPredicateHelper();
+
+    this.displayHandler = new EditDisplayHandler(predicateHelper, FloodgateIntegration.load(plugin.getLogger()), config, plugin);
+
+    var defaultLanguageCommand = Objects.requireNonNull(plugin.getCommand("mfilter"));
+    var customLanguageCommand = Objects.requireNonNull(plugin.getCommand("mfilterl"));
+
     var commandExecutor = new MFilterCommand(
       defaultLanguageCommand,
       customLanguageCommand,
       editSessionByPlayerId::get,
-      ipp.getPredicateHelper(),
+      displayHandler,
+      predicateHelper,
       config
     );
 
@@ -77,6 +84,9 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     customLanguageCommand.setExecutor(commandExecutor);
 
     Bukkit.getServer().getPluginManager().registerEvents(displayHandler, plugin);
+
+    this.filterPredicateKey = new NamespacedKey(plugin, "magnet-filter-predicate");
+    this.filterLanguageKey = new NamespacedKey(plugin, "magnet-filter-language");
   }
 
   @Override
@@ -312,13 +322,13 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     var parameters = new MagnetParameters(sign, config);
 
     parameters.read();
-    parameters.writeIfDirty();
+    parameters.writeIfDirty(true);
 
     var cuboid = parameters.makeCuboid();
 
-    // TODO: Allow to create and set filters, probably using ipp (still requires more brainstorming)
+    var filter = PredicateAndLanguage.tryLoadFromSign(sign, filterPredicateKey, filterLanguageKey);
 
-    var instance = new MagnetInstance(sign, cuboid, null);
+    var instance = new MagnetInstance(sign, cuboid, filter == null ? null : filter.predicate());
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
     instanceCuboidRegistry.register(instance);
@@ -385,8 +395,11 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     var parameters = new MagnetParameters(sign, config);
     parameters.read();
 
+    var filter = PredicateAndLanguage.tryLoadFromSign(sign, filterPredicateKey, filterLanguageKey);
+
     editSessionByPlayerId.put(playerId, new EditSession(
-      player, parameters,
+      player, parameters, filter,
+      filterPredicateKey, filterLanguageKey,
       didWrite -> {
         editSessionByPlayerId.remove(playerId);
 

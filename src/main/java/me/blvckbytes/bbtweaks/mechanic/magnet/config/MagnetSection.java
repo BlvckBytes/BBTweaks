@@ -25,6 +25,9 @@ public class MagnetSection extends ConfigSection {
   public ComponentMarkup editModeSavedNoChanges;
   public ComponentMarkup editModeCancelled;
   public ComponentMarkup editModeClickDetectionActionbar;
+  public ComponentMarkup editModeFilterPrompt;
+  public ComponentMarkup editModeFilterEditSuggestion;
+  public ComponentMarkup editModeFilterRemoved;
   public ComponentMarkup filterCommandPlayersOnly;
   public ComponentMarkup filterCommandNoEditSession;
   public ComponentMarkup filterCommandFilterSet;

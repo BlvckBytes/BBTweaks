@@ -136,6 +136,13 @@ mechanic:
     editModeSaved: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>abgeschlossen<&7>; Änderungen wurden auf das Schild <&a>geschrieben<&7>!'
     editModeSavedNoChanges: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>abgeschlossen<&7>; es wurden <&a>keine Änderungen <&7>vorgenommen!'
     editModeCancelled: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>abgebrochen<&7>!'
+    editModeFilterPrompt: '{lut.mechanic_prefix} <&7>Benutze <&a>/mfilter \<Filter><&7>, um den Filter der aktuellen Editierungssitzung zu ändern.'
+    editModeFilterEditSuggestion: |
+      {lut.mechanic_prefix} <&7>Editiere den Filter mittels <&a>
+      <suggest-command value=`{filter_command}`>
+        <&a><u>{filter_command}
+      </suggest-command><&7>.
+    editModeFilterRemoved: '{lut.mechanic_prefix} <&7>Der aktuelle Filter wurde <&a>entfernt<&7>.'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Magnet <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
     editModeClickDetectionActionbar: |
       <&7>{lut.parameter_description[current_parameter]}: <&6>{env(current_parameter)}
@@ -198,13 +205,31 @@ mechanic:
               <&7>Schreibt die Änderungen<br/>
               und verlässt den Modus.
         modifyFilter:
-          type: LIGHT_GRAY_CONCRETE
+          type: '{filter_predicate then "LIME_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
           slots: 7
-          name: '<reset><&8>» <&7>Filter <&8>«'
+          name: '<reset><&8>» <&7><&a *use="filter_predicate">Filter <&8>«'
           lore: |
             <reset>
               <br/>
-              <&c><i>Coming Soon! :^)
+              {lut.spacer}<br/>
+              <container *if="filter_predicate">
+                <&8>♦ <&7>Aktueller Filter: <&e>{filter_predicate}<br/>
+                <&8>♦ <&7>Filtersprache: <&e>{filter_language}<br/>
+                {lut.spacer}<br/>
+                <&8>➥ <&e>Linksklick <&7>Filter editieren<br/>
+                <container *if="is_floodgate">
+                  <&8>➥ <&e>Werfen <&7>Filter entfernen<br/>
+                </container>
+                <container *else>
+                  <&8>➥ <&e>Rechtsklick <&7>Filter entfernen<br/>
+                </container>
+              </container>
+              <container *else>
+                <&8>♦ <&7>Aktueller Filter: <&c>kein Filter gesetzt<br/>
+                {lut.spacer}<br/>
+                <&8>➥ <&e>Linksklick <&7>Filter setzen<br/>
+              </container>
+              {lut.spacer}
         cancel:
           type: RED_CONCRETE
           slots: 14
