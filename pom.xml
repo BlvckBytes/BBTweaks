@@ -27,6 +27,10 @@
             <id>opencollab-snapshot</id>
             <url>https://repo.opencollab.dev/main/</url>
         </repository>
+        <repository>
+            <id>enginehub</id>
+            <url> https://maven.enginehub.org/repo/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -73,6 +77,12 @@
             <groupId>me.blvckbytes</groupId>
             <artifactId>ItemPredicateParser</artifactId>
             <version>0.0.25</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sk89q.worldguard</groupId>
+            <artifactId>worldguard-bukkit</artifactId>
+            <version>7.0.14</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

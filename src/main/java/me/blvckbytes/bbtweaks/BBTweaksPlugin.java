@@ -27,8 +27,15 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
   private LastLocationStore lastLocationStore;
   private SignMechanicManager mechanicManager;
+  private WorldGuardFlags worldGuardFlags;
 
   // TODO: Idea - /empty-out [all]
+
+  @Override
+  public void onLoad() {
+    // It's important that we do this in onLoad, as WorldGuard only allows to register flags at this point.
+    worldGuardFlags = new WorldGuardFlags();
+  }
 
   @Override
   public void onEnable() {
@@ -109,6 +116,9 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       }, 10L);
 
       mechanicManager = new SignMechanicManager(this, config);
+
+      if (worldGuardFlags != null)
+        getServer().getPluginManager().registerEvents(worldGuardFlags, this);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);
