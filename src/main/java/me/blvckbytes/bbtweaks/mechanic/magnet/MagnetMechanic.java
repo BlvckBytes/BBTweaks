@@ -444,8 +444,15 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     if (targetMagnet == null)
       return;
 
-    targetMagnet.addItem(itemStack);
     event.setCancelled(true);
+
+    // Seemingly, waiting until next tick is of utmost importance, because race-conditions can
+    // occur otherwise, leading to a loss of items. Example: use a dispenser with an attached
+    // comparator-clock and set the region in a way that it will automatically collect what has
+    // been dropped by the block; the spawn-event is called in-between dropping the item and thus
+    // calling this event and decrementing the slot - so if we add it immediately, we end up with
+    // a net-zero, thereby a loss of the item at hand.
+    Bukkit.getScheduler().runTaskLater(plugin, () -> targetMagnet.addItem(itemStack), 1);
   }
 
   @EventHandler
