@@ -51,10 +51,8 @@ public class EditSession extends VisualizeSession {
 
     didWrite |= PredicateAndLanguage.writeToSignPdcAndGetIfMadeChanges(filter, sign, filterPredicateKey, filterLanguageKey);
 
-    if (didWrite) {
-      PredicateAndLanguage.updatePredicateMarker(sign, filter);
+    if (didWrite)
       sign.update(true, false);
-    }
 
     afterWriting.accept(didWrite);
     manuallyExpire();

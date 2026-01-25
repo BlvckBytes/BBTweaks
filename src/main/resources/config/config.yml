@@ -128,7 +128,15 @@ mechanic:
     noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen Magneten zu erstellen!'
     noContainer: '{lut.mechanic_prefix} <&c>Ein Magnet kann nur an einem Behälterblock angebracht werden!'
     existingSign: '{lut.mechanic_prefix} <&c>Am Behälter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein Magnet!'
-    visualizationInitialized: '{lut.mechanic_prefix} <&7>Die Region des Magnetes bei <&a>{x} {y} {z} <&7>wird nun für <&a>{visualization_duration}s <&7>angezeigt!'
+    visualizationInitialized: |
+      {lut.mechanic_prefix} <&7>Die Region des Magnetes bei <&a>{x} {y} {z}
+      <container *if="env('predicate')">
+        <&7>, mit dem Prädikat<space/>
+        <suggest-command value=`{filter_command}`>
+          <&a><u>{predicate}
+        </suggest-command><&7>,
+      </container>
+      <space/><&7>wird nun für <&a>{visualization_duration}s <&7>angezeigt!
     signClickedInEditMode: '{lut.mechanic_prefix} <&c>Bitte breche die Bearbeitung im Menü (sneaken) ab, bevor du das Schild editierst!'
     alreadyInAnEditSession: '{lut.mechanic_prefix} <&c>Bitte breche die aktuelle Bearbeitung im Menü (sneaken) ab, bevor du ein weiteres Schild editierst!'
     editModeDistanceExceeded: '{lut.mechanic_prefix} <&c>Du hast dich weiter als <&4>{max_distance} <&c>Blöcke vom Magneten bei <&4>{x} {y} {z} <&c>wegbewegt; breche die Bearbeitung ab!'

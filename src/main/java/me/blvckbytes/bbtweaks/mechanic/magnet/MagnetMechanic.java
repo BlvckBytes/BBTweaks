@@ -321,12 +321,19 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
 
     var parameters = new MagnetParameters(sign, config);
 
+    var filter = PredicateAndLanguage.tryLoadFromSign(sign, filterPredicateKey, filterLanguageKey);
+
+    var isDirty = PredicateAndLanguage.updatePredicateMarkerAndGetIfMadeChanges(sign, filter);
+
     parameters.read();
-    parameters.writeIfDirty(true);
+    isDirty |= parameters.writeIfDirty(false);
+
+    if (isDirty) {
+      sign.update(true, false);
+      sign = (Sign) sign.getBlock().getState();
+    }
 
     var cuboid = parameters.makeCuboid();
-
-    var filter = PredicateAndLanguage.tryLoadFromSign(sign, filterPredicateKey, filterLanguageKey);
 
     var instance = new MagnetInstance(sign, cuboid, filter == null ? null : filter.predicate());
 
@@ -379,11 +386,31 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
       playerBucket.removeIf(entry -> entry.sign.getLocation().equals(sign.getLocation()));
       playerBucket.add(new ShowSession(player, sign, instance.getCuboid(), durationMs));
 
+      var signPredicate = PredicateAndLanguage.tryLoadFromSign(sign, filterPredicateKey, filterLanguageKey);
+
+      if (signPredicate != null) {
+        var filterLanguageString = TranslationLanguage.matcher.getNormalizedName(signPredicate.language());
+        var predicateString = new StringifyState(true).appendPredicate(signPredicate.predicate()).toString();
+
+        String command;
+
+        if (predicateHelper.getSelectedLanguage(player) == signPredicate.language())
+          command = "/mfilter " + predicateString;
+        else
+          command = "/mfilterl " + filterLanguageString + " " + predicateString;
+
+        environment
+          .withVariable("predicate_language", filterLanguageString)
+          .withVariable("predicate", predicateString)
+          .withVariable("filter_command", command);
+      }
+
       config.rootSection.mechanic.magnet.visualizationInitialized.sendMessage(
         player,
         environment
           .withVariable("visualization_duration", durationMs / 1000)
       );
+
       return true;
     }
 

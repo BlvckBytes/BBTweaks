@@ -52,15 +52,22 @@ public record PredicateAndLanguage(ItemPredicate predicate, TranslationLanguage 
     }
   }
 
-  public static void updatePredicateMarker(Sign sign, @Nullable PredicateAndLanguage predicateAndLanguage) {
+  public static boolean updatePredicateMarkerAndGetIfMadeChanges(Sign sign, @Nullable PredicateAndLanguage predicateAndLanguage) {
     var side = sign.getSide(Side.FRONT);
 
     if (predicateAndLanguage == null) {
+      if (side.line(0).equals(Component.empty()))
+        return false;
+
       side.line(0, Component.empty());
-      return;
+      return true;
     }
 
+    if (side.line(0).equals(PREDICATE_MODE_LINE))
+      return false;
+
     side.line(0, PREDICATE_MODE_LINE);
+    return true;
   }
 
   public static boolean writeToSignPdcAndGetIfMadeChanges(
