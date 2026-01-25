@@ -405,7 +405,10 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
 
         if (didWrite) {
           onSignUnload(instance.getSign());
-          onSignLoad(instance.getSign());
+
+          if (instance.getSign().getBlock().getState() instanceof Sign newSign)
+            onSignLoad(newSign);
+
           config.rootSection.mechanic.magnet.editModeSaved.sendMessage(player, environment);
           return;
         }

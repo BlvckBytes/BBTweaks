@@ -4,12 +4,17 @@ import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import me.blvckbytes.item_predicate_parser.predicate.StringifyState;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.Nullable;
 
 public record PredicateAndLanguage(ItemPredicate predicate, TranslationLanguage language) {
+
+  private static final Component PREDICATE_MODE_LINE = Component.text("Predicate Mode").color(NamedTextColor.GREEN);
 
   public static @Nullable PredicateAndLanguage tryLoadFromSign(
     Sign sign,
@@ -45,6 +50,17 @@ public record PredicateAndLanguage(ItemPredicate predicate, TranslationLanguage 
     } catch (Throwable e) {
       return null;
     }
+  }
+
+  public static void updatePredicateMarker(Sign sign, @Nullable PredicateAndLanguage predicateAndLanguage) {
+    var side = sign.getSide(Side.FRONT);
+
+    if (predicateAndLanguage == null) {
+      side.line(0, Component.empty());
+      return;
+    }
+
+    side.line(0, PREDICATE_MODE_LINE);
   }
 
   public static boolean writeToSignPdcAndGetIfMadeChanges(
