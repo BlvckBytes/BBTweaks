@@ -94,6 +94,11 @@ public class EditDisplayHandler extends DisplayHandler<EditDisplay, EditSession>
         return;
       }
 
+      if (isDropOrRight) {
+        config.rootSection.mechanic.magnet.unsetFilterNoneSet.sendMessage(player);
+        return;
+      }
+
       if (clickType == ClickType.LEFT) {
         config.rootSection.mechanic.magnet.editModeFilterPrompt.sendMessage(player);
         player.closeInventory();

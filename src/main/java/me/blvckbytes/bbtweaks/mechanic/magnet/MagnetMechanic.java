@@ -9,6 +9,9 @@ import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicRegistry;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
+import me.blvckbytes.item_predicate_parser.PredicateHelper;
+import me.blvckbytes.item_predicate_parser.predicate.StringifyState;
+import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Particle;
@@ -47,10 +50,11 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
   private final Map<UUID, List<ShowSession>> showSessionsByPlayerId;
   private final Map<UUID, EditSession> editSessionByPlayerId;
 
+  private final PredicateHelper predicateHelper;
   private final EditDisplayHandler displayHandler;
 
-  private final NamespacedKey filterPredicateKey;
-  private final NamespacedKey filterLanguageKey;
+  public final NamespacedKey filterPredicateKey;
+  public final NamespacedKey filterLanguageKey;
 
   public MagnetMechanic(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
     super(plugin, config);
@@ -64,8 +68,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     if (!Bukkit.getServer().getPluginManager().isPluginEnabled("ItemPredicateParser") || ipp == null)
       throw new IllegalArgumentException("Expected plugin ItemPredicateParser to have been loaded at this point");
 
-    var predicateHelper = ipp.getPredicateHelper();
-
+    this.predicateHelper = ipp.getPredicateHelper();
     this.displayHandler = new EditDisplayHandler(predicateHelper, FloodgateIntegration.load(plugin.getLogger()), config, plugin);
 
     var defaultLanguageCommand = Objects.requireNonNull(plugin.getCommand("mfilter"));
@@ -74,7 +77,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     var commandExecutor = new MFilterCommand(
       defaultLanguageCommand,
       customLanguageCommand,
-      editSessionByPlayerId::get,
+      this,
       displayHandler,
       predicateHelper,
       config
@@ -87,6 +90,10 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
 
     this.filterPredicateKey = new NamespacedKey(plugin, "magnet-filter-predicate");
     this.filterLanguageKey = new NamespacedKey(plugin, "magnet-filter-language");
+  }
+
+  public @Nullable EditSession getEditSessionByPlayer(Player player) {
+    return editSessionByPlayerId.get(player.getUniqueId());
   }
 
   @Override
@@ -493,7 +500,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
   }
 
   @SuppressWarnings("UnstableApiUsage")
-  private boolean canEditSign(Player player, Sign sign) {
+  public boolean canEditSign(Player player, Sign sign) {
     var side = sign.getSide(Side.FRONT);
     var fakeEvent = new SignChangeEvent(sign.getBlock(), player, side.lines(), Side.FRONT);
     callFakeEvent(fakeEvent);

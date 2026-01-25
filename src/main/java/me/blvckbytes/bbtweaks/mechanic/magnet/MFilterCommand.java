@@ -11,6 +11,8 @@ import me.blvckbytes.item_predicate_parser.predicate.StringifyState;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,14 +22,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.UUID;
-import java.util.function.Function;
 
 public class MFilterCommand implements CommandExecutor, TabCompleter {
 
   private final Command defaultLanguageCommand;
   private final Command customLanguageCommand;
-  private final Function<UUID, EditSession> editSessionAccessor;
+  private final MagnetMechanic magnetMechanic;
   private final EditDisplayHandler editDisplayHandler;
   private final PredicateHelper predicateHelper;
   private final ConfigKeeper<MainSection> config;
@@ -35,14 +35,14 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
   public MFilterCommand(
     Command defaultLanguageCommand,
     Command customLanguageCommand,
-    Function<UUID, EditSession> editSessionAccessor,
+    MagnetMechanic magnetMechanic,
     EditDisplayHandler editDisplayHandler,
     PredicateHelper predicateHelper,
     ConfigKeeper<MainSection> config
   ) {
     this.defaultLanguageCommand = defaultLanguageCommand;
     this.customLanguageCommand = customLanguageCommand;
-    this.editSessionAccessor = editSessionAccessor;
+    this.magnetMechanic = magnetMechanic;
     this.editDisplayHandler = editDisplayHandler;
     this.predicateHelper = predicateHelper;
     this.config = config;
@@ -58,26 +58,64 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
     if (command != defaultLanguageCommand && command != customLanguageCommand)
       return false;
 
-    var editSession = editSessionAccessor.apply(player.getUniqueId());
+    var result = tryParsePredicateAndLanguage(player, label, args, command == defaultLanguageCommand);
+
+    var environment = new InterpretationEnvironment();
+
+    if (result != null) {
+      environment
+        .withVariable("language", TranslationLanguage.matcher.getNormalizedName(result.language()))
+        .withVariable("predicate", new StringifyState(true).appendPredicate(result.predicate()).toString());
+    }
+
+    var editSession = magnetMechanic.getEditSessionByPlayer(player);
 
     if (editSession == null) {
-      config.rootSection.mechanic.magnet.filterCommandNoEditSession.sendMessage(sender);
+      var sign = getLookedAtSign(player);
+
+      if (sign == null) {
+        config.rootSection.mechanic.magnet.filterCommandNoEditSessionAndNoLookedAt.sendMessage(sender);
+        return true;
+      }
+
+      if (!magnetMechanic.canEditSign(player, sign)) {
+        config.rootSection.mechanic.magnet.filterSetByLookingCannotEdit.sendMessage(sender, environment);
+        return true;
+      }
+
+      if (!PredicateAndLanguage.writeToSignPdcAndGetIfMadeChanges(result, sign, magnetMechanic.filterPredicateKey, magnetMechanic.filterLanguageKey)) {
+        if (result == null) {
+          config.rootSection.mechanic.magnet.unsetFilterNoneSet.sendMessage(sender, environment);
+          return true;
+        }
+
+        config.rootSection.mechanic.magnet.filterSetByLookingNoChanges.sendMessage(sender, environment);
+        return true;
+      }
+
+      sign.update(true, false);
+      magnetMechanic.onSignUnload(sign);
+
+      if (sign.getBlock().getState() instanceof Sign newSign)
+        magnetMechanic.onSignLoad(newSign);
+
+      if (result == null) {
+        config.rootSection.mechanic.magnet.filterSetByLookingUnset.sendMessage(sender, environment);
+        return true;
+      }
+
+      config.rootSection.mechanic.magnet.filterCommandFilterSet.sendMessage(sender, environment);
       return true;
     }
 
-    var result = tryParsePredicateAndLanguage(player, label, args, command == defaultLanguageCommand);
-
-    if (result == null)
+    if (result == null) {
+      config.rootSection.mechanic.magnet.filterCommandEmptyPredicate.sendMessage(player);
       return true;
+    }
 
     editSession.filter = result;
 
-    config.rootSection.mechanic.magnet.filterCommandFilterSet.sendMessage(
-      sender,
-      new InterpretationEnvironment()
-        .withVariable("language", TranslationLanguage.matcher.getNormalizedName(result.language()))
-        .withVariable("predicate", new StringifyState(true).appendPredicate(result.predicate()).toString())
-    );
+    config.rootSection.mechanic.magnet.filterCommandFilterSet.sendMessage(sender, environment);
 
     editDisplayHandler.show(player, editSession);
 
@@ -122,6 +160,24 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
       showActionBarMessage(player, predicateHelper.createExceptionMessage(e));
       return null;
     }
+  }
+
+  private @Nullable Sign getLookedAtSign(Player player) {
+    var rayTraceResult = player.getWorld().rayTraceBlocks(
+      player.getEyeLocation(),
+      player.getEyeLocation().getDirection(),
+      5.0,
+      FluidCollisionMode.NEVER,
+      false
+    );
+
+    if (rayTraceResult == null || rayTraceResult.getHitBlock() == null)
+      return null;
+
+    if (!(rayTraceResult.getHitBlock().getState() instanceof Sign sign))
+      return null;
+
+    return sign;
   }
 
   private @Nullable PredicateAndLanguage tryParsePredicateAndLanguage(Player executor, String label, String[] args, boolean useSelectedLanguage) {
@@ -176,10 +232,8 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
       return null;
     }
 
-    if (predicate == null) {
-      config.rootSection.mechanic.magnet.filterCommandEmptyPredicate.sendMessage(executor);
+    if (predicate == null)
       return null;
-    }
 
     return new PredicateAndLanguage(predicate, language);
   }

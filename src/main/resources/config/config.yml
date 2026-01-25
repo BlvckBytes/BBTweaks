@@ -138,6 +138,10 @@ mechanic:
       </container>
       <space/><&7>wird nun für <&a>{visualization_duration}s <&7>angezeigt!
     signClickedInEditMode: '{lut.mechanic_prefix} <&c>Bitte breche die Bearbeitung im Menü (sneaken) ab, bevor du das Schild editierst!'
+    filterSetByLookingCannotEdit: '{lut.mechanic_prefix} <&c>Du kannst das von dir angeschaute Schild nicht bearbeiten!'
+    filterSetByLookingNoChanges: '{lut.mechanic_prefix} <&c>Der Filter <&4>{predicate} <&c>ist bereits am Magneten gesetzt!'
+    unsetFilterNoneSet: '{lut.mechanic_prefix} <&c>Dieser Magnet hat keinen Filter gesetzt, den du entfernen könntest!'
+    filterSetByLookingUnset: '{lut.mechanic_prefix} <&7>Der Filter des Magnetes wurde <&a>entfernt<&7>.'
     alreadyInAnEditSession: '{lut.mechanic_prefix} <&c>Bitte breche die aktuelle Bearbeitung im Menü (sneaken) ab, bevor du ein weiteres Schild editierst!'
     editModeDistanceExceeded: '{lut.mechanic_prefix} <&c>Du hast dich weiter als <&4>{max_distance} <&c>Blöcke vom Magneten bei <&4>{x} {y} {z} <&c>wegbewegt; breche die Bearbeitung ab!'
     editModeInitialized: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>begonnen<&7>; <&a>sneake <&7>jederzeit, um das <&a>Menü <&7>zu öffnen!'
@@ -159,7 +163,7 @@ mechanic:
         <&c><i>(Limit)
       </container>
     filterCommandPlayersOnly: '{lut.mechanic_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
-    filterCommandNoEditSession: '{lut.mechanic_prefix} <&c>Du befindest dich aktuell in keiner Bearbeitung eines Magnetes!'
+    filterCommandNoEditSessionAndNoLookedAt: '{lut.mechanic_prefix} <&c>Du befindest dich aktuell in keiner Bearbeitung eines Magnetes und schaust auch auf kein Magnet-Schild!'
     filterCommandFilterSet: '{lut.mechanic_prefix} <&7>Der Filter <&a>{predicate} <&7>in der Sprache <&a>{language} <&7>wurde gesetzt.'
     filterCommandMissingLanguage: '{lut.mechanic_prefix} <&c>Der Befehl <&4>/{label} <&c>erfordert eine Sprachauswahl als ersten Parameter!'
     filterCommandUnknownLanguage: '{lut.mechanic_prefix} <&c>Die Sprache <&4>{input} <&c>stellt keine gültige Auswahl dar; wähle aus: <&4 *for-language="languages" *for-separator={<&c>,<space/>}>{language}</><&c>.'
