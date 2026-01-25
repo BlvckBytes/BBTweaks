@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.mechanic.magnet;
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicInstance;
+import org.bukkit.Material;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.DoubleChestInventory;
@@ -21,6 +22,8 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
   // there are countless ways for it to get out-of-sync; instead, we cache it for a single tick, which
   // still massively reduces computation as many items can be sucked up all at once.
   private @Nullable Inventory inventory;
+  private Material inventoryBlockType;
+
   private boolean isReferenceUpToDate;
   private boolean didAddItems;
   private boolean wasMissingContainer;
@@ -120,20 +123,26 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
 
     didAddItems = false;
 
-    if (!(inventory instanceof DoubleChestInventory doubleChestInventory))
-      return true;
-
-    if (doubleChestInventory.getRightSide().getHolder() instanceof Container rightContainer) {
-      if (!mountBlock.equals(rightContainer.getBlock())) {
-        rightContainer.update(true, true);
-        return true;
+    if (inventory instanceof DoubleChestInventory doubleChestInventory) {
+      if (doubleChestInventory.getRightSide().getHolder() instanceof Container rightContainer) {
+        if (!mountBlock.equals(rightContainer.getBlock())) {
+          rightContainer.update(true, true);
+          return true;
+        }
       }
+
+      if (doubleChestInventory.getLeftSide().getHolder() instanceof Container leftContainer) {
+        if (!mountBlock.equals(leftContainer.getBlock()))
+          leftContainer.update(true, true);
+      }
+
+      return true;
     }
 
-    if (doubleChestInventory.getLeftSide().getHolder() instanceof Container leftContainer) {
-      if (!mountBlock.equals(leftContainer.getBlock()))
-        leftContainer.update(true, true);
-    }
+    // For some odd reason, bukkit doesn't cause a block-update for hoppers when modifying
+    // their inventory, so we need to cause one manually, as to update comparators and the like.
+    if (inventoryBlockType == Material.HOPPER)
+      mountBlock.getState().update(true, true);
 
     return true;
   }
@@ -146,15 +155,18 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
 
     if (!isBlockLoaded(mountBlock)) {
       inventory = null;
+      inventoryBlockType = Material.AIR;
       return;
     }
 
     if (!(mountBlock.getState() instanceof Container container)) {
       inventory = null;
+      inventoryBlockType = Material.AIR;
       wasMissingContainer = true;
       return;
     }
 
     inventory = container.getInventory();
+    inventoryBlockType = container.getType();
   }
 }
