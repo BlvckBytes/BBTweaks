@@ -1,9 +1,17 @@
 package me.blvckbytes.bbtweaks.mechanic;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
+import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
+import at.blvckbytes.component_markup.expression.parser.ExpressionParseException;
+import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
+import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
+import at.blvckbytes.component_markup.util.InputView;
+import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.util.CacheByPosition;
-import me.blvckbytes.bbtweaks.util.IterationDecision;
+import me.blvckbytes.bbtweaks.util.*;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
@@ -13,6 +21,8 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.logging.Level;
 
 public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic<InstanceType> {
@@ -101,6 +111,30 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     }
 
     onConfigReload();
+  }
+
+  protected <T> Optional<T> parseExpression(String expression, InterpretationEnvironment environment, BiFunction<ValueInterpreter, Object, T> resultMapper) {
+    var inputView = InputView.of(expression);
+
+    ExpressionNode expressionNode;
+
+    try {
+      expressionNode = ExpressionParser.parse(inputView, null);
+    } catch (ExpressionTokenizeException | ExpressionParseException e) {
+      return Optional.empty();
+    }
+
+    var logCount = new MutableInt();
+    var value = ExpressionInterpreter.interpret(expressionNode, environment, makeCountingLogger(logCount));
+
+    if (logCount.value != 0)
+      return Optional.empty();
+
+    return Optional.of(resultMapper.apply(environment.getValueInterpreter(), value));
+  }
+
+  private InterpreterLogger makeCountingLogger(MutableInt output) {
+    return (view, position, message, e) -> ++output.value;
   }
 
   @SuppressWarnings({"UnstableApiUsage", "BooleanMethodIsAlwaysInverted"})

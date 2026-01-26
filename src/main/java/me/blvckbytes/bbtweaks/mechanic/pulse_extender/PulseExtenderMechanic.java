@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.mechanic.pulse_extender;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.util.SignUtil;
@@ -49,14 +50,21 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
       return null;
     }
 
-    int signalLength;
+    var parseResult = parseExpression(parameterLine, new InterpretationEnvironment(), ValueInterpreter::asLong);
 
-    try {
-      signalLength = Integer.parseInt(parameterLine);
+    if (parseResult.isEmpty()) {
+      config.rootSection.mechanic.pulseExtender.periodDurationMalformedExpression.sendMessage(
+        creator,
+        new InterpretationEnvironment()
+          .withVariable("input", parameterLine)
+      );
 
-      if (signalLength < 0)
-        throw new IllegalStateException();
-    } catch (Throwable e) {
+      return null;
+    }
+
+    int signalLength = parseResult.get().intValue();
+
+    if (signalLength < 0) {
       if (creator != null) {
         config.rootSection.mechanic.pulseExtender.signalLengthNoPositiveInt.sendMessage(
           creator,

@@ -15,6 +15,7 @@ public class ClockSection extends ConfigSection {
 
   public ComponentMarkup noPermission;
   public ComponentMarkup periodDurationAbsent;
+  public ComponentMarkup periodDurationMalformedExpression;
   public ComponentMarkup periodDurationNoPositiveInt;
   public ComponentMarkup periodDurationTooLow;
   public ComponentMarkup periodDurationUneven;

@@ -16,6 +16,7 @@ public class PulseExtenderSection extends ConfigSection {
 
   public ComponentMarkup noPermission;
   public ComponentMarkup signalLengthAbsent;
+  public ComponentMarkup periodDurationMalformedExpression;
   public ComponentMarkup signalLengthNoPositiveInt;
   public ComponentMarkup signalLengthTooLow;
   public ComponentMarkup creationSuccess;

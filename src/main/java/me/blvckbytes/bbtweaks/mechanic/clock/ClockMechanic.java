@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.mechanic.clock;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.util.SignUtil;
@@ -71,14 +72,21 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
       return null;
     }
 
-    int periodDuration;
+    var parseResult = parseExpression(parameterLine, new InterpretationEnvironment(), ValueInterpreter::asLong);
 
-    try {
-      periodDuration = Integer.parseInt(parameterLine);
+    if (parseResult.isEmpty()) {
+      config.rootSection.mechanic.clock.periodDurationMalformedExpression.sendMessage(
+        creator,
+        new InterpretationEnvironment()
+          .withVariable("input", parameterLine)
+      );
 
-      if (periodDuration < 0)
-        throw new IllegalStateException();
-    } catch (Throwable e) {
+      return null;
+    }
+
+    int periodDuration = parseResult.get().intValue();
+
+    if (periodDuration < 0) {
       if (creator != null) {
         config.rootSection.mechanic.clock.periodDurationNoPositiveInt.sendMessage(
           creator,
