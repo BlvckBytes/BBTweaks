@@ -119,14 +119,25 @@ mechanic:
     periodDurationNoPositiveInt: '{lut.mechanic_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>ist keine positive Ganzzahl!'
     periodDurationTooLow: '{lut.mechanic_prefix} <&7>Die Periodendauer von <&c>{duration} <&7>unterschreitet den Minimalwert von <&c>{min_duration}<&7>; falle auf diesen Wert zurück!'
     periodDurationUneven: '{lut.mechanic_prefix} <&c>Die Periodendauer von <&4>{duration} <&c>ist ungerade; Periodendauer = 2 * Umschaltdauer!'
-    creationSuccess: '{lut.mechanic_prefix} <&7>Die <&a>Clock <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit einer Periodendauer von <&a>{duration} Ticks <&7>erstellt!'
+    creationSuccess: |
+      {lut.mechanic_prefix} <&7>Die <&a>Clock <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit einer Periodendauer von <&a>{duration} Ticks <&7>(
+        <&a *let-tick_duration="duration">{lut.tick_duration_display}</&a>
+      <&7>) erstellt!
+    unknownRemainingTime: '{lut.mechanic_prefix} <&c>Keine verbleibende Zeit verfügbar (Clock deaktiviert?).'
+    remainingTimeActionBar: |
+      <&7>Umschaltung in: <&a>{remaining_time} Ticks <&7>(
+        <&a *let-tick_duration="remaining_time">{lut.tick_duration_display}</&a>
+      <&7>)
   pulseExtender:
     minSignalLength: 5
     noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen Pulse-Extender zu erstellen!'
     signalLengthAbsent: '{lut.mechanic_prefix} <&c>Fehlende Signallänge in der dritten Zeile des Schildes!'
     signalLengthNoPositiveInt: '{lut.mechanic_prefix} <&c>Die Signallänge von <&4>{signal_length} <&c>ist keine positive Ganzzahl!'
     signalLengthTooLow: '{lut.mechanic_prefix} <&7>Die Signallänge von <&c>{signal_length} <&7>unterschreitet den Minimalwert von <&c>{min_signal_length}<&7>; falle auf diesen Wert zurück!'
-    creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Pulse-Extender <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit einer Signallänge von <&a>{signal_length} Ticks <&7>erstellt!'
+    creationSuccess: |
+      {lut.mechanic_prefix} <&7>Der <&a>Pulse-Extender <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit einer Signallänge von <&a>{signal_length} Ticks <&7>(
+        <&a *let-tick_duration="signal_length">{lut.tick_duration_display}</&a>
+      <&7>) erstellt!
   magnet:
     noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen Magneten zu erstellen!'
     noContainer: '{lut.mechanic_prefix} <&c>Ein Magnet kann nur an einem Behälterblock angebracht werden!'
@@ -363,3 +374,17 @@ cLut:
     <hover-text value={<&a>Klicke, um den Seed zu kopieren!}>
       <to-clipboard value=`{seed}`>
         <&a><u>{seed}
+  tick_duration_display: |
+    <container *if="tick_duration <= 1">
+      sofort
+    </container>
+    <container *else-if="tick_duration < 20 * 60">
+      <number [value]="double(tick_duration) / 20" format="0.0" locale="de_DE" />s
+    </container>
+    <container
+      *else
+      *let-seconds="double(tick_duration) / 20"
+    >
+      <container *if="floor(seconds) neq seconds">≈</container>
+      <duration [value]="ceil(seconds) * 1000" units="hms" />
+    </container>

@@ -25,7 +25,29 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
 
   @Override
   public boolean onInstanceClick(Player player, ClockInstance instance, boolean wasLeftClick) {
-    return false;
+    var sign = instance.getSign();
+
+    if (!canEditSign(player, sign))
+      return false;
+
+    if (!wasLeftClick || !player.isSneaking())
+      return false;
+
+    var remainingTime = instance.getRemainingTimeUntilNextToggle();
+
+    var environment = new InterpretationEnvironment()
+      .withVariable("x", sign.getX())
+      .withVariable("y", sign.getY())
+      .withVariable("z", sign.getZ())
+      .withVariable("remaining_time", remainingTime);
+
+    if (remainingTime < 0) {
+      config.rootSection.mechanic.clock.unknownRemainingTime.sendMessage(player, environment);
+      return true;
+    }
+
+    config.rootSection.mechanic.clock.remainingTimeActionBar.sendActionBar(player, environment);
+    return true;
   }
 
   @Override

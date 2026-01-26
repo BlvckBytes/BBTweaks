@@ -19,6 +19,8 @@ public class ClockSection extends ConfigSection {
   public ComponentMarkup periodDurationTooLow;
   public ComponentMarkup periodDurationUneven;
   public ComponentMarkup creationSuccess;
+  public ComponentMarkup unknownRemainingTime;
+  public ComponentMarkup remainingTimeActionBar;
 
   public ClockSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

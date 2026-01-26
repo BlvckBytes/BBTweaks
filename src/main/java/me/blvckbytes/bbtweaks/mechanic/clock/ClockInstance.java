@@ -7,6 +7,7 @@ public class ClockInstance extends SISOInstance {
 
   private final int toggleDuration;
 
+  private int lastTickTime = -1;
   private int initTickTime = -1;
 
   public ClockInstance(int periodDuration, Sign sign) {
@@ -17,6 +18,8 @@ public class ClockInstance extends SISOInstance {
 
   @Override
   public boolean tick(int time) {
+    lastTickTime = time;
+
     if (initTickTime < 0) {
       initTickTime = time;
       return true;
@@ -34,10 +37,30 @@ public class ClockInstance extends SISOInstance {
 
     if (inputPower == 0) {
       tryWriteOutputState(false);
+      initTickTime = -1;
       return true;
     }
 
     tryWriteOutputState(!getLastOutputState());
     return true;
+  }
+
+  public int getRemainingTimeUntilNextToggle() {
+    if (lastTickTime < 0 || initTickTime < 0)
+      return -1;
+
+    var inputPower = tryReadInputPower();
+
+    if (inputPower == null || inputPower == 0)
+      return -1;
+
+    var elapsedTime = lastTickTime - initTickTime;
+
+    if (elapsedTime == 0)
+      return -1;
+
+    var timeRemainder = elapsedTime % toggleDuration;
+
+    return toggleDuration - timeRemainder;
   }
 }
