@@ -31,16 +31,22 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
 
   @Override
   public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-    if (!(sender instanceof Player player))
-      return false;
-
-    if (!player.hasPermission("essentials.back"))
+    if (!(sender instanceof Player player)) {
+      config.rootSection.backOverride.playersOnly.sendMessage(sender);
       return true;
+    }
+
+    if (!player.hasPermission("essentials.back")) {
+      config.rootSection.backOverride.noPermission.sendMessage(player);
+      return true;
+    }
 
     var lastLocation = lastLocationStore.getLastLocation(player);
 
-    if (lastLocation == null)
+    if (lastLocation == null) {
+      config.rootSection.backOverride.noLastLocation.sendMessage(player);
       return true;
+    }
 
     player.teleport(lastLocation);
     config.rootSection.backOverride.teleportedBack.sendMessage(player);

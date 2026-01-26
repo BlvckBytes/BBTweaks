@@ -15,7 +15,10 @@ abSleep:
   thresholdReached: '<&a>Die Nacht wird durchgeschlafen'
 
 backOverride:
-  teleportedBack: '<&6>Du kehrst zur letzten Position zurück.'
+  playersOnly: '{lut.back_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+  noPermission: '{lut.back_prefix} <&c>Dir fehlen die nötigen Rechte, um diesen Befehl benutzen zu können!'
+  noLastLocation: '{lut.back_prefix} <&c>Es ist noch keine vorherige Position vorhanden!'
+  teleportedBack: '{lut.back_prefix} <&7>Du kehrst zur <&a>vorherigen Position <&7>zurück.'
 
 furnaceLevel:
   noLevelsStored: '<&7>[XP] Keine Level gespeichert'
@@ -302,6 +305,7 @@ cLut:
   main_prefix: '<&7>[<&5>BBTweaks<&7>]'
   ping_prefix: '<&7>[<&6>Ping<&7>]'
   uc_prefix: '<&7>[<&6>UC<&7>]'
+  back_prefix: '<&7>[<&6>Back<&7>]'
   mechanic_prefix: '<&7>[<&6>Mechanic<&7>]'
   spacer: |
     <container *if="is_floodgate">

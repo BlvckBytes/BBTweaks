@@ -7,6 +7,9 @@ import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 
 public class BackOverrideSection extends ConfigSection {
 
+  public ComponentMarkup playersOnly;
+  public ComponentMarkup noPermission;
+  public ComponentMarkup noLastLocation;
   public ComponentMarkup teleportedBack;
 
   public BackOverrideSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
