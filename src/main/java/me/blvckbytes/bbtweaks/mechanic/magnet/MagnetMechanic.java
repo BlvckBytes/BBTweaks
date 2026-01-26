@@ -21,14 +21,11 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
-import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -38,7 +35,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.logging.Level;
 
 public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements Listener {
 
@@ -497,27 +493,6 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     var playerId = event.getPlayer().getUniqueId();
     showSessionsByPlayerId.remove(playerId);
     editSessionByPlayerId.remove(playerId);
-  }
-
-  @SuppressWarnings("UnstableApiUsage")
-  public boolean canEditSign(Player player, Sign sign) {
-    var side = sign.getSide(Side.FRONT);
-    var fakeEvent = new SignChangeEvent(sign.getBlock(), player, side.lines(), Side.FRONT);
-    callFakeEvent(fakeEvent);
-    return !fakeEvent.isCancelled();
-  }
-
-  private void callFakeEvent(Event event) {
-    for(var listener : event.getHandlers().getRegisteredListeners()) {
-      if (listener.getPlugin().equals(plugin))
-        continue;
-
-      try {
-        listener.callEvent(event);
-      } catch (Exception e) {
-        plugin.getLogger().log(Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + listener.getPlugin().getName(), e);
-      }
-    }
   }
 
   private boolean hasRegisteredSigns(Container container) {

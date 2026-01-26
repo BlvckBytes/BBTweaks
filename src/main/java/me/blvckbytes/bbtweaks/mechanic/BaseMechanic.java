@@ -5,11 +5,15 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import me.blvckbytes.bbtweaks.util.IterationDecision;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.logging.Level;
 
 public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic<InstanceType> {
 
@@ -97,5 +101,26 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     }
 
     onConfigReload();
+  }
+
+  @SuppressWarnings({"UnstableApiUsage", "BooleanMethodIsAlwaysInverted"})
+  public boolean canEditSign(Player player, Sign sign) {
+    var side = sign.getSide(Side.FRONT);
+    var fakeEvent = new SignChangeEvent(sign.getBlock(), player, side.lines(), Side.FRONT);
+    callFakeEvent(fakeEvent);
+    return !fakeEvent.isCancelled();
+  }
+
+  private void callFakeEvent(Event event) {
+    for(var listener : event.getHandlers().getRegisteredListeners()) {
+      if (listener.getPlugin().equals(plugin))
+        continue;
+
+      try {
+        listener.callEvent(event);
+      } catch (Exception e) {
+        plugin.getLogger().log(Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + listener.getPlugin().getName(), e);
+      }
+    }
   }
 }
