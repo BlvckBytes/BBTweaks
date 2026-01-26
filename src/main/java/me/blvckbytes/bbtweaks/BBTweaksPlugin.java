@@ -14,6 +14,7 @@ import me.blvckbytes.bbtweaks.main_command.MainCommand;
 import me.blvckbytes.bbtweaks.mechanic.SignMechanicManager;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
+import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
@@ -119,6 +120,12 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       if (worldGuardFlags != null)
         getServer().getPluginManager().registerEvents(worldGuardFlags, this);
+
+      var seedOverride = new SeedOverrideCommand(config);
+
+      Objects.requireNonNull(getCommand("seed")).setExecutor(seedOverride);
+
+      getServer().getPluginManager().registerEvents(seedOverride, this);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);

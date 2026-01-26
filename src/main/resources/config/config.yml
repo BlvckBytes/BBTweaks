@@ -301,12 +301,23 @@ mechanic:
         green: 170
         blue: 0
 
+seedOverride:
+  playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+  worldSpecificMessages:
+    creative: '{lut.seed_prefix} <&7>Der Seed von <&a>Creative <&7>lautet: {lut.seed_display}<&7>.'
+    world: '{lut.seed_prefix} <&7>Der Seed der <&a>Bauwelt <&7>lautet: {lut.seed_display}<&7>.'
+    world_farm: '{lut.seed_prefix} <&7>Der Seed der <&a>Farmwelt <&7>lautet: {lut.seed_display}<&7>.'
+    world_nether: '{lut.seed_prefix} <&7>Der Seed des <&a>Nethers <&7>lautet: {lut.seed_display}<&7>.'
+    world_the_end: '{lut.seed_prefix} <&7>Der Seed des <&a>Ends <&7>lautet: {lut.seed_display}<&7>.'
+  fallbackMessage: '{lut.seed_prefix} <&7>Der Seed der Welt <&a>{world} <&7>lautet: {lut.seed_display}<&7>.'
+
 cLut:
   main_prefix: '<&7>[<&5>BBTweaks<&7>]'
   ping_prefix: '<&7>[<&6>Ping<&7>]'
   uc_prefix: '<&7>[<&6>UC<&7>]'
   back_prefix: '<&7>[<&6>Back<&7>]'
   mechanic_prefix: '<&7>[<&6>Mechanic<&7>]'
+  seed_prefix: '<&7>[<&6>Seed<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}
@@ -348,3 +359,7 @@ cLut:
           <&8>➥ <&e>Linksklick <&7>Parameter auswählen<br/>
         </container>
         {lut.spacer}
+  seed_display: |
+    <hover-text value={<&a>Klicke, um den Seed zu kopieren!}>
+      <to-clipboard value=`{seed}`>
+        <&a><u>{seed}
