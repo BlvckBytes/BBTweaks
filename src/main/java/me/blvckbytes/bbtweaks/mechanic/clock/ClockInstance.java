@@ -20,15 +20,9 @@ public class ClockInstance extends SISOInstance {
   public boolean tick(int time) {
     lastTickTime = time;
 
-    if (initTickTime < 0) {
+    // Do not return here - begin with a high-cycle immediately, if applicable.
+    if (initTickTime < 0)
       initTickTime = time;
-      return true;
-    }
-
-    var elapsedTime = time - initTickTime;
-
-    if (elapsedTime % toggleDuration != 0)
-      return true;
 
     var inputPower = tryReadInputPower();
 
@@ -40,6 +34,11 @@ public class ClockInstance extends SISOInstance {
       initTickTime = -1;
       return true;
     }
+
+    var elapsedTime = time - initTickTime;
+
+    if (elapsedTime % toggleDuration != 0)
+      return true;
 
     tryWriteOutputState(!getLastOutputState());
     return true;
