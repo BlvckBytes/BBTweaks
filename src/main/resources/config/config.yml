@@ -140,6 +140,11 @@ mechanic:
       {lut.mechanic_prefix} <&7>Der <&a>Pulse-Extender <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit einer Signallänge von <&a>{signal_length} Ticks <&7>(
         <&a *let-tick_duration="signal_length">{lut.tick_duration_display}</&a>
       <&7>) erstellt!
+    noRemainingHighTime: '{lut.mechanic_prefix} <&c>Der Ausgang ist aktuell inaktiv!'
+    remainingHighTimeActionBar: |
+      <&7>Verbleibende An-Dauer: <&a>{remaining_time} Ticks <&7>(
+        <&a *let-tick_duration="remaining_time">{lut.tick_duration_display}</&a>
+      <&7>)
   magnet:
     noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen Magneten zu erstellen!'
     noContainer: '{lut.mechanic_prefix} <&c>Ein Magnet kann nur an einem Behälterblock angebracht werden!'
@@ -378,7 +383,7 @@ cLut:
         <&a><u>{seed}
   tick_duration_display: |
     <container *if="tick_duration <= 1">
-      sofort
+      sofortig
     </container>
     <container *else-if="tick_duration < 20 * 60">
       <number [value]="double(tick_duration) / 20" format="0.0" locale="de_DE" />s

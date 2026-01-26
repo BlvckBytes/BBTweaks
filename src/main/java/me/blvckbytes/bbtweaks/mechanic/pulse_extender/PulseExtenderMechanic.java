@@ -26,7 +26,29 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
 
   @Override
   public boolean onInstanceClick(Player player, PulseExtenderInstance instance, boolean wasLeftClick) {
-    return false;
+    var sign = instance.getSign();
+
+    if (!canEditSign(player, sign))
+      return false;
+
+    if (!wasLeftClick || !player.isSneaking())
+      return false;
+
+    var remainingTime = instance.getRemainingHighTime();
+
+    var environment = new InterpretationEnvironment()
+      .withVariable("x", sign.getX())
+      .withVariable("y", sign.getY())
+      .withVariable("z", sign.getZ())
+      .withVariable("remaining_time", remainingTime);
+
+    if (remainingTime < 0) {
+      config.rootSection.mechanic.pulseExtender.noRemainingHighTime.sendMessage(player, environment);
+      return true;
+    }
+
+    config.rootSection.mechanic.pulseExtender.remainingHighTimeActionBar.sendActionBar(player, environment);
+    return true;
   }
 
   @Override

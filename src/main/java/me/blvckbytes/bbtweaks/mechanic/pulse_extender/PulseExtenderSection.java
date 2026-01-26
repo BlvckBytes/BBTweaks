@@ -1,6 +1,5 @@
 package me.blvckbytes.bbtweaks.mechanic.pulse_extender;
 
-import at.blvckbytes.cm_mapper.cm.ComponentExpression;
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import at.blvckbytes.cm_mapper.mapper.MappingError;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
@@ -20,6 +19,8 @@ public class PulseExtenderSection extends ConfigSection {
   public ComponentMarkup signalLengthNoPositiveInt;
   public ComponentMarkup signalLengthTooLow;
   public ComponentMarkup creationSuccess;
+  public ComponentMarkup noRemainingHighTime;
+  public ComponentMarkup remainingHighTimeActionBar;
 
   public PulseExtenderSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
