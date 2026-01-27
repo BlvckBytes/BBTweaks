@@ -329,6 +329,9 @@ seedOverride:
     world_the_end: '{lut.seed_prefix} <&7>Der Seed des <&a>Ends <&7>lautet: {lut.seed_display}<&7>.'
   fallbackMessage: '{lut.seed_prefix} <&7>Der Seed der Welt <&a>{world} <&7>lautet: {lut.seed_display}<&7>.'
 
+customCommands:
+  commands:
+
 cLut:
   main_prefix: '<&7>[<&5>BBTweaks<&7>]'
   ping_prefix: '<&7>[<&6>Ping<&7>]'

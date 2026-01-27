@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.ab_sleep.ActionBarSleepMessage;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipesSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
 import me.blvckbytes.bbtweaks.back.LastLocationStore;
+import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
@@ -126,6 +127,8 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       Objects.requireNonNull(getCommand("seed")).setExecutor(seedOverride);
 
       getServer().getPluginManager().registerEvents(seedOverride, this);
+
+      new CustomCommandsManager(this, config);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);
