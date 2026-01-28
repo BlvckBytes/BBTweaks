@@ -46,7 +46,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
   };
 
   private final CuboidMechanicRegistry<MagnetInstance> instanceCuboidRegistry;
-  private final Map<UUID, List<ShowSession>> showSessionsByPlayerId;
+  private final Map<UUID, VisualizationsBucket> visualizationsByPlayerId;
   private final Map<UUID, EditSession> editSessionByPlayerId;
 
   private final PredicateHelper predicateHelper;
@@ -55,11 +55,13 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
   public final NamespacedKey filterPredicateKey;
   public final NamespacedKey filterLanguageKey;
 
+  private int lastTime;
+
   public MagnetMechanic(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
     super(plugin, config);
 
     this.instanceCuboidRegistry = new CuboidMechanicRegistry<>();
-    this.showSessionsByPlayerId = new HashMap<>();
+    this.visualizationsByPlayerId = new HashMap<>();
     this.editSessionByPlayerId = new HashMap<>();
 
     var ipp = ItemPredicateParserPlugin.getInstance();
@@ -115,8 +117,11 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
   public void tick(int time) {
     super.tick(time);
 
+    this.lastTime = time;
+
     if (time % config.rootSection.mechanic.magnet.visualization.periodTicks == 0) {
-      showSessionsByPlayerId.values().forEach(this::handleVisualizations);
+      // TODO: The edit-session should also use this new way of visualization, if it pans out long-term.
+      visualizationsByPlayerId.values().forEach(bucket -> bucket.update(time));
       handleVisualizations(editSessionByPlayerId.values());
     }
 
@@ -372,11 +377,9 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
 
   public void visualizeInstance(Player player, MagnetInstance instance, boolean displayMessage) {
     var sign = instance.getSign();
-    var durationMs = config.rootSection.mechanic.magnet.visualization.durationMs;
-    var playerBucket = showSessionsByPlayerId.computeIfAbsent(player.getUniqueId(), k -> new ArrayList<>());
+    var visualizations = visualizationsByPlayerId.computeIfAbsent(player.getUniqueId(), k -> new VisualizationsBucket(player, config));
 
-    playerBucket.removeIf(entry -> entry.sign.getLocation().equals(sign.getLocation()));
-    playerBucket.add(new ShowSession(player, sign, instance.getCuboid(), durationMs));
+    visualizations.add(instance, lastTime);
 
     if (!displayMessage)
       return;
@@ -408,7 +411,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     config.rootSection.mechanic.magnet.visualizationInitialized.sendMessage(
       player,
       environment
-        .withVariable("visualization_duration", durationMs / 1000)
+        .withVariable("visualization_duration", config.rootSection.mechanic.magnet.visualization.durationMs / 1000)
     );
   }
 
@@ -514,7 +517,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
   @EventHandler
   public void onQuit(PlayerQuitEvent event) {
     var playerId = event.getPlayer().getUniqueId();
-    showSessionsByPlayerId.remove(playerId);
+    visualizationsByPlayerId.remove(playerId);
     editSessionByPlayerId.remove(playerId);
   }
 
