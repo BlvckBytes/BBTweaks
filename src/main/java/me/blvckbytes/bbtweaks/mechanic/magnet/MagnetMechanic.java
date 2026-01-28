@@ -331,7 +331,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
       return null;
     }
 
-    if (hasRegisteredSigns(container)) {
+    if (!config.rootSection.mechanic.magnet.allowMultipleSignsPerContainer && hasRegisteredSigns(container)) {
       if (creator != null)
         config.rootSection.mechanic.magnet.existingSign.sendMessage(creator, environment);
 

@@ -106,8 +106,13 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
       onSignUnload(sign);
 
     for (var sign : mechanicSigns) {
-      if (sign.getBlock().getState() instanceof Sign newSign)
-        onSignLoad(newSign);
+      var signBlock = sign.getBlock();
+
+      if (!(signBlock.getState() instanceof Sign newSign))
+        continue;
+
+      if (onSignLoad(newSign) == null)
+        signBlock.breakNaturally();
     }
 
     onConfigReload();

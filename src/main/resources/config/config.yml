@@ -148,6 +148,7 @@ mechanic:
   magnet:
     noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen Magneten zu erstellen!'
     noContainer: '{lut.mechanic_prefix} <&c>Ein Magnet kann nur an einem Behälterblock angebracht werden!'
+    allowMultipleSignsPerContainer: true
     existingSign: '{lut.mechanic_prefix} <&c>Am Behälter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein Magnet!'
     visualizationInitialized: |
       {lut.mechanic_prefix} <&7>Die Region des Magnetes bei <&a>{x} {y} {z}
