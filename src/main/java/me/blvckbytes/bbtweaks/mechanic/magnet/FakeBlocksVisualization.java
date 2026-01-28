@@ -69,6 +69,8 @@ public class FakeBlocksVisualization {
     var hadOutdatedKeys = !outdatedKeys.isEmpty();
 
     if (hadOutdatedKeys) {
+      // TODO: IMPORTANT! Only get block-data if we're inside an accessible chunk (to not load unloaded chunks)!
+      //       Also, cache results for the duration of this visualization.
       for (var remainingKey : outdatedKeys)
         fakeBlocks.put(remainingKey, remainingKey.block.getBlockData());
     }

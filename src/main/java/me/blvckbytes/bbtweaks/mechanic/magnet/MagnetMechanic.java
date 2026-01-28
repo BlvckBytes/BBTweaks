@@ -37,7 +37,6 @@ import java.util.*;
 public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements Listener {
 
   // TODO: Hide visualization of A if editing A
-  // TODO: Different colors for concurrent visualizations
   // TODO: Select param in the UI with any button
   // TODO: Stop visualization on destroy
 
