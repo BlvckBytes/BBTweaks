@@ -4,6 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
+import me.blvckbytes.bbtweaks.mechanic.MVisualizeCommand;
 import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.EditDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicRegistry;
@@ -12,10 +13,7 @@ import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.predicate.StringifyState;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
-import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
-import org.bukkit.Tag;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
@@ -37,6 +35,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements Listener {
+
+  // TODO: Hide visualization of A if editing A
+  // TODO: Different colors for concurrent visualizations
+  // TODO: Select param in the UI with any button
+  // TODO: Stop visualization on destroy
 
   private static final BlockFace[] SIGN_FACES = new BlockFace[] {
     BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
@@ -70,7 +73,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     var defaultLanguageCommand = Objects.requireNonNull(plugin.getCommand("mfilter"));
     var customLanguageCommand = Objects.requireNonNull(plugin.getCommand("mfilterl"));
 
-    var commandExecutor = new MFilterCommand(
+    var filterCommandExecutor = new MFilterCommand(
       defaultLanguageCommand,
       customLanguageCommand,
       this,
@@ -79,13 +82,21 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
       config
     );
 
-    defaultLanguageCommand.setExecutor(commandExecutor);
-    customLanguageCommand.setExecutor(commandExecutor);
+    defaultLanguageCommand.setExecutor(filterCommandExecutor);
+    customLanguageCommand.setExecutor(filterCommandExecutor);
+
+    var visualizeCommandExecutor = new MVisualizeCommand(this, config);
+
+    Objects.requireNonNull(plugin.getCommand("mvisualize")).setExecutor(visualizeCommandExecutor);
 
     Bukkit.getServer().getPluginManager().registerEvents(displayHandler, plugin);
 
     this.filterPredicateKey = new NamespacedKey(plugin, "magnet-filter-predicate");
     this.filterLanguageKey = new NamespacedKey(plugin, "magnet-filter-language");
+  }
+
+  public List<MagnetInstance> getMagnetsInChunk(World world, int chunkX, int chunkZ) {
+    return instanceCuboidRegistry.getWithinXZChunk(world, chunkX, chunkZ);
   }
 
   public @Nullable EditSession getEditSessionByPlayer(Player player) {
@@ -359,6 +370,48 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     return instance;
   }
 
+  public void visualizeInstance(Player player, MagnetInstance instance, boolean displayMessage) {
+    var sign = instance.getSign();
+    var durationMs = config.rootSection.mechanic.magnet.visualization.durationMs;
+    var playerBucket = showSessionsByPlayerId.computeIfAbsent(player.getUniqueId(), k -> new ArrayList<>());
+
+    playerBucket.removeIf(entry -> entry.sign.getLocation().equals(sign.getLocation()));
+    playerBucket.add(new ShowSession(player, sign, instance.getCuboid(), durationMs));
+
+    if (!displayMessage)
+      return;
+
+    var signPredicate = PredicateAndLanguage.tryLoadFromSign(sign, filterPredicateKey, filterLanguageKey);
+
+    var environment = new InterpretationEnvironment()
+      .withVariable("x", sign.getX())
+      .withVariable("y", sign.getY())
+      .withVariable("z", sign.getZ());
+
+    if (signPredicate != null) {
+      var filterLanguageString = TranslationLanguage.matcher.getNormalizedName(signPredicate.language());
+      var predicateString = new StringifyState(true).appendPredicate(signPredicate.predicate()).toString();
+
+      String command;
+
+      if (predicateHelper.getSelectedLanguage(player) == signPredicate.language())
+        command = "/mfilter " + predicateString;
+      else
+        command = "/mfilterl " + filterLanguageString + " " + predicateString;
+
+      environment
+        .withVariable("predicate_language", filterLanguageString)
+        .withVariable("predicate", predicateString)
+        .withVariable("filter_command", command);
+    }
+
+    config.rootSection.mechanic.magnet.visualizationInitialized.sendMessage(
+      player,
+      environment
+        .withVariable("visualization_duration", durationMs / 1000)
+    );
+  }
+
   @Override
   public boolean onInstanceClick(Player player, MagnetInstance instance, boolean wasLeftClick) {
     var sign = instance.getSign();
@@ -383,37 +436,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
       return false;
 
     if (wasLeftClick) {
-      var durationMs = config.rootSection.mechanic.magnet.visualization.durationMs;
-      var playerBucket = showSessionsByPlayerId.computeIfAbsent(playerId, k -> new ArrayList<>());
-
-      playerBucket.removeIf(entry -> entry.sign.getLocation().equals(sign.getLocation()));
-      playerBucket.add(new ShowSession(player, sign, instance.getCuboid(), durationMs));
-
-      var signPredicate = PredicateAndLanguage.tryLoadFromSign(sign, filterPredicateKey, filterLanguageKey);
-
-      if (signPredicate != null) {
-        var filterLanguageString = TranslationLanguage.matcher.getNormalizedName(signPredicate.language());
-        var predicateString = new StringifyState(true).appendPredicate(signPredicate.predicate()).toString();
-
-        String command;
-
-        if (predicateHelper.getSelectedLanguage(player) == signPredicate.language())
-          command = "/mfilter " + predicateString;
-        else
-          command = "/mfilterl " + filterLanguageString + " " + predicateString;
-
-        environment
-          .withVariable("predicate_language", filterLanguageString)
-          .withVariable("predicate", predicateString)
-          .withVariable("filter_command", command);
-      }
-
-      config.rootSection.mechanic.magnet.visualizationInitialized.sendMessage(
-        player,
-        environment
-          .withVariable("visualization_duration", durationMs / 1000)
-      );
-
+      visualizeInstance(player, instance, true);
       return true;
     }
 

@@ -39,6 +39,10 @@ public class MagnetSection extends ConfigSection {
   public ComponentMarkup filterCommandUnknownLanguage;
   public ComponentMarkup filterCommandPredicateError;
   public ComponentMarkup filterCommandEmptyPredicate;
+  public int visualizeCommandChunkExpandRadius;
+  public ComponentMarkup visualizeCommandPlayersOnly;
+  public ComponentMarkup visualizeCommandNoMagnetsNearby;
+  public ComponentMarkup visualizeCommandVisualizingNearbyMagnets;
 
   public @CSAlways EditGuiSection editDisplay;
 
@@ -75,5 +79,8 @@ public class MagnetSection extends ConfigSection {
 
     if (collectionPeriodTicks <= 0)
       throw new MappingError("\"collectionPeriodTicks\" cannot be less than or equal to zero");
+
+    if (visualizeCommandChunkExpandRadius <= 0)
+      throw new MappingError("\"visualizeCommandChunkExpandRadius\" cannot be less than or equal to zero");
   }
 }

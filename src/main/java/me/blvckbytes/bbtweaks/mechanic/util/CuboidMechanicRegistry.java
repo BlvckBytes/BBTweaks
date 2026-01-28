@@ -4,6 +4,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,6 +26,22 @@ public class CuboidMechanicRegistry<InstanceType extends CuboidMechanicInstance>
 
   public CuboidMechanicRegistry() {
     this.instanceByChunkIdByWorldId = new HashMap<>();
+  }
+
+  public List<InstanceType> getWithinXZChunk(World world, int chunkX, int chunkZ) {
+    var worldBucket = instanceByChunkIdByWorldId.get(world.getUID());
+
+    if (worldBucket == null)
+      return Collections.emptyList();
+
+    var xzTuple = IntTuple.create(chunkX, chunkZ);
+
+    var xzBucket = worldBucket.instanceByXZTuple.get(xzTuple);
+
+    if (xzBucket == null)
+      return Collections.emptyList();
+
+    return Collections.unmodifiableList(xzBucket);
   }
 
   public void forEachXZChunkBucket(XZChunkBucketHandler<InstanceType> chunkBucketHandler) {

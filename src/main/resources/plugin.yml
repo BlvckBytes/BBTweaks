@@ -26,6 +26,9 @@ commands:
   mfilterl:
     description: 'Used to set the filter-predicate of a magnet during an edit-session using a custom language'
     permission: bbtweaks.mechanic.magnet
+  mvisualize:
+    description: 'Used to visualize multiple nearby magnets simultaneously'
+    permission: bbtweaks.mechanic.magnet
   seed:
     description: 'Displays the seed of the current world'
 permissions:

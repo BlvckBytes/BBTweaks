@@ -190,6 +190,10 @@ mechanic:
     filterCommandUnknownLanguage: '{lut.mechanic_prefix} <&c>Die Sprache <&4>{input} <&c>stellt keine gültige Auswahl dar; wähle aus: <&4 *for-language="languages" *for-separator={<&c>,<space/>}>{language}</><&c>.'
     filterCommandPredicateError: '{lut.mechanic_prefix} <&c>Ungültiger Filter: <&4>{error}<&c>.'
     filterCommandEmptyPredicate: '{lut.mechanic_prefix} <&c>Bitte gib einen gültigen Filter an!'
+    visualizeCommandChunkExpandRadius: 2
+    visualizeCommandPlayersOnly: '{lut.mechanic_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+    visualizeCommandNoMagnetsNearby: '{lut.mechanic_prefix} <&c>Es befinden sich keine Magnete in deinem Chunk!'
+    visualizeCommandVisualizingNearbyMagnets: '{lut.mechanic_prefix} <&7>Zeige <&a>{magnet_count} Magnete <&7>in deiner Umgebung für <&a>{visualization_duration}s <&7>an.'
     editDisplay:
       title: '<&8>Magnet <&e>{magnet_x} {magnet_y} {magnet_z}'
       rows: 2
