@@ -193,7 +193,7 @@ mechanic:
     filterCommandEmptyPredicate: '{lut.mechanic_prefix} <&c>Bitte gib einen gültigen Filter an!'
     visualizeCommandChunkExpandRadius: 2
     visualizeCommandPlayersOnly: '{lut.mechanic_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
-    visualizeCommandNoMagnetsNearby: '{lut.mechanic_prefix} <&c>Es befinden sich keine Magnete in deinem Chunk!'
+    visualizeCommandNoMagnetsNearby: '{lut.mechanic_prefix} <&c>Es befinden sich keine Magnete in deinem Chunk, auf die du Zugriff hast!'
     visualizeCommandVisualizingNearbyMagnets: '{lut.mechanic_prefix} <&7>Zeige <&a>{magnet_count} Magnete <&7>in deiner Umgebung für <&a>{visualization_duration}s <&7>an.'
     editDisplay:
       title: '<&8>Magnet <&e>{magnet_x} {magnet_y} {magnet_z}'

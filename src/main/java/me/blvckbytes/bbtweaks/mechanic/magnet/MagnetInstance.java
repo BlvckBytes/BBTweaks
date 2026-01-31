@@ -98,6 +98,8 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
     // Remainders are also unreachable, given the above, but just to make absolutely sure.
     inventory.addItem(item)
       .values()
+      // TODO: Rather drop at the original location of the item (require it as a parameter)
+      // TODO: Also, keep them in a local buffer, stack them up and only drop every N ticks
       .forEach(remainder -> mountBlock.getWorld().dropItem(mountBlock.getLocation(), remainder));
 
     didAddItems = true;
