@@ -8,7 +8,7 @@ import me.blvckbytes.bbtweaks.mechanic.magnet.MagnetParameter;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
-import me.blvckbytes.item_predicate_parser.predicate.StringifyState;
+import me.blvckbytes.item_predicate_parser.predicate.stringify.PlainStringifier;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -70,7 +70,7 @@ public class EditDisplayHandler extends DisplayHandler<EditDisplay, EditSession>
         if (clickType == ClickType.LEFT) {
           var filterLanguage = display.displayData.filter.language();
           var filterLanguageString = TranslationLanguage.matcher.getNormalizedName(filterLanguage);
-          var predicateString = new StringifyState(true).appendPredicate(display.displayData.filter.predicate()).toString();
+          var predicateString = PlainStringifier.stringify(display.displayData.filter.predicate(), true);
 
           String command;
 

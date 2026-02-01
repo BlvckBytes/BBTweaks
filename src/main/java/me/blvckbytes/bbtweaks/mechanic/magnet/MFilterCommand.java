@@ -4,13 +4,12 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.EditDisplayHandler;
+import me.blvckbytes.bbtweaks.mechanic.util.MutableBoolean;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
-import me.blvckbytes.item_predicate_parser.predicate.StringifyState;
+import me.blvckbytes.item_predicate_parser.predicate.stringify.PlainStringifier;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
@@ -65,7 +64,7 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
     if (result != null) {
       environment
         .withVariable("language", TranslationLanguage.matcher.getNormalizedName(result.language()))
-        .withVariable("predicate", new StringifyState(true).appendPredicate(result.predicate()).toString());
+        .withVariable("predicate", PlainStringifier.stringify(result.predicate(), true));
     }
 
     var editSession = magnetMechanic.getEditSessionByPlayer(player);
@@ -153,11 +152,11 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
       var completions = predicateHelper.createCompletion(language, tokens);
 
       if (completions.expandedPreviewOrError() != null)
-        showActionBarMessage(player, completions.expandedPreviewOrError());
+        player.sendActionBar(completions.expandedPreviewOrError());
 
       return completions.suggestions();
     } catch (ItemPredicateParseException e) {
-      showActionBarMessage(player, predicateHelper.createExceptionMessage(e));
+      player.sendActionBar(predicateHelper.createExceptionMessage(e));
       return null;
     }
   }
@@ -232,14 +231,11 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
       return null;
     }
 
-    if (predicate == null)
+    if (predicate == null) {
+      didProvideEmpty.value = true;
       return null;
+    }
 
     return new PredicateAndLanguage(predicate, language);
-  }
-
-  @SuppressWarnings("deprecation")
-  private void showActionBarMessage(Player player, String message) {
-    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, new TextComponent(message));
   }
 }

@@ -11,7 +11,7 @@ import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicRegistry;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
-import me.blvckbytes.item_predicate_parser.predicate.StringifyState;
+import me.blvckbytes.item_predicate_parser.predicate.stringify.PlainStringifier;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -392,7 +392,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
 
     if (signPredicate != null) {
       var filterLanguageString = TranslationLanguage.matcher.getNormalizedName(signPredicate.language());
-      var predicateString = new StringifyState(true).appendPredicate(signPredicate.predicate()).toString();
+      var predicateString = PlainStringifier.stringify(signPredicate.predicate(), true);
 
       String command;
 

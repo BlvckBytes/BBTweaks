@@ -2,7 +2,7 @@ package me.blvckbytes.bbtweaks.mechanic.magnet;
 
 import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
-import me.blvckbytes.item_predicate_parser.predicate.StringifyState;
+import me.blvckbytes.item_predicate_parser.predicate.stringify.PlainStringifier;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -83,7 +83,7 @@ public record PredicateAndLanguage(ItemPredicate predicate, TranslationLanguage 
 
     if (predicateAndLanguage != null) {
       var newFilterLanguage = predicateAndLanguage.language.name();
-      var newFilterPredicate = new StringifyState(true).appendPredicate(predicateAndLanguage.predicate()).toString();
+      var newFilterPredicate = PlainStringifier.stringify(predicateAndLanguage.predicate(), true);
 
       if (newFilterPredicate.equals(existingFilterPredicate) && newFilterLanguage.equals(existingFilterLanguage))
         return false;

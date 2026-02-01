@@ -3,7 +3,7 @@ package me.blvckbytes.bbtweaks.mechanic.magnet;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.mechanic.util.Axis;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
-import me.blvckbytes.item_predicate_parser.predicate.StringifyState;
+import me.blvckbytes.item_predicate_parser.predicate.stringify.PlainStringifier;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -116,7 +116,7 @@ public class EditSession extends VisualizeSession {
         "filter_predicate",
         filter == null
           ? null
-          : new StringifyState(true).appendPredicate(filter.predicate()).toString()
+          : PlainStringifier.stringify(filter.predicate(), true)
       )
       .withVariable(
         "filter_language",
