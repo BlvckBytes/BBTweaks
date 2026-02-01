@@ -57,7 +57,12 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
     if (command != defaultLanguageCommand && command != customLanguageCommand)
       return false;
 
-    var result = tryParsePredicateAndLanguage(player, label, args, command == defaultLanguageCommand);
+    var didProvideEmpty = new MutableBoolean();
+    var result = tryParsePredicateAndLanguage(player, label, args, command == defaultLanguageCommand, didProvideEmpty);
+
+    // Null now signals an error, which has already been handled internally by the method.
+    if (result == null && !didProvideEmpty.value)
+      return true;
 
     var environment = new InterpretationEnvironment();
 
@@ -179,7 +184,13 @@ public class MFilterCommand implements CommandExecutor, TabCompleter {
     return sign;
   }
 
-  private @Nullable PredicateAndLanguage tryParsePredicateAndLanguage(Player executor, String label, String[] args, boolean useSelectedLanguage) {
+  private @Nullable PredicateAndLanguage tryParsePredicateAndLanguage(
+    Player executor,
+    String label,
+    String[] args,
+    boolean useSelectedLanguage,
+    MutableBoolean didProvideEmpty
+  ) {
     int predicateArgsOffset;
     TranslationLanguage language;
 
