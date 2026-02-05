@@ -89,7 +89,7 @@ public class AdditionalRecipesSection extends ConfigSection {
 
         var ingredient = recipeSection.ingredients.get(ingredientName);
 
-        shapedRecipe.setIngredient(c, ingredient.type);
+        shapedRecipe.setIngredient(c, ingredient._choice);
       }
 
       if (!requiredIngredients.isEmpty()) {

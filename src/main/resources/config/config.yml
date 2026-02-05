@@ -43,19 +43,6 @@ ping:
   pingOther: '{lut.ping_prefix} <&a>{name}''s <&7>Ping: <&a>{ping}ms'
 
 additionalRecipes:
-  shapedRecipes:
-    light-blocks:
-      result: LIGHT
-      amount: 1
-      shape:
-        - AAA
-        - ABA
-        - AAA
-      ingredients:
-        A:
-          type: GLASS_PANE
-        B:
-          type: TORCH
 
 unCraft:
   inGameOnly: '{lut.uc_prefix} <&c>Dieser Befehl ist nur für Spieler verfügbar!'

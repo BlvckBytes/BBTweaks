@@ -225,3 +225,41 @@ unCraft:
       tags:
         - ITEMS_STONE_CRAFTING_MATERIALS
       preferredMaterial: COBBLESTONE
+
+additionalRecipes:
+  shapedRecipes:
+    light-blocks:
+      result: LIGHT
+      amount: 1
+      shape:
+        - AAA
+        - ABA
+        - AAA
+      ingredients:
+        A:
+          materials:
+            - GLASS_PANE
+        B:
+          materials:
+            - TORCH
+    custom-pistons:
+      result: PISTON
+      amount: 1
+      shape:
+        - WWW
+        - CIC
+        - CRC
+      ingredients:
+        W:
+          tags:
+            - ITEMS_PLANKS
+        C:
+          materials:
+            - COBBLESTONE
+            - COBBLED_DEEPSLATE
+        I:
+          materials:
+            - IRON_INGOT
+        R:
+          materials:
+            - REDSTONE
