@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class CacheByPosition<T> {
@@ -30,6 +31,13 @@ public class CacheByPosition<T> {
           return;
       }
     }
+  }
+
+  public void forEachValue(World world, Consumer<T> handler) {
+    var bucket = cachedItemByFastHashByWorldId.get(world.getUID());
+
+    if (bucket != null)
+      bucket.values().forEach(handler);
   }
 
   public void clear() {

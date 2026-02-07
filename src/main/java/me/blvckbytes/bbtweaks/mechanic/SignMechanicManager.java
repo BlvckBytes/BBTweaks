@@ -5,17 +5,17 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.clock.ClockMechanic;
 import me.blvckbytes.bbtweaks.mechanic.magnet.MagnetMechanic;
 import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderMechanic;
+import me.blvckbytes.bbtweaks.util.BooleanConsumer;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPhysicsEvent;
-import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
@@ -181,6 +181,23 @@ public class SignMechanicManager implements Listener {
       if (mechanic.onSignClick(event.getPlayer(), sign, wasLeftClick))
         event.setCancelled(true);
     });
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+  public void onLeverToggle(BlockRedstoneEvent event) {
+    var block = event.getBlock();
+
+    if (block.getType() != Material.LEVER)
+      return;
+
+    // Filter out noise, possibly stemming from physics-updates
+    if (event.getOldCurrent() == event.getNewCurrent())
+      return;
+
+    BooleanConsumer stateSetter = state -> event.setNewCurrent(state ? 15 : 0);
+
+    for (var mechanic : signMechanicByDiscriminatorLower.values())
+      mechanic.onLeverToggle(block, event.getNewCurrent() != 0, stateSetter);
   }
 
   private void correspondSign(Sign sign, Consumer<SignMechanic<?>> handler) {

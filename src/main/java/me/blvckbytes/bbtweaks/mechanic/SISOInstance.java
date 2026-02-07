@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.mechanic;
 
+import me.blvckbytes.bbtweaks.util.BooleanConsumer;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.*;
@@ -7,6 +8,8 @@ import org.bukkit.block.data.AnaloguePowerable;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Powerable;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.Objects;
 
 public abstract class SISOInstance implements MechanicInstance {
 
@@ -27,6 +30,7 @@ public abstract class SISOInstance implements MechanicInstance {
 
   public SISOInstance(Sign sign) {
     this.sign = sign;
+
     this.signFacing = ((Directional) sign.getBlockData()).getFacing();
     this.mountBlock = sign.getBlock().getRelative(signFacing.getOppositeFace());
     this.inputBlock = sign.getBlock().getRelative(signFacing);
@@ -84,6 +88,19 @@ public abstract class SISOInstance implements MechanicInstance {
     };
   }
 
+  public void onLeverToggle(Block leverBlock, boolean newState, BooleanConsumer stateSetter) {
+    if (cachedOutputBlock == null || newState == lastOutputState)
+      return;
+
+    if (!leverBlock.getWorld().getUID().equals(cachedOutputBlock.getWorld().getUID()))
+      return;
+
+    if (cachedOutputBlock.getX() != leverBlock.getX() || cachedOutputBlock.getY() != leverBlock.getY() || cachedOutputBlock.getZ() != leverBlock.getZ())
+      return;
+
+    stateSetter.accept(lastOutputState);
+  }
+
   protected void tryWriteOutputState(boolean state) {
     if (state == lastOutputState)
       return;
@@ -93,10 +110,10 @@ public abstract class SISOInstance implements MechanicInstance {
     if (cachedOutputBlock == null || cachedOutputBlockData == null)
       return;
 
+    lastOutputState = state;
+
     cachedOutputBlockData.setPowered(state);
     cachedOutputBlock.setBlockData(cachedOutputBlockData);
-
-    lastOutputState = state;
   }
 
   protected boolean getLastOutputState() {
@@ -130,5 +147,18 @@ public abstract class SISOInstance implements MechanicInstance {
         return;
       }
     }
+  }
+
+  @Override
+  public boolean equals(Object other) {
+    if (!(other instanceof SISOInstance otherInstance))
+      return false;
+
+    return Objects.equals(this.sign.getLocation(), otherInstance.sign.getLocation());
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hashCode(sign.getLocation());
   }
 }

@@ -1,5 +1,7 @@
 package me.blvckbytes.bbtweaks.mechanic;
 
+import me.blvckbytes.bbtweaks.util.BooleanConsumer;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +36,8 @@ public interface SignMechanic<InstanceType extends MechanicInstance> {
    * @return Whether to cancel the corresponding event
    */
   boolean onSignClick(Player player, Sign sign, boolean wasLeftClick);
+
+  default void onLeverToggle(Block lever, boolean newState, BooleanConsumer stateSetter) {}
 
   void onMechanicLoad();
 
