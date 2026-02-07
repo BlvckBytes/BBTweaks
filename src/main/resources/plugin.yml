@@ -44,3 +44,5 @@ permissions:
     description: 'Use the pulse-extender mechanic'
   bbtweaks.mechanic.magnet:
     description: 'Use the magnet mechanic'
+  bbtweaks.mechanic.transmitter-receiver:
+    description: 'Use the transmitter/receiver mechanic'

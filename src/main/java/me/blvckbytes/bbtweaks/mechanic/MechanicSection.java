@@ -8,6 +8,7 @@ import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import me.blvckbytes.bbtweaks.mechanic.clock.ClockSection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.config.MagnetSection;
 import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderSection;
+import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.TransmitterReceiverSection;
 
 @CSAlways
 public class MechanicSection extends ConfigSection {
@@ -15,6 +16,7 @@ public class MechanicSection extends ConfigSection {
   public ClockSection clock;
   public PulseExtenderSection pulseExtender;
   public MagnetSection magnet;
+  public TransmitterReceiverSection transmitterReceiver;
 
   public ComponentMarkup noWallSign;
 

@@ -310,6 +310,36 @@ mechanic:
         red: 255
         green: 170
         blue: 0
+  transmitterReceiver:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen Transmitter oder Receiver zu erstellen!'
+    signalNameAbsent: '{lut.mechanic_prefix} <&c>Der Signalname in der dritten Zeile des Schildes ist erforderlich!'
+    receiverCreationSuccess: |
+      {lut.mechanic_prefix} <&7>Der <&a>Receiver <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit dem Signalnamen <&a>{signal_name}<space/>
+      <container *if="namespace">
+        <&7>im Namensraum <&a>{namespace}<space/>
+      </container>
+      <&7>erstellt!
+    transmitterCreationSuccess: |
+      {lut.mechanic_prefix} <&7>Der <&a>Transmitter <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich mit dem Signalnamen <&a>{signal_name}<space/>
+      <container *if="namespace">
+        <&7>im Namensraum <&a>{namespace}<space/>
+      </container>
+      <&7>erstellt!
+    currentBandInformation: |
+      {lut.mechanic_prefix} <&7>Auf den Signalnamen <&a>{signal_name}<space/>
+      <container *if="namespace">
+        <&7>im Namensraum <&a>{namespace}<space/>
+      </container>
+      <&7>sind zurzeit <&a>{loaded_receiver_count} Receiver<space/>
+      <&7>und <&a>{loaded_transmitter_count} Transmitter <&7>registriert;<space/>
+      <&7>momentaner Zustand:<space/>
+      <container *if="current_state">
+        <&a>Eingeschalten
+      </container>
+      <container *else>
+        <&c>Ausgeschalten
+      </container>
+      <&7>.
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
