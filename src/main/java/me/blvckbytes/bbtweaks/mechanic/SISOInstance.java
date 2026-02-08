@@ -27,6 +27,7 @@ public abstract class SISOInstance implements MechanicInstance {
   private @Nullable Powerable cachedOutputBlockData;
 
   private boolean lastOutputState;
+  private boolean isInitialWrite = true;
 
   public SISOInstance(Sign sign) {
     this.sign = sign;
@@ -102,7 +103,7 @@ public abstract class SISOInstance implements MechanicInstance {
   }
 
   protected void tryWriteOutputState(boolean state) {
-    if (state == lastOutputState)
+    if (state == lastOutputState && !isInitialWrite)
       return;
 
     updateOutputBlock();
@@ -111,6 +112,7 @@ public abstract class SISOInstance implements MechanicInstance {
       return;
 
     lastOutputState = state;
+    isInitialWrite = false;
 
     cachedOutputBlockData.setPowered(state);
     cachedOutputBlock.setBlockData(cachedOutputBlockData);

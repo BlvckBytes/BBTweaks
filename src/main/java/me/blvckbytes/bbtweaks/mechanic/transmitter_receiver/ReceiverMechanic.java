@@ -68,7 +68,6 @@ public class ReceiverMechanic extends BaseMechanic<ReceiverInstance> {
       .setState(state);
   }
 
-
   public int getLoadedCountForFinalName(String finalName) {
     var bucket = bucketByFinalName.get(finalName);
     return bucket == null ? 0 : bucket.size();
