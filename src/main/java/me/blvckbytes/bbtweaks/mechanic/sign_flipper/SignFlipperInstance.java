@@ -56,7 +56,10 @@ public class SignFlipperInstance extends SISOInstance {
     if (!(adjacentSignBlock.getState() instanceof Sign adjacentSign))
       return false;
 
-    swapSides(adjacentSign, inputPower != 0);
+    // Do not swap when we load for the very first time: there's no prior state stored
+    // in the PDC yet, and we've just read the very first value from input successfully.
+    if (lastState != TriState.NULL)
+      swapSides(adjacentSign, inputPower != 0);
 
     lastState = currentState;
     return true;
