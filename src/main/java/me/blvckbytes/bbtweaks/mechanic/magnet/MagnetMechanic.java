@@ -9,13 +9,12 @@ import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.EditDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicRegistry;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.predicate.stringify.PlainStringifier;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.*;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
@@ -28,7 +27,6 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,10 +37,6 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
   // TODO: Hide visualization of A if editing A
   // TODO: Select param in the UI with any button
   // TODO: Stop visualization on destroy
-
-  private static final BlockFace[] SIGN_FACES = new BlockFace[] {
-    BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
-  };
 
   private final CuboidMechanicRegistry<MagnetInstance> instanceCuboidRegistry;
   private final Map<UUID, VisualizationsBucket> visualizationsByPlayerId;
@@ -330,11 +324,13 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
       return null;
     }
 
-    if (!config.rootSection.mechanic.magnet.allowMultipleSignsPerContainer && hasRegisteredSigns(container)) {
-      if (creator != null)
-        config.rootSection.mechanic.magnet.existingSign.sendMessage(creator, environment);
+    if (!config.rootSection.mechanic.magnet.allowMultipleSignsPerContainer) {
+      if (SignUtil.checkIfAnyContainerSignMatches(container, this::isSignRegistered)) {
+        if (creator != null)
+          config.rootSection.mechanic.magnet.existingSign.sendMessage(creator, environment);
 
-      return null;
+        return null;
+      }
     }
 
     var parameters = new MagnetParameters(sign, config);
@@ -518,34 +514,5 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     var playerId = event.getPlayer().getUniqueId();
     visualizationsByPlayerId.remove(playerId);
     editSessionByPlayerId.remove(playerId);
-  }
-
-  private boolean hasRegisteredSigns(Container container) {
-    var containerBlocks = new ArrayList<Block>(2);
-
-    if (container.getInventory() instanceof DoubleChestInventory doubleInventory) {
-      if (doubleInventory.getRightSide().getHolder() instanceof Container rightContainer)
-        containerBlocks.add(rightContainer.getBlock());
-
-      if (doubleInventory.getLeftSide().getHolder() instanceof Container leftContainer)
-        containerBlocks.add(leftContainer.getBlock());
-    }
-
-    else
-      containerBlocks.add(container.getBlock());
-
-    for (var containerBlock : containerBlocks) {
-      for (var signFace : SIGN_FACES) {
-        var possibleSignBlock = containerBlock.getRelative(signFace);
-
-        if (!(Tag.WALL_SIGNS.isTagged(possibleSignBlock.getType())))
-          continue;
-
-        if (isSignRegistered((Sign) possibleSignBlock.getState()))
-          return true;
-      }
-    }
-
-    return false;
   }
 }

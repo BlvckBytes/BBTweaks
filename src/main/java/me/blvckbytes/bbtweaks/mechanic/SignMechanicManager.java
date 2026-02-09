@@ -158,6 +158,11 @@ public class SignMechanicManager implements Listener {
         continue;
 
       correspondSign(sign, mechanic -> {
+        if (!Tag.WALL_SIGNS.isTagged(sign.getType())) {
+          sign.getBlock().breakNaturally();
+          return;
+        }
+
         if (mechanic.onSignLoad(sign) == null)
           sign.getBlock().breakNaturally();
       });
