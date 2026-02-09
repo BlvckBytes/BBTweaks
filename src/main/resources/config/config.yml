@@ -340,6 +340,12 @@ mechanic:
         <&c>Ausgeschalten
       </container>
       <&7>.
+  autoDispose:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um ein AutoDispose zu erstellen!'
+    noContainer: '{lut.mechanic_prefix} <&c>Ein AutoDispose kann nur an einem Behälterblock angebracht werden!'
+    existingSign: '{lut.mechanic_prefix} <&c>Am Behälter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein AutoDispose!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Das <&a>AutoDispose <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
+    clearIntervalTicks: 5
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'

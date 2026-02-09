@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.mechanic;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.clock.ClockMechanic;
+import me.blvckbytes.bbtweaks.mechanic.auto_dispose.AutoDisposeMechanic;
 import me.blvckbytes.bbtweaks.mechanic.magnet.MagnetMechanic;
 import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderMechanic;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.ReceiverMechanic;
@@ -57,6 +58,8 @@ public class SignMechanicManager implements Listener {
 
     registerMechanic(transmitterMechanic);
     registerMechanic(receiverMechanic);
+
+    registerMechanic(new AutoDisposeMechanic(plugin, config));
 
     tickerTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 0, 1);
 

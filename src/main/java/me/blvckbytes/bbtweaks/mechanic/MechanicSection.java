@@ -6,6 +6,7 @@ import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import me.blvckbytes.bbtweaks.mechanic.clock.ClockSection;
+import me.blvckbytes.bbtweaks.mechanic.auto_dispose.AutoDisposeSection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.config.MagnetSection;
 import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderSection;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.TransmitterReceiverSection;
@@ -17,6 +18,7 @@ public class MechanicSection extends ConfigSection {
   public PulseExtenderSection pulseExtender;
   public MagnetSection magnet;
   public TransmitterReceiverSection transmitterReceiver;
+  public AutoDisposeSection autoDispose;
 
   public ComponentMarkup noWallSign;
 
