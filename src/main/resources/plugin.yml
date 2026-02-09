@@ -48,3 +48,5 @@ permissions:
     description: 'Use the transmitter/receiver mechanic'
   bbtweaks.mechanic.auto-dispose:
     description: 'Use the auto-dispose mechanic'
+  bbtweaks.mechanic.sign-flipper:
+    description: 'Use the sign-flipper mechanic'
