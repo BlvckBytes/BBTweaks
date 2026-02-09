@@ -139,7 +139,7 @@ mechanic:
     existingSign: '{lut.mechanic_prefix} <&c>Am Behälter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein Magnet!'
     visualizationInitialized: |
       {lut.mechanic_prefix} <&7>Die Region des Magnetes bei <&a>{x} {y} {z}
-      <container *if="env('predicate')">
+      <container *if="has(predicate)">
         <&7>, mit dem Prädikat<space/>
         <suggest-command value=`{filter_command}`>
           <&a><u>{predicate}
