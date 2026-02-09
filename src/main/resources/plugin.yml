@@ -46,3 +46,5 @@ permissions:
     description: 'Use the magnet mechanic'
   bbtweaks.mechanic.transmitter-receiver:
     description: 'Use the transmitter/receiver mechanic'
+  bbtweaks.mechanic.auto-dispose:
+    description: 'Use the auto-dispose mechanic'
