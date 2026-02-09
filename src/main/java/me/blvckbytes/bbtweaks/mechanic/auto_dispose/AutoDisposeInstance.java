@@ -1,5 +1,7 @@
 package me.blvckbytes.bbtweaks.mechanic.auto_dispose;
 
+import at.blvckbytes.cm_mapper.ConfigKeeper;
+import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.MechanicInstance;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
@@ -9,12 +11,12 @@ public class AutoDisposeInstance implements MechanicInstance {
 
   private final Sign sign;
   private final Block mountBlock;
-  private final int clearIntervalTicks;
+  private final ConfigKeeper<MainSection> config;
 
-  public AutoDisposeInstance(Sign sign, Block mountBlock, int clearIntervalTicks) {
+  public AutoDisposeInstance(Sign sign, Block mountBlock, ConfigKeeper<MainSection> config) {
     this.sign = sign;
     this.mountBlock = mountBlock;
-    this.clearIntervalTicks = clearIntervalTicks;
+    this.config = config;
   }
 
   @Override
@@ -24,7 +26,7 @@ public class AutoDisposeInstance implements MechanicInstance {
 
   @Override
   public boolean tick(int time) {
-    if (time % clearIntervalTicks != 0)
+    if (time % config.rootSection.mechanic.autoDispose.clearIntervalTicks != 0)
       return true;
 
     if (!(mountBlock.getState() instanceof Container container))

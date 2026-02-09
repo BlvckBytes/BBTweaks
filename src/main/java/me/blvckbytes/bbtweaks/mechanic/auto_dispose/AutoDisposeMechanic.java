@@ -64,7 +64,7 @@ public class AutoDisposeMechanic extends BaseMechanic<AutoDisposeInstance> imple
       return null;
     }
 
-    var instance = new AutoDisposeInstance(sign, mountBlock, config.rootSection.mechanic.autoDispose.clearIntervalTicks);
+    var instance = new AutoDisposeInstance(sign, mountBlock, config);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
