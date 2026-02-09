@@ -346,6 +346,12 @@ mechanic:
     existingSign: '{lut.mechanic_prefix} <&c>Am Behälter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein AutoDispose!'
     creationSuccess: '{lut.mechanic_prefix} <&7>Das <&a>AutoDispose <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
     clearIntervalTicks: 10
+  signFlipper:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen SignFlipper zu erstellen!'
+    noAdjacentSign: '{lut.mechanic_prefix} <&c>Auf der gegenüberliegenden Seite des Blockes befindet sich kein Schild!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>SignFlipper <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
+    currentState: |
+      {lut.mechanic_prefix} <&7>Aktueller Zustand: {lut.tri_state[state]}<&7>.
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
@@ -426,3 +432,7 @@ cLut:
       <container *if="floor(seconds) neq seconds">≈</container>
       <duration [value]="ceil(seconds) * 1000" units="hms" />
     </container>
+  tri_state:
+    'TRUE': '<&a>An'
+    'FALSE': '<&c>Aus'
+    'NULL': '<&7>Unbekannt'
