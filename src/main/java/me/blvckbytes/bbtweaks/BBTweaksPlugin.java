@@ -11,6 +11,7 @@ import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
+import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.main_command.MainCommand;
 import me.blvckbytes.bbtweaks.mechanic.SignMechanicManager;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
@@ -129,6 +130,12 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       getServer().getPluginManager().registerEvents(seedOverride, this);
 
       new CustomCommandsManager(this, config);
+
+      var invFilterCommandExecutor = new InvFilterCommand(this, config);
+
+      getServer().getPluginManager().registerEvents(invFilterCommandExecutor, this);
+
+      Objects.requireNonNull(getCommand("invfilter")).setExecutor(invFilterCommandExecutor);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);

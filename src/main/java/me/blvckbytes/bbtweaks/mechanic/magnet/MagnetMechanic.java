@@ -57,9 +57,9 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
     this.visualizationsByPlayerId = new HashMap<>();
     this.editSessionByPlayerId = new HashMap<>();
 
-    var ipp = ItemPredicateParserPlugin.getInstance();
+    ItemPredicateParserPlugin ipp;
 
-    if (!Bukkit.getServer().getPluginManager().isPluginEnabled("ItemPredicateParser") || ipp == null)
+    if (!Bukkit.getServer().getPluginManager().isPluginEnabled("ItemPredicateParser") || (ipp = ItemPredicateParserPlugin.getInstance()) == null)
       throw new IllegalArgumentException("Expected plugin ItemPredicateParser to have been loaded at this point");
 
     this.predicateHelper = ipp.getPredicateHelper();
