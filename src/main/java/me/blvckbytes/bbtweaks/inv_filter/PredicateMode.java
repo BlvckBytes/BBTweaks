@@ -4,8 +4,8 @@ import me.blvckbytes.syllables_matcher.EnumMatcher;
 import me.blvckbytes.syllables_matcher.MatchableEnum;
 
 public enum PredicateMode implements MatchableEnum {
-  ALLOW,
-  DENY,
+  ALLOW_MATCHES,
+  DENY_MATCHES,
   OFF,
   ;
 

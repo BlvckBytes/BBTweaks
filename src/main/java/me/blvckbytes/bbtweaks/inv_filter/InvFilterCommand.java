@@ -20,7 +20,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
@@ -63,14 +62,12 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
   @Override
   public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
     if (!(sender instanceof Player player)) {
-      // TODO: Config-message
-      sender.sendMessage("§cPlayers only!");
+      config.rootSection.invFilter.playersOnly.sendMessage(sender);
       return true;
     }
 
-    if (!player.hasPermission("bbtweaks.mechanic.invfilter")) {
-      // TODO: Config-message
-      player.sendMessage("§cNo permission!");
+    if (!player.hasPermission("bbtweaks.invfilter")) {
+      config.rootSection.invFilter.noPermission.sendMessage(player);
       return true;
     }
 
@@ -88,39 +85,54 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
         var predicateLanguage = currentFilter.predicateAndLanguage().language();
 
         if (predicateLanguage == selectedLanguage)
-          setFilterCommand = label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET) + " " + filterString;
+          setFilterCommand = "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER) + " " + filterString;
         else
-          setFilterCommand = label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_LANGUAGE) + " " + TranslationLanguage.matcher.getNormalizedName(predicateLanguage) + " " + filterString;
+          setFilterCommand = "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER_WITH_LANGUAGE) + " " + TranslationLanguage.matcher.getNormalizedName(predicateLanguage) + " " + filterString;
       }
 
       var currentMode = currentFilter == null ? PredicateMode.OFF : currentFilter.mode();
       var modeName = PredicateMode.matcher.getNormalizedName(currentMode);
 
-      // TODO: Config-message
-      player.sendMessage("§aCurrent Filter: " + filterString);
-      player.sendMessage("§aSet Filter Command: " + setFilterCommand);
-      player.sendMessage("§aCurrent Mode: " + modeName);
+      config.rootSection.invFilter.currentState.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("current_filter", filterString)
+          .withVariable("set_filter_command", setFilterCommand)
+          .withVariable("current_mode", modeName)
+      );
+
       return true;
     }
 
     var action = CommandAction.matcher.matchFirst(args[0]);
 
     if (action == null) {
-      // TODO: Config-message
-      player.sendMessage("§cUsage: /" + label + " <" + CommandAction.matcher.createCompletions(null) + ">");
+      config.rootSection.invFilter.usageAction.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("label", label)
+          .withVariable("actions", CommandAction.matcher.createCompletions(null))
+      );
+
       return true;
     }
 
-    if (action.constant == CommandAction.SET || action.constant == CommandAction.SET_LANGUAGE) {
+    if (action.constant == CommandAction.SET_FILTER || action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE) {
       int argsOffset;
       TranslationLanguage language;
 
-      if (action.constant == CommandAction.SET_LANGUAGE) {
+      if (action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE) {
         me.blvckbytes.item_predicate_parser.syllables_matcher.NormalizedConstant<TranslationLanguage> matchedLanguage;
 
         if (args.length == 1 || (matchedLanguage = TranslationLanguage.matcher.matchFirst(args[1])) == null) {
-          // TODO: Config-message
-          player.sendMessage("§cUsage: /" + label + " " + action.getNormalizedName() + " <" + TranslationLanguage.matcher.createCompletions(null) + "> <Filter>");
+          config.rootSection.invFilter.usageLanguage.sendMessage(
+            player,
+            new InterpretationEnvironment()
+              .withVariable("label", label)
+              .withVariable("action", action.getNormalizedName())
+              .withVariable("languages", TranslationLanguage.matcher.createCompletions(null))
+          );
+
           return true;
         }
 
@@ -128,8 +140,14 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
         argsOffset = 2;
 
         if (args.length == argsOffset) {
-          // TODO: Config-message
-          player.sendMessage("§cUsage: /" + label + " " + action.getNormalizedName() + " " + TranslationLanguage.matcher.getNormalizedName(language) + " <Filter>");
+          config.rootSection.invFilter.usageFilterCustomLanguage.sendMessage(
+            player,
+            new InterpretationEnvironment()
+              .withVariable("label", label)
+              .withVariable("action", action.getNormalizedName())
+              .withVariable("language", TranslationLanguage.matcher.getNormalizedName(language))
+          );
+
           return true;
         }
       }
@@ -139,8 +157,13 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
         argsOffset = 1;
 
         if (args.length == argsOffset) {
-          // TODO: Config-message
-          player.sendMessage("§cUsage: /" + label + " " + action.getNormalizedName() + " <Filter>");
+          config.rootSection.invFilter.usageFilterDefaultLanguage.sendMessage(
+            player,
+            new InterpretationEnvironment()
+              .withVariable("label", label)
+              .withVariable("action", action.getNormalizedName())
+          );
+
           return true;
         }
       }
@@ -151,8 +174,7 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
         var tokens = predicateHelper.parseTokens(args, argsOffset);
         predicate = predicateHelper.parsePredicate(language, tokens);
       } catch (ItemPredicateParseException e) {
-        // TODO: Separate message specific to inv-filter
-        config.rootSection.mechanic.magnet.filterCommandPredicateError.sendMessage(
+        config.rootSection.invFilter.predicateError.sendMessage(
           player,
           new InterpretationEnvironment()
             .withVariable("error", predicateHelper.createExceptionMessage(e))
@@ -175,16 +197,27 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
       pdc.set(filterPredicateKey, PersistentDataType.STRING, predicateString);
       pdc.set(filterLanguageKey, PersistentDataType.STRING, language.name());
 
-      // TODO: Config-message
-      player.sendMessage("§aFilter set to §2" + predicateString + "§a!");
+      config.rootSection.invFilter.filterChanged.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("filter", predicateString)
+      );
+
       return true;
     }
 
-    if (action.constant == CommandAction.MODE) {
+    if (action.constant == CommandAction.SET_MODE) {
       NormalizedConstant<PredicateMode> mode;
 
       if (args.length == 1 || (mode = PredicateMode.matcher.matchFirst(args[1])) == null) {
-        player.sendMessage("§cUsage: /" + label + " " + action.getNormalizedName() + " <" + PredicateMode.matcher.createCompletions(null) + ">");
+        config.rootSection.invFilter.usageMode.sendMessage(
+          player,
+          new InterpretationEnvironment()
+            .withVariable("label", label)
+            .withVariable("action", action.getNormalizedName())
+            .withVariable("modes", PredicateMode.matcher.createCompletions(null))
+        );
+
         return true;
       }
 
@@ -199,8 +232,12 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
 
       pdc.set(filterModeKey, PersistentDataType.STRING, mode.constant.name());
 
-      // TODO: Config-message
-      player.sendMessage("§aMode set to §2" + mode.getNormalizedName() + "§a!");
+      config.rootSection.invFilter.modeChanged.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("mode", mode.getNormalizedName())
+      );
+
       return true;
     }
 
@@ -212,7 +249,7 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
     if (!(sender instanceof Player player))
       return List.of();
 
-    if (!player.hasPermission("bbtweaks.mechanic.invfilter"))
+    if (!player.hasPermission("bbtweaks.invfilter"))
       return List.of();
 
     if (args.length == 1)
@@ -223,11 +260,11 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
     if (action == null)
       return List.of();
 
-    if (action.constant == CommandAction.SET || action.constant == CommandAction.SET_LANGUAGE) {
+    if (action.constant == CommandAction.SET_FILTER || action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE) {
       TranslationLanguage language;
       int argsOffset;
 
-      if (action.constant == CommandAction.SET_LANGUAGE) {
+      if (action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE) {
         if (args.length == 2)
           return TranslationLanguage.matcher.createCompletions(args[1]);
 
@@ -259,7 +296,7 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
       }
     }
 
-    if (action.constant == CommandAction.MODE) {
+    if (action.constant == CommandAction.SET_MODE) {
       if (args.length == 2)
         return PredicateMode.matcher.createCompletions(args[1]);
 
@@ -271,13 +308,13 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
 
   @EventHandler(ignoreCancelled = true)
   public void onPickup(PlayerAttemptPickupItemEvent event) {
-    var filter = filterByPlayerId.get(event.getPlayer().getUniqueId());
+    var filter = getOrLoadFilter(event.getPlayer());
 
-    if (filter == null || filter.predicateAndLanguage() == null || filter.mode() == PredicateMode.OFF)
+    if (filter.predicateAndLanguage() == null || filter.mode() == PredicateMode.OFF)
       return;
 
     var testResult = filter.predicateAndLanguage().predicate().test(event.getItem().getItemStack());
-    var doAllow = filter.mode() == PredicateMode.ALLOW;
+    var doAllow = filter.mode() == PredicateMode.ALLOW_MATCHES;
 
     if (doAllow && !testResult || !doAllow && testResult)
       event.setCancelled(true);
@@ -288,9 +325,14 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
     filterByPlayerId.remove(event.getPlayer().getUniqueId());
   }
 
-  @EventHandler
-  public void onJoin(PlayerJoinEvent event) {
-    var player = event.getPlayer();
+  private InventoryFilter getOrLoadFilter(Player player) {
+    var playerId = player.getUniqueId();
+
+    var filter = filterByPlayerId.get(playerId);
+
+    if (filter != null)
+      return filter;
+
     var pdc = player.getPersistentDataContainer();
 
     var predicateAndLanguage = loadPredicateFromPlayerPdc(player);
@@ -304,8 +346,11 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
       } catch (Throwable ignored) {}
     }
 
-    if (predicateAndLanguage != null || filterMode != PredicateMode.OFF)
-      filterByPlayerId.put(player.getUniqueId(), new InventoryFilter(predicateAndLanguage, filterMode));
+    filter = new InventoryFilter(predicateAndLanguage, filterMode);
+
+    filterByPlayerId.put(playerId, filter);
+
+    return filter;
   }
 
   private @Nullable PredicateAndLanguage loadPredicateFromPlayerPdc(Player player) {

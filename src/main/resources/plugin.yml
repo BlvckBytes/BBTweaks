@@ -33,7 +33,7 @@ commands:
     description: 'Displays the seed of the current world'
   invfilter:
     description: 'Configure and toggle inventory-filters regarding picked-up items'
-    permission: bbtweaks.mechanic.invfilter
+    permission: bbtweaks.invfilter
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

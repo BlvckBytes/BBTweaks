@@ -1,12 +1,12 @@
 package me.blvckbytes.bbtweaks.inv_filter;
 
-import me.blvckbytes.item_predicate_parser.syllables_matcher.EnumMatcher;
-import me.blvckbytes.item_predicate_parser.syllables_matcher.MatchableEnum;
+import me.blvckbytes.syllables_matcher.EnumMatcher;
+import me.blvckbytes.syllables_matcher.MatchableEnum;
 
 public enum CommandAction implements MatchableEnum {
-  SET,
-  SET_LANGUAGE,
-  MODE,
+  SET_FILTER,
+  SET_FILTER_WITH_LANGUAGE,
+  SET_MODE,
   ;
 
   static final EnumMatcher<CommandAction> matcher = new EnumMatcher<>(values());

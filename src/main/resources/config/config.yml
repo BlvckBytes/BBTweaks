@@ -293,7 +293,7 @@ mechanic:
     defaultOffsetY: 0
     defaultOffsetZ: -2
     visualization:
-      durationMs: 5000
+      durationMs: 10000
       periodTicks: 5
       stepSize: .1
       dustSize: 1
@@ -366,6 +366,38 @@ seedOverride:
 customCommands:
   commands:
 
+invFilter:
+  playersOnly: '{lut.inv_filter_prefix} <&c>Dieser Befehl ist nur für Spieler zugänglich!'
+  noPermission: '{lut.inv_filter_prefix} <&c>Du hast nicht die nötigen Zugriffsrechte, um diesen Befehl zu nutzen!'
+  usageAction: |
+    {lut.inv_filter_prefix} <&c>Benutzung: /{label} \<
+    <&4 *for-action="actions" *for-separator={<&c>,<space/>}>{action}</>
+    >
+  usageLanguage: |
+    {lut.inv_filter_prefix} <&c>Benutzung: /{label} {action} \<
+    <&4 *for-language="languages" *for-separator={<&c>,<space/>}>{language}</>
+    > \<Filter>
+  usageFilterDefaultLanguage: '{lut.inv_filter_prefix} <&c>Benutzung: /{label} {action} \<<&4>Filter<&c>>'
+  usageFilterCustomLanguage: '{lut.inv_filter_prefix} <&c>Benutzung: /{label} {action} {language} \<<&4>Filter<&c>>'
+  predicateError: '{lut.inv_filter_prefix} <&c>Ungültiger Filter: <&4>{error}<&c>.'
+  filterChanged: '{lut.inv_filter_prefix} <&7>Der Filter wurde auf <&a>{filter} <&7>gesetzt.'
+  usageMode: |
+    {lut.inv_filter_prefix} <&c>Benutzung: /{label} {action} \<
+    <&4 *for-mode="modes" *for-separator={<&c>,<space/>}>{mode}</>
+    >
+  modeChanged: '{lut.inv_filter_prefix} <&7>Der Modus wurde auf <&a>{mode} <&7>gesetzt.'
+  currentState: |
+    {lut.inv_filter_prefix} <&7>Modus: <&a>{current_mode}<&7>, Filter:<space/>
+    <container *if="current_filter">
+      <hover-text value={<&a>Klicke, um einen Befehl zum editieren vorzuschlagen.}>
+        <suggest-command value=`{set_filter_command}`>
+          <&a><u>{current_filter}
+    </container>
+    <container *else>
+      <&c>Kein Filter gesetzt
+    </container>
+    <&7>.
+
 cLut:
   main_prefix: '<&7>[<&5>BBTweaks<&7>]'
   ping_prefix: '<&7>[<&6>Ping<&7>]'
@@ -373,6 +405,7 @@ cLut:
   back_prefix: '<&7>[<&6>Back<&7>]'
   mechanic_prefix: '<&7>[<&6>Mechanic<&7>]'
   seed_prefix: '<&7>[<&6>Seed<&7>]'
+  inv_filter_prefix: '<&7>[<&6>InvFilter<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}
