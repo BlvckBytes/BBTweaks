@@ -380,14 +380,22 @@ invFilter:
   usageFilterDefaultLanguage: '{lut.inv_filter_prefix} <&c>Benutzung: /{label} {action} \<<&4>Filter<&c>>'
   usageFilterCustomLanguage: '{lut.inv_filter_prefix} <&c>Benutzung: /{label} {action} {language} \<<&4>Filter<&c>>'
   predicateError: '{lut.inv_filter_prefix} <&c>Ungültiger Filter: <&4>{error}<&c>.'
-  filterChanged: '{lut.inv_filter_prefix} <&7>Der Filter wurde auf <&a>{filter} <&7>gesetzt.'
-  usageMode: |
-    {lut.inv_filter_prefix} <&c>Benutzung: /{label} {action} \<
-    <&4 *for-mode="modes" *for-separator={<&c>,<space/>}>{mode}</>
-    >
-  modeChanged: '{lut.inv_filter_prefix} <&7>Der Modus wurde auf <&a>{mode} <&7>gesetzt.'
+  changeEnableNoFilterSet: '{lut.inv_filter_prefix} <&c>Bitte setze zuerst einen Filter, bevor du dessen Zustand umschaltest!'
+  changeEnableEnabledAlready: '{lut.inv_filter_prefix} <&c>Der aktuelle Filter ist bereits eingeschalten!'
+  changeEnableDisabledAlready: '{lut.inv_filter_prefix} <&c>Der aktuelle Filter ist bereits ausgeschalten!'
+  filterSetAndEnabled: '{lut.inv_filter_prefix} <&7>Der Filter wurde auf <&a>{filter} <&7>gesetzt und <&a>aktiviert<&7>.'
+  filterEnabled: '{lut.inv_filter_prefix} <&7>Der Filter <&a>{filter} <&7>wurde <&a>aktiviert<&7>.'
+  filterDisabled: '{lut.inv_filter_prefix} <&7>Der Filter <&a>{filter} <&7>wurde <&c>deaktiviert<&7>.'
+  activeFilterWarning: '{lut.inv_filter_prefix} <&e>ACHTUNG! <&7>Der Filter <&e>{filter} <&7>ist aktiv; benutze <&e>{disable_command}<&7>, um diesen zu deaktivieren.'
   currentState: |
-    {lut.inv_filter_prefix} <&7>Modus: <&a>{current_mode}<&7>, Filter:<space/>
+    {lut.inv_filter_prefix} <&7>Modus:<space/>
+    <container *if="is_enabled">
+      <&a>aktiviert
+    </container>
+    <container *else>
+      <&c>deaktiviert
+    </container>
+    <&7>, Filter:<space/>
     <container *if="current_filter">
       <hover-text value={<&a>Klicke, um einen Befehl zum editieren vorzuschlagen.}>
         <suggest-command value=`{set_filter_command}`>

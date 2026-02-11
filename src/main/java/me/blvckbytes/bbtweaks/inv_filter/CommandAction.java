@@ -6,7 +6,8 @@ import me.blvckbytes.syllables_matcher.MatchableEnum;
 public enum CommandAction implements MatchableEnum {
   SET_FILTER,
   SET_FILTER_WITH_LANGUAGE,
-  SET_MODE,
+  ENABLE,
+  DISABLE,
   ;
 
   static final EnumMatcher<CommandAction> matcher = new EnumMatcher<>(values());

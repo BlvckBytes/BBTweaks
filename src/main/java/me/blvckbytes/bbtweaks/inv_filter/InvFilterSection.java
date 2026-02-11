@@ -17,10 +17,14 @@ public class InvFilterSection extends ConfigSection {
   public ComponentMarkup usageFilterDefaultLanguage;
   public ComponentMarkup usageFilterCustomLanguage;
   public ComponentMarkup predicateError;
-  public ComponentMarkup filterChanged;
-  public ComponentMarkup usageMode;
+  public ComponentMarkup changeEnableNoFilterSet;
+  public ComponentMarkup changeEnableEnabledAlready;
+  public ComponentMarkup changeEnableDisabledAlready;
+  public ComponentMarkup filterSetAndEnabled;
+  public ComponentMarkup filterEnabled;
+  public ComponentMarkup filterDisabled;
+  public ComponentMarkup activeFilterWarning;
   public ComponentMarkup currentState;
-  public ComponentMarkup modeChanged;
 
   public InvFilterSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

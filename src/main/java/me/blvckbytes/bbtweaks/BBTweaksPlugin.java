@@ -141,11 +141,12 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       new CustomCommandsManager(commandUpdater, this, config);
 
-      var invFilterCommandExecutor = new InvFilterCommand(this, config);
+      var invFilterCommand = Objects.requireNonNull(getCommand("invfilter"));
+      var invFilterCommandExecutor = new InvFilterCommand(invFilterCommand, this, config);
 
       getServer().getPluginManager().registerEvents(invFilterCommandExecutor, this);
 
-      Objects.requireNonNull(getCommand("invfilter")).setExecutor(invFilterCommandExecutor);
+      invFilterCommand.setExecutor(invFilterCommandExecutor);
 
       markerDisplayHandler = new MarkerDisplayHandler(config, FloodgateIntegration.load(getLogger()), this);
       getServer().getPluginManager().registerEvents(markerDisplayHandler, this);

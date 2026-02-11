@@ -7,9 +7,7 @@ import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
-import me.blvckbytes.item_predicate_parser.predicate.stringify.PlainStringifier;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
-import me.blvckbytes.syllables_matcher.NormalizedConstant;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.Command;
@@ -20,29 +18,35 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener {
 
+  private final Command command;
+  private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
   private final PredicateHelper predicateHelper;
 
   private final NamespacedKey filterPredicateKey;
   private final NamespacedKey filterLanguageKey;
-  private final NamespacedKey filterModeKey;
+  private final NamespacedKey filterEnabledKey;
 
   private final Map<UUID, InventoryFilter> filterByPlayerId;
 
-  public InvFilterCommand(Plugin plugin, ConfigKeeper<MainSection> config) {
+  public InvFilterCommand(
+    Command command,
+    Plugin plugin,
+    ConfigKeeper<MainSection> config
+  ) {
+    this.command = command;
+    this.plugin = plugin;
     this.config = config;
 
     ItemPredicateParserPlugin ipp;
@@ -54,7 +58,7 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
 
     this.filterPredicateKey = new NamespacedKey(plugin, "invfilter-predicate");
     this.filterLanguageKey = new NamespacedKey(plugin, "invfilter-language");
-    this.filterModeKey = new NamespacedKey(plugin, "invfilter-mode");
+    this.filterEnabledKey = new NamespacedKey(plugin, "invfilter-enabled");
 
     this.filterByPlayerId = new HashMap<>();
   }
@@ -75,30 +79,24 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
 
     if (args.length == 0) {
       var currentFilter = filterByPlayerId.get(player.getUniqueId());
-      String filterString = null;
       String setFilterCommand = null;
 
-      if (currentFilter != null && currentFilter.predicateAndLanguage() != null) {
-        filterString = PlainStringifier.stringify(currentFilter.predicateAndLanguage().predicate(), true);
-
+      if (currentFilter != null && currentFilter.predicateAndLanguage != null) {
         var selectedLanguage = predicateHelper.getSelectedLanguage(player);
-        var predicateLanguage = currentFilter.predicateAndLanguage().language();
+        var predicateLanguage = currentFilter.predicateAndLanguage.language();
 
         if (predicateLanguage == selectedLanguage)
-          setFilterCommand = "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER) + " " + filterString;
+          setFilterCommand = "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER) + " " + currentFilter.predicateString;
         else
-          setFilterCommand = "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER_WITH_LANGUAGE) + " " + TranslationLanguage.matcher.getNormalizedName(predicateLanguage) + " " + filterString;
+          setFilterCommand = "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER_WITH_LANGUAGE) + " " + TranslationLanguage.matcher.getNormalizedName(predicateLanguage) + " " + currentFilter.predicateString;
       }
-
-      var currentMode = currentFilter == null ? PredicateMode.OFF : currentFilter.mode();
-      var modeName = PredicateMode.matcher.getNormalizedName(currentMode);
 
       config.rootSection.invFilter.currentState.sendMessage(
         player,
         new InterpretationEnvironment()
-          .withVariable("current_filter", filterString)
+          .withVariable("is_enabled", currentFilter != null && currentFilter.enabled)
+          .withVariable("current_filter", currentFilter == null ? null : currentFilter.predicateString)
           .withVariable("set_filter_command", setFilterCommand)
-          .withVariable("current_mode", modeName)
       );
 
       return true;
@@ -183,59 +181,73 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
         return true;
       }
 
-      var currentFilter = filterByPlayerId.get(player.getUniqueId());
-
-      var newFilter = new InventoryFilter(
-        new PredicateAndLanguage(predicate, language),
-        currentFilter == null ? PredicateMode.OFF : currentFilter.mode()
-      );
+      var newFilter = new InventoryFilter(new PredicateAndLanguage(predicate, language), true);
 
       filterByPlayerId.put(player.getUniqueId(), newFilter);
 
-      var predicateString = PlainStringifier.stringify(predicate, true);
-
-      pdc.set(filterPredicateKey, PersistentDataType.STRING, predicateString);
+      pdc.set(filterPredicateKey, PersistentDataType.STRING, Objects.requireNonNull(newFilter.predicateString));
       pdc.set(filterLanguageKey, PersistentDataType.STRING, language.name());
 
-      config.rootSection.invFilter.filterChanged.sendMessage(
+      config.rootSection.invFilter.filterSetAndEnabled.sendMessage(
         player,
         new InterpretationEnvironment()
-          .withVariable("filter", predicateString)
+          .withVariable("filter", newFilter.predicateString)
       );
 
       return true;
     }
 
-    if (action.constant == CommandAction.SET_MODE) {
-      NormalizedConstant<PredicateMode> mode;
+    if (action.constant == CommandAction.ENABLE) {
+      var currentFilter = filterByPlayerId.get(player.getUniqueId());
 
-      if (args.length == 1 || (mode = PredicateMode.matcher.matchFirst(args[1])) == null) {
-        config.rootSection.invFilter.usageMode.sendMessage(
-          player,
-          new InterpretationEnvironment()
-            .withVariable("label", label)
-            .withVariable("action", action.getNormalizedName())
-            .withVariable("modes", PredicateMode.matcher.createCompletions(null))
-        );
-
+      if (currentFilter == null || currentFilter.predicateString == null) {
+        config.rootSection.invFilter.changeEnableNoFilterSet.sendMessage(player);
         return true;
       }
 
-      var currentFilter = filterByPlayerId.get(player.getUniqueId());
+      if (currentFilter.enabled) {
+        config.rootSection.invFilter.changeEnableEnabledAlready.sendMessage(player);
+        return true;
+      }
 
-      var newFilter = new InventoryFilter(
-        currentFilter == null ? null : currentFilter.predicateAndLanguage(),
-        mode.constant
-      );
+      var newFilter = new InventoryFilter(currentFilter.predicateAndLanguage, true);
 
       filterByPlayerId.put(player.getUniqueId(), newFilter);
 
-      pdc.set(filterModeKey, PersistentDataType.STRING, mode.constant.name());
+      pdc.set(filterEnabledKey, PersistentDataType.BOOLEAN, true);
 
-      config.rootSection.invFilter.modeChanged.sendMessage(
+      config.rootSection.invFilter.filterEnabled.sendMessage(
         player,
         new InterpretationEnvironment()
-          .withVariable("mode", mode.getNormalizedName())
+          .withVariable("filter", newFilter.predicateString)
+      );
+
+      return true;
+    }
+
+    if (action.constant == CommandAction.DISABLE) {
+      var currentFilter = filterByPlayerId.get(player.getUniqueId());
+
+      if (currentFilter == null || currentFilter.predicateString == null) {
+        config.rootSection.invFilter.changeEnableNoFilterSet.sendMessage(player);
+        return true;
+      }
+
+      if (!currentFilter.enabled) {
+        config.rootSection.invFilter.changeEnableDisabledAlready.sendMessage(player);
+        return true;
+      }
+
+      var newFilter = new InventoryFilter(currentFilter.predicateAndLanguage, false);
+
+      filterByPlayerId.put(player.getUniqueId(), newFilter);
+
+      pdc.set(filterEnabledKey, PersistentDataType.BOOLEAN, false);
+
+      config.rootSection.invFilter.filterDisabled.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("filter", newFilter.predicateString)
       );
 
       return true;
@@ -296,13 +308,6 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
       }
     }
 
-    if (action.constant == CommandAction.SET_MODE) {
-      if (args.length == 2)
-        return PredicateMode.matcher.createCompletions(args[1]);
-
-      return List.of();
-    }
-
     return List.of();
   }
 
@@ -310,14 +315,32 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
   public void onPickup(PlayerAttemptPickupItemEvent event) {
     var filter = getOrLoadFilter(event.getPlayer());
 
-    if (filter.predicateAndLanguage() == null || filter.mode() == PredicateMode.OFF)
+    if (!filter.enabled || filter.predicateAndLanguage == null)
       return;
 
-    var testResult = filter.predicateAndLanguage().predicate().test(event.getItem().getItemStack());
-    var doAllow = filter.mode() == PredicateMode.ALLOW_MATCHES;
-
-    if (doAllow && !testResult || !doAllow && testResult)
+    if (!filter.predicateAndLanguage.predicate().test(event.getItem().getItemStack()))
       event.setCancelled(true);
+  }
+
+  @EventHandler
+  public void onJoin(PlayerJoinEvent event) {
+    var player = event.getPlayer();
+    var filter = getOrLoadFilter(player);
+
+    if (!filter.enabled || filter.predicateAndLanguage == null)
+      return;
+
+    // Ensure that this important message is not spammed away by Essentials' MOTD and the like.
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      var disableCommand = "/" + command.getLabel() + " " + CommandAction.matcher.getNormalizedName(CommandAction.DISABLE);
+
+      config.rootSection.invFilter.activeFilterWarning.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("filter", filter.predicateString)
+          .withVariable("disable_command", disableCommand)
+      );
+    }, 5L);
   }
 
   @EventHandler
@@ -337,16 +360,9 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
 
     var predicateAndLanguage = loadPredicateFromPlayerPdc(player);
 
-    var filterModeString = pdc.get(filterModeKey, PersistentDataType.STRING);
-    PredicateMode filterMode = PredicateMode.OFF;
+    var filterMode = pdc.get(filterEnabledKey, PersistentDataType.BOOLEAN);
 
-    if (filterModeString != null) {
-      try {
-        filterMode = PredicateMode.valueOf(filterModeString);
-      } catch (Throwable ignored) {}
-    }
-
-    filter = new InventoryFilter(predicateAndLanguage, filterMode);
+    filter = new InventoryFilter(predicateAndLanguage, filterMode != null && filterMode);
 
     filterByPlayerId.put(playerId, filter);
 
