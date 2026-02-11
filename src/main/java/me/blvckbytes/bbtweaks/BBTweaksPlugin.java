@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks;
 
 import at.blvckbytes.cm_mapper.ConfigHandler;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandUpdater;
 import com.gmail.nossr50.util.player.UserManager;
 import me.blvckbytes.bbtweaks.ab_sleep.ActionBarSleepMessage;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipesSection;
@@ -13,11 +14,17 @@ import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.main_command.MainCommand;
+import me.blvckbytes.bbtweaks.markers_menu.MarkersCommand;
+import me.blvckbytes.bbtweaks.markers_menu.MarkersCommandSection;
+import me.blvckbytes.bbtweaks.markers_menu.SetMarkerCommand;
+import me.blvckbytes.bbtweaks.markers_menu.SetMarkerCommandSection;
+import me.blvckbytes.bbtweaks.markers_menu.display.MarkerDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.SignMechanicManager;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
+import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
@@ -31,6 +38,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
   private LastLocationStore lastLocationStore;
   private SignMechanicManager mechanicManager;
   private WorldGuardFlags worldGuardFlags;
+  private MarkerDisplayHandler markerDisplayHandler;
 
   // TODO: Idea - /empty-out [all]
 
@@ -129,13 +137,33 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       getServer().getPluginManager().registerEvents(seedOverride, this);
 
-      new CustomCommandsManager(this, config);
+      var commandUpdater = new CommandUpdater(this);
+
+      new CustomCommandsManager(commandUpdater, this, config);
 
       var invFilterCommandExecutor = new InvFilterCommand(this, config);
 
       getServer().getPluginManager().registerEvents(invFilterCommandExecutor, this);
 
       Objects.requireNonNull(getCommand("invfilter")).setExecutor(invFilterCommandExecutor);
+
+      markerDisplayHandler = new MarkerDisplayHandler(config, FloodgateIntegration.load(getLogger()), this);
+      getServer().getPluginManager().registerEvents(markerDisplayHandler, this);
+
+      var markerCommand = Objects.requireNonNull(getCommand(MarkersCommandSection.INITIAL_NAME));
+      markerCommand.setExecutor(new MarkersCommand(markerDisplayHandler, config));
+
+      var setMarkerCommand = Objects.requireNonNull(getCommand(SetMarkerCommandSection.INITIAL_NAME));
+      setMarkerCommand.setExecutor(new SetMarkerCommand(config, getLogger()));
+
+      Runnable updateCommands = () -> {
+        config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);
+        config.rootSection.markersMenu.setMarkerCommand.apply(setMarkerCommand, commandUpdater);
+        commandUpdater.trySyncCommands();
+      };
+
+      updateCommands.run();
+      config.registerReloadListener(updateCommands);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);
@@ -152,6 +180,11 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     if (mechanicManager != null) {
       mechanicManager.shutdown();
       mechanicManager = null;
+    }
+
+    if (markerDisplayHandler != null) {
+      markerDisplayHandler.onShutdown();
+      markerDisplayHandler = null;
     }
   }
 }

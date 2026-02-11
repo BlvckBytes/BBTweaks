@@ -22,10 +22,14 @@ public class CustomCommandsManager {
   private final List<PluginCommand> registeredCommands;
   private final Constructor<PluginCommand> pluginCommandConstructor;
 
-  public CustomCommandsManager(Plugin plugin, ConfigKeeper<MainSection> config) throws Exception {
+  public CustomCommandsManager(
+    CommandUpdater commandUpdater,
+    Plugin plugin,
+    ConfigKeeper<MainSection> config
+  ) throws Exception {
     this.config = config;
     this.plugin = plugin;
-    this.commandUpdater = new CommandUpdater(plugin);
+    this.commandUpdater = commandUpdater;
     this.registeredCommands = new ArrayList<>();
 
     this.pluginCommandConstructor = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);

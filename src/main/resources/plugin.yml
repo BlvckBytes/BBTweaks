@@ -34,6 +34,12 @@ commands:
   invfilter:
     description: 'Configure and toggle inventory-filters regarding picked-up items'
     permission: bbtweaks.invfilter
+  markers:
+    description: 'Browse all available markers'
+    permission: bbtweaks.markers
+  setmarker:
+    description: 'Set a marker to your current location by its name'
+    permission: bbtweaks.setmarker
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
@@ -53,3 +59,7 @@ permissions:
     description: 'Use the auto-dispose mechanic'
   bbtweaks.mechanic.sign-flipper:
     description: 'Use the sign-flipper mechanic'
+  bbtweaks.markers:
+    description: 'Browse all available markers'
+  bbtweaks.setmarker:
+    description: 'Set a marker to your current location by its name'

@@ -12,6 +12,7 @@ import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterSection;
 import me.blvckbytes.bbtweaks.main_command.MainCommandSection;
+import me.blvckbytes.bbtweaks.markers_menu.MarkersMenuSection;
 import me.blvckbytes.bbtweaks.mechanic.MechanicSection;
 import me.blvckbytes.bbtweaks.ping.PingSection;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideSection;
@@ -32,6 +33,7 @@ public class MainSection extends ConfigSection {
   public SeedOverrideSection seedOverride;
   public CustomCommandsSection customCommands;
   public InvFilterSection invFilter;
+  public MarkersMenuSection markersMenu;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

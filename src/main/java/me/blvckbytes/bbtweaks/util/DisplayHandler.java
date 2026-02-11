@@ -50,6 +50,11 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
     displayByPlayerId.put(player.getUniqueId(), instantiateDisplay(player, displayData));
   }
 
+  public void reopen(DisplayType display) {
+    displayByPlayerId.put(display.player.getUniqueId(), display);
+    display.show();
+  }
+
   public void close(Player player) {
     var display = displayByPlayerId.remove(player.getUniqueId());
 
