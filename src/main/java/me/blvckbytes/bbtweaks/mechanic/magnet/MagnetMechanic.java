@@ -364,8 +364,6 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
   public @Nullable MagnetInstance onSignDestroy(@Nullable Player destroyer, Sign sign) {
     var instance = super.onSignDestroy(destroyer, sign);
 
-    // TODO: There must be some sort of bug which doesn't properly unregister the instance here. I encountered
-    //       old instances which no longer sucked items but were still visualized on the server today.
     if (instance != null)
       instanceCuboidRegistry.unregister(instance);
 

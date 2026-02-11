@@ -87,20 +87,15 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     instanceBySignPosition.forEachValue(instance -> {
       if (!instance.tick(time)) {
         instance.getSign().getBlock().breakNaturally();
-        return IterationDecision.REMOVE_AND_CONTINUE;
+        onSignDestroy(null, instance.getSign());
       }
-
-      return IterationDecision.CONTINUE;
     });
   }
 
   private void _onConfigReload() {
     var mechanicSigns = new ArrayList<Sign>();
 
-    instanceBySignPosition.forEachValue(instance -> {
-      mechanicSigns.add(instance.getSign());
-      return IterationDecision.CONTINUE;
-    });
+    instanceBySignPosition.forEachValue(instance -> mechanicSigns.add(instance.getSign()));
 
     for (var sign : mechanicSigns)
       onSignUnload(sign);
