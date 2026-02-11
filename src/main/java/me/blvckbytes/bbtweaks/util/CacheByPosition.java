@@ -20,6 +20,27 @@ public class CacheByPosition<T> {
   }
 
   public void forEachValue(IterationHandler<T> handler) {
+    /*
+      TODO: Investigate this error
+      [19:40:24 WARN]: [BBTweaks] Task #92 for BBTweaks v0.1 generated an exception
+      java.lang.NullPointerException: Cannot invoke "it.unimi.dsi.fastutil.longs.LongArrayList.getLong(int)" because "this.wrapped" is null
+        at it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap$MapIterator.nextEntry(Long2ObjectOpenHashMap.java:676) ~[fastutil-8.5.18.jar:?]
+        at it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap$ValueIterator.next(Long2ObjectOpenHashMap.java:1185) ~[fastutil-8.5.18.jar:?]
+        at BBTweaks-0.1.jar//me.blvckbytes.bbtweaks.util.CacheByPosition.forEachValue(CacheByPosition.java:25) ~[?:?]
+        at BBTweaks-0.1.jar//me.blvckbytes.bbtweaks.mechanic.BaseMechanic.tick(BaseMechanic.java:87) ~[?:?]
+        at BBTweaks-0.1.jar//me.blvckbytes.bbtweaks.mechanic.SignMechanicManager.lambda$tick$0(SignMechanicManager.java:91) ~[?:?]
+        at java.base/java.util.HashMap$Values.forEach(HashMap.java:1073) ~[?:?]
+        at BBTweaks-0.1.jar//me.blvckbytes.bbtweaks.mechanic.SignMechanicManager.tick(SignMechanicManager.java:91) ~[?:?]
+        at org.bukkit.craftbukkit.scheduler.CraftTask.run(CraftTask.java:78) ~[paper-1.21.11.jar:1.21.11-111-302c47c]
+        at org.bukkit.craftbukkit.scheduler.CraftScheduler.mainThreadHeartbeat(CraftScheduler.java:474) ~[paper-1.21.11.jar:1.21.11-111-302c47c]
+        at net.minecraft.server.MinecraftServer.tickChildren(MinecraftServer.java:1761) ~[paper-1.21.11.jar:1.21.11-111-302c47c]
+        at net.minecraft.server.MinecraftServer.tickServer(MinecraftServer.java:1616) ~[paper-1.21.11.jar:1.21.11-111-302c47c]
+        at net.minecraft.server.dedicated.DedicatedServer.tickServer(DedicatedServer.java:427) ~[paper-1.21.11.jar:1.21.11-111-302c47c]
+        at net.minecraft.server.MinecraftServer.processPacketsAndTick(MinecraftServer.java:1672) ~[paper-1.21.11.jar:1.21.11-111-302c47c]
+        at net.minecraft.server.MinecraftServer.runServer(MinecraftServer.java:1340) ~[paper-1.21.11.jar:1.21.11-111-302c47c]
+        at net.minecraft.server.MinecraftServer.lambda$spin$2(MinecraftServer.java:388) ~[paper-1.21.11.jar:1.21.11-111-302c47c]
+        at java.base/java.lang.Thread.run(Thread.java:1583) ~[?:?]
+     */
     for (var bucket : cachedItemByFastHashByWorldId.values()) {
       for (var itemIterator = bucket.values().iterator(); itemIterator.hasNext();) {
         var decision = handler.handle(itemIterator.next());

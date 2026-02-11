@@ -42,6 +42,8 @@ public class FakeBlocksVisualization {
     var outdatedKeys = new HashSet<>(fakeBlocks.keySet());
     var newBlocksCount = new MutableInt();
 
+    // TODO: If the blocks should mark the cuboid inclusively, we must subtract 1 from each axis' max, I believe.
+
     cuboid.forEachLine((minX, minY, minZ, maxX, maxY, maxZ, axis) -> {
       for (var x = minX; x <= maxX; ++x) {
         for (var y = minY; y <= maxY; ++y) {
