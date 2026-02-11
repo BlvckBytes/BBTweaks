@@ -224,7 +224,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
 
     var currentlySelectedAxis = editSession.getCurrentlySelectedAxis();
 
-    editSession.getCuboid().forEachLine((minX, minY, minZ, maxX, maxY, maxZ, axis) -> {
+    editSession.getCuboid().forEachLine(false, (minX, minY, minZ, maxX, maxY, maxZ, axis) -> {
       var usedOptions = (currentlySelectedAxis != null && axis == currentlySelectedAxis) ? highlightOptions : normalOptions;
 
       for (double x = minX; x <= maxX; x += stepSize) {
@@ -245,7 +245,7 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
       (float) config.rootSection.mechanic.magnet.visualization.dustSize
     );
 
-    cuboid.forEachLine((minX, minY, minZ, maxX, maxY, maxZ, axis) -> {
+    cuboid.forEachLine(false, (minX, minY, minZ, maxX, maxY, maxZ, axis) -> {
       for (double x = minX; x <= maxX; x += stepSize) {
         for (double y = minY; y <= maxY; y += stepSize) {
           for (double z = minZ; z <= maxZ; z += stepSize) {
