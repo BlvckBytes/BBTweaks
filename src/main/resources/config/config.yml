@@ -469,7 +469,7 @@ markersMenu:
         lore: |
           <reset>
             {lut.spacer}<br/>
-            <&8>➥ <&e>Linksklick <&7>Gelange zurück zu den Kategorien<br/>
+            <&8>➥ <&e>Linksklick <&7>Gelange zu den Kategorien<br/>
             {lut.spacer}
       nextPage:
         slots: 'last_slot'

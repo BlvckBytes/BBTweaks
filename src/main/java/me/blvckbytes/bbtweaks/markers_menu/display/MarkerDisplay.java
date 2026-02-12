@@ -94,7 +94,7 @@ public class MarkerDisplay extends Display<MarkerDisplayData> {
     config.rootSection.markersMenu.display.items.previousPage.renderInto(inventory, environment);
     config.rootSection.markersMenu.display.items.nextPage.renderInto(inventory, environment);
 
-    if (displayData.selectedCategory() != null)
+    if (displayData.previousDisplay() != null)
       config.rootSection.markersMenu.display.items.backToCategoriesButton.renderInto(inventory, environment);
   }
 
