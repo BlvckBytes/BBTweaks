@@ -225,6 +225,17 @@ unCraft:
       tags:
         - ITEMS_STONE_CRAFTING_MATERIALS
       preferredMaterial: COBBLESTONE
+    -
+      materials:
+        - CHISELED_QUARTZ_BLOCK
+        - QUARTZ_BLOCK
+        - QUARTZ_PILLAR
+      preferredMaterial: QUARTZ_BLOCK
+    -
+      materials:
+        - CHARCOAL
+        - COAL
+      preferredMaterial: COAL
 
 additionalRecipes:
   shapedRecipes:
@@ -260,6 +271,24 @@ additionalRecipes:
         I:
           materials:
             - IRON_INGOT
+        R:
+          materials:
+            - REDSTONE
+    deepslate-dispenser:
+      result: DISPENSER
+      amount: 1
+      shape:
+        - CCC
+        - CBC
+        - CRC
+      ingredients:
+        C:
+          materials:
+            - COBBLESTONE
+            - COBBLED_DEEPSLATE
+        B:
+          materials:
+            - BOW
         R:
           materials:
             - REDSTONE
