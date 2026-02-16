@@ -6,6 +6,9 @@ import at.blvckbytes.cm_mapper.section.command.CommandUpdater;
 import me.blvckbytes.bbtweaks.MainSection;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerCommandSendEvent;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-public class CustomCommandsManager {
+public class CustomCommandsManager implements Listener {
 
   private final ConfigKeeper<MainSection> config;
   private final Plugin plugin;
@@ -37,6 +40,11 @@ public class CustomCommandsManager {
 
     config.registerReloadListener(this::updateCommands);
     updateCommands();
+  }
+
+  @EventHandler
+  public void onCommandSend(PlayerCommandSendEvent event) {
+    event.getCommands().removeIf(config.rootSection.customCommands._hiddenCommandsLower::contains);
   }
 
   private void updateCommands() {

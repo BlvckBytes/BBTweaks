@@ -139,7 +139,8 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       var commandUpdater = new CommandUpdater(this);
 
-      new CustomCommandsManager(commandUpdater, this, config);
+      var customCommandsManager = new CustomCommandsManager(commandUpdater, this, config);
+      getServer().getPluginManager().registerEvents(customCommandsManager, this);
 
       var invFilterCommand = Objects.requireNonNull(getCommand("invfilter"));
       var invFilterCommandExecutor = new InvFilterCommand(invFilterCommand, this, config);
