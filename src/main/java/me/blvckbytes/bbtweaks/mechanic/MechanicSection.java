@@ -7,6 +7,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import me.blvckbytes.bbtweaks.mechanic.clock.ClockSection;
 import me.blvckbytes.bbtweaks.mechanic.auto_dispose.AutoDisposeSection;
+import me.blvckbytes.bbtweaks.mechanic.hopper.HopperSection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.config.MagnetSection;
 import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderSection;
 import me.blvckbytes.bbtweaks.mechanic.sign_flipper.SignFlipperSection;
@@ -21,6 +22,7 @@ public class MechanicSection extends ConfigSection {
   public TransmitterReceiverSection transmitterReceiver;
   public AutoDisposeSection autoDispose;
   public SignFlipperSection signFlipper;
+  public HopperSection hopper;
 
   public ComponentMarkup noWallSign;
 

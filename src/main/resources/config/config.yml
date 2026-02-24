@@ -352,6 +352,11 @@ mechanic:
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>SignFlipper <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
     currentState: |
       {lut.mechanic_prefix} <&7>Aktueller Zustand: {lut.tri_state[state]}<&7>.
+  hopper:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen Hopper zu erstellen!'
+    notOnAHopper: '{lut.mechanic_prefix} <&c>Ein Hopper-Schild kann nur direkt auf einem Trichter angebracht werden!'
+    multipleHoppers: '{lut.mechanic_prefix} <&c>Auf dem Trichter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein Hopper-Schild!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Hopper <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'

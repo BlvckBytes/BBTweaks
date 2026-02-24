@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import it.unimi.dsi.fastutil.objects.*;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
+import me.blvckbytes.bbtweaks.util.ReflectUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.*;
@@ -24,11 +25,7 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
-import java.lang.reflect.Member;
-import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -197,7 +194,7 @@ public class FurnaceLevelDisplay implements Listener {
   private void registerRecipesUsedAccessorFor(BlockState blockState) {
     var stateClass = blockState.getClass();
 
-    var getHandleMethod = tryLocateNonStaticMember(stateClass, Class::getDeclaredMethods, method -> method.getName().equals("getBlockEntity"));
+    var getHandleMethod = ReflectUtil.tryLocateNonStaticMember(stateClass, Class::getDeclaredMethods, method -> method.getName().equals("getBlockEntity"));
 
     if (getHandleMethod == null)
       throw new IllegalArgumentException("Could not locate the get-handle method on " + stateClass);
@@ -214,7 +211,7 @@ public class FurnaceLevelDisplay implements Listener {
     if (handle == null)
       throw new IllegalArgumentException("Invoking the get-handle method yielded null on " + stateClass);
 
-    var usedRecipesField = tryLocateNonStaticMember(handle.getClass(), Class::getDeclaredFields, field -> Reference2IntMap.class.isAssignableFrom(field.getType()));
+    var usedRecipesField = ReflectUtil.tryLocateNonStaticMember(handle.getClass(), Class::getDeclaredFields, field -> Reference2IntMap.class.isAssignableFrom(field.getType()));
 
     if (usedRecipesField == null)
       throw new IllegalArgumentException("Could not locate field of type " + Reference2IntMap.class + " on " + stateClass);
@@ -236,23 +233,6 @@ public class FurnaceLevelDisplay implements Listener {
         return null;
       }
     });
-  }
-
-  private <T extends Member> @Nullable T tryLocateNonStaticMember(Class<?> targetClass, Function<Class<?>, T[]> memberAccessor, Predicate<T> predicate) {
-    for (var member : memberAccessor.apply(targetClass)) {
-      if (Modifier.isStatic(member.getModifiers()))
-        continue;
-
-      if (predicate.test(member))
-        return member;
-    }
-
-    var superClass = targetClass.getSuperclass();
-
-    if (superClass != Object.class)
-      return tryLocateNonStaticMember(superClass, memberAccessor, predicate);
-
-    return null;
   }
 
   private void handleDisplays() {
