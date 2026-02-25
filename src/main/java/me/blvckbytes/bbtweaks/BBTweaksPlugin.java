@@ -25,6 +25,7 @@ import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
@@ -126,7 +127,14 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
         getLogger().info("Successfully set up furnace-level displays!");
       }, 10L);
 
-      mechanicManager = new SignMechanicManager(this, config);
+      ItemPredicateParserPlugin ipp;
+
+      if (!Bukkit.getServer().getPluginManager().isPluginEnabled("ItemPredicateParser") || (ipp = ItemPredicateParserPlugin.getInstance()) == null)
+        throw new IllegalArgumentException("Expected plugin ItemPredicateParser to have been loaded at this point");
+
+      var predicateHelper = ipp.getPredicateHelper();
+
+      mechanicManager = new SignMechanicManager(this, config, predicateHelper);
 
       if (worldGuardFlags != null)
         getServer().getPluginManager().registerEvents(worldGuardFlags, this);

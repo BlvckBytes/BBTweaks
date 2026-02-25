@@ -12,6 +12,7 @@ import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.ReceiverMechanic;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.TransmitterMechanic;
 import me.blvckbytes.bbtweaks.util.BooleanConsumer;
 import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -44,7 +45,7 @@ public class SignMechanicManager implements Listener {
 
   private int time;
 
-  public SignMechanicManager(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
+  public SignMechanicManager(JavaPlugin plugin, ConfigKeeper<MainSection> config, PredicateHelper predicateHelper) {
     this.plugin = plugin;
     this.config = config;
 
@@ -52,7 +53,7 @@ public class SignMechanicManager implements Listener {
 
     registerMechanic(new ClockMechanic(plugin, config));
     registerMechanic(new PulseExtenderMechanic(plugin, config));
-    registerMechanic(new MagnetMechanic(plugin, config));
+    registerMechanic(new MagnetMechanic(plugin, config, predicateHelper));
 
     var receiverMechanic = new ReceiverMechanic(plugin, config);
     var transmitterMechanic = new TransmitterMechanic(receiverMechanic, plugin, config);
@@ -63,7 +64,7 @@ public class SignMechanicManager implements Listener {
 
     registerMechanic(new AutoDisposeMechanic(plugin, config));
     registerMechanic(new SignFlipperMechanic(plugin, config));
-    registerMechanic(new HopperMechanic(plugin, config));
+    registerMechanic(new HopperMechanic(plugin, config, predicateHelper));
 
     tickerTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 0, 1);
 

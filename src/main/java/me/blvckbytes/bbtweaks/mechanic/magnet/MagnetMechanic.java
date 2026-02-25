@@ -10,7 +10,6 @@ import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicRegistry;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.SignUtil;
-import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.predicate.stringify.PlainStringifier;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
@@ -50,19 +49,14 @@ public class MagnetMechanic extends BaseMechanic<MagnetInstance> implements List
 
   private int lastTime;
 
-  public MagnetMechanic(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
+  public MagnetMechanic(JavaPlugin plugin, ConfigKeeper<MainSection> config, PredicateHelper predicateHelper) {
     super(plugin, config);
 
     this.instanceCuboidRegistry = new CuboidMechanicRegistry<>();
     this.visualizationsByPlayerId = new HashMap<>();
     this.editSessionByPlayerId = new HashMap<>();
 
-    ItemPredicateParserPlugin ipp;
-
-    if (!Bukkit.getServer().getPluginManager().isPluginEnabled("ItemPredicateParser") || (ipp = ItemPredicateParserPlugin.getInstance()) == null)
-      throw new IllegalArgumentException("Expected plugin ItemPredicateParser to have been loaded at this point");
-
-    this.predicateHelper = ipp.getPredicateHelper();
+    this.predicateHelper = predicateHelper;
     this.displayHandler = new EditDisplayHandler(predicateHelper, FloodgateIntegration.load(plugin.getLogger()), config, plugin);
 
     var defaultLanguageCommand = Objects.requireNonNull(plugin.getCommand("mfilter"));
