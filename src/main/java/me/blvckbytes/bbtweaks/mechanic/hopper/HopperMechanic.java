@@ -147,7 +147,7 @@ public class HopperMechanic extends BaseMechanic<HopperInstance> implements List
     }
 
     // TODO: Load predicate from PDC
-    var instance = new HopperInstance(sign, null, this);
+    var instance = new HopperInstance(sign, predicate, this, config);
     var world = sign.getWorld();
 
     instanceBySignPosition.put(world, sign.getX(), sign.getY(), sign.getZ(), instance);

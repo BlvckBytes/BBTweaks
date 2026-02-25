@@ -1,5 +1,7 @@
 package me.blvckbytes.bbtweaks.mechanic.hopper;
 
+import at.blvckbytes.cm_mapper.ConfigKeeper;
+import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.Material;
@@ -13,18 +15,24 @@ import org.jetbrains.annotations.Nullable;
 
 public class HopperInstance extends SISOInstance {
 
-  private static final int ITEM_TRANSPORT_CYCLE_T = 10;
   private static final int[] BREWER_POTION_SLOTS = { 0, 1, 2 };
 
   private @Nullable Inventory hopperInventory;
   private final @Nullable ItemPredicate predicate;
   private final ItemCompatibilities itemCompatibilities;
+  private final ConfigKeeper<MainSection> config;
 
-  public HopperInstance(Sign sign, @Nullable ItemPredicate predicate, ItemCompatibilities itemCompatibilities) {
+  public HopperInstance(
+    Sign sign,
+    @Nullable ItemPredicate predicate,
+    ItemCompatibilities itemCompatibilities,
+    ConfigKeeper<MainSection> config
+  ) {
     super(sign);
 
     this.predicate = predicate;
     this.itemCompatibilities = itemCompatibilities;
+    this.config = config;
   }
 
   public Block getMountBlock() {
@@ -33,7 +41,7 @@ public class HopperInstance extends SISOInstance {
 
   @Override
   public boolean tick(int time) {
-    if (time % ITEM_TRANSPORT_CYCLE_T != 0)
+    if (time % config.rootSection.mechanic.hopper.transportCycleTicks != 0)
       return true;
 
     var inputPower = tryReadInputPower();
