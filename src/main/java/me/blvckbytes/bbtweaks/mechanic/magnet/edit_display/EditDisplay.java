@@ -44,7 +44,6 @@ public class EditDisplay extends Display<EditSession> {
     config.rootSection.mechanic.magnet.editDisplay.items.selectParameterOffsetZ.renderInto(inventory, environment);
 
     config.rootSection.mechanic.magnet.editDisplay.items.save.renderInto(inventory, environment);
-    config.rootSection.mechanic.magnet.editDisplay.items.modifyFilter.renderInto(inventory, environment);
     config.rootSection.mechanic.magnet.editDisplay.items.cancel.renderInto(inventory, environment);
     config.rootSection.mechanic.magnet.editDisplay.items.toggleClickDetection.renderInto(inventory, environment);
   }

@@ -137,33 +137,14 @@ mechanic:
     noContainer: '{lut.mechanic_prefix} <&c>Ein Magnet kann nur an einem Behälterblock angebracht werden!'
     allowMultipleSignsPerContainer: true
     existingSign: '{lut.mechanic_prefix} <&c>Am Behälter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein Magnet!'
-    visualizationInitialized: |
-      {lut.mechanic_prefix} <&7>Die Region des Magnetes bei <&a>{x} {y} {z}
-      <container *if="has(predicate)">
-        <&7>, mit dem Prädikat<space/>
-        <suggest-command value=`{filter_command}`>
-          <&a><u>{predicate}
-        </suggest-command><&7>,
-      </container>
-      <space/><&7>wird nun für <&a>{visualization_duration}s <&7>angezeigt!
+    visualizationInitialized: '{lut.mechanic_prefix} <&7>Die Region des Magnetes bei <&a>{x} {y} {z} <&7>wird nun für <&a>{visualization_duration}s <&7>angezeigt!'
     signClickedInEditMode: '{lut.mechanic_prefix} <&c>Bitte breche die Bearbeitung im Menü (sneaken) ab, bevor du das Schild editierst!'
-    filterSetByLookingCannotEdit: '{lut.mechanic_prefix} <&c>Du kannst das von dir angeschaute Schild nicht bearbeiten!'
-    filterSetByLookingNoChanges: '{lut.mechanic_prefix} <&c>Der Filter <&4>{predicate} <&c>ist bereits am Magneten gesetzt!'
-    unsetFilterNoneSet: '{lut.mechanic_prefix} <&c>Dieser Magnet hat keinen Filter gesetzt, den du entfernen könntest!'
-    filterSetByLookingUnset: '{lut.mechanic_prefix} <&7>Der Filter des Magnetes wurde <&a>entfernt<&7>.'
     alreadyInAnEditSession: '{lut.mechanic_prefix} <&c>Bitte breche die aktuelle Bearbeitung im Menü (sneaken) ab, bevor du ein weiteres Schild editierst!'
     editModeDistanceExceeded: '{lut.mechanic_prefix} <&c>Du hast dich weiter als <&4>{max_distance} <&c>Blöcke vom Magneten bei <&4>{x} {y} {z} <&c>wegbewegt; breche die Bearbeitung ab!'
     editModeInitialized: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>begonnen<&7>; <&a>sneake <&7>jederzeit, um das <&a>Menü <&7>zu öffnen!'
     editModeSaved: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>abgeschlossen<&7>; Änderungen wurden auf das Schild <&a>geschrieben<&7>!'
     editModeSavedNoChanges: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>abgeschlossen<&7>; es wurden <&a>keine Änderungen <&7>vorgenommen!'
     editModeCancelled: '{lut.mechanic_prefix} <&7>Die Bearbeitung des Magnetes bei <&a>{x} {y} {z} <&7>wurde <&a>abgebrochen<&7>!'
-    editModeFilterPrompt: '{lut.mechanic_prefix} <&7>Benutze <&a>/mfilter \<Filter><&7>, um den Filter der aktuellen Editierungssitzung zu ändern.'
-    editModeFilterEditSuggestion: |
-      {lut.mechanic_prefix} <&7>Editiere den Filter mittels <&a>
-      <suggest-command value=`{filter_command}`>
-        <&a><u>{filter_command}
-      </suggest-command><&7>.
-    editModeFilterRemoved: '{lut.mechanic_prefix} <&7>Der aktuelle Filter wurde <&a>entfernt<&7>.'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Magnet <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
     editModeClickDetectionActionbar: |
       <&7>{lut.parameter_description[current_parameter]}: <&6>{env(current_parameter)}
@@ -171,13 +152,6 @@ mechanic:
         <space/>
         <&c><i>(Limit)
       </container>
-    filterCommandPlayersOnly: '{lut.mechanic_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
-    filterCommandNoEditSessionAndNoLookedAt: '{lut.mechanic_prefix} <&c>Du befindest dich aktuell in keiner Bearbeitung eines Magnetes und schaust auch auf kein Magnet-Schild!'
-    filterCommandFilterSet: '{lut.mechanic_prefix} <&7>Der Filter <&a>{predicate} <&7>in der Sprache <&a>{language} <&7>wurde gesetzt.'
-    filterCommandMissingLanguage: '{lut.mechanic_prefix} <&c>Der Befehl <&4>/{label} <&c>erfordert eine Sprachauswahl als ersten Parameter!'
-    filterCommandUnknownLanguage: '{lut.mechanic_prefix} <&c>Die Sprache <&4>{input} <&c>stellt keine gültige Auswahl dar; wähle aus: <&4 *for-language="languages" *for-separator={<&c>,<space/>}>{language}</><&c>.'
-    filterCommandPredicateError: '{lut.mechanic_prefix} <&c>Ungültiger Filter: <&4>{error}<&c>.'
-    filterCommandEmptyPredicate: '{lut.mechanic_prefix} <&c>Bitte gib einen gültigen Filter an!'
     visualizeCommandChunkExpandRadius: 2
     visualizeCommandPlayersOnly: '{lut.mechanic_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
     visualizeCommandNoMagnetsNearby: '{lut.mechanic_prefix} <&c>Es befinden sich keine Magnete in deinem Chunk, auf die du Zugriff hast!'
@@ -229,32 +203,6 @@ mechanic:
               <br/>
               <&7>Schreibt die Änderungen<br/>
               und verlässt den Modus.
-        modifyFilter:
-          type: '{filter_predicate then "LIME_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
-          slots: 7
-          name: '<reset><&8>» <&7><&a *use="filter_predicate">Filter <&8>«'
-          lore: |
-            <reset>
-              <br/>
-              {lut.spacer}<br/>
-              <container *if="filter_predicate">
-                <&8>♦ <&7>Aktueller Filter: <&e>{filter_predicate}<br/>
-                <&8>♦ <&7>Filtersprache: <&e>{filter_language}<br/>
-                {lut.spacer}<br/>
-                <&8>➥ <&e>Linksklick <&7>Filter editieren<br/>
-                <container *if="is_floodgate">
-                  <&8>➥ <&e>Werfen <&7>Filter entfernen<br/>
-                </container>
-                <container *else>
-                  <&8>➥ <&e>Rechtsklick <&7>Filter entfernen<br/>
-                </container>
-              </container>
-              <container *else>
-                <&8>♦ <&7>Aktueller Filter: <&c>kein Filter gesetzt<br/>
-                {lut.spacer}<br/>
-                <&8>➥ <&e>Linksklick <&7>Filter setzen<br/>
-              </container>
-              {lut.spacer}
         cancel:
           type: RED_CONCRETE
           slots: 14

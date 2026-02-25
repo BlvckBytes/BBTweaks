@@ -18,10 +18,6 @@ public class MagnetSection extends ConfigSection {
   public ComponentMarkup existingSign;
   public ComponentMarkup visualizationInitialized;
   public ComponentMarkup signClickedInEditMode;
-  public ComponentMarkup unsetFilterNoneSet;
-  public ComponentMarkup filterSetByLookingCannotEdit;
-  public ComponentMarkup filterSetByLookingNoChanges;
-  public ComponentMarkup filterSetByLookingUnset;
   public ComponentMarkup alreadyInAnEditSession;
   public ComponentMarkup creationSuccess;
   public ComponentMarkup editModeDistanceExceeded;
@@ -30,16 +26,6 @@ public class MagnetSection extends ConfigSection {
   public ComponentMarkup editModeSavedNoChanges;
   public ComponentMarkup editModeCancelled;
   public ComponentMarkup editModeClickDetectionActionbar;
-  public ComponentMarkup editModeFilterPrompt;
-  public ComponentMarkup editModeFilterEditSuggestion;
-  public ComponentMarkup editModeFilterRemoved;
-  public ComponentMarkup filterCommandPlayersOnly;
-  public ComponentMarkup filterCommandNoEditSessionAndNoLookedAt;
-  public ComponentMarkup filterCommandFilterSet;
-  public ComponentMarkup filterCommandMissingLanguage;
-  public ComponentMarkup filterCommandUnknownLanguage;
-  public ComponentMarkup filterCommandPredicateError;
-  public ComponentMarkup filterCommandEmptyPredicate;
   public int visualizeCommandChunkExpandRadius;
   public ComponentMarkup visualizeCommandPlayersOnly;
   public ComponentMarkup visualizeCommandNoMagnetsNearby;

@@ -42,6 +42,10 @@ public abstract class SISOInstance implements MechanicInstance {
     return sign;
   }
 
+  public Block getMountBlock() {
+    return mountBlock;
+  }
+
   protected @Nullable Integer tryReadInputPower() {
     // Undefined input-state
     if (!isBlockLoaded(inputBlock))
