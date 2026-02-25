@@ -41,6 +41,14 @@ public abstract class PredicateMechanic<InstanceType extends MechanicInstance> e
       return;
 
     event.acknowledge();
+
+    if (!canEditSign(event.getPlayer(), sign)) {
+      event.setDeniedAccessBlock(sign.getBlock());
+      return;
+    }
+
+    event.setDataHoldingBlock(sign.getBlock());
+
     event.setResult(loadPredicateFromSign(sign));
   }
 
@@ -52,6 +60,14 @@ public abstract class PredicateMechanic<InstanceType extends MechanicInstance> e
       return;
 
     event.acknowledge();
+
+    if (!canEditSign(event.getPlayer(), sign)) {
+      event.setDeniedAccessBlock(sign.getBlock());
+      return;
+    }
+
+    event.setDataHoldingBlock(sign.getBlock());
+
     setPredicateToSign(sign, event.getValue());
     reloadInstanceBySign(sign);
   }
@@ -66,6 +82,14 @@ public abstract class PredicateMechanic<InstanceType extends MechanicInstance> e
     var currentPredicate = loadPredicateFromSign(sign);
 
     event.acknowledge();
+
+    if (!canEditSign(event.getPlayer(), sign)) {
+      event.setDeniedAccessBlock(sign.getBlock());
+      return;
+    }
+
+    event.setDataHoldingBlock(sign.getBlock());
+
     event.setRemovedPredicate(currentPredicate);
 
     if (currentPredicate != null) {
