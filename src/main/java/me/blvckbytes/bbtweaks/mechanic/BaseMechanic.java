@@ -72,6 +72,13 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     return instanceBySignPosition.get(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ()) != null;
   }
 
+  public void reloadInstanceBySign(Sign sign) {
+    onSignUnload(sign);
+
+    if (sign.getBlock().getState() instanceof Sign newSign)
+      onSignLoad(newSign);
+  }
+
   public abstract boolean onInstanceClick(Player player, InstanceType instance, boolean wasLeftClick);
 
   @Override
