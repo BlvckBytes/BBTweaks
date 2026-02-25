@@ -35,38 +35,20 @@ public abstract class PredicateMechanic<InstanceType extends MechanicInstance> e
 
   @EventHandler
   public void onPredicateGet(PredicateGetEvent event) {
-    var sign = getSignFromPredicateEvent(event);
+    var sign = getEditableSignFromPredicateEventAndAcknowledge(event);
 
     if (sign == null)
       return;
-
-    event.acknowledge();
-
-    if (!canEditSign(event.getPlayer(), sign)) {
-      event.setDeniedAccessBlock(sign.getBlock());
-      return;
-    }
-
-    event.setDataHoldingBlock(sign.getBlock());
 
     event.setResult(loadPredicateFromSign(sign));
   }
 
   @EventHandler
   public void onPredicateSet(PredicateSetEvent event) {
-    var sign = getSignFromPredicateEvent(event);
+    var sign = getEditableSignFromPredicateEventAndAcknowledge(event);
 
     if (sign == null)
       return;
-
-    event.acknowledge();
-
-    if (!canEditSign(event.getPlayer(), sign)) {
-      event.setDeniedAccessBlock(sign.getBlock());
-      return;
-    }
-
-    event.setDataHoldingBlock(sign.getBlock());
 
     setPredicateToSign(sign, event.getValue());
     reloadInstanceBySign(sign);
@@ -74,21 +56,12 @@ public abstract class PredicateMechanic<InstanceType extends MechanicInstance> e
 
   @EventHandler
   public void onPredicateRemove(PredicateRemoveEvent event) {
-    var sign = getSignFromPredicateEvent(event);
+    var sign = getEditableSignFromPredicateEventAndAcknowledge(event);
 
     if (sign == null)
       return;
 
     var currentPredicate = loadPredicateFromSign(sign);
-
-    event.acknowledge();
-
-    if (!canEditSign(event.getPlayer(), sign)) {
-      event.setDeniedAccessBlock(sign.getBlock());
-      return;
-    }
-
-    event.setDataHoldingBlock(sign.getBlock());
 
     event.setRemovedPredicate(currentPredicate);
 
@@ -144,14 +117,21 @@ public abstract class PredicateMechanic<InstanceType extends MechanicInstance> e
     sign.update(true, false);
   }
 
-  private @Nullable Sign getSignFromPredicateEvent(PredicateEvent predicateEvent) {
-    var block = predicateEvent.getBlock();
-
+  private @Nullable Sign getEditableSignFromPredicateEventAndAcknowledge(PredicateEvent event) {
+    var block = event.getBlock();
     var instance = instanceBySignPosition.get(block.getWorld(), block.getX(), block.getY(), block.getZ());
+    var sign = instance != null ? instance.getSign() : tryGetSignByAuxiliaryBlock(block);
 
-    if (instance != null)
-      return instance.getSign();
+    if (sign != null) {
+      event.acknowledge();
+      event.setDataHoldingBlock(sign.getBlock());
 
-    return tryGetSignByAuxiliaryBlock(block);
+      if (!canEditSign(event.getPlayer(), sign)) {
+        event.setDeniedAccessBlock(sign.getBlock());
+        return null;
+      }
+    }
+
+    return sign;
   }
 }
