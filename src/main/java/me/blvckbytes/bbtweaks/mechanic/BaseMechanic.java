@@ -34,9 +34,11 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
 
   protected final CacheByPosition<InstanceType> instanceBySignPosition;
 
-  private record LastInteraction(long timestamp, boolean result) {}
+  private record LastInteraction(int time, boolean result) {}
 
   private final Map<UUID, LastInteraction> lastInteractionByPlayerId;
+
+  private int currentTime;
 
   public BaseMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
     this.plugin = plugin;
@@ -46,6 +48,10 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     this.lastInteractionByPlayerId = new HashMap<>();
 
     config.registerReloadListener(this::_onConfigReload);
+  }
+
+  protected int getCurrentTime() {
+    return currentTime;
   }
 
   protected abstract void onConfigReload();
@@ -71,15 +77,14 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
 
     if (instance != null) {
       var lastInteraction = lastInteractionByPlayerId.get(player.getUniqueId());
-      var now = System.currentTimeMillis();
 
       // Debounce interaction-spam (break + interact, double-interact, etc. - no idea what's the underlying scheme with that...)
-      if (lastInteraction != null && now - lastInteraction.timestamp < 50)
+      if (lastInteraction != null && currentTime - lastInteraction.time <= 2)
         return lastInteraction.result;
 
       var result = onInstanceClick(player, instance, wasLeftClick);
 
-      lastInteractionByPlayerId.put(player.getUniqueId(), new LastInteraction(now, result));
+      lastInteractionByPlayerId.put(player.getUniqueId(), new LastInteraction(currentTime, result));
 
       return result;
     }
@@ -115,6 +120,8 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
 
   @Override
   public void tick(int time) {
+    currentTime = time;
+
     instanceBySignPosition.forEachValue(instance -> {
       if (!instance.tick(time)) {
         instance.getSign().getBlock().breakNaturally();

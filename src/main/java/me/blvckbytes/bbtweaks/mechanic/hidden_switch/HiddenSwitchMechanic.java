@@ -10,7 +10,6 @@ import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.util.InputView;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
-import me.blvckbytes.bbtweaks.mechanic.SignMechanicManager;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.bbtweaks.util.StringUtil;
@@ -43,7 +42,6 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
   private static final int OFFSET_VALUES_LINE_ID = 2;
   private static final int GRANTED_MESSAGE_LINE_ID = 3;
 
-  private final SignMechanicManager signMechanicManager;
   private final CacheByPosition<HiddenSwitchInstance> instanceByInteractionPosition;
   private final NamespacedKey keyItemsKey;
 
@@ -52,14 +50,9 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
   private final Map<UUID, HiddenSwitchInstance> openKeysInstanceByPlayerId;
   private final Map<UUID, OffsetSelecting> offsetSelectingByPlayerId;
 
-  public HiddenSwitchMechanic(
-    SignMechanicManager signMechanicManager,
-    Plugin plugin,
-    ConfigKeeper<MainSection> config
-  ) {
+  public HiddenSwitchMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
     super(plugin, config);
 
-    this.signMechanicManager = signMechanicManager;
     this.instanceByInteractionPosition = new CacheByPosition<>();
     this.keyItemsKey = new NamespacedKey(plugin, "key-items");
     this.openKeysInstanceByPlayerId = new HashMap<>();
@@ -98,7 +91,7 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
       return true;
     }
 
-    offsetSelectingByPlayerId.put(player.getUniqueId(), new OffsetSelecting(player, instance, signMechanicManager.getTime()));
+    offsetSelectingByPlayerId.put(player.getUniqueId(), new OffsetSelecting(player, instance, getCurrentTime()));
 
     config.rootSection.mechanic.hiddenSwitch.blockSelectionPrompt.sendMessage(
       player,
@@ -350,7 +343,7 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
     if (instance == null)
       return;
 
-    instance.interact(player, signMechanicManager.getTime());
+    instance.interact(player, getCurrentTime());
     event.setCancelled(true);
   }
 

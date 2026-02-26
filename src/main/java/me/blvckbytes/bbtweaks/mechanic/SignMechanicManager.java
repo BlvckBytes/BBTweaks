@@ -66,7 +66,7 @@ public class SignMechanicManager implements Listener {
     registerMechanic(new AutoDisposeMechanic(plugin, config));
     registerMechanic(new SignFlipperMechanic(plugin, config));
     registerMechanic(new HopperMechanic(plugin, config, predicateHelper));
-    registerMechanic(new HiddenSwitchMechanic(this, plugin, config));
+    registerMechanic(new HiddenSwitchMechanic(plugin, config));
 
     tickerTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 0, 1);
 
@@ -89,10 +89,6 @@ public class SignMechanicManager implements Listener {
     });
 
     signMechanicByDiscriminatorLower.clear();
-  }
-
-  public int getTime() {
-    return time;
   }
 
   private void tick() {
