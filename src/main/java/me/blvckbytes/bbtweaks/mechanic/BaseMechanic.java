@@ -16,27 +16,34 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.logging.Level;
 
-public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic<InstanceType> {
+public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic<InstanceType>, Listener {
 
   protected final Plugin plugin;
   protected final ConfigKeeper<MainSection> config;
 
   protected final CacheByPosition<InstanceType> instanceBySignPosition;
 
+  private record LastInteraction(long timestamp, boolean result) {}
+
+  private final Map<UUID, LastInteraction> lastInteractionByPlayerId;
+
   public BaseMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
     this.plugin = plugin;
     this.config = config;
 
     this.instanceBySignPosition = new CacheByPosition<>();
+    this.lastInteractionByPlayerId = new HashMap<>();
 
     config.registerReloadListener(this::_onConfigReload);
   }
@@ -62,10 +69,27 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
   public boolean onSignClick(Player player, Sign sign, boolean wasLeftClick) {
     var instance = instanceBySignPosition.get(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ());
 
-    if (instance != null)
-      return onInstanceClick(player, instance, wasLeftClick);
+    if (instance != null) {
+      var lastInteraction = lastInteractionByPlayerId.get(player.getUniqueId());
+      var now = System.currentTimeMillis();
+
+      // Debounce interaction-spam (break + interact, double-interact, etc. - no idea what's the underlying scheme with that...)
+      if (lastInteraction != null && now - lastInteraction.timestamp < 50)
+        return lastInteraction.result;
+
+      var result = onInstanceClick(player, instance, wasLeftClick);
+
+      lastInteractionByPlayerId.put(player.getUniqueId(), new LastInteraction(now, result));
+
+      return result;
+    }
 
     return false;
+  }
+
+  @EventHandler
+  public void onQuit(PlayerQuitEvent event) {
+    lastInteractionByPlayerId.remove(event.getPlayer().getUniqueId());
   }
 
   public boolean isSignRegistered(Sign sign) {
