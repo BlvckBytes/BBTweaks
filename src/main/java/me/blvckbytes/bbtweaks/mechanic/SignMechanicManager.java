@@ -89,9 +89,30 @@ public class SignMechanicManager implements Listener {
     signMechanicByDiscriminatorLower.clear();
   }
 
+  public int getTime() {
+    return time;
+  }
+
   private void tick() {
     ++time;
     signMechanicByDiscriminatorLower.values().forEach(mechanic -> mechanic.tick(time));
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onBlockPlace(BlockPlaceEvent event) {
+    var block = event.getBlock();
+    var blockType = block.getType();
+
+    if (!Tag.WALL_SIGNS.isTagged(blockType))
+      return;
+
+    if (!(block.getState() instanceof Sign sign))
+      return;
+
+    correspondSign(sign, mechanic -> {
+      if (mechanic.onSignClick(event.getPlayer(), sign, false))
+        event.setCancelled(true);
+    });
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -105,13 +126,20 @@ public class SignMechanicManager implements Listener {
     if (!(block.getState() instanceof Sign sign))
       return;
 
-    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-      // Ensure that the block has actually been altered - many plugins like to misuse this event for permission-checks
-      if (blockType == block.getType())
+    correspondSign(sign, mechanic -> {
+      if (mechanic.onSignClick(event.getPlayer(), sign, true)) {
+        event.setCancelled(true);
         return;
+      }
 
-      correspondSign(sign, mechanic -> mechanic.onSignDestroy(event.getPlayer(), sign));
-    }, 1);
+      Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        // Ensure that the block has actually been altered - many plugins like to misuse this event for permission-checks
+        if (blockType == block.getType())
+          return;
+
+        mechanic.onSignDestroy(event.getPlayer(), sign);
+      }, 1);
+    });
   }
 
   @EventHandler(ignoreCancelled = true)
