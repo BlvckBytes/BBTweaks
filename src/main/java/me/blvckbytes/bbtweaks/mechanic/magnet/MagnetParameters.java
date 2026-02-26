@@ -4,9 +4,9 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.StringUtil;
 import org.bukkit.block.Sign;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.IntSupplier;
@@ -69,13 +69,13 @@ public class MagnetParameters {
   }
 
   public void read() {
-    var extentsTokens = getTokens(SignUtil.getPlainTextLine(sign, EXTENTS_LINE_INDEX));
+    var extentsTokens = StringUtil.getTokens(SignUtil.getPlainTextLine(sign, EXTENTS_LINE_INDEX));
 
     extentX.readFromToken(getOrEmpty(extentsTokens, 0));
     extentY.readFromToken(getOrEmpty(extentsTokens, 1));
     extentZ.readFromToken(getOrEmpty(extentsTokens, 2));
 
-    var offsetsTokens = getTokens(SignUtil.getPlainTextLine(sign, OFFSETS_LINE_INDEX));
+    var offsetsTokens = StringUtil.getTokens(SignUtil.getPlainTextLine(sign, OFFSETS_LINE_INDEX));
 
     offsetX.readFromToken(getOrEmpty(offsetsTokens, 0));
     offsetY.readFromToken(getOrEmpty(offsetsTokens, 1));
@@ -111,32 +111,5 @@ public class MagnetParameters {
 
   private ParameterClamp clampMinNegativeSupplierExclusiveMaxZero(IntSupplier min) {
     return value -> Math.max(-(min.getAsInt() - 1), Math.min(value, 0));
-  }
-
-  private List<String> getTokens(String input) {
-    var result = new ArrayList<String>();
-    var tokenBeginIndex = -1;
-
-    for (var charIndex = 0; charIndex < input.length(); ++charIndex) {
-      var currentChar = input.charAt(charIndex);
-      var isWhitespace = Character.isWhitespace(currentChar);
-
-      if (isWhitespace) {
-        if (tokenBeginIndex < 0)
-          continue;
-
-        result.add(input.substring(tokenBeginIndex, charIndex));
-        tokenBeginIndex = -1;
-        continue;
-      }
-
-      if (tokenBeginIndex < 0)
-        tokenBeginIndex = charIndex;
-    }
-
-    if (tokenBeginIndex >= 0)
-      result.add(input.substring(tokenBeginIndex));
-
-    return result;
   }
 }
