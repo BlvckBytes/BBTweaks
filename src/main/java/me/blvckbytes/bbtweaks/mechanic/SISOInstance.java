@@ -9,7 +9,7 @@ import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Powerable;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Objects;
+import java.util.*;
 
 public abstract class SISOInstance implements MechanicInstance {
 
@@ -26,15 +26,37 @@ public abstract class SISOInstance implements MechanicInstance {
   private @Nullable Block cachedOutputBlock;
   private @Nullable Powerable cachedOutputBlockData;
 
+  private final List<Block> availableOutputBlocks;
+
   private boolean lastOutputState;
   private boolean isInitialWrite = true;
 
-  public SISOInstance(Sign sign) {
+  public SISOInstance(Sign sign, SISOFlag... flags) {
     this.sign = sign;
 
     this.signFacing = ((Directional) sign.getBlockData()).getFacing();
     this.mountBlock = sign.getBlock().getRelative(signFacing.getOppositeFace());
     this.inputBlock = sign.getBlock().getRelative(signFacing);
+
+    this.availableOutputBlocks = new ArrayList<>();
+
+    for (var face : DIRECT_FACES)
+      availableOutputBlocks.add(mountBlock.getRelative(face));
+
+    var flagSet = flags.length == 0 ? EnumSet.noneOf(SISOFlag.class) : EnumSet.of(flags[0], flags);
+
+    if (flagSet.contains(SISOFlag.ALLOW_OUTPUT_ON_SIGN_PLANE)) {
+      availableOutputBlocks.add(sign.getBlock().getRelative(BlockFace.UP));
+      availableOutputBlocks.add(sign.getBlock().getRelative(BlockFace.DOWN));
+
+      if (signFacing == BlockFace.NORTH || signFacing == BlockFace.SOUTH) {
+        availableOutputBlocks.add(sign.getBlock().getRelative(BlockFace.EAST));
+        availableOutputBlocks.add(sign.getBlock().getRelative(BlockFace.WEST));
+      } else if (signFacing == BlockFace.EAST || signFacing == BlockFace.WEST) {
+        availableOutputBlocks.add(sign.getBlock().getRelative(BlockFace.NORTH));
+        availableOutputBlocks.add(sign.getBlock().getRelative(BlockFace.SOUTH));
+      }
+    }
   }
 
   @Override
@@ -141,15 +163,10 @@ public abstract class SISOInstance implements MechanicInstance {
       cachedOutputBlock = null;
     }
 
-    for (var face : DIRECT_FACES) {
-      if (face == signFacing)
-        continue;
-
-      var possibleOutputBlock = mountBlock.getRelative(face);
-
-      if (isValidLeverBlock(possibleOutputBlock)) {
-        cachedOutputBlock = possibleOutputBlock;
-        cachedOutputBlockData = (Powerable) possibleOutputBlock.getBlockData();
+    for (var availableOutputBlock : availableOutputBlocks) {
+      if (isValidLeverBlock(availableOutputBlock)) {
+        cachedOutputBlock = availableOutputBlock;
+        cachedOutputBlockData = (Powerable) availableOutputBlock.getBlockData();
         return;
       }
     }
