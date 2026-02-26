@@ -53,6 +53,8 @@ permissions:
     description: 'Use the auto-dispose mechanic'
   bbtweaks.mechanic.sign-flipper:
     description: 'Use the sign-flipper mechanic'
+  bbtweaks.mechanic.hopper:
+    description: 'Use the hopper mechanic'
   bbtweaks.markers:
     description: 'Browse all available markers'
   bbtweaks.setmarker:
