@@ -306,6 +306,27 @@ mechanic:
     notOnAHopper: '{lut.mechanic_prefix} <&c>Ein Hopper-Schild kann nur direkt auf einem Trichter angebracht werden!'
     multipleHoppers: '{lut.mechanic_prefix} <&c>Auf dem Trichter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein Hopper-Schild!'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Hopper <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
+  hiddenSwitch:
+    onTimeDurationTicks: 30
+    maximumAxisOffset: 10
+    offsetSelectingTimeoutSeconds: 15
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen Hidden-Switch zu erstellen!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Hidden-Switch <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
+    cannotEditSign: '{lut.mechanic_prefix} <&c>Du hast keinen Zugriff auf dieses Schild!'
+    anotherIsEditing: '{lut.mechanic_prefix} <&c>Ein anderer Spieler editiert bereits die Schlüssel!'
+    keysInventoryOpening: '{lut.mechanic_prefix} <&7>Du kannst nun die <&a>Schlüssel <&7>des Hidden-Switch bei <&a>{x} {y} {z} <&7>editieren; aktuelle Anzahl: <&a>{key_count}<&7>.'
+    keysInventoryClosing: '{lut.mechanic_prefix} <&7>Speichere <&a>{key_count} Schlüssel <&7>des Hidden-Switch bei <&a>{x} {y} {z}<&7>.'
+    destroyedWhileInInventory: '{lut.mechanic_prefix} <&c>Der Hidden-Switch bei <&4>{x} {y} {z} <&c>wurde <&4>zerstört<&c>; breche die Bearbeitung ab!'
+    blockSelectionPrompt: '{lut.mechanic_prefix} <&7>Wähle den gewünschten <&a>Schalter-Block <&7>des Hidden-Switch bei <&a>{x} {y} {z} <&7>durch klicken innerhalb <&a>{timeout}s <&7>aus!'
+    blockSelectionTimeout: '{lut.mechanic_prefix} <&c>Breche Auswahl eines <&4>Schalter-Blocks <&c>des Hidden-Switch bei <&4>{x} {y} {z} <&c>aufgrund von Inaktivität (<&4>{timeout}s<&c>) ab!'
+    blockSelectionSuccess: '{lut.mechanic_prefix} <&7>Der Hidden-Switch bei <&a>{x} {y} {z} <&7>benutzt nun die offsets <&a>{x_offset} {y_offset} {z_offset}<&7>.'
+    malformedGrantedMessage: '{lut.mechanic_prefix} <&c>Die "Zugang Gewährt"-Nachricht (4. Zeile) ist fehlerhaft: <&4>{error_message} (Zeichen #{error_position})'
+    malformedDeniedMessage: '{lut.mechanic_prefix} <&c>Die "Zugang Verweigert"-Nachricht (1. Zeile) ist fehlerhaft: <&4>{error_message} (Zeichen #{error_position})'
+    axisOffsetLimitExceeded: '{lut.mechanic_prefix} <&c>Die Limitierung von <&4>{limit} <&c>des offsets pro Achse wurde überschritten!'
+    triedBindingToSign: '{lut.mechanic_prefix} <&c>Das Schild selbst kann nicht als Schalter-Block benutzt werden!'
+    keysInventoryTitle: '<&8>[HiddenSwitch]-Schlüssel'
+    defaultGrantedMessage: '<&6>Du hörst das dumpfe Klicken eines Schalters!'
+    defaultDeniedMessage: '<&c>Du hältst keinen autorisierten Schlüssel in der Hand!'
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'

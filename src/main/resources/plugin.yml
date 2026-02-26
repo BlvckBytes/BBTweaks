@@ -55,6 +55,8 @@ permissions:
     description: 'Use the sign-flipper mechanic'
   bbtweaks.mechanic.hopper:
     description: 'Use the hopper mechanic'
+  bbtweaks.mechanic.hidden-switch:
+    description: 'Use the hidden-switch mechanic'
   bbtweaks.markers:
     description: 'Browse all available markers'
   bbtweaks.setmarker:
