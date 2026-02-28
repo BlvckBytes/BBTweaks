@@ -4,7 +4,7 @@ version: ${project.version}
 author: BlvckBytes
 api-version: 1.21
 depend: [ItemPredicateParser, WorldGuard]
-softdepend: [mcMMO, floodgate]
+softdepend: [mcMMO, floodgate, CraftBook]
 commands:
   bbtweaks:
     description: 'Administrative base-command of this plugin'

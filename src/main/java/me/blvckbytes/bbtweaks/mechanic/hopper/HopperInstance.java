@@ -2,16 +2,18 @@ package me.blvckbytes.bbtweaks.mechanic.hopper;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegration;
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.type.Hopper;
 import org.bukkit.inventory.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 
 public class HopperInstance extends SISOInstance {
 
@@ -33,10 +35,6 @@ public class HopperInstance extends SISOInstance {
     this.predicate = predicate;
     this.itemCompatibilities = itemCompatibilities;
     this.config = config;
-  }
-
-  public Block getMountBlock() {
-    return mountBlock;
   }
 
   @Override
@@ -98,15 +96,30 @@ public class HopperInstance extends SISOInstance {
     if (!isBlockLoaded(destinationBlock))
       return true;
 
-    if (!(destinationBlock.getState() instanceof InventoryHolder destinationInventoryHolder))
-      return true;
-
     var sourceItem = sourceInventory.getItem(sourceSlot);
 
     if (sourceItem == null)
       return true;
 
-    var remainingAmount = tryTransportItemAndGetRemainder(destinationInventoryHolder.getInventory(), destinationBlock.getType(), sourceItem, hopperFacing);
+    int remainingAmount;
+
+    if (destinationBlock.getState() instanceof InventoryHolder destinationInventoryHolder)
+      remainingAmount = tryTransportItemAndGetRemainder(destinationInventoryHolder.getInventory(), destinationBlock.getType(), sourceItem, hopperFacing);
+
+    else if (destinationBlock.getType() == Material.STICKY_PISTON) {
+      var transportedItems = new ArrayList<ItemStack>(1);
+      transportedItems.add(sourceItem);
+
+      var leftovers = CraftBookIntegration.INSTANCE.requestPipeAndGetLeftovers(destinationBlock, transportedItems);
+
+      remainingAmount = 0;
+
+      for (var item : leftovers)
+        remainingAmount += item.getAmount();
+    }
+
+    else
+      return true;
 
     if (remainingAmount == sourceItem.getAmount())
       return true;

@@ -12,6 +12,7 @@ import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
+import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegration;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.main_command.MainCommand;
 import me.blvckbytes.bbtweaks.markers_menu.MarkersCommand;
@@ -174,6 +175,8 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       updateCommands.run();
       config.registerReloadListener(updateCommands);
+
+      getServer().getPluginManager().registerEvents(CraftBookIntegration.INSTANCE, this);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);
