@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.*;
 import org.bukkit.block.data.AnaloguePowerable;
+import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.Powerable;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,7 @@ public abstract class SISOInstance implements MechanicInstance {
   protected final Sign sign;
   protected final BlockFace signFacing;
   protected final Block mountBlock;
+  private final BlockData mountBlockData;
   protected final Block inputBlock;
 
   private @Nullable Block cachedOutputBlock;
@@ -36,6 +38,7 @@ public abstract class SISOInstance implements MechanicInstance {
 
     this.signFacing = ((Directional) sign.getBlockData()).getFacing();
     this.mountBlock = sign.getBlock().getRelative(signFacing.getOppositeFace());
+    this.mountBlockData = mountBlock.getBlockData();
     this.inputBlock = sign.getBlock().getRelative(signFacing);
 
     this.availableOutputBlocks = new ArrayList<>();
@@ -142,6 +145,10 @@ public abstract class SISOInstance implements MechanicInstance {
 
     cachedOutputBlockData.setPowered(state);
     cachedOutputBlock.setBlockData(cachedOutputBlockData);
+
+    // Force the mount-block to recalculate its power-state; sadly, this is the only known way.
+    mountBlock.setType(Material.BARRIER);
+    mountBlock.setBlockData(mountBlockData);
   }
 
   protected boolean getLastOutputState() {
