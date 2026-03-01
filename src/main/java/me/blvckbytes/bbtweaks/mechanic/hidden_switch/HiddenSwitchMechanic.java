@@ -15,6 +15,7 @@ import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.bbtweaks.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
@@ -23,7 +24,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
@@ -306,45 +311,32 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
     if (clickedBlock == null)
       return;
 
-    var player = event.getPlayer();
-    var offsetSelecting = offsetSelectingByPlayerId.remove(player.getUniqueId());
-
-    if (offsetSelecting != null) {
+    if (handleInteraction(event.getPlayer(), clickedBlock.getLocation()))
       event.setCancelled(true);
+  }
 
-      var mountBlock = offsetSelecting.instance.getMountBlock();
+  @EventHandler
+  public void onInteractEntity(PlayerInteractEntityEvent event) {
+    if (handleInteraction(event.getPlayer(), event.getRightClicked().getLocation()))
+      event.setCancelled(true);
+  }
 
-      var xOffset = clickedBlock.getX() - mountBlock.getX();
-      var yOffset = clickedBlock.getY() - mountBlock.getY();
-      var zOffset = clickedBlock.getZ() - mountBlock.getZ();
+  @EventHandler
+  public void onHangingBreak(HangingBreakEvent event) {
+    if (handleInteraction(null, event.getEntity().getLocation()))
+      event.setCancelled(true);
+  }
 
-      var sign = offsetSelecting.instance.getSign();
+  @EventHandler
+  public void onDamageByEntity(EntityDamageByEntityEvent event) {
+    if (handleInteraction(event.getDamager() instanceof Player player ? player : null, event.getEntity().getLocation()))
+      event.setCancelled(true);
+  }
 
-      if (areOffsetsInvalid(player, sign, xOffset, yOffset, zOffset))
-        return;
-
-      sign.getSide(Side.FRONT).line(OFFSET_VALUES_LINE_ID, Component.text(xOffset + " " + yOffset + " " + zOffset));
-      sign.update(true, false);
-      reloadInstanceBySign(sign);
-
-      config.rootSection.mechanic.hiddenSwitch.blockSelectionSuccess.sendMessage(
-        player,
-        getSignEnvironment(offsetSelecting.instance.getSign())
-          .withVariable("x_offset", xOffset)
-          .withVariable("y_offset", yOffset)
-          .withVariable("z_offset", zOffset)
-      );
-
-      return;
-    }
-
-    var instance = instanceByInteractionPosition.get(clickedBlock.getWorld(), clickedBlock.getX(), clickedBlock.getY(), clickedBlock.getZ());
-
-    if (instance == null)
-      return;
-
-    instance.interact(player, getCurrentTime());
-    event.setCancelled(true);
+  @EventHandler
+  public void onDamage(EntityDamageEvent event) {
+    if (handleInteraction(null, event.getEntity().getLocation()))
+      event.setCancelled(true);
   }
 
   @EventHandler
@@ -383,6 +375,53 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
     var playerId = event.getPlayer().getUniqueId();
     openKeysInstanceByPlayerId.remove(playerId);
     offsetSelectingByPlayerId.remove(playerId);
+  }
+
+  private boolean handleOffsetSelecting(Player player, Location location) {
+    var offsetSelecting = offsetSelectingByPlayerId.remove(player.getUniqueId());
+
+    if (offsetSelecting == null)
+      return false;
+
+    var mountBlock = offsetSelecting.instance.getMountBlock();
+
+    var xOffset = location.getBlockX() - mountBlock.getX();
+    var yOffset = location.getBlockY() - mountBlock.getY();
+    var zOffset = location.getBlockZ() - mountBlock.getZ();
+
+    var sign = offsetSelecting.instance.getSign();
+
+    if (areOffsetsInvalid(player, sign, xOffset, yOffset, zOffset))
+      return true;
+
+    sign.getSide(Side.FRONT).line(OFFSET_VALUES_LINE_ID, Component.text(xOffset + " " + yOffset + " " + zOffset));
+    sign.update(true, false);
+    reloadInstanceBySign(sign);
+
+    config.rootSection.mechanic.hiddenSwitch.blockSelectionSuccess.sendMessage(
+      player,
+      getSignEnvironment(offsetSelecting.instance.getSign())
+        .withVariable("x_offset", xOffset)
+        .withVariable("y_offset", yOffset)
+        .withVariable("z_offset", zOffset)
+    );
+
+    return true;
+  }
+
+  private boolean handleInteraction(@Nullable Player player, Location location) {
+    if (player != null && handleOffsetSelecting(player, location))
+      return true;
+
+    var instance = instanceByInteractionPosition.get(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+
+    if (instance == null)
+      return false;
+
+    if (player != null)
+      instance.interact(player, getCurrentTime());
+
+    return true;
   }
 
   private void storeKeyItemsToPDC(Sign sign, Inventory keysInventory) {
