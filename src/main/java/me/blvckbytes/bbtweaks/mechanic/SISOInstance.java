@@ -4,10 +4,7 @@ import me.blvckbytes.bbtweaks.util.BooleanConsumer;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.*;
-import org.bukkit.block.data.AnaloguePowerable;
-import org.bukkit.block.data.BlockData;
-import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.Powerable;
+import org.bukkit.block.data.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -145,6 +142,12 @@ public abstract class SISOInstance implements MechanicInstance {
 
     cachedOutputBlockData.setPowered(state);
     cachedOutputBlock.setBlockData(cachedOutputBlockData);
+
+    if (mountBlockData instanceof Lightable lightable)
+      lightable.setLit(state);
+
+    if (mountBlockData instanceof Powerable powerable)
+      powerable.setPowered(state);
 
     // Force the mount-block to recalculate its power-state; sadly, this is the only known way.
     mountBlock.setType(Material.BARRIER);
