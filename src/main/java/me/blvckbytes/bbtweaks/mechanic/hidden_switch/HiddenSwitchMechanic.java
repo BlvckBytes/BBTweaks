@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.mechanic.hidden_switch;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
+import at.blvckbytes.cm_mapper.section.command.CommandUpdater;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
@@ -14,12 +15,12 @@ import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.bbtweaks.util.StringUtil;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.NamespacedKey;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
+import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -34,7 +35,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -49,19 +50,98 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
 
   private final CacheByPosition<HiddenSwitchInstance> instanceByInteractionPosition;
   private final NamespacedKey keyItemsKey;
+  private final NamespacedKey passwordKey;
 
-  private record OffsetSelecting(Player player, HiddenSwitchInstance instance, int creationTime) {}
+  private record InstanceSession(Player player, HiddenSwitchInstance instance, int creationTime) {}
 
   private final Map<UUID, HiddenSwitchInstance> openKeysInstanceByPlayerId;
-  private final Map<UUID, OffsetSelecting> offsetSelectingByPlayerId;
+  private final Map<UUID, InstanceSession> offsetSelectingByPlayerId;
+  private final Map<UUID, InstanceSession> passwordPromptByPlayerId;
 
-  public HiddenSwitchMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
+  private final PluginCommand passwordCommand;
+
+  public HiddenSwitchMechanic(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
     super(plugin, config);
 
+    Objects.requireNonNull(plugin.getCommand("hiddenswitch")).setExecutor(new HiddenSwitchCommand(this, config));
+
+    this.passwordCommand = Objects.requireNonNull(plugin.getCommand(PasswordCommandSection.INITIAL_NAME));
+    passwordCommand.setExecutor(new PasswordCommand(this, config));
+
+    var commandUpdater = new CommandUpdater(plugin);
+
+    Runnable updateCommands = () -> {
+      config.rootSection.mechanic.hiddenSwitch.passwordCommand.apply(passwordCommand, commandUpdater);
+      commandUpdater.trySyncCommands();
+    };
+
+    updateCommands.run();
+    config.registerReloadListener(updateCommands);
+
     this.instanceByInteractionPosition = new CacheByPosition<>();
+
     this.keyItemsKey = new NamespacedKey(plugin, "key-items");
+    this.passwordKey = new NamespacedKey(plugin, "password");
+
     this.openKeysInstanceByPlayerId = new HashMap<>();
     this.offsetSelectingByPlayerId = new HashMap<>();
+    this.passwordPromptByPlayerId = new HashMap<>();
+  }
+
+  private Block getLookedAtSignBlock(Player player) {
+    //noinspection UnstableApiUsage
+    var rayTraceResult = player.getWorld().rayTraceBlocks(
+      player.getEyeLocation(),
+      player.getEyeLocation().getDirection(),
+      5.0,
+      FluidCollisionMode.NEVER,
+      false,
+      block -> Tag.WALL_SIGNS.isTagged(block.getType())
+    );
+
+    if (rayTraceResult == null || rayTraceResult.getHitBlock() == null)
+      return player.getEyeLocation().getBlock();
+
+    return rayTraceResult.getHitBlock();
+  }
+
+  public @Nullable HiddenSwitchInstance getLookedAtInstance(Player player) {
+    var block = getLookedAtSignBlock(player);
+
+    return instanceBySignPosition.get(block.getWorld(), block.getX(), block.getY(), block.getZ());
+  }
+
+  public @Nullable String updatePasswordAndGetPriorValue(HiddenSwitchInstance instance, @Nullable String password) {
+    var sign = instance.getSign();
+    var pdc = sign.getPersistentDataContainer();
+
+    var priorValue = pdc.get(passwordKey, PersistentDataType.STRING);
+
+    if (password == null)
+      pdc.remove(passwordKey);
+    else
+      pdc.set(passwordKey, PersistentDataType.STRING, password);
+
+    sign.update(true, false);
+
+    reloadInstanceBySign(instance.getSign());
+
+    return priorValue;
+  }
+
+  public PasswordResult onPasswordInput(Player player, String password) {
+    var session = passwordPromptByPlayerId.get(player.getUniqueId());
+
+    if (session == null)
+      return PasswordResult.NO_ACTIVE_PROMPT;
+
+    if (!password.equals(session.instance.password))
+      return PasswordResult.WRONG_PASSWORD;
+
+    session.instance.interactAndSendMessage(player, getCurrentTime());
+    passwordPromptByPlayerId.remove(player.getUniqueId());
+
+    return PasswordResult.SUCCESS;
   }
 
   @Override
@@ -96,7 +176,7 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
       return true;
     }
 
-    offsetSelectingByPlayerId.put(player.getUniqueId(), new OffsetSelecting(player, instance, getCurrentTime()));
+    offsetSelectingByPlayerId.put(player.getUniqueId(), new InstanceSession(player, instance, getCurrentTime()));
 
     config.rootSection.mechanic.hiddenSwitch.blockSelectionPrompt.sendMessage(
       player,
@@ -156,7 +236,9 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
       }
     }
 
-    var instance = new HiddenSwitchInstance(sign, keysInventory, xOffset, yOffset, zOffset, grantedMessage, deniedMessage, config);
+    var password = sign.getPersistentDataContainer().get(passwordKey, PersistentDataType.STRING);
+
+    var instance = new HiddenSwitchInstance(sign, keysInventory, xOffset, yOffset, zOffset, grantedMessage, deniedMessage, password, config);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
@@ -283,19 +365,31 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
   public void tick(int time) {
     super.tick(time);
 
-    var timeoutSeconds = config.rootSection.mechanic.hiddenSwitch.offsetSelectingTimeoutSeconds;
+    handleSessionTimeouts(
+      offsetSelectingByPlayerId, time,
+      config.rootSection.mechanic.hiddenSwitch.offsetSelectingTimeoutSeconds,
+      config.rootSection.mechanic.hiddenSwitch.blockSelectionTimeout
+    );
 
-    for (var iterator = offsetSelectingByPlayerId.values().iterator(); iterator.hasNext();) {
-      var offsetSelecting = iterator.next();
+    handleSessionTimeouts(
+      passwordPromptByPlayerId, time,
+      config.rootSection.mechanic.hiddenSwitch.passwordPromptTimeoutSeconds,
+      config.rootSection.mechanic.hiddenSwitch.passwordPromptTimeout
+    );
+  }
 
-      if (time - offsetSelecting.creationTime < timeoutSeconds * 20)
+  private void handleSessionTimeouts(Map<?, InstanceSession> sessionMap, int time, int timeoutSeconds, ComponentMarkup timeoutMessage) {
+    for (var iterator = sessionMap.values().iterator(); iterator.hasNext();) {
+      var session = iterator.next();
+
+      if (time - session.creationTime < timeoutSeconds * 20)
         continue;
 
       iterator.remove();
 
-      config.rootSection.mechanic.hiddenSwitch.blockSelectionTimeout.sendMessage(
-        offsetSelecting.player,
-        getSignEnvironment(offsetSelecting.instance.getSign())
+      timeoutMessage.sendMessage(
+        session.player,
+        getSignEnvironment(session.instance.getSign())
           .withVariable("timeout", timeoutSeconds)
       );
     }
@@ -418,8 +512,30 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
     if (instance == null)
       return false;
 
-    if (player != null)
-      instance.interact(player, getCurrentTime());
+    if (player == null)
+      return true;
+
+    if (instance.testKeyForFailureAndSendMessage(player))
+      return true;
+
+    if (instance.password == null) {
+      instance.interactAndSendMessage(player, getCurrentTime());
+      return true;
+    }
+
+    passwordPromptByPlayerId.put(player.getUniqueId(), new InstanceSession(player, instance, getCurrentTime()));
+
+    var labels = new ArrayList<>(passwordCommand.getAliases());
+    labels.add(passwordCommand.getName());
+
+    config.rootSection.mechanic.hiddenSwitch.passwordPrompt.sendMessage(
+      player,
+      new InterpretationEnvironment()
+        .withVariable("command", passwordCommand.getName())
+        .withVariable("aliases", passwordCommand.getAliases())
+        .withVariable("labels", labels)
+        .withVariable("timeout", config.rootSection.mechanic.hiddenSwitch.passwordPromptTimeoutSeconds)
+    );
 
     return true;
   }

@@ -21,6 +21,7 @@ public class HiddenSwitchInstance extends SISOInstance {
   public final Location interactionPosition;
   private final ComponentMarkup grantedMessage;
   private final ComponentMarkup deniedMessage;
+  public final @Nullable String password;
   private final ConfigKeeper<MainSection> config;
   private final boolean hasKeys;
 
@@ -33,6 +34,7 @@ public class HiddenSwitchInstance extends SISOInstance {
     int xOffset, int yOffset, int zOffset,
     @Nullable ComponentMarkup grantedMessage,
     @Nullable ComponentMarkup deniedMessage,
+    @Nullable String password,
     ConfigKeeper<MainSection> config
   ) {
     super(sign, SISOFlag.ALLOW_OUTPUT_ON_SIGN_PLANE);
@@ -41,6 +43,7 @@ public class HiddenSwitchInstance extends SISOInstance {
     this.interactionPosition = getMountBlock().getLocation().add(xOffset, yOffset, zOffset);
     this.grantedMessage = grantedMessage == null ? config.rootSection.mechanic.hiddenSwitch.defaultGrantedMessage : grantedMessage;
     this.deniedMessage = deniedMessage == null ? config.rootSection.mechanic.hiddenSwitch.defaultDeniedMessage : deniedMessage;
+    this.password = password;
     this.config = config;
     this.hasKeys = Arrays.stream(keysInventory.getContents()).anyMatch(it -> it != null && !it.getType().isAir());
   }
@@ -66,24 +69,23 @@ public class HiddenSwitchInstance extends SISOInstance {
     return true;
   }
 
-  public void interact(Player player, int time) {
-    if (lastInteractTime > 0 && time - lastInteractTime < 5)
-      return;
+  public boolean testKeyForFailureAndSendMessage(Player player) {
+    var didFail = _testKeyForFailureAndSendMessage(player);
 
-    lastInteractTime = time;
+    if (didFail)
+      sendMessage(player, deniedMessage);
 
-    if (!hasKeys) {
-      lastSuccessfulInteractTime = time;
-      sendMessage(player, grantedMessage);
-      return;
-    }
+    return didFail;
+  }
+
+  private boolean _testKeyForFailureAndSendMessage(Player player) {
+    if (!hasKeys)
+      return false;
 
     var item = player.getInventory().getItemInMainHand();
 
-    if (item.getType().isAir()) {
-      sendMessage(player, deniedMessage);
-      return;
-    }
+    if (item.getType().isAir())
+      return true;
 
     for (var slotIndex = 0; slotIndex < keysInventory.getSize(); ++slotIndex) {
       var currentItem = keysInventory.getItem(slotIndex);
@@ -91,14 +93,21 @@ public class HiddenSwitchInstance extends SISOInstance {
       if (currentItem == null)
         continue;
 
-      if (currentItem.isSimilar(item)) {
-        lastSuccessfulInteractTime = time;
-        sendMessage(player, grantedMessage);
-        return;
-      }
+      if (currentItem.isSimilar(item))
+        return false;
     }
 
-    sendMessage(player, deniedMessage);
+    return true;
+  }
+
+  public void interactAndSendMessage(Player player, int time) {
+    if (lastInteractTime > 0 && time - lastInteractTime < 5)
+      return;
+
+    lastInteractTime = time;
+    lastSuccessfulInteractTime = time;
+
+    sendMessage(player, grantedMessage);
   }
 
   private void sendMessage(Player player, ComponentMarkup message) {

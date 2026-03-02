@@ -34,6 +34,12 @@ commands:
   setmarker:
     description: 'Set a marker to your current location by its name'
     permission: bbtweaks.setmarker
+  hiddenswitch:
+    description: 'Interact with the parameters of a hidden-switch'
+    permission: bbtweaks.mechanic.hidden-switch
+  password:
+    description: 'Respond to password-prompts of the hidden-switch mechanic'
+    permission: bbtweaks.mechanic.hidden-switch
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

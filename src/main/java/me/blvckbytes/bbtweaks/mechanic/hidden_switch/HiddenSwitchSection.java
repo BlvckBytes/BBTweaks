@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.mechanic.hidden_switch;
 
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import at.blvckbytes.cm_mapper.mapper.MappingError;
+import at.blvckbytes.cm_mapper.mapper.section.CSAlways;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
@@ -11,10 +12,26 @@ import java.util.List;
 
 public class HiddenSwitchSection extends ConfigSection {
 
+  public @CSAlways PasswordCommandSection passwordCommand;
   public int onTimeDurationTicks;
   public int maximumAxisOffset;
   public int offsetSelectingTimeoutSeconds;
+  public int passwordPromptTimeoutSeconds;
   public ComponentMarkup noPermission;
+  public ComponentMarkup commandPlayerOnly;
+  public ComponentMarkup commandUsage;
+  public ComponentMarkup commandNotLookingAtInstance;
+  public ComponentMarkup commandGetPassword;
+  public ComponentMarkup commandGetPasswordNone;
+  public ComponentMarkup commandSetPassword;
+  public ComponentMarkup commandSetPasswordMissingValue;
+  public ComponentMarkup commandRemoveNoneSet;
+  public ComponentMarkup commandRemovePassword;
+  public ComponentMarkup commandPasswordMissingValue;
+  public ComponentMarkup commandPasswordNoPrompt;
+  public ComponentMarkup commandPasswordWrongPassword;
+  public ComponentMarkup passwordPrompt;
+  public ComponentMarkup passwordPromptTimeout;
   public ComponentMarkup creationSuccess;
   public ComponentMarkup cannotEditSign;
   public ComponentMarkup anotherIsEditing;

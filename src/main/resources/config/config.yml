@@ -307,10 +307,29 @@ mechanic:
     multipleHoppers: '{lut.mechanic_prefix} <&c>Auf dem Trichter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein Hopper-Schild!'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Hopper <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
   hiddenSwitch:
+    passwordCommand:
+      name: password
+      aliases:
+        - pw
     onTimeDurationTicks: 30
     maximumAxisOffset: 10
     offsetSelectingTimeoutSeconds: 15
+    passwordPromptTimeoutSeconds: 20
     noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen Hidden-Switch zu erstellen!'
+    commandPlayerOnly: '{lut.mechanic_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+    commandUsage: '{lut.mechanic_prefix} <&c>Benutze: /{label} \<<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>>'
+    commandNotLookingAtInstance: '{lut.mechanic_prefix} <&c>Du schaust gerade keinen aktiven Hidden-Switch an!'
+    commandGetPassword: '{lut.mechanic_prefix} <&7>Der Hidden-Switch bei <&a>{x} {y} {z} <&7>hat das Passwort "<&a>{password}<&7>" gesetzt.'
+    commandGetPasswordNone: '{lut.mechanic_prefix} <&7>Der Hidden-Switch bei <&a>{x} {y} {z} <&7>hat <&a>kein <&7>Passwort gesetzt.'
+    commandSetPassword: '{lut.mechanic_prefix} <&7>Das Passwort "<&a>{password}<&7>" wurde am Hidden-Switch bei <&a>{x} {y} {z} <&7>gesetzt.'
+    commandSetPasswordMissingValue: '{lut.mechanic_prefix} <&c>Bitte gib ein Passwort als nächsten Befehlsparameter an!'
+    commandRemoveNoneSet: '{lut.mechanic_prefix} <&c>Der Hidden-Switch bei <&4>{x} {y} {z} <&c>hat kein Passwort gesetzt!'
+    commandRemovePassword: '{lut.mechanic_prefix} <&7>Das Passwort "<&a>{password}<&7>" wurde vom Hidden-Switch bei <&a>{x} {y} {z} <&7>entfernt.'
+    commandPasswordMissingValue: '{lut.mechanic_prefix} <&c>Bitte gib ein Passwort als nächsten Befehlsparameter an!'
+    commandPasswordNoPrompt: '{lut.mechanic_prefix} <&c>Es wird aktuell kein Passwort benötigt - interagiere zuerst mit einem Hidden-Switch!'
+    commandPasswordWrongPassword: '{lut.mechanic_prefix} <&c>Falsches Passwort - versuche es erneut!'
+    passwordPrompt: '{lut.mechanic_prefix} <&7>Gib das <&a>Passwort <&7>innerhalb von <&a>{timeout}s <&7>per <&a *for-label="labels" *for-separator={<&7><space/>oder<space/>}>/{label}</> ein!'
+    passwordPromptTimeout: '{lut.mechanic_prefix} <&c>Breche Eingabe des <&4>Passworts <&c>des Hidden-Switch bei <&4>{x} {y} {z} <&c>aufgrund von Überschreitung der <&4>{timeout}s <&c>ab!'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Hidden-Switch <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
     cannotEditSign: '{lut.mechanic_prefix} <&c>Du hast keinen Zugriff auf dieses Schild!'
     anotherIsEditing: '{lut.mechanic_prefix} <&c>Ein anderer Spieler editiert bereits die Schlüssel!'
