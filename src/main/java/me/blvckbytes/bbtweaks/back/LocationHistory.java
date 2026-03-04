@@ -8,9 +8,16 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.jetbrains.annotations.Nullable;
 
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+
 public class LocationHistory {
 
   private static final int HISTORY_SIZE = 5;
+
+  private static final DecimalFormatSymbols DECIMAL_SYMBOLS = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
+  private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat( "#.##", DECIMAL_SYMBOLS);
 
   private final Location[] historyRingbuffer;
   private int nextWriteIndex;
@@ -44,7 +51,7 @@ public class LocationHistory {
     result.add("history", history);
 
     for (var location : historyRingbuffer) {
-      JsonObject locationJson;
+      JsonPrimitive locationJson;
 
       if (location == null || (locationJson = locationToJson(location)) == null) {
         history.add(JsonNull.INSTANCE);
@@ -96,8 +103,8 @@ public class LocationHistory {
       if (historyIndex >= result.historyRingbuffer.length)
         break;
 
-      if (history.get(historyIndex) instanceof JsonObject locationObject)
-        result.historyRingbuffer[historyIndex] = locationFromJson(locationObject);
+      if (history.get(historyIndex) instanceof JsonPrimitive locationPrimitive)
+        result.historyRingbuffer[historyIndex] = locationFromJson(locationPrimitive);
     }
 
     if (!(json.get("nextWriteIndex") instanceof JsonPrimitive indexPrimitive))
@@ -113,29 +120,29 @@ public class LocationHistory {
     return result;
   }
 
-  private static @Nullable JsonObject locationToJson(Location location) {
-    var result = new JsonObject();
-
+  private static @Nullable JsonPrimitive locationToJson(Location location) {
     var world = location.getWorld();
 
     if (world == null)
       return null;
 
-    result.addProperty("world", world.getName());
-    result.addProperty("x", location.getX());
-    result.addProperty("y", location.getY());
-    result.addProperty("z", location.getZ());
-    result.addProperty("yaw", location.getYaw());
-    result.addProperty("pitch", location.getPitch());
-
-    return result;
+    return new JsonPrimitive(
+      DECIMAL_FORMAT.format(location.getX()) + ' '
+      + DECIMAL_FORMAT.format(location.getY()) + ' '
+      + DECIMAL_FORMAT.format(location.getZ()) + ' '
+      + DECIMAL_FORMAT.format(location.getYaw()) + ' '
+      + DECIMAL_FORMAT.format(location.getPitch()) + ' '
+      + world.getName()
+    );
   }
 
-  private static @Nullable Location locationFromJson(JsonObject json) {
-    if (!(json.get("world") instanceof JsonPrimitive world))
+  private static @Nullable Location locationFromJson(JsonPrimitive json) {
+    var parts = json.getAsString().split(" ");
+
+    if (parts.length != 6)
       return null;
 
-    var bukkitWorld = Bukkit.getWorld(world.getAsString());
+    var bukkitWorld = Bukkit.getWorld(parts[5]);
 
     if (bukkitWorld == null)
       return null;
@@ -143,11 +150,11 @@ public class LocationHistory {
     try {
       return new Location(
         bukkitWorld,
-        json.get("x").getAsDouble(),
-        json.get("y").getAsDouble(),
-        json.get("z").getAsDouble(),
-        json.get("yaw").getAsFloat(),
-        json.get("pitch").getAsFloat()
+        Double.parseDouble(parts[0]),
+        Double.parseDouble(parts[1]),
+        Double.parseDouble(parts[2]),
+        Float.parseFloat(parts[3]),
+        Float.parseFloat(parts[4])
       );
     } catch (Throwable e) {
       return null;
