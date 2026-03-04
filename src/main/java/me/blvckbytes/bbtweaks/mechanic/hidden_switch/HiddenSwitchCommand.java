@@ -124,6 +124,18 @@ public class HiddenSwitchCommand implements CommandExecutor, TabCompleter {
 
         return true;
       }
+
+      case ALLOW_KEY_OR_PASSWORD -> {
+        var newValue = mechanic.toggleAllowKeyOrPasswordAndGetNewValue(instance);
+
+        if (newValue) {
+          config.rootSection.mechanic.hiddenSwitch.commandEnableKeyOrPassword.sendMessage(player, environment);
+          return true;
+        }
+
+        config.rootSection.mechanic.hiddenSwitch.commandDisableKeyOrPassword.sendMessage(player, environment);
+        return true;
+      }
     }
 
     return true;

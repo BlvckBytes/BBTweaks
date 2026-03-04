@@ -27,6 +27,8 @@ public class HiddenSwitchSection extends ConfigSection {
   public ComponentMarkup commandSetPasswordMissingValue;
   public ComponentMarkup commandRemoveNoneSet;
   public ComponentMarkup commandRemovePassword;
+  public ComponentMarkup commandEnableKeyOrPassword;
+  public ComponentMarkup commandDisableKeyOrPassword;
   public ComponentMarkup commandPasswordMissingValue;
   public ComponentMarkup commandPasswordNoPrompt;
   public ComponentMarkup commandPasswordWrongPassword;

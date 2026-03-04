@@ -51,6 +51,7 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
   private final CacheByPosition<HiddenSwitchInstance> instanceByInteractionPosition;
   private final NamespacedKey keyItemsKey;
   private final NamespacedKey passwordKey;
+  private final NamespacedKey allowKeyOrPasswordKey;
 
   private record InstanceSession(Player player, HiddenSwitchInstance instance, int creationTime) {}
 
@@ -82,6 +83,7 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
 
     this.keyItemsKey = new NamespacedKey(plugin, "key-items");
     this.passwordKey = new NamespacedKey(plugin, "password");
+    this.allowKeyOrPasswordKey = new NamespacedKey(plugin, "key-or-password");
 
     this.openKeysInstanceByPlayerId = new HashMap<>();
     this.offsetSelectingByPlayerId = new HashMap<>();
@@ -109,6 +111,23 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
     var block = getLookedAtSignBlock(player);
 
     return instanceBySignPosition.get(block.getWorld(), block.getX(), block.getY(), block.getZ());
+  }
+
+  public boolean toggleAllowKeyOrPasswordAndGetNewValue(HiddenSwitchInstance instance) {
+    var sign = instance.getSign();
+    var pdc = sign.getPersistentDataContainer();
+
+    var priorValue = pdc.get(allowKeyOrPasswordKey, PersistentDataType.BOOLEAN);
+    var priorFlag = priorValue != null && priorValue;
+    var newFlag = !priorFlag;
+
+    pdc.set(allowKeyOrPasswordKey, PersistentDataType.BOOLEAN, newFlag);
+
+    sign.update(true, false);
+
+    reloadInstanceBySign(instance.getSign());
+
+    return newFlag;
   }
 
   public @Nullable String updatePasswordAndGetPriorValue(HiddenSwitchInstance instance, @Nullable String password) {
@@ -236,9 +255,17 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
       }
     }
 
-    var password = sign.getPersistentDataContainer().get(passwordKey, PersistentDataType.STRING);
+    var pdc = sign.getPersistentDataContainer();
+    var password = pdc.get(passwordKey, PersistentDataType.STRING);
+    var allowKeyOrPassword = pdc.get(allowKeyOrPasswordKey, PersistentDataType.BOOLEAN);
 
-    var instance = new HiddenSwitchInstance(sign, keysInventory, xOffset, yOffset, zOffset, grantedMessage, deniedMessage, password, config);
+    var instance = new HiddenSwitchInstance(
+      sign, keysInventory,
+      xOffset, yOffset, zOffset,
+      grantedMessage, deniedMessage,
+      password, allowKeyOrPassword != null && allowKeyOrPassword,
+      config
+    );
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
@@ -515,6 +542,21 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
     if (player == null)
       return true;
 
+    if (instance.getKeyCount() == 0 && instance.password == null) {
+      instance.interactAndSendMessage(player, getCurrentTime());
+      return true;
+    }
+
+    if (instance.allowKeyOrPassword) {
+      if (!instance.testKeyForFailure(player)) {
+        instance.interactAndSendMessage(player, getCurrentTime());
+        return true;
+      }
+
+      promptForPassword(player, instance);
+      return true;
+    }
+
     if (instance.testKeyForFailureAndSendMessage(player))
       return true;
 
@@ -523,6 +565,11 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
       return true;
     }
 
+    promptForPassword(player, instance);
+    return true;
+  }
+
+  private void promptForPassword(Player player, HiddenSwitchInstance instance) {
     passwordPromptByPlayerId.put(player.getUniqueId(), new InstanceSession(player, instance, getCurrentTime()));
 
     var labels = new ArrayList<>(passwordCommand.getAliases());
@@ -536,8 +583,6 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
         .withVariable("labels", labels)
         .withVariable("timeout", config.rootSection.mechanic.hiddenSwitch.passwordPromptTimeoutSeconds)
     );
-
-    return true;
   }
 
   private void storeKeyItemsToPDC(Sign sign, Inventory keysInventory) {

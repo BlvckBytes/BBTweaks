@@ -7,6 +7,7 @@ public enum CommandAction implements MatchableEnum {
   SET_PASSWORD,
   GET_PASSWORD,
   REMOVE_PASSWORD,
+  ALLOW_KEY_OR_PASSWORD,
   ;
 
   public static final EnumMatcher<CommandAction> matcher = new EnumMatcher<>(values());

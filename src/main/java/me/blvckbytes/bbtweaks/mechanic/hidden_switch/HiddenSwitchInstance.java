@@ -22,6 +22,7 @@ public class HiddenSwitchInstance extends SISOInstance {
   private final ComponentMarkup grantedMessage;
   private final ComponentMarkup deniedMessage;
   public final @Nullable String password;
+  public final boolean allowKeyOrPassword;
   private final ConfigKeeper<MainSection> config;
   private final boolean hasKeys;
 
@@ -35,6 +36,7 @@ public class HiddenSwitchInstance extends SISOInstance {
     @Nullable ComponentMarkup grantedMessage,
     @Nullable ComponentMarkup deniedMessage,
     @Nullable String password,
+    boolean allowKeyOrPassword,
     ConfigKeeper<MainSection> config
   ) {
     super(sign, SISOFlag.ALLOW_OUTPUT_ON_SIGN_PLANE);
@@ -44,6 +46,7 @@ public class HiddenSwitchInstance extends SISOInstance {
     this.grantedMessage = grantedMessage == null ? config.rootSection.mechanic.hiddenSwitch.defaultGrantedMessage : grantedMessage;
     this.deniedMessage = deniedMessage == null ? config.rootSection.mechanic.hiddenSwitch.defaultDeniedMessage : deniedMessage;
     this.password = password;
+    this.allowKeyOrPassword = allowKeyOrPassword;
     this.config = config;
     this.hasKeys = Arrays.stream(keysInventory.getContents()).anyMatch(it -> it != null && !it.getType().isAir());
   }
@@ -70,7 +73,7 @@ public class HiddenSwitchInstance extends SISOInstance {
   }
 
   public boolean testKeyForFailureAndSendMessage(Player player) {
-    var didFail = _testKeyForFailureAndSendMessage(player);
+    var didFail = testKeyForFailure(player);
 
     if (didFail)
       sendMessage(player, deniedMessage);
@@ -78,7 +81,7 @@ public class HiddenSwitchInstance extends SISOInstance {
     return didFail;
   }
 
-  private boolean _testKeyForFailureAndSendMessage(Player player) {
+  public boolean testKeyForFailure(Player player) {
     if (!hasKeys)
       return false;
 
