@@ -9,7 +9,7 @@ import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipesSection;
 import me.blvckbytes.bbtweaks.auto_fly.AutoFlyCommand;
 import me.blvckbytes.bbtweaks.auto_fly.AutoFlyCommandSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
-import me.blvckbytes.bbtweaks.back.LastLocationStore;
+import me.blvckbytes.bbtweaks.back.LocationHistoryStore;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
@@ -41,7 +41,7 @@ import java.util.logging.Level;
 
 public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCompleter {
 
-  private LastLocationStore lastLocationStore;
+  private LocationHistoryStore locationHistoryStore;
   private SignMechanicManager mechanicManager;
   private WorldGuardFlags worldGuardFlags;
   private MarkerDisplayHandler markerDisplayHandler;
@@ -84,11 +84,11 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       getServer().getPluginManager().registerEvents(getUuidCommand, this);
 
-      lastLocationStore = new LastLocationStore(this);
+      locationHistoryStore = new LocationHistoryStore(this);
 
-      Bukkit.getScheduler().runTaskTimerAsynchronously(this, lastLocationStore::save, 20L * 60, 20L * 60);
+      Bukkit.getScheduler().runTaskTimerAsynchronously(this, locationHistoryStore::save, 20L * 60, 20L * 60);
 
-      var backOverrideCommand = new BackOverrideCommand(lastLocationStore, config);
+      var backOverrideCommand = new BackOverrideCommand(locationHistoryStore, config);
 
       Objects.requireNonNull(getCommand("back")).setExecutor(backOverrideCommand);
 
@@ -205,9 +205,9 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       preferencesStore = null;
     }
 
-    if (lastLocationStore != null) {
-      catchAll(lastLocationStore::save);
-      lastLocationStore = null;
+    if (locationHistoryStore != null) {
+      catchAll(locationHistoryStore::save);
+      locationHistoryStore = null;
     }
 
     if (mechanicManager != null) {

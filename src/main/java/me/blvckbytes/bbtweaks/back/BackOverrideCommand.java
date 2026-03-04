@@ -21,11 +21,11 @@ import java.util.List;
 
 public class BackOverrideCommand implements CommandExecutor, TabCompleter, Listener {
 
-  private final LastLocationStore lastLocationStore;
+  private final LocationHistoryStore locationHistoryStore;
   private final ConfigKeeper<MainSection> config;
 
-  public BackOverrideCommand(LastLocationStore lastLocationStore, ConfigKeeper<MainSection> config) {
-    this.lastLocationStore = lastLocationStore;
+  public BackOverrideCommand(LocationHistoryStore locationHistoryStore, ConfigKeeper<MainSection> config) {
+    this.locationHistoryStore = locationHistoryStore;
     this.config = config;
   }
 
@@ -41,7 +41,7 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
       return true;
     }
 
-    var lastLocation = lastLocationStore.getLastLocation(player);
+    var lastLocation = locationHistoryStore.accessHistory(player).getLastLocation();
 
     if (lastLocation == null) {
       config.rootSection.backOverride.noLastLocation.sendMessage(player);
@@ -61,7 +61,7 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
   @EventHandler(priority = EventPriority.LOWEST)
   public void onPreProcess(PlayerCommandPreprocessEvent event) {
     // Do not override if we have no last location yet (initial case).
-    if (lastLocationStore.getLastLocation(event.getPlayer()) == null)
+    if (locationHistoryStore.accessHistory(event.getPlayer()).getLastLocation() == null)
       return;
 
     var message = event.getMessage();
@@ -94,7 +94,7 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
     if (player.getMetadata("essentials:ignore-teleport").stream().anyMatch(MetadataValue::asBoolean))
       return;
 
-    lastLocationStore.setLastLocation(player, player.getLocation());
+    locationHistoryStore.accessHistory(player).add(player.getLocation());
   }
 
   @EventHandler
@@ -104,6 +104,6 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
     if (!player.hasPermission("essentials.back.ondeath"))
       return;
 
-    lastLocationStore.setLastLocation(player, player.getLocation());
+    locationHistoryStore.accessHistory(player).add(player.getLocation());
   }
 }
