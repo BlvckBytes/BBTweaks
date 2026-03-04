@@ -40,6 +40,8 @@ commands:
   password:
     description: 'Respond to password-prompts of the hidden-switch mechanic'
     permission: bbtweaks.mechanic.hidden-switch
+  autofly:
+    description: 'Toggles automatically enabling essentials'' fly-mode'
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

@@ -6,6 +6,8 @@ import at.blvckbytes.cm_mapper.section.command.CommandUpdater;
 import com.gmail.nossr50.util.player.UserManager;
 import me.blvckbytes.bbtweaks.ab_sleep.ActionBarSleepMessage;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipesSection;
+import me.blvckbytes.bbtweaks.auto_fly.AutoFlyCommand;
+import me.blvckbytes.bbtweaks.auto_fly.AutoFlyCommandSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
 import me.blvckbytes.bbtweaks.back.LastLocationStore;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
@@ -26,12 +28,14 @@ import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.util.NameScopedKeyValueStore;
 import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
 import java.util.Objects;
 import java.util.logging.Level;
 
@@ -41,6 +45,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
   private SignMechanicManager mechanicManager;
   private WorldGuardFlags worldGuardFlags;
   private MarkerDisplayHandler markerDisplayHandler;
+  private NameScopedKeyValueStore preferencesStore;
 
   // TODO: Idea - /empty-out [all]
 
@@ -57,6 +62,9 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     try {
       var configHandler = new ConfigHandler(this, "config");
       var config = new ConfigKeeper<>(configHandler, "config.yml", MainSection.class);
+
+      preferencesStore = new NameScopedKeyValueStore(getFileAndEnsureExistence("user-preferences.json"), getLogger());
+      Bukkit.getScheduler().runTaskTimerAsynchronously(this, preferencesStore::saveToDisk, 20 * 60L, 20 * 60L);
 
       new ActionBarSleepMessage(this, config);
 
@@ -167,9 +175,16 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       var setMarkerCommand = Objects.requireNonNull(getCommand(SetMarkerCommandSection.INITIAL_NAME));
       setMarkerCommand.setExecutor(new SetMarkerCommand(config, getLogger()));
 
+      var autoFlyCommandExecutor = new AutoFlyCommand(this, preferencesStore, config);
+      Bukkit.getServer().getPluginManager().registerEvents(autoFlyCommandExecutor, this);
+
+      var autoFlyCommand = Objects.requireNonNull(getCommand(AutoFlyCommandSection.INITIAL_NAME));
+      autoFlyCommand.setExecutor(autoFlyCommandExecutor);
+
       Runnable updateCommands = () -> {
         config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);
         config.rootSection.markersMenu.setMarkerCommand.apply(setMarkerCommand, commandUpdater);
+        config.rootSection.autoFly.command.apply(autoFlyCommand, commandUpdater);
         commandUpdater.trySyncCommands();
       };
 
@@ -185,19 +200,48 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
   @Override
   public void onDisable() {
+    if (preferencesStore != null) {
+      catchAll(preferencesStore::saveToDisk);
+      preferencesStore = null;
+    }
+
     if (lastLocationStore != null) {
-      lastLocationStore.save();
+      catchAll(lastLocationStore::save);
       lastLocationStore = null;
     }
 
     if (mechanicManager != null) {
-      mechanicManager.shutdown();
+      catchAll(mechanicManager::shutdown);
       mechanicManager = null;
     }
 
     if (markerDisplayHandler != null) {
-      markerDisplayHandler.onShutdown();
+      catchAll(markerDisplayHandler::onShutdown);
       markerDisplayHandler = null;
     }
+  }
+
+  private void catchAll(Runnable runnable) {
+    try {
+      runnable.run();
+    } catch (Throwable e) {
+      getLogger().log(Level.SEVERE, "An internal error occurred", e);
+    }
+  }
+
+  private File getFileAndEnsureExistence(String name) throws Exception {
+    var file = new File(getDataFolder(), name);
+
+    if (!file.exists()) {
+      var parentDirectory = file.getParentFile();
+
+      if (!parentDirectory.exists() && !parentDirectory.mkdirs())
+        throw new IllegalStateException("Could not create parent-directories of the file " + file);
+
+      if (!file.createNewFile())
+        throw new IllegalStateException("Could not create the file " + file);
+    }
+
+    return file;
   }
 }
