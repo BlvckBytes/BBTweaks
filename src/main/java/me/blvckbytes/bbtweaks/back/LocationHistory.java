@@ -17,7 +17,7 @@ public class LocationHistory {
   private static final int HISTORY_SIZE = 5;
 
   private static final DecimalFormatSymbols DECIMAL_SYMBOLS = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
-  private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat( "#.##", DECIMAL_SYMBOLS);
+  private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##", DECIMAL_SYMBOLS);
 
   private final Location[] historyRingbuffer;
   private int nextWriteIndex;
@@ -33,10 +33,14 @@ public class LocationHistory {
       nextWriteIndex = 0;
   }
 
-  public @Nullable Location getLastLocation() {
-    var readIndex = nextWriteIndex - 1;
+  public int maxSize() {
+    return historyRingbuffer.length;
+  }
 
-    if (readIndex < 0)
+  public @Nullable Location getNthLastLocation(int index) {
+    var readIndex = nextWriteIndex - 1 - index;
+
+    while (readIndex < 0)
       readIndex += historyRingbuffer.length;
 
     return historyRingbuffer[readIndex];

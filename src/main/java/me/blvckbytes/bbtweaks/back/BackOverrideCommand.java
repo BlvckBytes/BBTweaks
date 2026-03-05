@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.back;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
+import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -41,7 +42,7 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
       return true;
     }
 
-    var lastLocation = locationHistoryStore.accessHistory(player).getLastLocation();
+    var lastLocation = locationHistoryStore.accessHistory(player).getNthLastLocation(0);
 
     if (lastLocation == null) {
       config.rootSection.backOverride.noLastLocation.sendMessage(player);
@@ -61,7 +62,7 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
   @EventHandler(priority = EventPriority.LOWEST)
   public void onPreProcess(PlayerCommandPreprocessEvent event) {
     // Do not override if we have no last location yet (initial case).
-    if (locationHistoryStore.accessHistory(event.getPlayer()).getLastLocation() == null)
+    if (locationHistoryStore.accessHistory(event.getPlayer()).getNthLastLocation(0) == null)
       return;
 
     var message = event.getMessage();
@@ -94,7 +95,13 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
     if (player.getMetadata("essentials:ignore-teleport").stream().anyMatch(MetadataValue::asBoolean))
       return;
 
-    locationHistoryStore.accessHistory(player).add(player.getLocation());
+    var history = locationHistoryStore.accessHistory(player);
+    var addEvent = new LocationHistoryAddEvent(player, history, player.getLocation());
+
+    Bukkit.getPluginManager().callEvent(addEvent);
+
+    if (!addEvent.isCancelled())
+      history.add(addEvent.getLocation());
   }
 
   @EventHandler

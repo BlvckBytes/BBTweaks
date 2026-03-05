@@ -18,6 +18,9 @@ commands:
   back:
     description: 'Teleport to a previous location'
     permission: essentials.back
+  backtrack:
+    description: 'Navigate through your history of last-locations'
+    permission: essentials.back
   ping:
     description: 'Get the ping of yourself (and possibly others)'
   mvisualize:

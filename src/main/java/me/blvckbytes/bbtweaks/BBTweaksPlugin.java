@@ -9,6 +9,8 @@ import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipesSection;
 import me.blvckbytes.bbtweaks.auto_fly.AutoFlyCommand;
 import me.blvckbytes.bbtweaks.auto_fly.AutoFlyCommandSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
+import me.blvckbytes.bbtweaks.back.BacktrackCommand;
+import me.blvckbytes.bbtweaks.back.BacktrackCommandSection;
 import me.blvckbytes.bbtweaks.back.LocationHistoryStore;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
@@ -87,6 +89,13 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       locationHistoryStore = new LocationHistoryStore(this);
 
       Bukkit.getScheduler().runTaskTimerAsynchronously(this, locationHistoryStore::save, 20L * 60, 20L * 60);
+
+      var backtrackCommandExecutor = new BacktrackCommand(this, locationHistoryStore, config);
+      var backtrackCommand = Objects.requireNonNull(getCommand(BacktrackCommandSection.INITIAL_NAME));
+
+      backtrackCommand.setExecutor(backtrackCommandExecutor);
+
+      getServer().getPluginManager().registerEvents(backtrackCommandExecutor, this);
 
       var backOverrideCommand = new BackOverrideCommand(locationHistoryStore, config);
 
@@ -185,6 +194,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
         config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);
         config.rootSection.markersMenu.setMarkerCommand.apply(setMarkerCommand, commandUpdater);
         config.rootSection.autoFly.command.apply(autoFlyCommand, commandUpdater);
+        config.rootSection.backOverride.backtrackCommand.apply(backtrackCommand, commandUpdater);
         commandUpdater.trySyncCommands();
       };
 

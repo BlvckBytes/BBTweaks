@@ -19,6 +19,21 @@ backOverride:
   noPermission: '{lut.back_prefix} <&c>Dir fehlen die nötigen Rechte, um diesen Befehl benutzen zu können!'
   noLastLocation: '{lut.back_prefix} <&c>Es ist noch keine vorherige Position vorhanden!'
   teleportedBack: '{lut.back_prefix} <&7>Du kehrst zur <&a>vorherigen Position <&7>zurück.'
+  backtrackCommand:
+    name: 'backtrack'
+    aliases:
+      - 'bt'
+  backtrackAlreadyInASession: '{lut.back_prefix} <&c>Du befindest dich bereits in einer Backtrack-Sitzung!'
+  backtrackCancelledDueToExternalTeleport: '{lut.back_prefix} <&c>Du wurdest teleportiert; breche Backtrack-Sitzung ab!'
+  backtrackTitle: '<&6>/{label}'
+  backtrackSubtitle: |
+    <container *if="current_position eq 0">
+      <&a>Ursprung
+    </container>
+    <container *else>
+      <&a>{current_position}<&7>/<&a>{total_count}
+    </container>
+  backtrackActionBar: '<&a>Springen: <&a>Vorwärts <&8>| <&a>Sneaken: <&a>Rückwärts <&8>| <&a>Bewegen: <&a>Verlassen'
 
 furnaceLevel:
   noLevelsStored: '<&7>[XP] Keine Level gespeichert'
