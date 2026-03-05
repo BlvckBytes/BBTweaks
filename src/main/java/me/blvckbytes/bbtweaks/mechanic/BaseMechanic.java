@@ -56,6 +56,13 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
 
   protected abstract void onConfigReload();
 
+  protected InterpretationEnvironment getSignEnvironment(Sign sign) {
+    return new InterpretationEnvironment()
+      .withVariable("x", sign.getX())
+      .withVariable("y", sign.getY())
+      .withVariable("z", sign.getZ());
+  }
+
   @Override
   public @Nullable InstanceType onSignLoad(Sign sign) {
     return onSignCreate(null, sign);

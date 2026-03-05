@@ -7,6 +7,8 @@ public interface MechanicInstance {
 
   Sign getSign();
 
+  Block getMountBlock();
+
   /**
    * @return Whether the tick was successful; unsuccessful ticks will result in self-destruction.
    */

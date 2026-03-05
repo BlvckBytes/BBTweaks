@@ -64,6 +64,7 @@ public abstract class SISOInstance implements MechanicInstance {
     return sign;
   }
 
+  @Override
   public Block getMountBlock() {
     return mountBlock;
   }
