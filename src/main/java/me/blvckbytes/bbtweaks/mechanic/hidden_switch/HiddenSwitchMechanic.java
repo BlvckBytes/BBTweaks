@@ -542,6 +542,9 @@ public class HiddenSwitchMechanic extends BaseMechanic<HiddenSwitchInstance> imp
     if (player == null)
       return true;
 
+    if (shouldDebounceInteraction(player, instance))
+      return true;
+
     if (instance.getKeyCount() == 0 && instance.password == null) {
       instance.interactAndSendMessage(player, getCurrentTime());
       return true;

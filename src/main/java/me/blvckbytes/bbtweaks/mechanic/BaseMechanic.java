@@ -10,6 +10,8 @@ import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
 import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
+import it.unimi.dsi.fastutil.longs.Long2IntMap;
+import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.util.*;
 import org.bukkit.block.Sign;
@@ -38,6 +40,8 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
 
   private final Map<UUID, LastInteraction> lastInteractionByPlayerId;
 
+  private final Map<UUID, Long2IntMap> debounceTimeByBlockIdByPlayerId;
+
   private int currentTime;
 
   public BaseMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
@@ -46,8 +50,23 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
 
     this.instanceBySignPosition = new CacheByPosition<>();
     this.lastInteractionByPlayerId = new HashMap<>();
+    this.debounceTimeByBlockIdByPlayerId = new HashMap<>();
 
     config.registerReloadListener(this::_onConfigReload);
+  }
+
+  protected boolean shouldDebounceInteraction(Player player, InstanceType instance) {
+    var sign = instance.getSign();
+
+    var bucket = debounceTimeByBlockIdByPlayerId.computeIfAbsent(player.getUniqueId(), k -> new Long2IntOpenHashMap());
+    var blockId = CacheByPosition.computeWorldlessBlockId(sign.getX(), sign.getY(), sign.getZ());
+
+    var previousInvocationTime = bucket.get(blockId);
+    var now = getCurrentTime();
+
+    bucket.put(blockId, now);
+
+    return now - previousInvocationTime <= 1;
   }
 
   protected int getCurrentTime() {
@@ -100,8 +119,10 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
   }
 
   @EventHandler
-  public void onQuit(PlayerQuitEvent event) {
-    lastInteractionByPlayerId.remove(event.getPlayer().getUniqueId());
+  public void _onQuit(PlayerQuitEvent event) {
+    var playerId = event.getPlayer().getUniqueId();
+    lastInteractionByPlayerId.remove(playerId);
+    debounceTimeByBlockIdByPlayerId.remove(playerId);
   }
 
   public boolean isSignRegistered(Sign sign) {
