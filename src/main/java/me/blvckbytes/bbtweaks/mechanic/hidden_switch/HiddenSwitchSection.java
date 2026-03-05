@@ -6,11 +6,12 @@ import at.blvckbytes.cm_mapper.mapper.section.CSAlways;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
+import me.blvckbytes.bbtweaks.mechanic.common.OffsetSelectingSection;
 
 import java.lang.reflect.Field;
 import java.util.List;
 
-public class HiddenSwitchSection extends ConfigSection {
+public class HiddenSwitchSection extends ConfigSection implements OffsetSelectingSection {
 
   public @CSAlways PasswordCommandSection passwordCommand;
   public int onTimeDurationTicks;
@@ -67,5 +68,40 @@ public class HiddenSwitchSection extends ConfigSection {
 
     if (offsetSelectingTimeoutSeconds <= 0)
       throw new MappingError("\"offsetSelectingTimeoutSeconds\" cannot be lass then or equal to zero");
+  }
+
+  @Override
+  public int maximumAxisOffset() {
+    return maximumAxisOffset;
+  }
+
+  @Override
+  public int offsetSelectingTimeoutSeconds() {
+    return offsetSelectingTimeoutSeconds;
+  }
+
+  @Override
+  public ComponentMarkup axisOffsetLimitExceeded() {
+    return axisOffsetLimitExceeded;
+  }
+
+  @Override
+  public ComponentMarkup triedBindingToSign() {
+    return triedBindingToSign;
+  }
+
+  @Override
+  public ComponentMarkup blockSelectionPrompt() {
+    return blockSelectionPrompt;
+  }
+
+  @Override
+  public ComponentMarkup blockSelectionTimeout() {
+    return blockSelectionTimeout;
+  }
+
+  @Override
+  public ComponentMarkup blockSelectionSuccess() {
+    return blockSelectionSuccess;
   }
 }

@@ -7,6 +7,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.SISOFlag;
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
+import me.blvckbytes.bbtweaks.mechanic.common.Offsets;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -32,7 +33,7 @@ public class HiddenSwitchInstance extends SISOInstance {
   public HiddenSwitchInstance(
     Sign sign,
     Inventory keysInventory,
-    int xOffset, int yOffset, int zOffset,
+    Offsets offsets,
     @Nullable ComponentMarkup grantedMessage,
     @Nullable ComponentMarkup deniedMessage,
     @Nullable String password,
@@ -42,7 +43,7 @@ public class HiddenSwitchInstance extends SISOInstance {
     super(sign, SISOFlag.ALLOW_OUTPUT_ON_SIGN_PLANE);
 
     this.keysInventory = keysInventory;
-    this.interactionPosition = getMountBlock().getLocation().add(xOffset, yOffset, zOffset);
+    this.interactionPosition = getMountBlock().getLocation().add(offsets.x(), offsets.y(), offsets.z());
     this.grantedMessage = grantedMessage == null ? config.rootSection.mechanic.hiddenSwitch.defaultGrantedMessage : grantedMessage;
     this.deniedMessage = deniedMessage == null ? config.rootSection.mechanic.hiddenSwitch.defaultDeniedMessage : deniedMessage;
     this.password = password;
