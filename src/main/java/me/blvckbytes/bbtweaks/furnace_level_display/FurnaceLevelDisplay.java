@@ -263,16 +263,15 @@ public class FurnaceLevelDisplay implements Listener {
         targetBlock.getWorld(),
         targetBlock.getX(), targetBlock.getY(), targetBlock.getZ(),
         () -> {
-          var furnaceState = targetBlock.getState();
-          var accessor = accessorByType.get(furnaceState.getClass());
+          var furnaceState = targetBlock.getState(false);
+          var recipeMap = tryAccessFurnaceRecipeMap(furnaceState);
 
-          if (accessor == null)
+          if (recipeMap == null)
             return null;
 
-          var accessedRecipesUsed = accessor.access(furnaceState);
           var inventory = ((Furnace) furnaceState).getInventory();
 
-          return new FurnaceAccess(accessedRecipesUsed, inventory);
+          return new FurnaceAccess(recipeMap, inventory);
         }
       );
 
@@ -291,36 +290,52 @@ public class FurnaceLevelDisplay implements Listener {
     }
   }
 
+  public <KeyType> RecipeExperience<KeyType> tryAccessRecipeExperienceByKey(KeyType recipeKey) {
+    String recipePath;
+
+    try {
+      var recipeIdentifier = resourceKeyGetIdentifier.invoke(recipeKey);
+      recipePath = (String) identifierGetPath.invoke(recipeIdentifier);
+    } catch (Throwable e) {
+      logger.log(Level.WARNING, "An error occurred while trying to access the recipe-path of recipeKey=" + recipeKey);
+      return null;
+    }
+
+    var experience = recipeExperienceByKey.getFloat(recipePath);
+
+    if (experience < 0) {
+      logger.log(Level.WARNING, "Could not access experience for recipe of path " + recipePath);
+      return null;
+    }
+
+    return new RecipeExperience<>(experience, recipeKey, recipePath);
+  }
+
+  public @Nullable Reference2IntMap<?> tryAccessFurnaceRecipeMap(BlockState state) {
+    var accessor = accessorByType.get(state.getClass());
+
+    if (accessor != null)
+      return accessor.access(state);
+
+    return null;
+  }
+
   private void displayForPlayer(Player player, FurnaceAccess furnaceAccess) {
     float totalExperience = 0;
     var encounteredOreRecipe = false;
 
     for (var recipeEntry : furnaceAccess.recipesUsed.reference2IntEntrySet()) {
-      var recipeKey = recipeEntry.getKey();
+      var recipeExperience = tryAccessRecipeExperienceByKey(recipeEntry.getKey());
 
-      String recipePath;
-
-      try {
-        var recipeIdentifier = resourceKeyGetIdentifier.invoke(recipeKey);
-        recipePath = (String) identifierGetPath.invoke(recipeIdentifier);
-      } catch (Throwable e) {
-        logger.log(Level.WARNING, "An error occurred while trying to access the recipe-path of recipeKey=" + recipeKey);
+      if (recipeExperience == null)
         continue;
-      }
-
-      var recipeExperience = recipeExperienceByKey.getFloat(recipePath);
-
-      if (recipeExperience < 0) {
-        logger.log(Level.WARNING, "Could not access experience for recipe of path " + recipePath);
-        continue;
-      }
 
       var totalRecipeSmeltCount = recipeEntry.getIntValue();
 
-      totalExperience += recipeExperience * totalRecipeSmeltCount;
+      totalExperience += recipeExperience.experience() * totalRecipeSmeltCount;
 
       if (!encounteredOreRecipe)
-        encounteredOreRecipe = oreRecipeKeys.contains(recipePath);
+        encounteredOreRecipe = oreRecipeKeys.contains(recipeExperience.recipePath());
     }
 
     if (totalExperience == 0) {
