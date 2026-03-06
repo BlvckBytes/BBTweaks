@@ -15,6 +15,8 @@ import me.blvckbytes.bbtweaks.back.LocationHistoryStore;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
+import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
+import me.blvckbytes.bbtweaks.get_exp.GetExpCommandSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegration;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
@@ -190,11 +192,15 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       var autoFlyCommand = Objects.requireNonNull(getCommand(AutoFlyCommandSection.INITIAL_NAME));
       autoFlyCommand.setExecutor(autoFlyCommandExecutor);
 
+      var getExpCommand = Objects.requireNonNull(getCommand(GetExpCommandSection.INITIAL_NAME));
+      getExpCommand.setExecutor(new GetExpCommand(furnaceLevelDisplay, config));
+
       Runnable updateCommands = () -> {
         config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);
         config.rootSection.markersMenu.setMarkerCommand.apply(setMarkerCommand, commandUpdater);
         config.rootSection.autoFly.command.apply(autoFlyCommand, commandUpdater);
         config.rootSection.backOverride.backtrackCommand.apply(backtrackCommand, commandUpdater);
+        config.rootSection.getExp.command.apply(getExpCommand, commandUpdater);
         commandUpdater.trySyncCommands();
       };
 

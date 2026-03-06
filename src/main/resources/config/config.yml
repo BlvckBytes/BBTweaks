@@ -513,6 +513,11 @@ autoFly:
   newModeEnabled: '{lut.auto_fly_prefix} <&7>Dein Flugmodus wird nun <&a>automatisch aktiviert<&7>.'
   newModeEnabledSetFlying: '{lut.auto_fly_prefix} <&7>Dein Flugmodus wird nun <&a>automatisch aktiviert <&7>und du wirst <&a>anschließend ins Fliegen versetzt<&7>.'
 
+getExp:
+  command:
+    name: getexp
+  playersOnly: '{lut.get_exp_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -531,6 +536,7 @@ cLut:
   inv_filter_prefix: '<&7>[<&6>InvFilter<&7>]'
   markers_prefix: '<&7>[<&6>Markierungen<&7>]'
   auto_fly_prefix: '<&7>[<&6>AutoFly<&7>]'
+  get_exp_prefix: '<&7>[<&6>GetExp<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

@@ -10,6 +10,7 @@ import me.blvckbytes.bbtweaks.auto_fly.AutoFlySection;
 import me.blvckbytes.bbtweaks.back.BackOverrideSection;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsSection;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
+import me.blvckbytes.bbtweaks.get_exp.GetExpSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterSection;
 import me.blvckbytes.bbtweaks.main_command.MainCommandSection;
@@ -36,6 +37,7 @@ public class MainSection extends ConfigSection {
   public InvFilterSection invFilter;
   public MarkersMenuSection markersMenu;
   public AutoFlySection autoFly;
+  public GetExpSection getExp;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
