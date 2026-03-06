@@ -1,12 +1,14 @@
 package me.blvckbytes.bbtweaks.get_exp;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import it.unimi.dsi.fastutil.objects.Reference2IntMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.RecipeExperience;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -21,9 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class GetExpCommand implements CommandExecutor, TabCompleter {
-
-  // TODO: Add to config
-  private static final int EXP_PER_BOTTLE = 16;
 
   private final FurnaceLevelDisplay furnaceLevelDisplay;
   private final ConfigKeeper<MainSection> config;
@@ -44,51 +43,60 @@ public class GetExpCommand implements CommandExecutor, TabCompleter {
     }
 
     if (!(player.hasPermission("bbtweaks.getexp"))) {
-      // TODO: Config-message
-      player.sendMessage("§cNo permission!");
+      config.rootSection.getExp.noPermission.sendMessage(player);
       return true;
     }
 
-    var recipeMap = getLookedAtFurnaceBlockRecipeMap(player);
+    var recipeMapAndBlock = getLookedAtFurnaceRecipeMapAndBlock(player);
 
-    if (recipeMap == null) {
-      // TODO: Config-message
-      player.sendMessage("§cNot looking at a furnace!");
+    if (recipeMapAndBlock == null) {
+      config.rootSection.getExp.notLookingAtAFurnace.sendMessage(player);
       return true;
     }
 
     var experienceLimit = -1F;
     var isLimitAPercentage = false;
 
-    if (args.length >= 1) {
-      var numberString = args[0];
+    if (args.length == 0) {
+      config.rootSection.getExp.commandUsage.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("label", label)
+      );
 
-      if (numberString.endsWith("%")) {
-        numberString = numberString.substring(0, numberString.length() - 1);
-        isLimitAPercentage = true;
-      }
+      return true;
+    }
 
-      try {
-        experienceLimit = Float.parseFloat(numberString);
+    var numberString = args[0];
 
-        if (experienceLimit <= 0)
-          throw new IllegalArgumentException();
-      } catch (Throwable e) {
-        // TODO: Config-message
-        player.sendMessage("§cNot a strictly positive float: " + numberString);
-        return true;
-      }
+    if (numberString.endsWith("%")) {
+      numberString = numberString.substring(0, numberString.length() - 1);
+      isLimitAPercentage = true;
+    }
 
-      if (isLimitAPercentage && experienceLimit > 100) {
-        // TODO: Config-message
-        player.sendMessage("§cPercentage cannot be greater than 100");
-        return true;
-      }
+    try {
+      experienceLimit = Float.parseFloat(numberString);
+
+      if (experienceLimit <= 0)
+        throw new IllegalArgumentException();
+    } catch (Throwable e) {
+      config.rootSection.getExp.invalidNumberProvided.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("value", numberString)
+      );
+
+      return true;
+    }
+
+    if (isLimitAPercentage && experienceLimit > 100) {
+      config.rootSection.getExp.invalidPercentageProvided.sendMessage(player);
+      return true;
     }
 
     var doBottleExperience = args.length >= 2 && args[1].equalsIgnoreCase("bottles");
 
-    handOutExperience(player, recipeMap, experienceLimit, isLimitAPercentage, doBottleExperience);
+    handOutExperience(player, recipeMapAndBlock.recipeMap(), recipeMapAndBlock.block(), experienceLimit, isLimitAPercentage, doBottleExperience);
 
     return true;
   }
@@ -96,6 +104,7 @@ public class GetExpCommand implements CommandExecutor, TabCompleter {
   private <T> void handOutExperience(
     Player player,
     Reference2IntMap<T> recipeMap,
+    Block furnaceBlock,
     float experienceLimit,
     boolean isLimitAPercentage,
     boolean doBottleExperience
@@ -125,10 +134,6 @@ public class GetExpCommand implements CommandExecutor, TabCompleter {
     var experienceAccumulator = 0F;
     var encounteredExperience = false;
 
-    var playerInventory = player.getInventory();
-    var encounteredFullInventory = false;
-    var totalBottleCount = 0;
-
     for (var recipeExperience : recipeExperiences) {
       var availableCount = recipeMap.getInt(recipeExperience.recipeKey());
 
@@ -139,92 +144,97 @@ public class GetExpCommand implements CommandExecutor, TabCompleter {
 
       encounteredExperience = true;
 
-      collector: while (availableCount > 0) {
+      while (availableCount > 0) {
         if (experienceLimit > 0 && experienceLimit - (experienceAccumulator + recipeExperience.experience()) <= .01)
           break;
 
         experienceAccumulator += recipeExperience.experience();
+
         --availableCount;
-
-        if (doBottleExperience) {
-          while (experienceAccumulator > EXP_PER_BOTTLE) {
-            experienceAccumulator -= EXP_PER_BOTTLE;
-
-            if (!addExperienceBottleToPlayerInventory(playerInventory)) {
-              encounteredFullInventory = true;
-              break collector;
-            }
-
-            ++totalBottleCount;
-          }
-        }
       }
 
-      if (originalCount != availableCount)
-        recipeMap.put(recipeExperience.recipeKey(), availableCount);
+      if (originalCount == availableCount)
+        continue;
 
-      if (encounteredFullInventory)
-        break;
+      if (availableCount <= 0) {
+        recipeMap.removeInt(recipeExperience.recipeKey());
+        continue;
+      }
+
+      recipeMap.put(recipeExperience.recipeKey(), availableCount);
     }
+
+    var environment = new InterpretationEnvironment()
+      .withVariable("x", furnaceBlock.getX())
+      .withVariable("y", furnaceBlock.getY())
+      .withVariable("z", furnaceBlock.getZ());
 
     if (experienceAccumulator == 0) {
       if (!encounteredExperience) {
-        // TODO: Config-message
-        player.sendMessage("§cNo stored experience");
+        config.rootSection.getExp.noStoredExperience.sendMessage(player, environment);
         return;
       }
 
-      // TODO: Config-message
-      player.sendMessage("§cLimit too low - it's less than any single stored recipe");
+      config.rootSection.getExp.limitTooLow.sendMessage(
+        player,
+        environment
+          .withVariable("limit", experienceLimit)
+      );
+
       return;
     }
 
+    var handedOutExperience = Math.round(experienceAccumulator);
+
     if (doBottleExperience) {
+      var remainingExperience = handOutBottlesAndGetRemainingExperience(player.getInventory(), handedOutExperience);
       // TODO: Config-message
-      if (encounteredFullInventory)
-        player.sendMessage("§cInventory full - stopping!");
-
-      // TODO: Config-message
-      if (totalBottleCount > 0)
-        player.sendMessage("§aHanded out " + totalBottleCount + " bottles!");
-
-      // TODO: Config-message
-      else
-        player.sendMessage("§cCould not hand out any bottles, as the total experience was less than " + EXP_PER_BOTTLE + "exp, which would make for a single bottle.");
+      player.sendMessage("Handed out " + (handedOutExperience - remainingExperience) + "exp as bottles and " + remainingExperience + "exp as-is");
+      player.giveExp(remainingExperience);
+      return;
     }
 
-    var handedOutExperience = Math.round(experienceAccumulator);
-    var approximated = Math.abs(experienceAccumulator - experienceLimit) > .1;
-
     // TODO: Config-message
-    player.sendMessage("§aHanded out " + handedOutExperience + "exp" + (approximated ? " (approximated limit as best as possible)" : "") + ".");
-
+    player.sendMessage("§aHanded out " + handedOutExperience + "exp");
     player.giveExp(handedOutExperience);
   }
 
-  private boolean addExperienceBottleToPlayerInventory(Inventory inventory) {
+  private int handOutBottlesAndGetRemainingExperience(Inventory inventory, int totalExperience) {
+    var expPerBottle = config.rootSection.getExp.experiencePerBottle;
+    var maxStackSize = Material.EXPERIENCE_BOTTLE.getMaxStackSize();
+    var remainingCount = totalExperience / expPerBottle;
+
     for (var slot = 0; slot < 4 * 9; ++slot) {
+      if (remainingCount <= 0)
+        break;
+
       var currentItem = inventory.getItem(slot);
 
       if (currentItem == null) {
-        inventory.setItem(slot, new ItemStack(Material.EXPERIENCE_BOTTLE, 1));
-        return true;
+        var handedOutAmount = Math.min(remainingCount, maxStackSize);
+        inventory.setItem(slot, new ItemStack(Material.EXPERIENCE_BOTTLE, handedOutAmount));
+        remainingCount -= handedOutAmount;
+        continue;
       }
 
       if (currentItem.getType() != Material.EXPERIENCE_BOTTLE)
         continue;
 
-      if (currentItem.getAmount() == currentItem.getMaxStackSize())
+      var currentAmount = currentItem.getAmount();
+      var remainingSpace = maxStackSize - currentAmount;
+
+      if (remainingSpace <= 0)
         continue;
 
-      currentItem.setAmount(currentItem.getAmount() + 1);
-      return true;
+      var handedOutAmount = Math.min(remainingCount, remainingSpace);
+      currentItem.setAmount(currentAmount + handedOutAmount);
+      remainingCount -= handedOutAmount;
     }
 
-    return false;
+    return totalExperience % expPerBottle + remainingCount * expPerBottle;
   }
 
-  private @Nullable Reference2IntMap<?> getLookedAtFurnaceBlockRecipeMap(Player player) {
+  private @Nullable RecipeMapAndBlock getLookedAtFurnaceRecipeMapAndBlock(Player player) {
     //noinspection UnstableApiUsage
     var rayTraceResult = player.getWorld().rayTraceBlocks(
       player.getEyeLocation(),
@@ -235,12 +245,21 @@ public class GetExpCommand implements CommandExecutor, TabCompleter {
       block -> isFurnaceType(block.getType())
     );
 
-    if (rayTraceResult == null || rayTraceResult.getHitBlock() == null)
+    if (rayTraceResult == null)
       return null;
 
-    var blockState = rayTraceResult.getHitBlock().getState(false);
+    var hitBlock = rayTraceResult.getHitBlock();
 
-    return furnaceLevelDisplay.tryAccessFurnaceRecipeMap(blockState);
+    if (hitBlock == null)
+      return null;
+
+    var blockState = hitBlock.getState(false);
+    var recipeMap = furnaceLevelDisplay.tryAccessFurnaceRecipeMap(blockState);
+
+    if (recipeMap == null)
+      return null;
+
+    return new RecipeMapAndBlock(recipeMap, hitBlock);
   }
 
   private boolean isFurnaceType(Material material) {
@@ -253,12 +272,12 @@ public class GetExpCommand implements CommandExecutor, TabCompleter {
       return List.of();
 
     if (args.length == 1 && args[0].isBlank()) {
-      var recipeMap = getLookedAtFurnaceBlockRecipeMap(player);
+      var recipeMapAndBlock = getLookedAtFurnaceRecipeMapAndBlock(player);
 
       var totalExperience = 0F;
 
-      if (recipeMap != null) {
-        for (var entry : recipeMap.reference2IntEntrySet()) {
+      if (recipeMapAndBlock != null) {
+        for (var entry : recipeMapAndBlock.recipeMap().reference2IntEntrySet()) {
           var recipeExperience = furnaceLevelDisplay.tryAccessRecipeExperienceByKey(entry.getKey());
 
           if (recipeExperience != null)

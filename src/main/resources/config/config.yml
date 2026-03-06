@@ -37,7 +37,7 @@ backOverride:
 
 furnaceLevel:
   noLevelsStored: '<&7>[XP] Keine Level gespeichert'
-  levelsStored: '<&6>[XP] {old_level} → {new_level} <&7>({next_level_progress}% ↑)'
+  levelsStored: '<&6>[XP] {old_level} → {new_level} <&7>({next_level_progress}% ↑ | {stored_experience}exp)'
 
 getUuid:
   noPermission: '{lut.main_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
@@ -516,7 +516,15 @@ autoFly:
 getExp:
   command:
     name: getexp
+  experiencePerBottle: 16
   playersOnly: '{lut.get_exp_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+  noPermission: '{lut.get_exp_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  commandUsage: '{lut.get_exp_prefix} <&c>Benutzung: /{label} \<Obergrenze: Exp oder 0-100%> [bottles]'
+  notLookingAtAFurnace: '{lut.get_exp_prefix} <&c>Du schaust gerade keinen Ofen an!'
+  invalidNumberProvided: '{lut.get_exp_prefix} <&c>Die Eingabe <&4>{value} <&c>ist keine Zahl größer als Null!'
+  invalidPercentageProvided: '{lut.get_exp_prefix} <&c>Prozentwerte können den Wert 100 nicht übersteigen!'
+  noStoredExperience: '{lut.get_exp_prefix} <&c>Der Ofen bei <&4>{x} {y} {z} <&c>besitzt keine gespeicherte Erfahrung!'
+  limitTooLow: '{lut.get_exp_prefix} <&c>Die Obergrenze <&4>{limit} <&c>ist zu niedrig, da der Ofen bei <&4>{x} {y} {z} <&c>kein Rezept gespeichert hat, dessen Erfahrung kleiner/gleich diesem Wert ist!'
 
 sLut:
   textures:
