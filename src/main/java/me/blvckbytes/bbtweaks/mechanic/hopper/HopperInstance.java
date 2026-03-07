@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.Material;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Crafter;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.type.Hopper;
 import org.bukkit.inventory.*;
@@ -14,6 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 
 public class HopperInstance extends SISOInstance {
 
@@ -104,7 +106,7 @@ public class HopperInstance extends SISOInstance {
     int remainingAmount;
 
     if (destinationBlock.getState() instanceof InventoryHolder destinationInventoryHolder)
-      remainingAmount = tryTransportItemAndGetRemainder(destinationInventoryHolder.getInventory(), destinationBlock.getType(), sourceItem, hopperFacing);
+      remainingAmount = tryTransportItemAndGetRemainder(destinationInventoryHolder, destinationBlock.getType(), sourceItem, hopperFacing);
 
     else if (destinationBlock.getType() == Material.STICKY_PISTON) {
       var transportedItems = new ArrayList<ItemStack>(1);
@@ -133,7 +135,12 @@ public class HopperInstance extends SISOInstance {
     return true;
   }
 
-  private int tryTransportItemAndGetRemainder(Inventory destinationInventory, Material destinationBlockType, ItemStack item, BlockFace hopperFacing) {
+  private int tryTransportItemAndGetRemainder(InventoryHolder destinationInventoryHolder, Material destinationBlockType, ItemStack item, BlockFace hopperFacing) {
+    var destinationInventory = destinationInventoryHolder.getInventory();
+
+    if (destinationInventoryHolder instanceof Crafter crafter)
+      return distributeItemAndGetRemainder(destinationInventory, item, (slotIndex, slotContents) -> !crafter.isSlotDisabled(slotIndex));
+
     if (destinationInventory instanceof BrewerInventory) {
       if (hopperFacing == BlockFace.DOWN) {
         if (itemCompatibilities.isBrewingIngredient(item)) {
@@ -293,5 +300,76 @@ public class HopperInstance extends SISOInstance {
       return false;
 
     return predicate == null || predicate.test(item);
+  }
+
+  private int distributeItemAndGetRemainder(Inventory inventory, ItemStack item, SlotPredicate slotPredicate) {
+    var remainingAmountToAdd = item.getAmount();
+    var similarItems = new ArrayList<ItemStack>();
+
+    for (var slotIndex = 0; slotIndex < inventory.getSize(); ++slotIndex) {
+      var currentItem = inventory.getItem(slotIndex);
+
+      if (!slotPredicate.test(slotIndex, currentItem))
+        continue;
+
+      if (isAir(currentItem)) {
+        var newItem = new ItemStack(item);
+        newItem.setAmount(1);
+        inventory.setItem(slotIndex, newItem);
+
+        if (--remainingAmountToAdd <= 0)
+          return 0;
+
+        // Otherwise, we're not able to modify the amount later on by reference - the
+        // inventory seems to clone the stack internally when setting.
+        similarItems.add(inventory.getItem(slotIndex));
+        continue;
+      }
+
+      if (!currentItem.isSimilar(item))
+        continue;
+
+      var space = currentItem.getMaxStackSize() - currentItem.getAmount();
+
+      if (space <= 0)
+        continue;
+
+      similarItems.add(currentItem);
+    }
+
+    if (similarItems.isEmpty())
+      return remainingAmountToAdd;
+
+    similarItems.sort(Comparator.comparingInt(ItemStack::getAmount));
+
+    var currentItemIndex = 0;
+    var lastItemAmount = 0;
+
+    var maxStackSize = item.getMaxStackSize();
+
+    while (remainingAmountToAdd > 0) {
+      var currentItem = similarItems.get(currentItemIndex);
+      var currentAmount = currentItem.getAmount();
+
+      if (currentAmount >= maxStackSize && currentItemIndex == 0)
+        break;
+
+      if (currentItemIndex > 0 && currentAmount > lastItemAmount) {
+        currentItemIndex = 0;
+        continue;
+      }
+
+      lastItemAmount = currentAmount;
+
+      currentItem.setAmount(currentAmount + 1);
+      --remainingAmountToAdd;
+
+      if (++currentItemIndex >= similarItems.size())
+        currentItemIndex = 0;
+    }
+
+    item.setAmount(remainingAmountToAdd);
+
+    return remainingAmountToAdd;
   }
 }
