@@ -320,8 +320,23 @@ public class FurnaceLevelDisplay implements Listener {
     return null;
   }
 
+  public boolean isOreRecipe(RecipeExperience<?> recipeExperience) {
+    return oreRecipeKeys.contains(recipeExperience.recipePath());
+  }
+
+  public double accountForMcMMOBoost(Player player, boolean encounteredOreRecipe, double value) {
+    // The mcMMO xp-boost only applies if the item the user took out is an ore.
+    if (mcMMOIntegration != null && encounteredOreRecipe) {
+      var wholePart = (int) Math.floor(value);
+      var fractionalPart = value - wholePart;
+      return mcMMOIntegration.vanillaXPBoost(player, wholePart) + fractionalPart;
+    }
+
+    return value;
+  }
+
   private void displayForPlayer(Player player, FurnaceAccess furnaceAccess) {
-    float totalExperience = 0;
+    var totalExperience = 0D;
     var encounteredOreRecipe = false;
 
     for (var recipeEntry : furnaceAccess.recipesUsed.reference2IntEntrySet()) {
@@ -335,7 +350,7 @@ public class FurnaceLevelDisplay implements Listener {
       totalExperience += recipeExperience.experience() * totalRecipeSmeltCount;
 
       if (!encounteredOreRecipe)
-        encounteredOreRecipe = oreRecipeKeys.contains(recipeExperience.recipePath());
+        encounteredOreRecipe = isOreRecipe(recipeExperience);
     }
 
     if (totalExperience == 0) {
@@ -349,12 +364,7 @@ public class FurnaceLevelDisplay implements Listener {
     // Let's be lenient and allow for a vacant result-slot
     var hasOreResultInOutput = outputType == null || outputType.isAir() || oreRecipeResults.contains(outputType);
 
-    // The mcMMO xp-boost only applies if the item the user took out is an ore.
-    if (mcMMOIntegration != null && encounteredOreRecipe && hasOreResultInOutput) {
-      var wholePart = (int) Math.floor(totalExperience);
-      var fractionalPart = totalExperience - wholePart;
-      totalExperience = mcMMOIntegration.vanillaXPBoost(player, wholePart) + fractionalPart;
-    }
+    totalExperience = accountForMcMMOBoost(player, encounteredOreRecipe && hasOreResultInOutput, totalExperience);
 
     var formattedTotalExperience = String.format("%.1f", totalExperience);
 
