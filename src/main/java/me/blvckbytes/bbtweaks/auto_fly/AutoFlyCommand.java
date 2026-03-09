@@ -125,19 +125,44 @@ public class AutoFlyCommand implements CommandExecutor, TabCompleter, Listener {
     if (mode == AutoMode.OFF)
       return;
 
+    applyAutoFlyMode(player, mode, false);
+  }
+
+  private void applyAutoFlyMode(Player player, AutoMode mode, boolean isRetry) {
+    if (isRetry) {
+      // It seems like we're fighting against some external sort of plugin-initiated reset here, so let's
+      // retry to once again apply the mode if it has been cleared despite the player having permission.
+      Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        if (player.getAllowFlight() || !player.hasPermission(ESSENTIALS_FLY_PERMISSION))
+          return;
+
+        player.setAllowFlight(true);
+
+        if (mode == AutoMode.ENABLED_SET_FLYING)
+          player.setFlying(true);
+      }, 1);
+
+      return;
+    }
+
     if (mode == AutoMode.ENABLED_SET_FLYING) {
       player.setVelocity(new Vector(0, .1, 0));
 
       Bukkit.getScheduler().runTaskLater(plugin, () -> {
         player.setAllowFlight(true);
         player.setFlying(true);
+
+        applyAutoFlyMode(player, mode, true);
       }, 1);
 
       return;
     }
 
-    if (mode == AutoMode.ENABLED)
+    if (mode == AutoMode.ENABLED) {
       player.setAllowFlight(true);
+
+      applyAutoFlyMode(player, mode, true);
+    }
   }
 
   private AutoMode readModeFor(Player player) {
