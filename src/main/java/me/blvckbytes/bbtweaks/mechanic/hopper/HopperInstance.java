@@ -54,13 +54,13 @@ public class HopperInstance extends SISOInstance {
       return true;
     }
 
-    if (hopperInventory == null)
-      hopperInventory = ((InventoryHolder) mountBlock.getState()).getInventory();
-
     var mountBlockData = mountBlock.getBlockData();
 
     if (mountBlockData.getMaterial() != Material.HOPPER)
       return false;
+
+    if (hopperInventory == null)
+      hopperInventory = ((InventoryHolder) mountBlock.getState()).getInventory();
 
     var hopperData = (Hopper) mountBlockData;
 
