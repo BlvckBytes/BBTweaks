@@ -5,7 +5,7 @@ import at.blvckbytes.cm_mapper.mapper.section.CSIgnore;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
-import me.blvckbytes.bbtweaks.un_craft.ItemMaterialTagRegistry;
+import me.blvckbytes.bbtweaks.un_craft.MaterialTagRegistry;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.jetbrains.annotations.NotNull;
@@ -42,7 +42,7 @@ public class TypeRule extends ConfigSection {
     super.afterParsing(fields);
 
     for (var tagName : tags) {
-      var tag = ItemMaterialTagRegistry.getByName(tagName.toLowerCase().trim());
+      var tag = MaterialTagRegistry.getItemTagByName(tagName.toLowerCase().trim());
 
       if (tag == null)
         throw new MappingError("Unknown tag: " + tagName);

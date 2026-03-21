@@ -74,7 +74,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       getServer().getPluginManager().registerEvents(rdBreakTool, this);
 
-      var mainCommandExecutor = new MainCommand(config, rdBreakTool, getLogger());
+      var mainCommandExecutor = new MainCommand(config, rdBreakTool, this);
 
       Objects.requireNonNull(getCommand("bbtweaks")).setExecutor(mainCommandExecutor);
 

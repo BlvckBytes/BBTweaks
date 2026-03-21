@@ -7,7 +7,7 @@ import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import com.cryptomorin.xseries.XMaterial;
-import me.blvckbytes.bbtweaks.un_craft.ItemMaterialTagRegistry;
+import me.blvckbytes.bbtweaks.un_craft.MaterialTagRegistry;
 import org.bukkit.Material;
 import org.bukkit.inventory.RecipeChoice;
 
@@ -49,7 +49,7 @@ public class IngredientSection extends ConfigSection {
     if (tags != null) {
       for (var tag : tags) {
         var tagString = tag.asPlainString(null).toUpperCase().trim();
-        var materialTag = ItemMaterialTagRegistry.getByName(tagString);
+        var materialTag = MaterialTagRegistry.getItemTagByName(tagString);
 
         if (materialTag == null)
           throw new MappingError("Could not correspond \"" + tags + "\" to a valid material-tag");

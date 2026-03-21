@@ -7,23 +7,28 @@ import me.blvckbytes.bbtweaks.RDBreakTool;
 import me.blvckbytes.syllables_matcher.EnumMatcher;
 import me.blvckbytes.syllables_matcher.MatchableEnum;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabExecutor;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MainCommand implements CommandExecutor, TabExecutor {
 
   private enum Action implements MatchableEnum {
     RELOAD,
     RD_BREAKER,
+    LWC_EXTEND_BLOCKS,
     ;
 
     static final EnumMatcher<Action> matcher = new EnumMatcher<>(values());
@@ -31,16 +36,16 @@ public class MainCommand implements CommandExecutor, TabExecutor {
 
   private final ConfigKeeper<MainSection> config;
   private final RDBreakTool rdBreakTool;
-  private final Logger logger;
+  private final Plugin plugin;
 
   public MainCommand(
     ConfigKeeper<MainSection> config,
     RDBreakTool rdBreakTool,
-    Logger logger
+    Plugin plugin
   ) {
     this.config = config;
     this.rdBreakTool = rdBreakTool;
-    this.logger = logger;
+    this.plugin = plugin;
   }
 
   @Override
@@ -70,7 +75,7 @@ public class MainCommand implements CommandExecutor, TabExecutor {
           config.rootSection.mainCommand.configReloadSuccess.sendMessage(sender);
         } catch (Exception e) {
           config.rootSection.mainCommand.configReloadError.sendMessage(sender);
-          logger.log(Level.SEVERE, "An error occurred while trying to reload the config", e);
+          plugin.getLogger().log(Level.SEVERE, "An error occurred while trying to reload the config", e);
         }
         return true;
       }
@@ -93,9 +98,108 @@ public class MainCommand implements CommandExecutor, TabExecutor {
         config.rootSection.mainCommand.setRdBreakerMetadata.sendMessage(sender);
         return true;
       }
+
+      case LWC_EXTEND_BLOCKS -> {
+        var configFile = locateLWCCoreConfig();
+
+        if (configFile == null) {
+          config.rootSection.mainCommand.lwcExtendBlocks.configNotFound.sendMessage(
+            sender,
+            new InterpretationEnvironment()
+              .withVariable("file", new File(new File(plugin.getDataFolder(), "LWC"), "core.yml").getAbsolutePath())
+          );
+
+          return true;
+        }
+
+        var configYaml = YamlConfiguration.loadConfiguration(configFile);
+
+        if (!configYaml.isSet("protections")) {
+          config.rootSection.mainCommand.lwcExtendBlocks.protectionsSectionNotFound.sendMessage(
+            sender,
+            new InterpretationEnvironment()
+              .withVariable("file", configFile.getAbsolutePath())
+              .withVariable("missing_section", "protections")
+          );
+
+          return true;
+        }
+
+        var blocksSection = configYaml.getConfigurationSection("protections.blocks");
+        var existingMaterials = new HashSet<Material>();
+
+        if (blocksSection == null)
+          blocksSection = configYaml.createSection("protections.blocks");
+
+        for (var type : blocksSection.getKeys(false)) {
+          try {
+            existingMaterials.add(Material.valueOf(type.toUpperCase()));
+          } catch (Throwable ignored) {}
+        }
+
+        var extendedKeyCount = 0;
+
+        for (var material : config.rootSection.mainCommand.lwcExtendBlocks._materialsToExtend) {
+          if (existingMaterials.contains(material))
+            continue;
+
+          var type = material.name().toLowerCase();
+
+          blocksSection.set(type + ".enabled", true);
+
+          ++extendedKeyCount;
+        }
+
+        var outputFile = new File(plugin.getDataFolder(), "lwc_core.yml");
+
+        try {
+          configYaml.options().indent(4);
+          configYaml.save(outputFile);
+        } catch (Throwable e) {
+          plugin.getLogger().log(Level.SEVERE, "An error occurred while trying to write to " + outputFile, e);
+
+          config.rootSection.mainCommand.lwcExtendBlocks.couldNotWriteTemplate.sendMessage(
+            sender,
+            new InterpretationEnvironment()
+              .withVariable("file", outputFile.getAbsolutePath())
+          );
+
+          return true;
+        }
+
+        config.rootSection.mainCommand.lwcExtendBlocks.templateWritten.sendMessage(
+          sender,
+          new InterpretationEnvironment()
+            .withVariable("file", outputFile.getAbsolutePath())
+            .withVariable("extended_count", extendedKeyCount)
+            .withVariable("tag_member_count", config.rootSection.mainCommand.lwcExtendBlocks._materialsToExtend.size())
+            .withVariable("new_total_count", existingMaterials.size() + extendedKeyCount)
+        );
+
+        return true;
+      }
     }
 
     return true;
+  }
+
+  private @Nullable File locateLWCCoreConfig() {
+    var pluginsFolder = plugin.getDataFolder().getParentFile();
+
+    if (!pluginsFolder.isDirectory())
+      return null;
+
+    var lwcFolder = new File(pluginsFolder, "LWC");
+
+    if (!lwcFolder.isDirectory())
+      return null;
+
+    var coreConfig = new File(lwcFolder, "core.yml");
+
+    if (!coreConfig.isFile())
+      return null;
+
+    return coreConfig;
   }
 
   @Override

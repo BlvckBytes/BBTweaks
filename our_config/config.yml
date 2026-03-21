@@ -292,3 +292,11 @@ additionalRecipes:
         R:
           materials:
             - REDSTONE
+
+mainCommand:
+  lwcExtendBlocks:
+    materialTags:
+      - SHULKER_BOXES
+      - DOORS
+      - TRAPDOORS
+      - COPPER_CHESTS
