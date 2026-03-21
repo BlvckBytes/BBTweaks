@@ -20,10 +20,10 @@ public class GetExpSection extends ConfigSection {
   public ComponentMarkup noPermission;
   public ComponentMarkup commandUsage;
   public ComponentMarkup notLookingAtAFurnace;
-  public ComponentMarkup invalidNumberProvided;
   public ComponentMarkup invalidPercentageProvided;
   public ComponentMarkup noStoredExperience;
   public ComponentMarkup limitTooLow;
+  public ComponentMarkup handedOutExperience;
 
   public GetExpSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

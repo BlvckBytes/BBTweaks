@@ -519,12 +519,27 @@ getExp:
   experiencePerBottle: 16
   playersOnly: '{lut.get_exp_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
   noPermission: '{lut.get_exp_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
-  commandUsage: '{lut.get_exp_prefix} <&c>Benutzung: /{label} \<Obergrenze: Exp oder 0-100%> [bottles]'
+  commandUsage: |
+    {lut.get_exp_prefix} <&c>Benutzung: /{label} \<Max: Exp | 0-100%> [bottles]<br/>
+    {lut.get_exp_prefix} <&a>bottles <&7>- Ausgabe in Flaschen mit <&a>{exp_per_bottle} exp/Flasche<&7>.
   notLookingAtAFurnace: '{lut.get_exp_prefix} <&c>Du schaust gerade keinen Ofen an!'
-  invalidNumberProvided: '{lut.get_exp_prefix} <&c>Die Eingabe <&4>{value} <&c>ist keine Zahl größer als Null!'
-  invalidPercentageProvided: '{lut.get_exp_prefix} <&c>Prozentwerte können den Wert 100 nicht übersteigen!'
+  invalidPercentageProvided: '{lut.get_exp_prefix} <&c>Die Eingabe <&4>{value} <&c>ist keine Prozentangabe größer als 0% und kleiner als 100%!'
   noStoredExperience: '{lut.get_exp_prefix} <&c>Der Ofen bei <&4>{x} {y} {z} <&c>besitzt keine gespeicherte Erfahrung!'
-  limitTooLow: '{lut.get_exp_prefix} <&c>Die Obergrenze <&4>{limit} <&c>ist zu niedrig, da der Ofen bei <&4>{x} {y} {z} <&c>kein Rezept gespeichert hat, dessen Erfahrung kleiner/gleich diesem Wert ist!'
+  limitTooLow: '{lut.get_exp_prefix} <&c>Die Obergrenze <&4>{limit_percentage}% <&c>ist zu niedrig, da der Ofen bei <&4>{x} {y} {z} <&c>kein Rezept gespeichert hat, dessen Erfahrung kleiner/gleich dem zugehörigen, absoluten Wert ist!'
+  handedOutExperience: |
+    <container *if="bottles > 0">
+      {lut.get_exp_prefix} <&7>Es wurden <&a><container *let-value="experience" [lut.decimal] />exp <&7>als <&a>{bottles} Flaschen <&7>bei <&a>{x} {y} {z} <&7>ausgehändigt
+      <container *if="remaining_experience > 0">
+        <&7>; Rest <&a><container *let-value="remaining_experience" [lut.decimal] />exp
+      </container>
+    </container>
+    <container *else>
+      {lut.get_exp_prefix} <&7>Es wurden <&a><container *let-value="experience" [lut.decimal] />exp <&7>bei <&a>{x} {y} {z} <&7>ausgehändigt
+    </container>
+    <container *if="limit_percentage > 0">
+      <&7>; Obergrenze: <&a><container *let-value="limit_percentage" [lut.decimal] />%
+    <container>
+    <&7>.
 
 sLut:
   textures:
@@ -545,6 +560,7 @@ cLut:
   markers_prefix: '<&7>[<&6>Markierungen<&7>]'
   auto_fly_prefix: '<&7>[<&6>AutoFly<&7>]'
   get_exp_prefix: '<&7>[<&6>GetExp<&7>]'
+  decimal: '<number [value] format="#.##" locale="de_DE" />'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}
