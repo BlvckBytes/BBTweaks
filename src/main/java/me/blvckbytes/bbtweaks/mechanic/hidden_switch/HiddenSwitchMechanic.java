@@ -67,7 +67,6 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
 
     Runnable updateCommands = () -> {
       config.rootSection.mechanic.hiddenSwitch.passwordCommand.apply(passwordCommand, commandUpdater);
-      commandUpdater.trySyncCommands();
     };
 
     updateCommands.run();

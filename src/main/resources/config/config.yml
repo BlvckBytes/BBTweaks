@@ -519,6 +519,48 @@ autoFly:
   newModeEnabled: '{lut.auto_fly_prefix} <&7>Dein Flugmodus wird nun <&a>automatisch aktiviert<&7>.'
   newModeEnabledSetFlying: '{lut.auto_fly_prefix} <&7>Dein Flugmodus wird nun <&a>automatisch aktiviert <&7>und du wirst <&a>anschließend ins Fliegen versetzt<&7>.'
 
+newbieTeleport:
+  mainCommand:
+    name: newbieteleport
+    aliases:
+      - ntp
+  resetCommand:
+    name: newbieteleportreset
+    aliases:
+      - ntpr
+  useCountLimit: 3
+  worlds:
+    - world
+  allowedRegions:
+    - __global__
+  missingPermissionResetCommand: '{lut.ntp_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  usageResetCommand: '{lut.ntp_prefix} <&c>Benutze: /{label} \<Name>'
+  playerNotOnline: '{lut.ntp_prefix} <&c>Der Spieler <&4>{name} <&c>befindet sich aktuell nicht auf dem Server!'
+  useCountAlreadyAtZero: '{lut.ntp_prefix} <&c>Der Spieler <&4>{name} <&c>hat noch keine Versuche beansprucht!'
+  useCountReset: '{lut.ntp_prefix} <&7>Dem Spieler <&a>{name} <&7>stehen nun wieder alle <&a>{limit} Versuche <&7>zur Verfügung.'
+  playersOnly: '{lut.ntp_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+  missingPermissionMainCommand: '{lut.ntp_prefix} <&c>Diese Funktion steht nur Entdeckern zur Verfügung!'
+  usageMainCommand: |
+    {lut.ntp_prefix} <&7>Nutze <&a>/{label} \<x> \<z> <&7>in Verbindung mit<space/>
+    <open-url value="https://map.blockstal.de">
+      <&a><u>map.blockstal.de
+    </open-url>
+    <&7> -<space/>
+    <container *if="remaining_uses eq 1">
+      <&a>ein Versuch
+    </container>
+    <container *else>
+      <&a>{remaining_uses} Versuche
+    </container>
+    <&7> verbleibend.
+  noMoreUsesAvailable: '{lut.ntp_prefix} <&c>Du hast bereits alle <&4>{limit} Versuche <&c>genutzt; kontaktiere ein Teammitglied bei Problemen!'
+  unsupportedWorld: '{lut.ntp_prefix} <&c>Der Neulingsteleport steht nur in der Bauwelt zur Verfügung!'
+  malformedCoordinate: '{lut.ntp_prefix} <&c>Ungültige {axis}-Koordinate: <&4>{value} <&c>- bitte nur Ganzzahlen angeben!'
+  outsideOfWorldBorder: '{lut.ntp_prefix} <&c>Die Koordinaten <&4>{x} {z} <&c>liegen außerhalb der Weltgrenze von <&4>x: {min_x} bis {max_x} <&c>und <&4>z: {min_z} bis {max_z}<&c>!'
+  unsafeDestination: '{lut.ntp_prefix} <&c>Die Koordinaten <&4>{x} {z} <&c>liegen auf keinem sicheren Festland - bitte wähle eine andere Position!'
+  disallowedRegion: '{lut.ntp_prefix} <&c>Die Koordinaten <&4>{x} {z} <&c>liegen in einer verbotenen Region namens <&4>{region} <&c>- bitte wähle eine andere Position!'
+  successfulTeleport: '{lut.ntp_prefix} <&7>Du hast Versuch <&a>{use_count}/{use_limit} <&7>benutzt, um dich zu <&a>{x} {y} {z} <&7>zu teleportieren.'
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -537,6 +579,7 @@ cLut:
   inv_filter_prefix: '<&7>[<&6>InvFilter<&7>]'
   markers_prefix: '<&7>[<&6>Markierungen<&7>]'
   auto_fly_prefix: '<&7>[<&6>AutoFly<&7>]'
+  ntp_prefix: '<&7>[<&6>NTP<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

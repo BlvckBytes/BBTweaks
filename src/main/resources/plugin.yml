@@ -45,6 +45,11 @@ commands:
     permission: bbtweaks.mechanic.hidden-switch
   autofly:
     description: 'Toggles automatically enabling essentials'' fly-mode'
+  newbieteleport:
+    description: 'Teleport to a position within the main world to claim your plot at'
+  newbieteleportreset:
+    description: 'Resets the newbie-teleport use-count of the given player'
+    permission: bbtweaks.newbieteleport.reset
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

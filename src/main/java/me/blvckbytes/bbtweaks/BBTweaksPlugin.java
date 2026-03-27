@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks;
 
 import at.blvckbytes.cm_mapper.ConfigHandler;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.ReloadPriority;
 import at.blvckbytes.cm_mapper.section.command.CommandUpdater;
 import com.gmail.nossr50.util.player.UserManager;
 import me.blvckbytes.bbtweaks.ab_sleep.ActionBarSleepMessage;
@@ -25,6 +26,10 @@ import me.blvckbytes.bbtweaks.markers_menu.SetMarkerCommand;
 import me.blvckbytes.bbtweaks.markers_menu.SetMarkerCommandSection;
 import me.blvckbytes.bbtweaks.markers_menu.display.MarkerDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.SignMechanicManager;
+import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportCommand;
+import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportCommandSection;
+import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommand;
+import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommandSection;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
@@ -190,16 +195,27 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       var autoFlyCommand = Objects.requireNonNull(getCommand(AutoFlyCommandSection.INITIAL_NAME));
       autoFlyCommand.setExecutor(autoFlyCommandExecutor);
 
+      var newbieTeleportCommand = Objects.requireNonNull(getCommand(NewbieTeleportCommandSection.INITIAL_NAME));
+      var newbieTeleportExecutor = new NewbieTeleportCommand(this, config);
+      newbieTeleportCommand.setExecutor(newbieTeleportExecutor);
+
+      var newbieTeleportResetCommand = Objects.requireNonNull(getCommand(NewbieTeleportResetCommandSection.INITIAL_NAME));
+      newbieTeleportResetCommand.setExecutor(new NewbieTeleportResetCommand(newbieTeleportExecutor, config));
+
       Runnable updateCommands = () -> {
         config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);
         config.rootSection.markersMenu.setMarkerCommand.apply(setMarkerCommand, commandUpdater);
         config.rootSection.autoFly.command.apply(autoFlyCommand, commandUpdater);
         config.rootSection.backOverride.backtrackCommand.apply(backtrackCommand, commandUpdater);
-        commandUpdater.trySyncCommands();
+        config.rootSection.newbieTeleport.mainCommand.apply(newbieTeleportCommand, commandUpdater);
+        config.rootSection.newbieTeleport.resetCommand.apply(newbieTeleportResetCommand, commandUpdater);
       };
 
       updateCommands.run();
+      commandUpdater.trySyncCommands();
+
       config.registerReloadListener(updateCommands);
+      config.registerReloadListener(commandUpdater::trySyncCommands, ReloadPriority.LOWEST);
 
       getServer().getPluginManager().registerEvents(CraftBookIntegration.INSTANCE, this);
     } catch (Throwable e) {
