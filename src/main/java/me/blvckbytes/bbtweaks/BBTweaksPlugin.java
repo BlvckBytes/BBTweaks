@@ -27,6 +27,7 @@ import me.blvckbytes.bbtweaks.markers_menu.SetMarkerCommand;
 import me.blvckbytes.bbtweaks.markers_menu.SetMarkerCommandSection;
 import me.blvckbytes.bbtweaks.markers_menu.display.MarkerDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.SignMechanicManager;
+import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceHandler;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportCommand;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportCommandSection;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommand;
@@ -221,6 +222,8 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       config.registerReloadListener(commandUpdater::trySyncCommands, ReloadPriority.LOWEST);
 
       getServer().getPluginManager().registerEvents(CraftBookIntegration.INSTANCE, this);
+
+      getServer().getPluginManager().registerEvents(new NewbieAnnounceHandler(this, config), this);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);

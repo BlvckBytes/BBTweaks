@@ -16,6 +16,7 @@ import me.blvckbytes.bbtweaks.inv_filter.InvFilterSection;
 import me.blvckbytes.bbtweaks.main_command.MainCommandSection;
 import me.blvckbytes.bbtweaks.markers_menu.MarkersMenuSection;
 import me.blvckbytes.bbtweaks.mechanic.MechanicSection;
+import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceSection;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportSection;
 import me.blvckbytes.bbtweaks.ping.PingSection;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideSection;
@@ -40,6 +41,7 @@ public class MainSection extends ConfigSection {
   public AutoFlySection autoFly;
   public NewbieTeleportSection newbieTeleport;
   public DiscordSection discord;
+  public NewbieAnnounceSection newbieAnnounce;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
