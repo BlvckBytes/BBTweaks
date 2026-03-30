@@ -122,20 +122,18 @@ public class BacktrackCommand implements CommandExecutor, TabCompleter, Listener
   }
 
   @EventHandler
-  public void onMove(PlayerMoveEvent event) {
-    var playerId = event.getPlayer().getUniqueId();
-    var session = sessionByPlayerId.get(playerId);
+  public void onInput(PlayerInputEvent event) {
+    var input = event.getInput();
+
+    if (!(input.isForward() || input.isBackward() || input.isLeft() || input.isRight()))
+      return;
+
+    var session = sessionByPlayerId.remove(event.getPlayer().getUniqueId());
 
     if (session == null)
       return;
 
-    var dx = Math.abs(event.getFrom().getX() - event.getTo().getX());
-    var dz = Math.abs(event.getFrom().getZ() - event.getTo().getZ());
-
-    if (dx > .01 || dz > .01) {
-      sessionByPlayerId.remove(playerId);
-      session.onEnd(true, true);
-    }
+    session.onEnd(true, true);
   }
 
   @EventHandler
