@@ -18,6 +18,7 @@ import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegration;
+import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegration;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.main_command.MainCommand;
 import me.blvckbytes.bbtweaks.markers_menu.MarkersCommand;
@@ -69,6 +70,8 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     try {
       var configHandler = new ConfigHandler(this, "config");
       var config = new ConfigKeeper<>(configHandler, "config.yml", MainSection.class);
+
+      DiscordIntegration.getOrLoadInstance(this, getLogger(), config);
 
       preferencesStore = new NameScopedKeyValueStore(getFileAndEnsureExistence("user-preferences.json"), getLogger());
       Bukkit.getScheduler().runTaskTimerAsynchronously(this, preferencesStore::saveToDisk, 20 * 60L, 20 * 60L);

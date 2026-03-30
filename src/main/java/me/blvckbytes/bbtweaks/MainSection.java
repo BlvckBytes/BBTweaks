@@ -11,6 +11,7 @@ import me.blvckbytes.bbtweaks.back.BackOverrideSection;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsSection;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
+import me.blvckbytes.bbtweaks.integration.discord.DiscordSection;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterSection;
 import me.blvckbytes.bbtweaks.main_command.MainCommandSection;
 import me.blvckbytes.bbtweaks.markers_menu.MarkersMenuSection;
@@ -38,6 +39,7 @@ public class MainSection extends ConfigSection {
   public MarkersMenuSection markersMenu;
   public AutoFlySection autoFly;
   public NewbieTeleportSection newbieTeleport;
+  public DiscordSection discord;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
