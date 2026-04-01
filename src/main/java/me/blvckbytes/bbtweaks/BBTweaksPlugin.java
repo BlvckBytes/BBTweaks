@@ -34,6 +34,9 @@ import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommand;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommandSection;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
+import me.blvckbytes.bbtweaks.private_vaults.PrivateVaultCommand;
+import me.blvckbytes.bbtweaks.private_vaults.PrivateVaultManager;
+import me.blvckbytes.bbtweaks.private_vaults.PrivateVaultViewCommand;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
@@ -55,6 +58,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
   private WorldGuardFlags worldGuardFlags;
   private MarkerDisplayHandler markerDisplayHandler;
   private NameScopedKeyValueStore preferencesStore;
+  private PrivateVaultManager vaultManager;
 
   // TODO: Idea - /empty-out [all]
 
@@ -206,6 +210,14 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       var newbieTeleportResetCommand = Objects.requireNonNull(getCommand(NewbieTeleportResetCommandSection.INITIAL_NAME));
       newbieTeleportResetCommand.setExecutor(new NewbieTeleportResetCommand(newbieTeleportExecutor, config));
 
+      vaultManager = new PrivateVaultManager(this, config);
+
+      var privateVaultCommand = Objects.requireNonNull(getCommand("pv"));
+      privateVaultCommand.setExecutor(new PrivateVaultCommand(vaultManager));
+
+      var privateVaultViewCommand = Objects.requireNonNull(getCommand("pvv"));
+      privateVaultViewCommand.setExecutor(new PrivateVaultViewCommand(vaultManager));
+
       Runnable updateCommands = () -> {
         config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);
         config.rootSection.markersMenu.setMarkerCommand.apply(setMarkerCommand, commandUpdater);
@@ -250,6 +262,11 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     if (markerDisplayHandler != null) {
       catchAll(markerDisplayHandler::onShutdown);
       markerDisplayHandler = null;
+    }
+
+    if (vaultManager != null) {
+      catchAll(vaultManager::onShutdown);
+      vaultManager = null;
     }
   }
 

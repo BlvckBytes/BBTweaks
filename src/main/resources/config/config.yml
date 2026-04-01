@@ -571,6 +571,11 @@ newbieAnnounce:
   enableDiscord: true
   discordMessage: '👋 Seht her! {name} ist neu auf Blockstal! Willkommen. ♥'
 
+privateVaults:
+  inventoryTitle: '<&8>{owner}''s Privater Tresor'
+  # bbtweaks.private-vaults.size.<key>
+  rowCounts:
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'

@@ -19,6 +19,7 @@ import me.blvckbytes.bbtweaks.mechanic.MechanicSection;
 import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceSection;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportSection;
 import me.blvckbytes.bbtweaks.ping.PingSection;
+import me.blvckbytes.bbtweaks.private_vaults.PrivateVaultsSection;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideSection;
 import me.blvckbytes.bbtweaks.un_craft.config.UnCraftSection;
 
@@ -42,6 +43,7 @@ public class MainSection extends ConfigSection {
   public NewbieTeleportSection newbieTeleport;
   public DiscordSection discord;
   public NewbieAnnounceSection newbieAnnounce;
+  public PrivateVaultsSection privateVaults;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

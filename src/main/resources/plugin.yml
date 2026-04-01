@@ -50,6 +50,11 @@ commands:
   newbieteleportreset:
     description: 'Resets the newbie-teleport use-count of the given player'
     permission: bbtweaks.newbieteleport.reset
+  pv:
+    description: 'Access private vaults'
+  pvv:
+    description: 'View private vaults of other players'
+    permission: bbtweaks.private-vaults.other
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
