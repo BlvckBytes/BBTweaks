@@ -573,8 +573,14 @@ newbieAnnounce:
 
 privateVaults:
   inventoryTitle: '<&8>{owner}''s Privater Tresor'
-  # bbtweaks.private-vaults.size.<key>
-  rowCounts:
+  playersOnly: '{lut.pv_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+  handedOutExcessStacks: '{lut.pv_prefix} <&7>Dein Tresor wurde soeben <&a>verkleinert<&7>; händige <&a>{stack_count} Items <&7>aus, die dadurch abgeschnitten wurden!'
+  vaultResizedToZero: '{lut.pv_prefix} <&c>Der von dir betrachtete Tresor wurde soeben deaktiviert!'
+  viewCommandNoPermission: '{lut.pv_prefix} <&c>Dir fehlt das nötige Recht, um die Tresore anderer einzusehen!'
+  viewCommandUsage: '{lut.pv_prefix} <&c>Benutzung: /{label} \<Name>'
+  vaultNotExistingAndOwnerNotOnline: '{lut.pv_prefix} <&c>Der Spieler <&4>{name} <&c>hat auf seinen Tresor noch nie zugegriffen und ist aktuell nicht online - die Initialgröße kann daher nicht ermittelt werden!'
+  vaultHasNoActiveRowsSelf: '{lut.pv_prefix} <&c>Dein Tresor besitzt noch keine freigeschalteten Slots!'
+  vaultHasNoActiveRowsOther: '{lut.pv_prefix} <&c>Der Tresor von <&4>{name} <&c>besitzt noch keine freigeschalteten Slots!'
 
 sLut:
   textures:
@@ -595,6 +601,7 @@ cLut:
   markers_prefix: '<&7>[<&6>Markierungen<&7>]'
   auto_fly_prefix: '<&7>[<&6>AutoFly<&7>]'
   ntp_prefix: '<&7>[<&6>NTP<&7>]'
+  pv_prefix: '<&7>[<&6>PV<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

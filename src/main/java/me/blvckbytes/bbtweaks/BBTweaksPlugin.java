@@ -213,10 +213,10 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       vaultManager = new PrivateVaultManager(this, config);
 
       var privateVaultCommand = Objects.requireNonNull(getCommand("pv"));
-      privateVaultCommand.setExecutor(new PrivateVaultCommand(vaultManager));
+      privateVaultCommand.setExecutor(new PrivateVaultCommand(vaultManager, config));
 
       var privateVaultViewCommand = Objects.requireNonNull(getCommand("pvv"));
-      privateVaultViewCommand.setExecutor(new PrivateVaultViewCommand(vaultManager));
+      privateVaultViewCommand.setExecutor(new PrivateVaultViewCommand(vaultManager, config));
 
       Runnable updateCommands = () -> {
         config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);

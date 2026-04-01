@@ -93,6 +93,8 @@ public class ItemsAndRows {
       if (currentItem == null || currentItem.getType().isAir())
         continue;
 
+      items[index] = null;
+
       receiver.getInventory()
         .addItem(currentItem)
         .values().forEach(item -> receiver.getWorld().dropItem(receiver.getEyeLocation(), item));

@@ -23,6 +23,7 @@ public class PrivateVaultManager {
 
   private static final long OFFLINE_CACHE_TIMEOUT_MS = 1000 * 30;
   private static final long WRITE_PERIOD_T = 20 * 15;
+  private static final long SIZE_UPDATE_PERIOD_T = 20;
 
   private final File vaultsDirectory;
   private final Logger logger;
@@ -47,10 +48,20 @@ public class PrivateVaultManager {
     this.vaultByOwnerId = new HashMap<>();
 
     Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::storeAndCleanUpVaults, WRITE_PERIOD_T, WRITE_PERIOD_T);
+    Bukkit.getScheduler().runTaskTimer(plugin, this::updateVaultSizesToPermissions, SIZE_UPDATE_PERIOD_T, SIZE_UPDATE_PERIOD_T);
   }
 
   public void onShutdown() {
     storeAndCleanUpVaults();
+  }
+
+  private void updateVaultSizesToPermissions() {
+    synchronized (vaultByOwnerId) {
+      for (var vault : vaultByOwnerId.values()) {
+        if (vault.owner.isOnline())
+          vault.updateNumberOfRows(determineNumberOfRows(vault.owner.getPlayer()), config);
+      }
+    }
   }
 
   private void storeAndCleanUpVaults() {
@@ -81,23 +92,6 @@ public class PrivateVaultManager {
     }
   }
 
-  private VaultAccessResult handleOpeningVault(PrivateVault vault, Player viewer) {
-    if (viewer.getUniqueId().equals(vault.owner.getUniqueId())) {
-      var excessCount = vault.items.handOutExcessItemsAndGetStackCount(viewer);
-
-      // TODO: Config-message
-      if (excessCount > 0)
-        viewer.sendMessage("§aHanded out " + excessCount + " excess stacks which were cut off as the vault shrunk!");
-    }
-
-    if (vault.inventory == null)
-      return VaultAccessResult.OWNER_CANNOT_ACCESS_ANY_ROWS;
-
-    viewer.openInventory(vault.inventory);
-
-    return VaultAccessResult.SUCCESS;
-  }
-
   public VaultAccessResult tryOpenVaultInventory(Player viewer, OfflinePlayer owner) {
     PrivateVault vault;
 
@@ -106,7 +100,11 @@ public class PrivateVaultManager {
 
       if (vault != null) {
         vault.touchLastAccessStamp();
-        return handleOpeningVault(vault, viewer);
+
+        if (owner.isOnline())
+          vault.updateNumberOfRows(determineNumberOfRows(owner.getPlayer()), config);
+
+        return vault.openInventoryIfExistsAndHandOutExcesses(viewer, config);
       }
     }
 
@@ -117,9 +115,6 @@ public class PrivateVaultManager {
         return VaultAccessResult.NOT_EXISTING_AND_OWNER_NOT_ONLINE;
 
       var numberOfRows = determineNumberOfRows(owner.getPlayer());
-
-      if (numberOfRows <= 0)
-        return VaultAccessResult.OWNER_CANNOT_ACCESS_ANY_ROWS;
 
       items = ItemsAndRows.empty(numberOfRows);
     }
@@ -139,18 +134,16 @@ public class PrivateVaultManager {
       vaultByOwnerId.put(owner.getUniqueId(), vault);
     }
 
-    return handleOpeningVault(vault, viewer);
+    return vault.openInventoryIfExistsAndHandOutExcesses(viewer, config);
   }
 
   private int determineNumberOfRows(Player player) {
-    var maxAccessibleSize = 0;
-
-    for (var entry : config.rootSection.privateVaults.rowCounts.entrySet()) {
-      if (player.hasPermission("bbtweaks.private-vaults.size." + entry.getKey()))
-        maxAccessibleSize = Math.max(maxAccessibleSize, entry.getValue());
+    for (var rowCount = 6; rowCount > 0; --rowCount) {
+      if (player.hasPermission("bbtweaks.private-vaults.rows." + rowCount))
+        return rowCount;
     }
 
-    return maxAccessibleSize;
+    return 0;
   }
 
   private File getVaultFile(OfflinePlayer owner) {

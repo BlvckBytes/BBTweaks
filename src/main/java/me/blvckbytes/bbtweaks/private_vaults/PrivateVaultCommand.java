@@ -1,5 +1,8 @@
 package me.blvckbytes.bbtweaks.private_vaults;
 
+import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import me.blvckbytes.bbtweaks.MainSection;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,24 +16,31 @@ import java.util.List;
 public class PrivateVaultCommand implements CommandExecutor, TabCompleter {
 
   private final PrivateVaultManager vaultManager;
+  private final ConfigKeeper<MainSection> config;
 
-  public PrivateVaultCommand(PrivateVaultManager vaultManager) {
+  public PrivateVaultCommand(
+    PrivateVaultManager vaultManager,
+    ConfigKeeper<MainSection> config
+  ) {
     this.vaultManager = vaultManager;
+    this.config = config;
   }
 
   @Override
   public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
     if (!(sender instanceof Player player)) {
-      // TODO: Config-message
-      sender.sendMessage("§cPlayers only");
+      config.rootSection.privateVaults.playersOnly.sendMessage(sender);
       return true;
     }
 
     var result = vaultManager.tryOpenVaultInventory(player, player);
 
+    var environment = new InterpretationEnvironment()
+      .withVariable("name", player.getName());
+
     switch (result) {
-      case OWNER_CANNOT_ACCESS_ANY_ROWS -> player.sendMessage("§cThis vault does not have access to any rows which could be displayed!");
-      case NOT_EXISTING_AND_OWNER_NOT_ONLINE -> player.sendMessage("§cThe owner has not yet accessed and thereby created their vault!");
+      case OWNER_CANNOT_ACCESS_ANY_ROWS -> config.rootSection.privateVaults.vaultHasNoActiveRowsSelf.sendMessage(player, environment);
+      case NOT_EXISTING_AND_OWNER_NOT_ONLINE -> config.rootSection.privateVaults.vaultNotExistingAndOwnerNotOnline.sendMessage(player, environment);
     }
 
     return true;
