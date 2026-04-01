@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -75,16 +76,16 @@ public class PrivateVaultManager {
           iterator.remove();
 
         var items = vault.syncAndGetItems();
-        var vaultBytes = items.toBytes();
+        var vaultYamlString = items.toYamlString();
 
-        if (items.doBytesEqualCurrentlyWrittenData(vaultBytes))
+        if (items.doesEqualCurrentlyWrittenYamlString(vaultYamlString))
           continue;
 
         var vaultFile = getVaultFile(vault.owner);
 
         try (var outputStream = new FileOutputStream(vaultFile)) {
-          outputStream.write(vaultBytes);
-          items.updateCurrentlyWrittenData(vaultBytes);
+          outputStream.write(vaultYamlString.getBytes(StandardCharsets.UTF_8));
+          items.updateCurrentlyWrittenYamlString(vaultYamlString);
         } catch (Throwable e) {
           logger.log(Level.SEVERE, "An error occurred while trying to write the vault of " + vault.owner.getUniqueId() + " (" + vault.owner.getName() + ")", e);
         }
@@ -147,7 +148,7 @@ public class PrivateVaultManager {
   }
 
   private File getVaultFile(OfflinePlayer owner) {
-    return new File(vaultsDirectory, owner.getUniqueId() + ".bin");
+    return new File(vaultsDirectory, owner.getUniqueId() + ".yml");
   }
 
   private @Nullable ItemsAndRows tryLoadItemsFromFile(OfflinePlayer owner) {
@@ -157,7 +158,7 @@ public class PrivateVaultManager {
       return null;
 
     try (var inputStream = new FileInputStream(vaultFile)) {
-      return ItemsAndRows.fromBytes(inputStream.readAllBytes());
+      return ItemsAndRows.fromYamlString(new String(inputStream.readAllBytes(), StandardCharsets.UTF_8));
     } catch (Throwable e) {
       logger.log(Level.SEVERE, "An error occurred while trying to load the vault of " + owner.getUniqueId() + " (" + owner.getName() + ")", e);
       return null;

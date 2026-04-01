@@ -1,10 +1,14 @@
 package me.blvckbytes.bbtweaks.private_vaults;
 
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
+import java.io.StringReader;
+import java.util.Objects;
 
 public class ItemsAndRows {
 
@@ -13,26 +17,18 @@ public class ItemsAndRows {
   public final ItemStack[] items;
   public int lastKnownRows;
 
-  private byte[] currentlyWrittenBytes;
+  private @Nullable String currentlyWrittenYamlString;
 
-  private ItemsAndRows(byte[] bytes) {
-    if (bytes.length < 2)
-      throw new IllegalArgumentException("Cannot load from less than two bytes");
+  private ItemsAndRows(@NotNull String yamlString) {
+    var yamlConfig = YamlConfiguration.loadConfiguration(new StringReader(yamlString));
 
-    var itemsBytes = new byte[bytes.length - 1];
-    System.arraycopy(bytes, 1, itemsBytes, 0, bytes.length - 1);
+    this.items = new ItemStack[FIXED_ITEMS_ARRAY_SIZE];
 
-    var loadedItems = ItemStack.deserializeItemsFromBytes(itemsBytes);
+    for (var index = 0; index < items.length; ++index)
+      this.items[index] = yamlConfig.getItemStack("slot-" + index);
 
-    if (loadedItems.length != FIXED_ITEMS_ARRAY_SIZE) {
-      var newArray = new ItemStack[FIXED_ITEMS_ARRAY_SIZE];
-      System.arraycopy(loadedItems, 0, newArray, 0, Math.min(FIXED_ITEMS_ARRAY_SIZE, loadedItems.length));
-      loadedItems = newArray;
-    }
-
-    this.items = loadedItems;
-    this.lastKnownRows = bytes[0];
-    this.currentlyWrittenBytes = bytes;
+    this.lastKnownRows = yamlConfig.getInt("lastKnownRows", 0);
+    this.currentlyWrittenYamlString = yamlString;
   }
 
   private ItemsAndRows(int lastKnownRows) {
@@ -40,30 +36,37 @@ public class ItemsAndRows {
     this.lastKnownRows = lastKnownRows;
   }
 
-  public static ItemsAndRows fromBytes(byte[] bytes) {
-    return new ItemsAndRows(bytes);
+  public static ItemsAndRows fromYamlString(String yamlString) {
+    return new ItemsAndRows(yamlString);
   }
 
   public static ItemsAndRows empty(int lastKnownRows) {
     return new ItemsAndRows(lastKnownRows);
   }
 
-  public void updateCurrentlyWrittenData(byte[] bytes) {
-    currentlyWrittenBytes = bytes;
+  public void updateCurrentlyWrittenYamlString(String yamlString) {
+    currentlyWrittenYamlString = yamlString;
   }
 
-  public boolean doBytesEqualCurrentlyWrittenData(byte[] bytes) {
-    return Arrays.equals(currentlyWrittenBytes, bytes);
+  public boolean doesEqualCurrentlyWrittenYamlString(String yamlString) {
+    return Objects.equals(currentlyWrittenYamlString, yamlString);
   }
 
-  public byte[] toBytes() {
-    var itemsBytes = ItemStack.serializeItemsAsBytes(items);
-    var totalBytes = new byte[1 + itemsBytes.length];
+  public String toYamlString() {
+    var yamlConfig = new YamlConfiguration();
 
-    totalBytes[0] = (byte) lastKnownRows;
-    System.arraycopy(itemsBytes, 0, totalBytes, 1, itemsBytes.length);
+    yamlConfig.set("lastKnownRows", lastKnownRows);
 
-    return totalBytes;
+    for (var index = 0; index < items.length; ++index) {
+      var currentItem = items[index];
+
+      if (currentItem == null || currentItem.getType().isAir())
+        continue;
+
+      yamlConfig.set("slot-" + index, currentItem);
+    }
+
+    return yamlConfig.saveToString();
   }
 
   public void loadIntoInventory(Inventory inventory) {
