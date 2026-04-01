@@ -82,3 +82,5 @@ permissions:
     description: 'Browse all available markers'
   bbtweaks.setmarker:
     description: 'Set a marker to your current location by its name'
+  bbtweaks.private-vaults.rows.<count>:
+    description: 'Permits access to <count> number of rows'
