@@ -3,7 +3,6 @@ package me.blvckbytes.bbtweaks.back;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import at.blvckbytes.component_markup.constructor.SlotType;
-import com.destroystokyo.paper.event.player.PlayerJumpEvent;
 import me.blvckbytes.bbtweaks.MainSection;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
@@ -91,49 +90,40 @@ public class BacktrackCommand implements CommandExecutor, TabCompleter, Listener
   }
 
   @EventHandler
-  public void onSneakToggle(PlayerToggleSneakEvent event) {
-    if (!event.isSneaking())
-      return;
-
-    var session = sessionByPlayerId.get(event.getPlayer().getUniqueId());
-
-    if (session == null)
-      return;
-
-    session.previous();
-  }
-
-  @EventHandler
-  public void onJump(PlayerJumpEvent event) {
-    var session = sessionByPlayerId.get(event.getPlayer().getUniqueId());
-
-    if (session != null)
-      session.next();
-  }
-
-  @EventHandler
   public void onFlyToggle(PlayerToggleFlightEvent event) {
-    var session = sessionByPlayerId.get(event.getPlayer().getUniqueId());
-
-    if (session != null) {
+    // Prevent accidental toggles while quickly navigating through the history
+    if (sessionByPlayerId.containsKey(event.getPlayer().getUniqueId()))
       event.setCancelled(true);
-      Bukkit.getScheduler().runTaskLater(plugin, session::next, 1);
-    }
   }
 
   @EventHandler
   public void onInput(PlayerInputEvent event) {
+    var playerId = event.getPlayer().getUniqueId();
     var input = event.getInput();
 
-    if (!(input.isForward() || input.isBackward() || input.isLeft() || input.isRight()))
+    if (input.isForward() || input.isBackward() || input.isLeft() || input.isRight()) {
+      var session = sessionByPlayerId.remove(playerId);
+
+      if (session == null)
+        return;
+
+      session.onEnd(true, true);
       return;
+    }
 
-    var session = sessionByPlayerId.remove(event.getPlayer().getUniqueId());
+    if (input.isJump() || input.isSneak()) {
+      var session = sessionByPlayerId.get(playerId);
 
-    if (session == null)
-      return;
+      if (session == null)
+        return;
 
-    session.onEnd(true, true);
+      if (input.isJump()) {
+        session.next();
+        return;
+      }
+
+      session.previous();
+    }
   }
 
   @EventHandler
