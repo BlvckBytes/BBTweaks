@@ -25,7 +25,7 @@ public class ItemsAndRows {
     this.items = new ItemStack[FIXED_ITEMS_ARRAY_SIZE];
 
     for (var index = 0; index < items.length; ++index)
-      this.items[index] = yamlConfig.getItemStack("slot-" + index);
+      this.items[index] = yamlConfig.getItemStack(makeSlotKey(index));
 
     this.lastKnownRows = yamlConfig.getInt("lastKnownRows", 0);
     this.currentlyWrittenYamlString = yamlString;
@@ -63,7 +63,7 @@ public class ItemsAndRows {
       if (currentItem == null || currentItem.getType().isAir())
         continue;
 
-      yamlConfig.set("slot-" + index, currentItem);
+      yamlConfig.set(makeSlotKey(index), currentItem);
     }
 
     return yamlConfig.saveToString();
@@ -106,5 +106,9 @@ public class ItemsAndRows {
     }
 
     return stackCount;
+  }
+
+  private static String makeSlotKey(int slot) {
+    return "slot-" + slot;
   }
 }
