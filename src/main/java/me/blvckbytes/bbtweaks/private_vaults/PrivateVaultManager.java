@@ -1,8 +1,6 @@
 package me.blvckbytes.bbtweaks.private_vaults;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
-import at.blvckbytes.component_markup.constructor.SlotType;
-import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -50,6 +48,13 @@ public class PrivateVaultManager {
 
     Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this::storeAndCleanUpVaults, WRITE_PERIOD_T, WRITE_PERIOD_T);
     Bukkit.getScheduler().runTaskTimer(plugin, this::updateVaultSizesToPermissions, SIZE_UPDATE_PERIOD_T, SIZE_UPDATE_PERIOD_T);
+
+    config.registerReloadListener(() -> {
+      synchronized (vaultByOwnerId) {
+        for (var vault : vaultByOwnerId.values())
+          vault.rebuildInventory();
+      }
+    });
   }
 
   public void onShutdown() {
@@ -60,7 +65,7 @@ public class PrivateVaultManager {
     synchronized (vaultByOwnerId) {
       for (var vault : vaultByOwnerId.values()) {
         if (vault.owner.isOnline())
-          vault.updateNumberOfRows(determineNumberOfRows(vault.owner.getPlayer()), config);
+          vault.updateNumberOfRows(determineNumberOfRows(vault.owner.getPlayer()));
       }
     }
   }
@@ -103,9 +108,9 @@ public class PrivateVaultManager {
         vault.touchLastAccessStamp();
 
         if (owner.isOnline())
-          vault.updateNumberOfRows(determineNumberOfRows(owner.getPlayer()), config);
+          vault.updateNumberOfRows(determineNumberOfRows(owner.getPlayer()));
 
-        return vault.openInventoryIfExistsAndHandOutExcesses(viewer, config);
+        return vault.openInventoryIfExistsAndHandOutExcesses(viewer);
       }
     }
 
@@ -123,19 +128,13 @@ public class PrivateVaultManager {
     else if (owner.isOnline())
       items.lastKnownRows = determineNumberOfRows(owner.getPlayer());
 
-    var inventoryTitle = config.rootSection.privateVaults.inventoryTitle.interpret(
-      SlotType.INVENTORY_TITLE,
-      new InterpretationEnvironment()
-        .withVariable("owner", owner.getName())
-    ).get(0);
-
-    vault = PrivateVault.loadFromItems(owner, items, inventoryTitle);
+    vault = PrivateVault.loadFromItems(owner, items, config);
 
     synchronized (vaultByOwnerId) {
       vaultByOwnerId.put(owner.getUniqueId(), vault);
     }
 
-    return vault.openInventoryIfExistsAndHandOutExcesses(viewer, config);
+    return vault.openInventoryIfExistsAndHandOutExcesses(viewer);
   }
 
   private int determineNumberOfRows(Player player) {

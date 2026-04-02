@@ -1,9 +1,9 @@
 package me.blvckbytes.bbtweaks.private_vaults;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.HumanEntity;
@@ -19,34 +19,37 @@ public class PrivateVault {
   public final OfflinePlayer owner;
 
   private final ItemsAndRows items;
-  private final Component inventoryTitle;
+  private final ConfigKeeper<MainSection> config;
   private @Nullable Inventory inventory;
 
   private long lastAccessStamp;
 
-  private PrivateVault(OfflinePlayer owner, ItemsAndRows items, Component inventoryTitle) {
+  private PrivateVault(OfflinePlayer owner, ItemsAndRows items, ConfigKeeper<MainSection> config) {
     this.owner = owner;
     this.items = items;
-    this.inventoryTitle = inventoryTitle;
+    this.config = config;
 
     if (items.lastKnownRows > 0) {
-      this.inventory = Bukkit.createInventory(null, 9 * items.lastKnownRows, inventoryTitle);
+      this.inventory = makeInventory();
       items.loadIntoInventory(this.inventory);
     }
 
     touchLastAccessStamp();
   }
 
-  public static PrivateVault loadFromItems(OfflinePlayer owner, ItemsAndRows items, Component inventoryTitle) {
-    return new PrivateVault(owner, items, inventoryTitle);
+  public static PrivateVault loadFromItems(OfflinePlayer owner, ItemsAndRows items, ConfigKeeper<MainSection> config) {
+    return new PrivateVault(owner, items, config);
   }
 
-  public void updateNumberOfRows(int rows, ConfigKeeper<MainSection> config) {
+  public void updateNumberOfRows(int rows) {
     if (rows == items.lastKnownRows)
       return;
 
     items.lastKnownRows = rows;
+    rebuildInventory();
+  }
 
+  public void rebuildInventory() {
     List<HumanEntity> viewers = null;
 
     if (inventory != null) {
@@ -57,7 +60,7 @@ public class PrivateVault {
       inventory = null;
     }
 
-    if (rows == 0) {
+    if (items.lastKnownRows == 0) {
       if (viewers == null)
         return;
 
@@ -65,7 +68,7 @@ public class PrivateVault {
       return;
     }
 
-    this.inventory = Bukkit.createInventory(null, 9 * items.lastKnownRows, inventoryTitle);
+    this.inventory = makeInventory();
 
     items.loadIntoInventory(this.inventory);
 
@@ -74,11 +77,11 @@ public class PrivateVault {
 
     viewers.forEach(viewer -> {
       if (viewer instanceof Player player)
-        openInventoryIfExistsAndHandOutExcesses(player, config);
+        openInventoryIfExistsAndHandOutExcesses(player);
     });
   }
 
-  public VaultAccessResult openInventoryIfExistsAndHandOutExcesses(Player viewer, ConfigKeeper<MainSection> config) {
+  public VaultAccessResult openInventoryIfExistsAndHandOutExcesses(Player viewer) {
     if (viewer.getUniqueId().equals(owner.getUniqueId())) {
       var excessCount = items.handOutExcessItemsAndGetStackCount(viewer);
 
@@ -111,5 +114,15 @@ public class PrivateVault {
 
   public long getLastAccessStamp() {
     return lastAccessStamp;
+  }
+
+  private Inventory makeInventory() {
+    var inventoryTitle = config.rootSection.privateVaults.inventoryTitle.interpret(
+      SlotType.INVENTORY_TITLE,
+      new InterpretationEnvironment()
+        .withVariable("owner", owner.getName())
+    ).getFirst();
+
+    return Bukkit.createInventory(null, 9 * items.lastKnownRows, inventoryTitle);
   }
 }
