@@ -572,7 +572,7 @@ newbieAnnounce:
   discordMessage: '👋 Seht her! {name} ist neu auf Blockstal! Willkommen. ♥'
 
 privateVaults:
-  inventoryTitle: '<&8>{owner}''s Privater Tresor'
+  inventoryTitle: '<&8>Tresor von {owner}'
   playersOnly: '{lut.pv_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
   handedOutExcessStacks: '{lut.pv_prefix} <&7>Dein Tresor wurde soeben <&a>verkleinert<&7>; händige <&a>{stack_count} Items <&7>aus, die dadurch abgeschnitten wurden!'
   vaultResizedToZero: '{lut.pv_prefix} <&c>Der von dir betrachtete Tresor wurde soeben deaktiviert!'
