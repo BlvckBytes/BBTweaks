@@ -17,7 +17,7 @@ import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
-import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegration;
+import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegrationSingleton;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegration;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.main_command.MainCommand;
@@ -221,7 +221,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       config.registerReloadListener(updateCommands);
       config.registerReloadListener(commandUpdater::trySyncCommands, ReloadPriority.LOWEST);
 
-      getServer().getPluginManager().registerEvents(CraftBookIntegration.INSTANCE, this);
+      CraftBookIntegrationSingleton.initializeInstance(this);
 
       getServer().getPluginManager().registerEvents(new NewbieAnnounceHandler(this, config), this);
     } catch (Throwable e) {
