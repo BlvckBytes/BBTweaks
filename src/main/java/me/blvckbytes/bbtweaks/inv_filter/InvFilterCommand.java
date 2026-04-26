@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
+import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
@@ -83,7 +84,7 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
 
       if (currentFilter != null && currentFilter.predicateAndLanguage != null) {
         var selectedLanguage = predicateHelper.getSelectedLanguage(player);
-        var predicateLanguage = currentFilter.predicateAndLanguage.language();
+        var predicateLanguage = currentFilter.predicateAndLanguage.language;
 
         if (predicateLanguage == selectedLanguage)
           setFilterCommand = "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER) + " " + currentFilter.predicateString;
@@ -318,7 +319,7 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
     if (!filter.enabled || filter.predicateAndLanguage == null)
       return;
 
-    if (!filter.predicateAndLanguage.predicate().test(event.getItem().getItemStack()))
+    if (!filter.predicateAndLanguage.predicate.test(event.getItem().getItemStack()))
       event.setCancelled(true);
   }
 
