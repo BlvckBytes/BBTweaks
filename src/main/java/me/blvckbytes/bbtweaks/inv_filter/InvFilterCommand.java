@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.inv_filter;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.util.PredicateUtils;
 import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
@@ -273,41 +274,8 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
     if (action == null)
       return List.of();
 
-    if (action.constant == CommandAction.SET_FILTER || action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE) {
-      TranslationLanguage language;
-      int argsOffset;
-
-      if (action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE) {
-        if (args.length == 2)
-          return TranslationLanguage.matcher.createCompletions(args[1]);
-
-        var matchedLanguage = TranslationLanguage.matcher.matchFirst(args[1]);
-
-        if (matchedLanguage == null)
-          return List.of();
-
-        language = matchedLanguage.constant;
-        argsOffset = 2;
-      }
-
-      else {
-        language = predicateHelper.getSelectedLanguage(player);
-        argsOffset = 1;
-      }
-
-      try {
-        var tokens = predicateHelper.parseTokens(args, argsOffset);
-        var completions = predicateHelper.createCompletion(language, tokens);
-
-        if (completions.expandedPreviewOrError() != null)
-          player.sendActionBar(completions.expandedPreviewOrError());
-
-        return completions.suggestions();
-      } catch (ItemPredicateParseException e) {
-        player.sendActionBar(predicateHelper.createExceptionMessage(e));
-        return List.of();
-      }
-    }
+    if (action.constant == CommandAction.SET_FILTER || action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE)
+      return PredicateUtils.tabCompletePredicate(player, args, 1, predicateHelper, action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE);
 
     return List.of();
   }
