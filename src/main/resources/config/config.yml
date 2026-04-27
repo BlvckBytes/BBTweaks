@@ -571,6 +571,266 @@ newbieAnnounce:
   enableDiscord: true
   discordMessage: '👋 Seht her! {name} ist neu auf Blockstal! Willkommen. ♥'
 
+multiBreak:
+  command:
+    name: multibreak
+    aliases:
+      - mb
+      - abbauradius
+      - abr
+  limitsByTierName:
+  allowedWorlds:
+    - world
+  missingPermission: '{lut.multi_break_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  unallowedWorld: '{lut.multi_break_prefix} <&c>Du befindest dich aktuell in einer Welt, in der die Funktion deaktiviert ist!'
+  noAccessToAnyVolume: '{lut.multi_break_prefix} <&c>Du hast keinen Zugriff auf ein verfügbares Abbauvolumen!'
+  openingSettingsMenu: '{lut.multi_break_prefix} <&7>Öffne das Einstellungsmenü.'
+  commandActionUsage: |
+    {lut.multi_break_prefix} <&c>Benutzung: /{label} \<
+    <&4 *for-action="actions" *for-separator={<&c>,<space/>}>{action}</>
+    >
+  commandFilterLanguageUsage: |
+    {lut.multi_break_prefix} <&c>Benutzung: /{label} {action} \<
+    <&4 *for-language="languages" *for-separator={<&c>,<space/>}>{language}</>
+    > \<Filter>
+  commandFilterUsageDefaultLanguage: '{lut.multi_break_prefix} <&c>Benutzung: /{label} {action} \<<&4>Filter<&c>>'
+  commandFilterUsageCustomLanguage: '{lut.multi_break_prefix} <&c>Benutzung: /{label} {action} {language} \<<&4>Filter<&c>>'
+  commandSizeUsage: '{lut.multi_break_prefix} <&c>Benutzung: /{label} {action} <&4>Breite<&c>x<&4>Höhe<&c>x<&4>Tiefe'
+  predicateError: '{lut.multi_break_prefix} <&c>Ungültiger Filter: <&4>{error}<&c>.'
+  filterSet: |
+    {lut.multi_break_prefix} <&7>Der Filter<space/>
+      <hover-text value={<&a>Klicke, um einen Befehl zum editieren vorzuschlagen.}>
+        <suggest-command value=`{set_command}`>
+          <&a><u>{filter_predicate}
+      </hover-text><space/>
+      wurde <&a>gesetzt<&7>.
+  filterRemoved: |
+    {lut.multi_break_prefix} <&7>Der Filter<space/>
+      <hover-text value={<&a>Klicke, um einen Befehl zum setzen vorzuschlagen.}>
+        <suggest-command value=`{set_command}`>
+          <&a><u>{filter_predicate}
+      </hover-text><space/>
+      wurde <&a>entfernt<&7>.
+  alreadyEnabled: '{lut.multi_break_prefix} <&c>Die Funktion ist bereits aktiviert!'
+  nowEnabled: '{lut.multi_break_prefix} <&7>Die Funktion ist nun <&a>aktiviert<&7>!'
+  alreadyDisabled: '{lut.multi_break_prefix} <&c>Die Funktion ist bereits deaktiviert!'
+  nowDisabled: '{lut.multi_break_prefix} <&7>Die Funktion ist nun <&a>deaktiviert<&7>!'
+  noFilterSet: '{lut.multi_break_prefix} <&c>Es ist aktuell kein Filter gesetzt!'
+  currentFilter: |
+    {lut.multi_break_prefix} <&7>Aktueller Filter:<space/>
+      <hover-text value={<&a>Klicke, um einen Befehl zum editieren vorzuschlagen.}>
+        <suggest-command value=`{set_command}`>
+          <&a><u>{filter_predicate}
+      </hover-text>
+      .
+  noToolsInHotbarFor: |
+    <&c>Fehlende Werkzeuge:<space/>
+    <&4 *for-key="block_type_keys" *for-separator={,<space/>}>
+      <translate [key] />
+  sizeSetExceededVolume: '{lut.multi_break_prefix} <&c>Deine Eingabe überschritt das Limit des Volumens von <&4>{limit}<&c>; schränke automatisch ein!'
+  sizeSetExceededExtent: '{lut.multi_break_prefix} <&c>Deine Eingabe überschritt das Limit der Reichweite von <&4>{limit}<&c>; schränke automatisch ein!'
+  sizeSet: |
+    {lut.multi_break_prefix} <&7>Abbaugröße gesetzt auf:<space/>
+    <&a>{total_width}x{total_height}x{total_depth} <&7>(
+    <&a>{extent_up} ↑<&7>, <&a>{extent_down} ↓<&7>, <&a>{extent_left} L<&7>, <&a>{extent_right} R<&7>, <&a>{extent_depth} T
+    <&7>).
+  enabledJoinWarning:
+    enabled: true
+    title: '<&4>Achtung: Multi-Break'
+    subtitle: '<&c>Der Modus ist noch aktiv!'
+    durationMillis: 2500
+  display:
+    title: '<&8>MultiBreak-Einstellungen'
+    rows: 3
+    items:
+      extentLeft:
+        slots: 10
+        type: 'ORANGE_CONCRETE'
+        name: |
+          <reset>
+            <&8>» <&6>L<&7>: <&e>Breite Links <&8>«
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Wie viele zusätzliche Blöcke sollen in Blick-<br/>
+            richtung links vom Hauptblock abgebaut werden?<br/>
+            <br/>
+            <&8>♦ <&e>Aktueller Wert: <&6>{extent_left} {extent_left eq 1 then "Block" else "Blöcke"}<br/>
+            <container *if="exceeded_volume_limit">
+              <br/>
+              <&4>⚠ <&c>Limit des Volumens von <&4>{volume_limit} <&c>erreicht!<br/>
+            </container>
+            <container *if="exceeded_extent_limit">
+              <br/>
+              <&4>⚠ <&c>Limit der Reichweite von <&4>{extent_limit} <&c>erreicht!<br/>
+            </container>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
+            <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
+            {lut.spacer}
+      extentRight:
+        slots: 12
+        type: 'ORANGE_CONCRETE'
+        name: |
+          <reset>
+            <&8>» <&6>R<&7>: <&e>Breite Rechts <&8>«
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Wie viele zusätzliche Blöcke sollen in Blick-<br/>
+            richtung rechts vom Hauptblock abgebaut werden?<br/>
+            <br/>
+            <&8>♦ <&e>Aktueller Wert: <&6>{extent_right} {extent_right eq 1 then "Block" else "Blöcke"}<br/>
+            <container *if="exceeded_volume_limit">
+              <br/>
+              <&4>⚠ <&c>Limit des Volumens von <&4>{volume_limit} <&c>erreicht!<br/>
+            </container>
+            <container *if="exceeded_extent_limit">
+              <br/>
+              <&4>⚠ <&c>Limit der Reichweite von <&4>{extent_limit} <&c>erreicht!<br/>
+            </container>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
+            <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
+            {lut.spacer}
+      extentUp:
+        slots: 2
+        type: 'ORANGE_CONCRETE'
+        name: |
+          <reset>
+            <&8>» <&6>↑<&7>: <&e>Breite Oberhalb <&8>«
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Wie viele zusätzliche Blöcke sollen oberhalb<br/>
+            des Hauptblockes abgebaut werden?<br/>
+            <br/>
+            <&8>♦ <&e>Aktueller Wert: <&6>{extent_up} {extent_up eq 1 then "Block" else "Blöcke"}<br/>
+            <container *if="exceeded_volume_limit">
+              <br/>
+              <&4>⚠ <&c>Limit des Volumens von <&4>{volume_limit} <&c>erreicht!<br/>
+            </container>
+            <container *if="exceeded_extent_limit">
+              <br/>
+              <&4>⚠ <&c>Limit der Reichweite von <&4>{extent_limit} <&c>erreicht!<br/>
+            </container>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
+            <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
+            {lut.spacer}
+      extentDown:
+        slots: 20
+        type: 'ORANGE_CONCRETE'
+        name: |
+          <reset>
+            <&8>» <&6>↓<&7>: <&e>Breite Unterhalb <&8>«
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Wie viele zusätzliche Blöcke sollen unterhalb<br/>
+            des Hauptblockes abgebaut werden?<br/>
+            <br/>
+            <&8>♦ <&e>Aktueller Wert: <&6>{extent_down} {extent_down eq 1 then "Block" else "Blöcke"}<br/>
+            <container *if="exceeded_volume_limit">
+              <br/>
+              <&4>⚠ <&c>Limit des Volumens von <&4>{volume_limit} <&c>erreicht!<br/>
+            </container>
+            <container *if="exceeded_extent_limit">
+              <br/>
+              <&4>⚠ <&c>Limit der Reichweite von <&4>{extent_limit} <&c>erreicht!<br/>
+            </container>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
+            <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
+            {lut.spacer}
+      extentDepth:
+        slots: 11
+        type: 'ORANGE_CONCRETE'
+        name: |
+          <reset>
+            <&8>» <&6>T<&7>: <&e>Tiefe <&8>«
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Wie viele zusätzliche Blöcke sollen in die Tiefe<br/>
+            der Blickrichtung abgebaut werden?<br/>
+            <br/>
+            <&8>♦ <&e>Aktueller Wert: <&6>{extent_depth} {extent_depth eq 1 then "Block" else "Blöcke"}<br/>
+            <container *if="exceeded_volume_limit">
+              <br/>
+              <&4>⚠ <&c>Limit des Volumens von <&4>{volume_limit} <&c>erreicht!<br/>
+            </container>
+            <container *if="exceeded_extent_limit">
+              <br/>
+              <&4>⚠ <&c>Limit der Reichweite von <&4>{extent_limit} <&c>erreicht!<br/>
+            </container>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
+            <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
+            {lut.spacer}
+      currentFilter:
+        slots: 14
+        type: '{filter_predicate neq null then "PURPLE_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&6>Abbaufilter <&8>«
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Schränkt ein, welche Blöcke abgebaut werden.<br/>
+            <br/>
+            <&8>♦ <&e>Aktueller Filter:<space/>
+            <&6 *if="filter_predicate">{filter_predicate}</>
+            <&c *else>Nicht gesetzt</><br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Filter entfernen<br/>
+            <&8>➥ <&e>{filter_set_command} <&7>Filter setzen<br/>
+            {lut.spacer}
+      sneakMode:
+        slots: 15
+        type: 'LIGHT_BLUE_CONCRETE'
+        name: |
+          <reset>
+            <&8>» <&6>Verhalten beim Sneaken <&8>«
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Passt die Einschaltung temporär an deinen<br/>
+            Sneakzustand an.<br/>
+            <br/>
+            <&8>♦ <&e>Aktueller Modus: <&6>{lut.sneak_mode[sneak_mode]}<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
+            {lut.spacer}
+      toggleEnabled:
+        slots: 16
+        name: |
+          <reset>
+            <&8>»<space/>
+              <&a *if="enabled">Eingeschalten</>
+              <&c *else>Ausgeschalten</>
+            <space/><&8>«
+        type: '{enabled then "GREEN_CONCRETE" else "RED_CONCRETE"}'
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Schalte die Funktion ein oder aus.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Umschalten<br/>
+            {lut.spacer}
+      filler:
+        type: BLACK_STAINED_GLASS_PANE
+        name: ' '
+        slots: '0..last_slot'
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -590,6 +850,7 @@ cLut:
   markers_prefix: '<&7>[<&6>Markierungen<&7>]'
   auto_fly_prefix: '<&7>[<&6>AutoFly<&7>]'
   ntp_prefix: '<&7>[<&6>NTP<&7>]'
+  multi_break_prefix: '<&7>[<&6>MultiBreak<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}
@@ -682,3 +943,7 @@ cLut:
       </container>
       <br/>
       {lut.spacer}
+  sneak_mode:
+    NONE: '<u>Immer</> aktiviert'
+    ENABLE_WHILE_SNEAKING: 'Während Sneaken <u>aktiviert</>'
+    DISABLE_WHILE_SNEAKING: 'Während Sneaken <u>deaktiviert</>'

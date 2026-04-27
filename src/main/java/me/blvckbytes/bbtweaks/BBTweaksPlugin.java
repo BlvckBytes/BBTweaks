@@ -27,6 +27,11 @@ import me.blvckbytes.bbtweaks.markers_menu.SetMarkerCommand;
 import me.blvckbytes.bbtweaks.markers_menu.SetMarkerCommandSection;
 import me.blvckbytes.bbtweaks.markers_menu.display.MarkerDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.SignMechanicManager;
+import me.blvckbytes.bbtweaks.multi_break.command.MultiBreakCommand;
+import me.blvckbytes.bbtweaks.multi_break.MultiBreakListener;
+import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
+import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakCommandSection;
+import me.blvckbytes.bbtweaks.multi_break.display.MultiBreakDisplayHandler;
 import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceHandler;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportCommand;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportCommandSection;
@@ -55,6 +60,8 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
   private WorldGuardFlags worldGuardFlags;
   private MarkerDisplayHandler markerDisplayHandler;
   private NameScopedKeyValueStore preferencesStore;
+  private MultiBreakDisplayHandler multiBreakDisplayHandler;
+  private MultiBreakParametersStore multiBreakParametersStore;
 
   // TODO: Idea - /empty-out [all]
 
@@ -184,7 +191,9 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       invFilterCommand.setExecutor(invFilterCommandExecutor);
 
-      markerDisplayHandler = new MarkerDisplayHandler(config, FloodgateIntegration.load(getLogger()), this);
+      var floodgateIntegration = FloodgateIntegration.load(getLogger());
+
+      markerDisplayHandler = new MarkerDisplayHandler(config, floodgateIntegration, this);
       getServer().getPluginManager().registerEvents(markerDisplayHandler, this);
 
       var markerCommand = Objects.requireNonNull(getCommand(MarkersCommandSection.INITIAL_NAME));
@@ -206,6 +215,18 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       var newbieTeleportResetCommand = Objects.requireNonNull(getCommand(NewbieTeleportResetCommandSection.INITIAL_NAME));
       newbieTeleportResetCommand.setExecutor(new NewbieTeleportResetCommand(newbieTeleportExecutor, config));
 
+      multiBreakParametersStore = new MultiBreakParametersStore(this, predicateHelper, config);
+      getServer().getPluginManager().registerEvents(multiBreakParametersStore, this);
+
+      var multiBreakListener = new MultiBreakListener(this, multiBreakParametersStore, config);
+      getServer().getPluginManager().registerEvents(multiBreakListener, this);
+
+      multiBreakDisplayHandler = new MultiBreakDisplayHandler(floodgateIntegration, predicateHelper, config, this);
+      getServer().getPluginManager().registerEvents(multiBreakDisplayHandler, this);
+
+      var multiBreakCommand = Objects.requireNonNull(getCommand(MultiBreakCommandSection.INITIAL_NAME));
+      multiBreakCommand.setExecutor(new MultiBreakCommand(multiBreakParametersStore, multiBreakDisplayHandler, predicateHelper, config));
+
       Runnable updateCommands = () -> {
         config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);
         config.rootSection.markersMenu.setMarkerCommand.apply(setMarkerCommand, commandUpdater);
@@ -213,6 +234,7 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
         config.rootSection.backOverride.backtrackCommand.apply(backtrackCommand, commandUpdater);
         config.rootSection.newbieTeleport.mainCommand.apply(newbieTeleportCommand, commandUpdater);
         config.rootSection.newbieTeleport.resetCommand.apply(newbieTeleportResetCommand, commandUpdater);
+        config.rootSection.multiBreak.command.apply(multiBreakCommand, commandUpdater);
       };
 
       updateCommands.run();
@@ -250,6 +272,16 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
     if (markerDisplayHandler != null) {
       catchAll(markerDisplayHandler::onShutdown);
       markerDisplayHandler = null;
+    }
+
+    if (multiBreakDisplayHandler != null) {
+      catchAll(multiBreakDisplayHandler::onShutdown);
+      multiBreakDisplayHandler = null;
+    }
+
+    if (multiBreakParametersStore != null) {
+      catchAll(multiBreakParametersStore::onShutdown);
+      multiBreakDisplayHandler = null;
     }
   }
 

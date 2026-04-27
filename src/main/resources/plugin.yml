@@ -50,6 +50,9 @@ commands:
   newbieteleportreset:
     description: 'Resets the newbie-teleport use-count of the given player'
     permission: bbtweaks.newbieteleport.reset
+  multibreak:
+    description: 'Manages the settings of the multi-break feature'
+    permission: bbtweaks.multibreak
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
@@ -77,3 +80,5 @@ permissions:
     description: 'Browse all available markers'
   bbtweaks.setmarker:
     description: 'Set a marker to your current location by its name'
+  bbtweaks.multibreak.tier.<name>:
+    description: 'Give a player access to a named tier of multibreak-limits'
