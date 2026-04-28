@@ -19,11 +19,9 @@ public class MultiBreakParameters {
   public SneakMode sneakMode;
 
   public final int[] extentByOrdinal;
+  private final boolean[] didExceedLimitByDimensionOrdinal;
 
   private MultiBreakLimits limits;
-
-  private boolean exceededVolumeLimit;
-  private boolean exceededExtentLimit;
 
   public MultiBreakParameters(Player player, ConfigKeeper<MainSection> config) {
     this.player = player;
@@ -31,6 +29,7 @@ public class MultiBreakParameters {
 
     this.sneakMode = SneakMode.NONE;
     this.extentByOrdinal = new int[BreakExtent.values.size()];
+    this.didExceedLimitByDimensionOrdinal = new boolean[BreakDimension.values.size()];
 
     updateLimits();
   }
@@ -40,7 +39,7 @@ public class MultiBreakParameters {
   }
 
   public void updateLimits() {
-    for (var limits : config.rootSection.multiBreak.limitsInAscendingOrder) {
+    for (var limits : config.rootSection.multiBreak.limitsInDescendingOrder) {
       if (!player.hasPermission("bbtweaks.multibreak.tier." + limits.tierName()))
         continue;
 
@@ -55,77 +54,55 @@ public class MultiBreakParameters {
     Arrays.fill(extentByOrdinal, 0);
   }
 
-  public void constrain(boolean setFlags) {
+  public void constrainAndSetFlags(boolean setFlags) {
     constrainAndSetFlags(null, setFlags);
   }
 
-  private int calculateVolume() {
-    return (getExtent(BreakExtent.LEFT) + 1 + getExtent(BreakExtent.RIGHT))
-      * (getExtent(BreakExtent.UP) + 1 + getExtent(BreakExtent.DOWN))
-      * (1 + getExtent(BreakExtent.DEPTH));
-  }
-
   private void constrainAndSetFlags(@Nullable BreakExtent manipulatedExtent, boolean setFlags) {
-    while (limits.maxVolume() > 0 && calculateVolume() > limits.maxVolume()) {
-      var extentToDecrement = getNonZeroManipulatedOrFindGreatestExtent(manipulatedExtent);
+    for (var dimension : BreakDimension.values) {
+      while (true) {
+        // The sum always starts out at one, seeing how the origin-block is included in the total outer cuboid-dimension.
+        var sum = 1;
 
-      if (extentToDecrement == null)
-        break;
+        BreakExtent largestOrTargetExtent = null;
+        var largestExtentValue = 0;
 
-      --extentByOrdinal[extentToDecrement.ordinal()];
+        for (var currentExtent : dimension.extents) {
+          var currentValue = extentByOrdinal[currentExtent.ordinal()];
 
-      if (setFlags)
-        exceededVolumeLimit = true;
-    }
+          // Lock in to the manipulated extent, as to decrease it, instead of another member
+          // of the current dimension, as to keep the value appearing constant when the
+          // player tries to increment it within the UI.
+          if (currentValue > 0 && currentExtent == manipulatedExtent) {
+            largestOrTargetExtent = currentExtent;
+            largestExtentValue = -1;
+          }
 
-    if (limits.maxExtent() > 0) {
-      for (var currentExtent : BreakExtent.values) {
-        var currentValue = extentByOrdinal[currentExtent.ordinal()];
+          if (largestOrTargetExtent == null || (largestExtentValue >= 0 && currentValue > largestExtentValue)) {
+            largestOrTargetExtent = currentExtent;
+            largestExtentValue = currentValue;
+          }
 
-        if (currentValue <= limits.maxExtent())
-          continue;
+          sum += currentValue;
+        }
 
-        extentByOrdinal[currentExtent.ordinal()] = limits.maxExtent();
+        if (sum <= limits.maxDimension() || largestOrTargetExtent == null)
+          break;
+
+        --extentByOrdinal[largestOrTargetExtent.ordinal()];
 
         if (setFlags)
-          exceededExtentLimit = true;
+          didExceedLimitByDimensionOrdinal[dimension.ordinal()] = true;
       }
     }
   }
 
-  private @Nullable BreakExtent getNonZeroManipulatedOrFindGreatestExtent(@Nullable BreakExtent manipulatedExtent) {
-    if (manipulatedExtent != null && extentByOrdinal[manipulatedExtent.ordinal()] > 0)
-      return manipulatedExtent;
-
-    BreakExtent maxExtent = null;
-    int maxValue = 0;
-
-    for (var currentExtent : BreakExtent.values) {
-      var currentValue = extentByOrdinal[currentExtent.ordinal()];
-
-      if (currentValue <= 0)
-        continue;
-
-      if (maxExtent == null || currentValue > maxValue) {
-        maxExtent = currentExtent;
-        maxValue = currentValue;
-      }
-    }
-
-    return maxExtent;
-  }
-
-  public boolean didExceedVolumeLimit() {
-    return exceededVolumeLimit;
-  }
-
-  public boolean didExceedExtentLimit() {
-    return exceededExtentLimit;
+  public boolean didExceedLimit(BreakDimension dimension) {
+    return didExceedLimitByDimensionOrdinal[dimension.ordinal()];
   }
 
   public void clearFlags() {
-    exceededVolumeLimit = false;
-    exceededExtentLimit = false;
+    Arrays.fill(didExceedLimitByDimensionOrdinal, false);
   }
 
   public int getExtent(BreakExtent extent) {

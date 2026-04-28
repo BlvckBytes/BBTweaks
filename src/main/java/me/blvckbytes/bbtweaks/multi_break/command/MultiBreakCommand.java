@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.multi_break.command;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.multi_break.parameters.BreakDimension;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
 import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakLimits;
@@ -24,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 public class MultiBreakCommand implements CommandExecutor, TabCompleter {
@@ -64,17 +66,17 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
 
     var parameters = parametersStore.accessParameters(player);
 
+    // Just in case that they've ranked up and now want to increase their extents.
+    parameters.updateLimits();
+
     if (parameters.getLimits() == MultiBreakLimits.ZERO) {
       config.rootSection.multiBreak.noAccessToAnyVolume.sendMessage(player);
       return true;
     }
 
     if (args.length == 0) {
-      // Just in case that they've ranked up and now want to increase their extents.
-      parameters.updateLimits();
-
       // Let's also once again constrain, because it could happen that their limits decreased (temporary permissions, etc.)
-      parameters.constrain(false);
+      parameters.constrainAndSetFlags(false);
 
       parameters.clearFlags();
 
@@ -218,21 +220,21 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
         parameters.setExtent(BreakExtent.DOWN, (sizeValues.height - 1) / 2, false);
         parameters.setExtent(BreakExtent.DEPTH, sizeValues.depth - 1, false);
 
-        parameters.constrain(true);
+        parameters.constrainAndSetFlags(true);
 
-        if (parameters.didExceedExtentLimit()) {
-          config.rootSection.multiBreak.sizeSetExceededExtent.sendMessage(
-            player,
-            new InterpretationEnvironment()
-              .withVariable("limit", parameters.getLimits().maxExtent())
-          );
+        var exceededDimensions = new HashSet<String>();
+
+        for (var dimension : BreakDimension.values) {
+          if (parameters.didExceedLimit(dimension))
+            exceededDimensions.add(dimension.name());
         }
 
-        if (parameters.didExceedVolumeLimit()) {
-          config.rootSection.multiBreak.sizeSetExceededVolume.sendMessage(
+        if (!exceededDimensions.isEmpty()) {
+          config.rootSection.multiBreak.sizeSetExceededDimensions.sendMessage(
             player,
             new InterpretationEnvironment()
-              .withVariable("limit", parameters.getLimits().maxVolume())
+              .withVariable("max_dimension", parameters.getLimits().maxDimension())
+              .withVariable("exceeded_dimensions", exceededDimensions)
           );
         }
 
@@ -314,13 +316,19 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
 
     if (normalizedAction.constant == CommandAction.SIZE) {
       var parameters = parametersStore.accessParameters(player);
-      var maxVolume = parameters.getLimits().maxVolume();
+
+      // Seeing how seldomly this branch is invoked, I'd rather keep the displayed suggestions in sync with the current permissions.
+      parameters.updateLimits();
+
+      var maxDimension = parameters.getLimits().maxDimension();
 
       var suggestedSizes = new ArrayList<String>();
 
       for (var size = 2; size <= 5; ++size) {
-        if (maxVolume >= size * size * size)
-          suggestedSizes.add(size + "x" + size + "x" + size);
+        if (size > maxDimension)
+          break;
+
+        suggestedSizes.add(size + "x" + size + "x" + size);
       }
 
       return suggestedSizes;

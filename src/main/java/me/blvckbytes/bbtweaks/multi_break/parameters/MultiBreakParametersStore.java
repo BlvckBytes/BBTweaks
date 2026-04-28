@@ -128,7 +128,7 @@ public class MultiBreakParametersStore implements Listener {
 
     result.filter = tryLoadFilter(pdc);
 
-    result.constrain(false);
+    result.constrainAndSetFlags(false);
 
     return result;
   }

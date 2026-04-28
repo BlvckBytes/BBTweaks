@@ -63,7 +63,7 @@ public class MultiBreakListener implements Listener {
       return;
 
     // In case they've been revoked permissions and are still having the extents of their prior tier set.
-    if (parameters.getLimits().maxVolume() == 0) {
+    if (parameters.getLimits().maxDimension() == 0) {
       parameters.zeroOutAllExtents();
       parameters.enabled = false;
       return;

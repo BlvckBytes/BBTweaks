@@ -37,8 +37,7 @@ public class MultiBreakSection extends ConfigSection {
   public ComponentMarkup noFilterSet;
   public ComponentMarkup currentFilter;
   public ComponentMarkup noToolsInHotbarFor;
-  public ComponentMarkup sizeSetExceededVolume;
-  public ComponentMarkup sizeSetExceededExtent;
+  public ComponentMarkup sizeSetExceededDimensions;
   public ComponentMarkup sizeSet;
 
   public EnabledJoinWarningSection enabledJoinWarning;
@@ -46,7 +45,7 @@ public class MultiBreakSection extends ConfigSection {
   public MultiBreakDisplaySection display;
 
   @CSIgnore
-  public List<MultiBreakLimits> limitsInAscendingOrder = new ArrayList<>();
+  public List<MultiBreakLimits> limitsInDescendingOrder = new ArrayList<>();
 
   public MultiBreakSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
@@ -58,16 +57,9 @@ public class MultiBreakSection extends ConfigSection {
 
     for (var limitEntry : limitsByTierName.entrySet()) {
       var limits = limitEntry.getValue();
-      limitsInAscendingOrder.add(new MultiBreakLimits(limits.maxVolume, limits.maxExtent, limitEntry.getKey()));
+      limitsInDescendingOrder.add(new MultiBreakLimits(limits.maxDimension, limitEntry.getKey()));
     }
 
-    limitsInAscendingOrder.sort((a, b) -> {
-      int ret;
-
-      if ((ret = -Integer.compare(a.maxVolume(), b.maxVolume())) != 0)
-        return ret;
-
-      return -Integer.compare(a.maxExtent(), b.maxExtent());
-    });
+    limitsInDescendingOrder.sort((a, b) -> -Integer.compare(a.maxDimension(), b.maxDimension()));
   }
 }

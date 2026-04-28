@@ -627,8 +627,7 @@ multiBreak:
     <&c>Fehlende Werkzeuge:<space/>
     <&4 *for-key="block_type_keys" *for-separator={,<space/>}>
       <translate [key] />
-  sizeSetExceededVolume: '{lut.multi_break_prefix} <&c>Deine Eingabe überschritt das Limit des Volumens von <&4>{limit}<&c>; schränke automatisch ein!'
-  sizeSetExceededExtent: '{lut.multi_break_prefix} <&c>Deine Eingabe überschritt das Limit der Reichweite von <&4>{limit}<&c>; schränke automatisch ein!'
+  sizeSetExceededDimensions: '{lut.multi_break_prefix} <&c>Deine Eingabe überschritt den maximalen Durchmesser von <&4>{max_dimension} <&c>für <&4 *for-dimension="exceeded_dimensions" *for-separator={,<space/>}>{lut.break_dimension[dimension]}</>; schränke automatisch ein!'
   sizeSet: |
     {lut.multi_break_prefix} <&7>Abbaugröße gesetzt auf:<space/>
     <&a>{total_width}x{total_height}x{total_depth} <&7>(
@@ -657,13 +656,9 @@ multiBreak:
             richtung links vom Hauptblock abgebaut werden?<br/>
             <br/>
             <&8>♦ <&e>Aktueller Wert: <&6>{extent_left} {extent_left eq 1 then "Block" else "Blöcke"}<br/>
-            <container *if="exceeded_volume_limit">
+            <container *if="exceeded_width_limit">
               <br/>
-              <&4>⚠ <&c>Limit des Volumens von <&4>{volume_limit} <&c>erreicht!<br/>
-            </container>
-            <container *if="exceeded_extent_limit">
-              <br/>
-              <&4>⚠ <&c>Limit der Reichweite von <&4>{extent_limit} <&c>erreicht!<br/>
+              <&4>⚠ <&c>Limit der Gesamtbreite von <&4>{dimension_limit} <&c>erreicht!<br/>
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
@@ -683,13 +678,9 @@ multiBreak:
             richtung rechts vom Hauptblock abgebaut werden?<br/>
             <br/>
             <&8>♦ <&e>Aktueller Wert: <&6>{extent_right} {extent_right eq 1 then "Block" else "Blöcke"}<br/>
-            <container *if="exceeded_volume_limit">
+            <container *if="exceeded_width_limit">
               <br/>
-              <&4>⚠ <&c>Limit des Volumens von <&4>{volume_limit} <&c>erreicht!<br/>
-            </container>
-            <container *if="exceeded_extent_limit">
-              <br/>
-              <&4>⚠ <&c>Limit der Reichweite von <&4>{extent_limit} <&c>erreicht!<br/>
+              <&4>⚠ <&c>Limit der Gesamtbreite von <&4>{dimension_limit} <&c>erreicht!<br/>
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
@@ -709,13 +700,9 @@ multiBreak:
             des Hauptblockes abgebaut werden?<br/>
             <br/>
             <&8>♦ <&e>Aktueller Wert: <&6>{extent_up} {extent_up eq 1 then "Block" else "Blöcke"}<br/>
-            <container *if="exceeded_volume_limit">
+            <container *if="exceeded_height_limit">
               <br/>
-              <&4>⚠ <&c>Limit des Volumens von <&4>{volume_limit} <&c>erreicht!<br/>
-            </container>
-            <container *if="exceeded_extent_limit">
-              <br/>
-              <&4>⚠ <&c>Limit der Reichweite von <&4>{extent_limit} <&c>erreicht!<br/>
+              <&4>⚠ <&c>Limit der Gesamthöhe von <&4>{dimension_limit} <&c>erreicht!<br/>
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
@@ -735,13 +722,9 @@ multiBreak:
             des Hauptblockes abgebaut werden?<br/>
             <br/>
             <&8>♦ <&e>Aktueller Wert: <&6>{extent_down} {extent_down eq 1 then "Block" else "Blöcke"}<br/>
-            <container *if="exceeded_volume_limit">
+            <container *if="exceeded_height_limit">
               <br/>
-              <&4>⚠ <&c>Limit des Volumens von <&4>{volume_limit} <&c>erreicht!<br/>
-            </container>
-            <container *if="exceeded_extent_limit">
-              <br/>
-              <&4>⚠ <&c>Limit der Reichweite von <&4>{extent_limit} <&c>erreicht!<br/>
+              <&4>⚠ <&c>Limit der Gesamthöhe von <&4>{dimension_limit} <&c>erreicht!<br/>
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
@@ -761,13 +744,9 @@ multiBreak:
             der Blickrichtung abgebaut werden?<br/>
             <br/>
             <&8>♦ <&e>Aktueller Wert: <&6>{extent_depth} {extent_depth eq 1 then "Block" else "Blöcke"}<br/>
-            <container *if="exceeded_volume_limit">
+            <container *if="exceeded_depth_limit">
               <br/>
-              <&4>⚠ <&c>Limit des Volumens von <&4>{volume_limit} <&c>erreicht!<br/>
-            </container>
-            <container *if="exceeded_extent_limit">
-              <br/>
-              <&4>⚠ <&c>Limit der Reichweite von <&4>{extent_limit} <&c>erreicht!<br/>
+              <&4>⚠ <&c>Limit der Gesamttiefe von <&4>{dimension_limit} <&c>erreicht!<br/>
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
@@ -953,3 +932,7 @@ cLut:
     NONE: '<u>Immer</> aktiviert'
     ENABLE_WHILE_SNEAKING: 'Während Sneaken <u>aktiviert</>'
     DISABLE_WHILE_SNEAKING: 'Während Sneaken <u>deaktiviert</>'
+  break_dimension:
+    WIDTH: 'Breite'
+    HEIGHT: 'Höhe'
+    DEPTH: 'Tiefe'

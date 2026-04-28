@@ -10,8 +10,7 @@ import java.util.List;
 
 public class MultiBreakLimitsSection extends ConfigSection {
 
-  public int maxVolume;
-  public int maxExtent;
+  public int maxDimension;
 
   public MultiBreakLimitsSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
@@ -21,10 +20,7 @@ public class MultiBreakLimitsSection extends ConfigSection {
   public void afterParsing(List<Field> fields) throws Exception {
     super.afterParsing(fields);
 
-    if (maxVolume <= 0)
-      throw new MappingError("Property \"maxVolume\" cannot be less than or equal to zero");
-
-    if (maxExtent <= 0)
-      throw new MappingError("Property \"maxExtent\" cannot be less than or equal to zero");
+    if (maxDimension <= 0)
+      throw new MappingError("Property \"maxDimension\" cannot be less than or equal to zero");
   }
 }
