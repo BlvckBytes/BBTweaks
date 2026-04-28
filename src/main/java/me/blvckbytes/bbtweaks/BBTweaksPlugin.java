@@ -9,6 +9,7 @@ import me.blvckbytes.bbtweaks.ab_sleep.ActionBarSleepMessage;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipesSection;
 import me.blvckbytes.bbtweaks.auto_fly.AutoFlyCommand;
 import me.blvckbytes.bbtweaks.auto_fly.AutoFlyCommandSection;
+import me.blvckbytes.bbtweaks.auto_tool.AutoToolCommand;
 import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
 import me.blvckbytes.bbtweaks.back.BacktrackCommand;
 import me.blvckbytes.bbtweaks.back.BacktrackCommandSection;
@@ -246,6 +247,10 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
       CraftBookIntegrationSingleton.initializeInstance(this);
 
       getServer().getPluginManager().registerEvents(new NewbieAnnounceHandler(this, config), this);
+
+      var autoToolCommandExecutor = new AutoToolCommand(config, this);
+      getServer().getPluginManager().registerEvents(autoToolCommandExecutor, this);
+      Objects.requireNonNull(getCommand("autotool")).setExecutor(autoToolCommandExecutor);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);

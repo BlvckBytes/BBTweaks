@@ -831,6 +831,11 @@ multiBreak:
         name: ' '
         slots: '0..last_slot'
 
+autoTool:
+  noPermission: '{lut.auto_tool_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  nowEnabled: '{lut.auto_tool_prefix} <&7>Die automatische Werkzeugauswahl wurde <&a>aktiviert<&7>.'
+  nowDisabled: '{lut.auto_tool_prefix} <&7>Die automatische Werkzeugauswahl wurde <&c>deaktiviert<&7>.'
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -851,6 +856,7 @@ cLut:
   auto_fly_prefix: '<&7>[<&6>AutoFly<&7>]'
   ntp_prefix: '<&7>[<&6>NTP<&7>]'
   multi_break_prefix: '<&7>[<&6>MultiBreak<&7>]'
+  auto_tool_prefix: '<&7>[<&6>AutoTool<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

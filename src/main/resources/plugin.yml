@@ -53,6 +53,9 @@ commands:
   multibreak:
     description: 'Manages the settings of the multi-break feature'
     permission: bbtweaks.multibreak
+  autotool:
+    description: 'Toggles the autotool functionality'
+    permission: bbtweaks.autotool
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
