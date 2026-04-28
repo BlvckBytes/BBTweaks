@@ -7,9 +7,9 @@ import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParameters;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
 import org.bukkit.Bukkit;
-import org.bukkit.Effect;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
@@ -195,7 +195,13 @@ public class MultiBreakListener implements Listener {
       expOrb.setExperience(breakEvent.getExpToDrop());
     }
 
-    block.getWorld().playEffect(block.getLocation(), Effect.STEP_SOUND, block.getBlockData());
+    block.getWorld().spawnParticle(
+      Particle.BLOCK,
+      block.getLocation(),
+      10,
+      0.33, 0.33, 0.33,
+      block.getBlockData()
+    );
 
     block.setType(Material.AIR);
   }
