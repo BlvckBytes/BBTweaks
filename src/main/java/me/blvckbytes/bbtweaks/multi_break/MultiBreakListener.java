@@ -131,8 +131,12 @@ public class MultiBreakListener implements Listener {
       if (breakEvent.isCancelled())
         return;
 
-      if (!toolUsed.safelyIncrementDamageAndSet(player))
-        return;
+      var decreaseChance = config.rootSection.multiBreak.perAdditionalBlockDurabilityDecreaseChance;
+
+      if (decreaseChance > 0 && Math.random() <= decreaseChance / 100.0) {
+        if (!toolUsed.safelyIncrementDamageAndSet(player))
+          return;
+      }
 
       simulateBlockBreak(player, toolUsed.item(), block, breakEvent);
 

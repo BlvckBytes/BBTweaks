@@ -18,6 +18,8 @@ public class MultiBreakSection extends ConfigSection {
   public Map<String, MultiBreakLimitsSection> limitsByTierName = new HashMap<>();
   public Set<String> allowedWorlds = new HashSet<>();
 
+  public double perAdditionalBlockDurabilityDecreaseChance;
+
   public ComponentMarkup missingPermission;
   public ComponentMarkup unallowedWorld;
   public ComponentMarkup noAccessToAnyVolume;
