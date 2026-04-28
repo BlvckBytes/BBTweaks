@@ -88,7 +88,7 @@ public class MultiBreakListener implements Listener {
     if (!DamageableHotbarItem.isRightToolForBlock(playerInventory.getItemInMainHand(), originBlock))
       return;
 
-    var directions = BlockDirections.determine(player.getLocation().getDirection());
+    var directions = BlockDirections.determine(player);
 
     var toolsMissingForTypes = new HashSet<Material>(2);
 
@@ -207,32 +207,37 @@ public class MultiBreakListener implements Listener {
     Consumer<Block> handler
   ) {
     for (var depth = 0; depth <= parameters.getExtent(BreakExtent.DEPTH); ++depth) {
-      var depthOrigin = origin.getRelative(directions.forwards().getModX() * depth, 0, directions.forwards().getModZ() * depth);
+      var depthOrigin = origin.getRelative(directions.forwards(), depth);
 
       if (depth > 0)
         handler.accept(depthOrigin);
 
-      forEachBlockUpAndDown(depthOrigin, parameters, handler);
+      forEachBlockUpAndDown(depthOrigin, directions, parameters, handler);
 
       for (var left = 1; left <= parameters.getExtent(BreakExtent.LEFT); ++left) {
-        var leftOrigin = depthOrigin.getRelative(directions.left().getModX() * left, 0, directions.left().getModZ() * left);
+        var leftOrigin = depthOrigin.getRelative(directions.left(), left);
         handler.accept(leftOrigin);
-        forEachBlockUpAndDown(leftOrigin, parameters, handler);
+        forEachBlockUpAndDown(leftOrigin, directions, parameters, handler);
       }
 
       for (var right = 1; right <= parameters.getExtent(BreakExtent.RIGHT); ++right) {
-        var rightOrigin = depthOrigin.getRelative(directions.right().getModX() * right, 0, directions.right().getModZ() * right);
+        var rightOrigin = depthOrigin.getRelative(directions.right(), right);
         handler.accept(rightOrigin);
-        forEachBlockUpAndDown(rightOrigin, parameters, handler);
+        forEachBlockUpAndDown(rightOrigin, directions, parameters, handler);
       }
     }
   }
 
-  private void forEachBlockUpAndDown(Block origin, MultiBreakParameters extents, Consumer<Block> handler) {
-    for (var up = 1; up <= extents.getExtent(BreakExtent.UP); ++up)
-      handler.accept(origin.getRelative(0, up, 0));
+  private void forEachBlockUpAndDown(
+    Block origin,
+    BlockDirections directions,
+    MultiBreakParameters parameters,
+    Consumer<Block> handler
+  ) {
+    for (var up = 1; up <= parameters.getExtent(BreakExtent.UP); ++up)
+      handler.accept(origin.getRelative(directions.up(), up));
 
-    for (var down = 1; down <= extents.getExtent(BreakExtent.DOWN); ++down)
-      handler.accept(origin.getRelative(0, -down, 0));
+    for (var down = 1; down <= parameters.getExtent(BreakExtent.DOWN); ++down)
+      handler.accept(origin.getRelative(directions.down(), down));
   }
 }
