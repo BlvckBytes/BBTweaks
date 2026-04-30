@@ -22,6 +22,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
@@ -280,14 +281,18 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
     return List.of();
   }
 
-  @EventHandler(ignoreCancelled = true)
-  public void onPickup(PlayerAttemptPickupItemEvent event) {
-    var filter = getOrLoadFilter(event.getPlayer());
+  public boolean isExcludedByFilter(Player player, ItemStack item) {
+    var filter = getOrLoadFilter(player);
 
     if (!filter.enabled || filter.predicateAndLanguage == null)
-      return;
+      return false;
 
-    if (!filter.predicateAndLanguage.predicate.test(event.getItem().getItemStack()))
+    return !filter.predicateAndLanguage.predicate.test(item);
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onPickup(PlayerAttemptPickupItemEvent event) {
+    if (isExcludedByFilter(event.getPlayer(), event.getItem().getItemStack()))
       event.setCancelled(true);
   }
 
