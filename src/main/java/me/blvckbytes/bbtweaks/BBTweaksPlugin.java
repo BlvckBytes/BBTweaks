@@ -21,6 +21,7 @@ import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegrationSingleton;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegration;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
+import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.main_command.MainCommand;
 import me.blvckbytes.bbtweaks.markers_menu.MarkersCommand;
 import me.blvckbytes.bbtweaks.markers_menu.MarkersCommandSection;
@@ -46,15 +47,13 @@ import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.NameScopedKeyValueStore;
 import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import org.bukkit.Bukkit;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.util.Objects;
 import java.util.logging.Level;
 
-public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCompleter {
+public class BBTweaksPlugin extends JavaPlugin {
 
   private LocationHistoryStore locationHistoryStore;
   private SignMechanicManager mechanicManager;
@@ -91,7 +90,10 @@ public class BBTweaksPlugin extends JavaPlugin implements CommandExecutor, TabCo
 
       getServer().getPluginManager().registerEvents(rdBreakTool, this);
 
-      var mainCommandExecutor = new MainCommand(config, rdBreakTool, this);
+      var autoPickupContainerListener = new AutoPickupContainerListener(this);
+      getServer().getPluginManager().registerEvents(autoPickupContainerListener, this);
+
+      var mainCommandExecutor = new MainCommand(config, rdBreakTool, autoPickupContainerListener, this);
 
       Objects.requireNonNull(getCommand("bbtweaks")).setExecutor(mainCommandExecutor);
 

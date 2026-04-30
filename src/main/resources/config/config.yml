@@ -4,17 +4,20 @@ mainCommand:
     {lut.main_prefix} <&c>Benutzung: /{command_label} <&7>\<
       <&e *for-action="actions" *for-separator={<&7>,<space/>}>{action}</>
     <&7>>
+  playersOnly: '{lut.main_prefix} <&c>Dieser Befehl ist nur Spielern zugänglich!'
   configReloadSuccess: '{lut.main_prefix} <&a>Die Konfiguration wurde neu geladen.'
   configReloadError: '{lut.main_prefix} <&c>Die Konfiguration konnte nicht erfolgreich neu geladen werden; siehe Konsole!'
   setRdBreakerNoValidItem: '{lut.main_prefix} <&c>Du hältst kein valides Item in der Hand!'
   setRdBreakerMetadata: '{lut.main_prefix} <&a>Dieses Item ist nun als RD-Breaker gekennzeichnet.'
-  setRdBreakerPlayersOnly: '{lut.main_prefix} <&c>Dieser Befehl ist nur Spielern zugänglich!'
   lwcExtendBlocks:
     configNotFound: '{lut.main_prefix} <&c>Die Datei <&4>{file} <&c>konnte nicht gefunden werden!'
     protectionsSectionNotFound: '{lut.main_prefix} <&c>Konnte den top-level Schlüssel <&4>{missing_section} <&c>nicht in der Datei <&4>{file} <&c>finden!'
     couldNotWriteTemplate: '{lut.main_prefix} <&c>Konnte die Ausgabe der Vorlage nicht unter <&4>{file} <&c>schreiben; siehe Konsole!'
     templateWritten: '{lut.main_prefix} <&7>Die Ausgabe der Vorlage wurde unter <&a>{file} <&7>geschrieben (<&a>{extended_count} neue Blöcke<&7>, <&a>{tag_member_count} geladene Blöcke aus konfigurierten Tags<&7>, <&a>{new_total_count} Blöcke insgesamt in der Vorlage<&7>).'
     materialTags:
+  setAutoPickupContainerNoValidItem: '{lut.main_prefix} <&c>Du hältst keine Shulkerbox in der Hand!'
+  setAutoPickupContainerAlreadyMarked: '{lut.main_prefix} <&c>Das von dir gehaltene Item wurde bereits als Auto-Pickup-Behälter gekennzeichnet!'
+  setAutoPickupContainerSuccess: '{lut.main_prefix} <&a>Dieses Item ist nun als Auto-Pickup-Behälter gekennzeichnet.'
 
 abSleep:
   thresholdNotYetReached: '<&a>Es sind <&2>{sleeping_count}<&a>/<&2>{threshold_count} <&a>benötigen Spielern im Bett'

@@ -4,6 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.RDBreakTool;
+import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.syllables_matcher.EnumMatcher;
 import me.blvckbytes.syllables_matcher.MatchableEnum;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
@@ -27,8 +28,9 @@ public class MainCommand implements CommandExecutor, TabExecutor {
 
   private enum Action implements MatchableEnum {
     RELOAD,
-    RD_BREAKER,
+    MARK_RD_BREAKER,
     LWC_EXTEND_BLOCKS,
+    MARK_AUTO_PICKUP_CONTAINER,
     ;
 
     static final EnumMatcher<Action> matcher = new EnumMatcher<>(values());
@@ -36,15 +38,18 @@ public class MainCommand implements CommandExecutor, TabExecutor {
 
   private final ConfigKeeper<MainSection> config;
   private final RDBreakTool rdBreakTool;
+  private final AutoPickupContainerListener autoPickupContainer;
   private final Plugin plugin;
 
   public MainCommand(
     ConfigKeeper<MainSection> config,
     RDBreakTool rdBreakTool,
+    AutoPickupContainerListener autoPickupContainer,
     Plugin plugin
   ) {
     this.config = config;
     this.rdBreakTool = rdBreakTool;
+    this.autoPickupContainer = autoPickupContainer;
     this.plugin = plugin;
   }
 
@@ -80,10 +85,10 @@ public class MainCommand implements CommandExecutor, TabExecutor {
         return true;
       }
 
-      case RD_BREAKER -> {
+      case MARK_RD_BREAKER -> {
         if (!(sender instanceof Player player)) {
-          config.rootSection.mainCommand.setRdBreakerPlayersOnly.sendMessage(sender);
-          return false;
+          config.rootSection.mainCommand.playersOnly.sendMessage(sender);
+          return true;
         }
 
         var heldItem = player.getInventory().getItemInMainHand();
@@ -175,6 +180,28 @@ public class MainCommand implements CommandExecutor, TabExecutor {
             .withVariable("tag_member_count", config.rootSection.mainCommand.lwcExtendBlocks._materialsToExtend.size())
             .withVariable("new_total_count", existingMaterials.size() + extendedKeyCount)
         );
+
+        return true;
+      }
+
+      case MARK_AUTO_PICKUP_CONTAINER -> {
+        if (!(sender instanceof Player player)) {
+          config.rootSection.mainCommand.playersOnly.sendMessage(sender);
+          return true;
+        }
+
+        var heldItem = player.getInventory().getItemInMainHand();
+        var error = autoPickupContainer.modifyItemToBecomeAutoPickupContainer(heldItem);
+
+        if (error == null) {
+          config.rootSection.mainCommand.setAutoPickupContainerSuccess.sendMessage(player);
+          return true;
+        }
+
+        switch (error) {
+          case ALREADY_MARKED -> config.rootSection.mainCommand.setAutoPickupContainerAlreadyMarked.sendMessage(player);
+          case WRONG_ITEM_TYPE -> config.rootSection.mainCommand.setAutoPickupContainerNoValidItem.sendMessage(player);
+        }
 
         return true;
       }

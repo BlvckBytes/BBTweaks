@@ -10,12 +10,15 @@ public class MainCommandSection extends ConfigSection {
 
   public ComponentMarkup noPermission;
   public ComponentMarkup commandUsage;
+  public ComponentMarkup playersOnly;
   public ComponentMarkup configReloadSuccess;
   public ComponentMarkup configReloadError;
   public ComponentMarkup setRdBreakerNoValidItem;
   public ComponentMarkup setRdBreakerMetadata;
-  public ComponentMarkup setRdBreakerPlayersOnly;
   public @CSAlways LWCExtendBlocksSection lwcExtendBlocks;
+  public ComponentMarkup setAutoPickupContainerNoValidItem;
+  public ComponentMarkup setAutoPickupContainerAlreadyMarked;
+  public ComponentMarkup setAutoPickupContainerSuccess;
 
   public MainCommandSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
