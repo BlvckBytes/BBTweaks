@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.multi_break.parameters;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakLimits;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
@@ -105,6 +106,11 @@ public class MultiBreakParameters {
     Arrays.fill(didExceedLimitByDimensionOrdinal, false);
   }
 
+  public int getDimension(BreakDimension dimension) {
+    // Always starting out with one, as that's the origin-block itself
+    return Arrays.stream(dimension.extents).map(this::getExtent).reduce(1, Integer::sum);
+  }
+
   public int getExtent(BreakExtent extent) {
     return extentByOrdinal[extent.ordinal()];
   }
@@ -128,5 +134,24 @@ public class MultiBreakParameters {
 
   public void decreaseExtent(BreakExtent extent) {
     setExtent(extent, getExtent(extent) - 1, true);
+  }
+
+  public InterpretationEnvironment makeEnvironment() {
+    return new InterpretationEnvironment()
+      .withVariable("total_width", getDimension(BreakDimension.WIDTH))
+      .withVariable("total_height", getDimension(BreakDimension.HEIGHT))
+      .withVariable("total_depth", getDimension(BreakDimension.DEPTH))
+      .withVariable("extent_left", getExtent(BreakExtent.LEFT))
+      .withVariable("extent_right", getExtent(BreakExtent.RIGHT))
+      .withVariable("extent_up", getExtent(BreakExtent.UP))
+      .withVariable("extent_down", getExtent(BreakExtent.DOWN))
+      .withVariable("extent_depth", getExtent(BreakExtent.DEPTH))
+      .withVariable("max_dimension", getLimits().maxDimension())
+      .withVariable("enabled", enabled)
+      .withVariable("sneak_mode", sneakMode.name())
+      .withVariable("filter_predicate", filter == null ? null : filter.getTokenPredicateString())
+      .withVariable("exceeded_width_limit", didExceedLimit(BreakDimension.WIDTH))
+      .withVariable("exceeded_height_limit", didExceedLimit(BreakDimension.HEIGHT))
+      .withVariable("exceeded_depth_limit", didExceedLimit(BreakDimension.DEPTH));
   }
 }

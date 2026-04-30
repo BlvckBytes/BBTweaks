@@ -169,8 +169,7 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
 
       config.rootSection.multiBreak.filterSet.sendMessage(
         player,
-        new InterpretationEnvironment()
-          .withVariable("filter_predicate", parameters.filter.getTokenPredicateString())
+          parameters.makeEnvironment()
           .withVariable("set_command", makeFilterSetCommand(label, selectedLangauge, parameters.filter))
       );
 
@@ -185,7 +184,7 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
         }
 
         parameters.enabled = true;
-        config.rootSection.multiBreak.nowEnabled.sendMessage(player);
+        config.rootSection.multiBreak.nowEnabled.sendMessage(player, parameters.makeEnvironment());
         return true;
       }
 
@@ -232,33 +231,14 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
         if (!exceededDimensions.isEmpty()) {
           config.rootSection.multiBreak.sizeSetExceededDimensions.sendMessage(
             player,
-            new InterpretationEnvironment()
-              .withVariable("max_dimension", parameters.getLimits().maxDimension())
+            parameters.makeEnvironment()
               .withVariable("exceeded_dimensions", exceededDimensions)
           );
         }
 
         parameters.clearFlags();
 
-        var extentLeft = parameters.getExtent(BreakExtent.LEFT);
-        var extentRight = parameters.getExtent(BreakExtent.RIGHT);
-        var extentUp = parameters.getExtent(BreakExtent.UP);
-        var extentDown = parameters.getExtent(BreakExtent.DOWN);
-        var extentDepth = parameters.getExtent(BreakExtent.DEPTH);
-
-        config.rootSection.multiBreak.sizeSet.sendMessage(
-          player,
-          new InterpretationEnvironment()
-            .withVariable("total_width", extentLeft + 1 + extentRight)
-            .withVariable("total_height", extentUp + 1 + extentDown)
-            .withVariable("total_depth", extentDepth + 1)
-            .withVariable("extent_left", extentLeft)
-            .withVariable("extent_right", extentRight)
-            .withVariable("extent_up", extentUp)
-            .withVariable("extent_down", extentDown)
-            .withVariable("extent_depth", extentDepth)
-        );
-
+        config.rootSection.multiBreak.sizeSet.sendMessage(player, parameters.makeEnvironment());
         return true;
       }
 
@@ -270,8 +250,7 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
 
         config.rootSection.multiBreak.currentFilter.sendMessage(
           player,
-          new InterpretationEnvironment()
-            .withVariable("filter_predicate", parameters.filter.getTokenPredicateString())
+          parameters.makeEnvironment()
             .withVariable("set_command", makeFilterSetCommand(label, predicateHelper.getSelectedLanguage(player), parameters.filter))
         );
         return true;
@@ -285,8 +264,7 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
 
         config.rootSection.multiBreak.filterRemoved.sendMessage(
           player,
-          new InterpretationEnvironment()
-            .withVariable("filter_predicate", parameters.filter.getTokenPredicateString())
+          parameters.makeEnvironment()
             .withVariable("set_command", makeFilterSetCommand(label, predicateHelper.getSelectedLanguage(player), parameters.filter))
         );
 

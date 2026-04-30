@@ -613,9 +613,9 @@ multiBreak:
       </hover-text><space/>
       wurde <&a>entfernt<&7>.
   alreadyEnabled: '{lut.multi_break_prefix} <&c>Die Funktion ist bereits aktiviert!'
-  nowEnabled: '{lut.multi_break_prefix} <&7>Die Funktion ist nun <&a>aktiviert<&7>!'
+  nowEnabled: '{lut.multi_break_prefix} <&7>Die Funktion ist nun <&a>aktiviert <&7>(<&a>{total_width}x{total_height}x{total_depth}<&7>).'
   alreadyDisabled: '{lut.multi_break_prefix} <&c>Die Funktion ist bereits deaktiviert!'
-  nowDisabled: '{lut.multi_break_prefix} <&7>Die Funktion ist nun <&c>deaktiviert<&7>!'
+  nowDisabled: '{lut.multi_break_prefix} <&7>Die Funktion ist nun <&c>deaktiviert<&7>.'
   noFilterSet: '{lut.multi_break_prefix} <&c>Es ist aktuell kein Filter gesetzt!'
   currentFilter: |
     {lut.multi_break_prefix} <&7>Aktueller Filter:<space/>
@@ -659,7 +659,7 @@ multiBreak:
             <&8>♦ <&e>Aktueller Wert: <&6>{extent_left} {extent_left eq 1 then "Block" else "Blöcke"}<br/>
             <container *if="exceeded_width_limit">
               <br/>
-              <&4>⚠ <&c>Limit der Gesamtbreite von <&4>{dimension_limit} <&c>erreicht!<br/>
+              <&4>⚠ <&c>Limit der Gesamtbreite von <&4>{max_dimension} <&c>erreicht!<br/>
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
@@ -681,7 +681,7 @@ multiBreak:
             <&8>♦ <&e>Aktueller Wert: <&6>{extent_right} {extent_right eq 1 then "Block" else "Blöcke"}<br/>
             <container *if="exceeded_width_limit">
               <br/>
-              <&4>⚠ <&c>Limit der Gesamtbreite von <&4>{dimension_limit} <&c>erreicht!<br/>
+              <&4>⚠ <&c>Limit der Gesamtbreite von <&4>{max_dimension} <&c>erreicht!<br/>
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
@@ -703,7 +703,7 @@ multiBreak:
             <&8>♦ <&e>Aktueller Wert: <&6>{extent_up} {extent_up eq 1 then "Block" else "Blöcke"}<br/>
             <container *if="exceeded_height_limit">
               <br/>
-              <&4>⚠ <&c>Limit der Gesamthöhe von <&4>{dimension_limit} <&c>erreicht!<br/>
+              <&4>⚠ <&c>Limit der Gesamthöhe von <&4>{max_dimension} <&c>erreicht!<br/>
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
@@ -725,7 +725,7 @@ multiBreak:
             <&8>♦ <&e>Aktueller Wert: <&6>{extent_down} {extent_down eq 1 then "Block" else "Blöcke"}<br/>
             <container *if="exceeded_height_limit">
               <br/>
-              <&4>⚠ <&c>Limit der Gesamthöhe von <&4>{dimension_limit} <&c>erreicht!<br/>
+              <&4>⚠ <&c>Limit der Gesamthöhe von <&4>{max_dimension} <&c>erreicht!<br/>
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
@@ -747,7 +747,7 @@ multiBreak:
             <&8>♦ <&e>Aktueller Wert: <&6>{extent_depth} {extent_depth eq 1 then "Block" else "Blöcke"}<br/>
             <container *if="exceeded_depth_limit">
               <br/>
-              <&4>⚠ <&c>Limit der Gesamttiefe von <&4>{dimension_limit} <&c>erreicht!<br/>
+              <&4>⚠ <&c>Limit der Gesamttiefe von <&4>{max_dimension} <&c>erreicht!<br/>
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
