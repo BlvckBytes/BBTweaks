@@ -615,7 +615,7 @@ multiBreak:
   alreadyEnabled: '{lut.multi_break_prefix} <&c>Die Funktion ist bereits aktiviert!'
   nowEnabled: '{lut.multi_break_prefix} <&7>Die Funktion ist nun <&a>aktiviert<&7>!'
   alreadyDisabled: '{lut.multi_break_prefix} <&c>Die Funktion ist bereits deaktiviert!'
-  nowDisabled: '{lut.multi_break_prefix} <&7>Die Funktion ist nun <&a>deaktiviert<&7>!'
+  nowDisabled: '{lut.multi_break_prefix} <&7>Die Funktion ist nun <&c>deaktiviert<&7>!'
   noFilterSet: '{lut.multi_break_prefix} <&c>Es ist aktuell kein Filter gesetzt!'
   currentFilter: |
     {lut.multi_break_prefix} <&7>Aktueller Filter:<space/>
