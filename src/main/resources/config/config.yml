@@ -582,6 +582,7 @@ multiBreak:
   allowedWorlds:
     - world
   perAdditionalBlockDurabilityDecreaseChance: 50
+  customPickupDelay: 5
   missingPermission: '{lut.multi_break_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
   unallowedWorld: '{lut.multi_break_prefix} <&c>Du befindest dich aktuell in einer Welt, in der die Funktion deaktiviert ist!'
   noAccessToAnyVolume: '{lut.multi_break_prefix} <&c>Du hast keinen Zugriff auf ein verfügbares Abbauvolumen!'

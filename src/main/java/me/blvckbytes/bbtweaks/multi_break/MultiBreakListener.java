@@ -15,6 +15,7 @@ import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockDropItemEvent;
@@ -30,6 +31,8 @@ public class MultiBreakListener implements Listener {
 
   private @Nullable BlockBreakEvent ignoredBreakEvent;
 
+  private @Nullable BlockBreakEvent lastOriginBlockBreakEvent;
+
   private final Plugin plugin;
   private final MultiBreakParametersStore parametersStore;
   private final ConfigKeeper<MainSection> config;
@@ -42,6 +45,31 @@ public class MultiBreakListener implements Listener {
     this.plugin = plugin;
     this.parametersStore = parametersStore;
     this.config = config;
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+  public void onBlockDropItem(BlockDropItemEvent event) {
+    if (lastOriginBlockBreakEvent == null)
+      return;
+
+    var droppingBlock = event.getBlock();
+    var brokenBlock = lastOriginBlockBreakEvent.getBlock();
+
+    if (!droppingBlock.getWorld().equals(brokenBlock.getWorld()))
+      return;
+
+    if (droppingBlock.getX() != brokenBlock.getX() || droppingBlock.getY() != brokenBlock.getY() || droppingBlock.getZ() != brokenBlock.getZ())
+      return;
+
+    lastOriginBlockBreakEvent = null;
+
+    var pickupDelay = config.rootSection.multiBreak.customPickupDelay;
+
+    if (pickupDelay < 0)
+      return;
+
+    for (var item : event.getItems())
+      item.setPickupDelay(pickupDelay);
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -87,6 +115,8 @@ public class MultiBreakListener implements Listener {
 
     if (!DamageableHotbarItem.isRightToolForBlock(playerInventory.getItemInMainHand(), originBlock))
       return;
+
+    lastOriginBlockBreakEvent = event;
 
     var directions = BlockDirections.determine(player);
 
@@ -182,7 +212,12 @@ public class MultiBreakListener implements Listener {
       Bukkit.getPluginManager().callEvent(dropEvent);
 
       if (!dropEvent.isCancelled()) {
+        var pickupDelay = config.rootSection.multiBreak.customPickupDelay;
+
         for (Item item : dropEvent.getItems()) {
+          if (pickupDelay >= 0)
+            item.setPickupDelay(pickupDelay);
+
           if (!item.isInWorld())
             world.addEntity(item);
         }

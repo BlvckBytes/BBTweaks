@@ -20,6 +20,8 @@ public class MultiBreakSection extends ConfigSection {
 
   public double perAdditionalBlockDurabilityDecreaseChance;
 
+  public int customPickupDelay;
+
   public ComponentMarkup missingPermission;
   public ComponentMarkup unallowedWorld;
   public ComponentMarkup noAccessToAnyVolume;
