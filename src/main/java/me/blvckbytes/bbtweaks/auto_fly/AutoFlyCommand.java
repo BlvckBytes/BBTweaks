@@ -13,6 +13,7 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.Plugin;
@@ -113,6 +114,11 @@ public class AutoFlyCommand implements CommandExecutor, TabCompleter, Listener {
 
   @EventHandler
   public void onTeleport(PlayerTeleportEvent event) {
+    Bukkit.getScheduler().runTaskLater(plugin, () -> handleAutoFly(event.getPlayer()), 1);
+  }
+
+  @EventHandler
+  public void onGameModeChange(PlayerGameModeChangeEvent event) {
     Bukkit.getScheduler().runTaskLater(plugin, () -> handleAutoFly(event.getPlayer()), 1);
   }
 
