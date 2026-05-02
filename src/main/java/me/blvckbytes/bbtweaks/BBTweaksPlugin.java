@@ -22,6 +22,9 @@ import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegrationSingleto
 import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegration;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
+import me.blvckbytes.bbtweaks.inv_magnet.InvMagnetCommand;
+import me.blvckbytes.bbtweaks.inv_magnet.config.InvMagnetCommandSection;
+import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import me.blvckbytes.bbtweaks.main_command.MainCommand;
 import me.blvckbytes.bbtweaks.markers_menu.MarkersCommand;
 import me.blvckbytes.bbtweaks.markers_menu.MarkersCommandSection;
@@ -62,6 +65,7 @@ public class BBTweaksPlugin extends JavaPlugin {
   private NameScopedKeyValueStore preferencesStore;
   private MultiBreakDisplayHandler multiBreakDisplayHandler;
   private MultiBreakParametersStore multiBreakParametersStore;
+  private InvMagnetParametersStore invMagnetParametersStore;
 
   // TODO: Idea - /empty-out [all]
 
@@ -230,6 +234,14 @@ public class BBTweaksPlugin extends JavaPlugin {
       var multiBreakCommand = Objects.requireNonNull(getCommand(MultiBreakCommandSection.INITIAL_NAME));
       multiBreakCommand.setExecutor(new MultiBreakCommand(multiBreakParametersStore, multiBreakDisplayHandler, predicateHelper, config));
 
+      invMagnetParametersStore = new InvMagnetParametersStore(this, config);
+      getServer().getPluginManager().registerEvents(invMagnetParametersStore, this);
+
+      var invMagnetCommand = Objects.requireNonNull(getCommand(InvMagnetCommandSection.INITIAL_NAME));
+      var invMagnetExecutor = new InvMagnetCommand(this, invMagnetParametersStore, invFilterCommandExecutor, config);
+      getServer().getPluginManager().registerEvents(invMagnetExecutor, this);
+      invMagnetCommand.setExecutor(invMagnetExecutor);
+
       Runnable updateCommands = () -> {
         config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);
         config.rootSection.markersMenu.setMarkerCommand.apply(setMarkerCommand, commandUpdater);
@@ -238,6 +250,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         config.rootSection.newbieTeleport.mainCommand.apply(newbieTeleportCommand, commandUpdater);
         config.rootSection.newbieTeleport.resetCommand.apply(newbieTeleportResetCommand, commandUpdater);
         config.rootSection.multiBreak.command.apply(multiBreakCommand, commandUpdater);
+        config.rootSection.invMagnet.command.apply(invMagnetCommand, commandUpdater);
       };
 
       updateCommands.run();
@@ -288,7 +301,12 @@ public class BBTweaksPlugin extends JavaPlugin {
 
     if (multiBreakParametersStore != null) {
       catchAll(multiBreakParametersStore::onShutdown);
-      multiBreakDisplayHandler = null;
+      multiBreakParametersStore = null;
+    }
+
+    if (invMagnetParametersStore != null) {
+      catchAll(invMagnetParametersStore::onShutdown);
+      invMagnetParametersStore = null;
     }
   }
 

@@ -56,6 +56,9 @@ commands:
   autotool:
     description: 'Toggles the autotool functionality'
     permission: bbtweaks.autotool
+  invmagnet:
+    description: 'Toggles and configures the inv-magnet functionality'
+    permission: bbtweaks.invmagnet
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
@@ -85,3 +88,5 @@ permissions:
     description: 'Set a marker to your current location by its name'
   bbtweaks.multibreak.tier.<name>:
     description: 'Give a player access to a named tier of multibreak-limits'
+  bbtweaks.invmagnet.tier.<name>:
+    description: 'Give a player access to a named tier of invmagnet-limits'

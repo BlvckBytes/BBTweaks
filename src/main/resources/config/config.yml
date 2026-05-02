@@ -820,6 +820,20 @@ autoTool:
   nowEnabled: '{lut.auto_tool_prefix} <&7>Die automatische Werkzeugauswahl wurde <&a>aktiviert<&7>.'
   nowDisabled: '{lut.auto_tool_prefix} <&7>Die automatische Werkzeugauswahl wurde <&c>deaktiviert<&7>.'
 
+invMagnet:
+  command:
+    name: invmagnet
+  worlds:
+    - world
+  limitsByTierName:
+  missingPermission: '{lut.inv_magnet_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  unallowedWorld: '{lut.inv_magnet_prefix} <&c>Du befindest dich aktuell in einer Welt, in der die Funktion deaktiviert ist!'
+  nowEnabled: '{lut.inv_magnet_prefix} <&7>Die Funktion ist nun <&a>aktiviert <&7>(<&a>Radius {radius}<&7>).'
+  nowDisabled: '{lut.inv_magnet_prefix} <&7>Die Funktion ist nun <&c>deaktiviert<&7>.'
+  invalidRadius: '{lut.inv_magnet_prefix} <&c>Ungültiger Radius <&4>{input}<&c> - keine Ganzzahl größer/gleich Null!'
+  exceededRadiusLimit: '{lut.inv_magnet_prefix} <&c>Deine Eingabe <&4>{radius} <&c>überschritt den maximalen Radius von <&4>{radius_limit}<&c>; schränke automatisch ein!'
+  updatedRadius: '{lut.inv_magnet_prefix} <&7>Der Inventarmagnet-Radius wurde auf <&a>{radius} <&7>gesetzt.'
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -841,6 +855,7 @@ cLut:
   ntp_prefix: '<&7>[<&6>NTP<&7>]'
   multi_break_prefix: '<&7>[<&6>MultiBreak<&7>]'
   auto_tool_prefix: '<&7>[<&6>AutoTool<&7>]'
+  inv_magnet_prefix: '<&7>[<&6>InvMagnet<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

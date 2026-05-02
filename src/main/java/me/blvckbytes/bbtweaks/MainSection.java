@@ -14,6 +14,7 @@ import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordSection;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterSection;
+import me.blvckbytes.bbtweaks.inv_magnet.config.InvMagnetSection;
 import me.blvckbytes.bbtweaks.main_command.MainCommandSection;
 import me.blvckbytes.bbtweaks.markers_menu.MarkersMenuSection;
 import me.blvckbytes.bbtweaks.mechanic.MechanicSection;
@@ -46,6 +47,7 @@ public class MainSection extends ConfigSection {
   public NewbieAnnounceSection newbieAnnounce;
   public MultiBreakSection multiBreak;
   public AutoToolSection autoTool;
+  public InvMagnetSection invMagnet;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
