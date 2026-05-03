@@ -123,6 +123,9 @@ public class InvMagnetCommand implements CommandExecutor, TabCompleter, Listener
         .withVariable("radius", parameter.getRadius())
     );
 
+    if (!parameter.enabled)
+      parameter.enabled = true;
+
     return true;
   }
 
