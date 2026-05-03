@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.auto_pickup_container;
 
+import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.block.Container;
@@ -8,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -88,46 +90,7 @@ public class AutoPickupContainerListener implements Listener {
     if (!(blockStateMeta.getBlockState() instanceof Container container))
       return itemToAdd.getAmount();
 
-    var inventory = container.getInventory();
-    var maxStackSize = itemToAdd.getMaxStackSize();
-
-    var firstVacantSlotIndex = -1;
-    var remainingAmount = itemToAdd.getAmount();
-
-    for (var slotIndex = 0; slotIndex < inventory.getSize(); ++slotIndex) {
-      var currentItem = inventory.getItem(slotIndex);
-
-      if (currentItem == null || currentItem.getType().isAir()) {
-        if (firstVacantSlotIndex < 0)
-          firstVacantSlotIndex = slotIndex;
-
-        continue;
-      }
-
-      if (!itemToAdd.isSimilar(currentItem))
-        continue;
-
-      var remainingSpace = maxStackSize - currentItem.getAmount();
-
-      if (remainingSpace <= 0)
-        continue;
-
-      var amountToAdd = Math.min(remainingAmount, remainingSpace);
-
-      currentItem.setAmount(currentItem.getAmount() + amountToAdd);
-
-      remainingAmount -= amountToAdd;
-
-      if (remainingAmount <= 0)
-        break;
-    }
-
-    if (remainingAmount > 0 && firstVacantSlotIndex >= 0) {
-      var remainder = new ItemStack(itemToAdd);
-      remainder.setAmount(remainingAmount);
-      inventory.setItem(firstVacantSlotIndex, remainder);
-      remainingAmount = 0;
-    }
+    var remainingAmount = InventoryUtil.addItemToInventoryAndGetRemainingAmount(itemToAdd, container.getInventory());
 
     if (remainingAmount != itemToAdd.getAmount()) {
       blockStateMeta.setBlockState(container);
