@@ -1,15 +1,19 @@
 package me.blvckbytes.bbtweaks.auto_pickup_container;
 
+import io.papermc.paper.persistence.PersistentDataContainerView;
 import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.block.Container;
+import org.bukkit.block.ShulkerBox;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDropItemEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.persistence.PersistentDataType;
@@ -21,9 +25,11 @@ import java.util.Objects;
 public class AutoPickupContainerListener implements Listener {
 
   private final NamespacedKey containerMarkerKey;
+  private final NamespacedKey placedItemKey;
 
   public AutoPickupContainerListener(Plugin plugin) {
     this.containerMarkerKey = new NamespacedKey(plugin, "auto-pickup-container");
+    this.placedItemKey = new NamespacedKey(plugin, "auto-pickup-placed-item");
   }
 
   public @Nullable MarkerModifyError modifyItemToBecomeAutoPickupContainer(ItemStack item) {
@@ -42,6 +48,68 @@ public class AutoPickupContainerListener implements Listener {
     item.setItemMeta(meta);
 
     return null;
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+  public void onPlace(BlockPlaceEvent event) {
+    if (!(event.getBlockPlaced().getState() instanceof ShulkerBox shulkerBox))
+      return;
+
+    var placedItem = event.getItemInHand();
+
+    if (!Tag.SHULKER_BOXES.isTagged(placedItem.getType()))
+      return;
+
+    if (!doesContainMarker(placedItem.getPersistentDataContainer()))
+      return;
+
+    shulkerBox.getPersistentDataContainer().set(placedItemKey, PersistentDataType.BYTE_ARRAY, placedItem.serializeAsBytes());
+    shulkerBox.update(true, false);
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+  public void onBlockDropItem(BlockDropItemEvent event) {
+    if (!(event.getBlockState() instanceof ShulkerBox shulkerBox))
+      return;
+
+    var placedItemBytes = shulkerBox.getPersistentDataContainer().get(placedItemKey, PersistentDataType.BYTE_ARRAY);
+
+    if (placedItemBytes == null)
+      return;
+
+    Item droppedItem = null;
+    ItemStack droppedStack = null;
+
+    for (var item : event.getItems()) {
+      droppedStack = item.getItemStack();
+
+      if (!Tag.SHULKER_BOXES.isTagged(droppedStack.getType()))
+        continue;
+
+      if (droppedItem != null)
+        return;
+
+      droppedItem = item;
+    }
+
+    if (droppedItem == null)
+      return;
+
+    var placedItem = ItemStack.deserializeBytes(placedItemBytes);
+
+    var placedMeta = placedItem.getItemMeta();
+    var droppedMeta = droppedStack.getItemMeta();
+
+    if (placedMeta == null || droppedMeta == null)
+      return;
+
+    droppedMeta.displayName(placedMeta.displayName());
+    droppedMeta.lore(placedMeta.lore());
+
+    droppedMeta.getPersistentDataContainer().set(containerMarkerKey, PersistentDataType.BOOLEAN, true);
+
+    droppedStack.setItemMeta(droppedMeta);
+    droppedItem.setItemStack(droppedStack);
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -70,21 +138,13 @@ public class AutoPickupContainerListener implements Listener {
   }
 
   private int tryAddItemAndGetRemainingAmount(ItemStack containerItem, ItemStack itemToAdd) {
-    if (!Tag.SHULKER_BOXES.isTagged(containerItem.getType()))
+    if (!Tag.SHULKER_BOXES.isTagged(containerItem.getType()) || Tag.SHULKER_BOXES.isTagged(itemToAdd.getType()))
       return itemToAdd.getAmount();
 
-    var containerMeta = containerItem.getItemMeta();
-
-    if (containerMeta == null)
+    if (!doesContainMarker(containerItem.getPersistentDataContainer()))
       return itemToAdd.getAmount();
 
-    var pdc = containerMeta.getPersistentDataContainer();
-    var markerFlag = pdc.get(containerMarkerKey, PersistentDataType.BOOLEAN);
-
-    if (markerFlag == null || !markerFlag)
-      return itemToAdd.getAmount();
-
-    if (!(containerMeta instanceof BlockStateMeta blockStateMeta))
+    if (!(containerItem.getItemMeta() instanceof BlockStateMeta blockStateMeta))
       return itemToAdd.getAmount();
 
     if (!(blockStateMeta.getBlockState() instanceof Container container))
@@ -94,9 +154,15 @@ public class AutoPickupContainerListener implements Listener {
 
     if (remainingAmount != itemToAdd.getAmount()) {
       blockStateMeta.setBlockState(container);
-      containerItem.setItemMeta(containerMeta);
+      containerItem.setItemMeta(blockStateMeta);
     }
 
     return remainingAmount;
+  }
+
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+  private boolean doesContainMarker(PersistentDataContainerView pdc) {
+    var markerFlag = pdc.get(containerMarkerKey, PersistentDataType.BOOLEAN);
+    return markerFlag != null && markerFlag;
   }
 }
