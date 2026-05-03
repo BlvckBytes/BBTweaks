@@ -372,6 +372,29 @@ mechanic:
     keysInventoryTitle: '<&8>[HiddenSwitch]-Schlüssel'
     defaultGrantedMessage: '<&6>Du hörst das dumpfe Klicken eines Schalters!'
     defaultDeniedMessage: '<&c>Du hältst keinen autorisierten Schlüssel in der Hand!'
+  quickUnload:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um ein QuickUnload zu erstellen!'
+    noContainer: '{lut.mechanic_prefix} <&c>Ein QuickUnload kann nur an einem Behälterblock angebracht werden!'
+    existingSign: '{lut.mechanic_prefix} <&c>Am Behälter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein QuickUnload!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Das <&a>QuickUnload <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
+    noContainerInMainHand: '{lut.mechanic_prefix} <&c>Du hältst kein Behälteritem in deiner Haupthand!'
+    emptyContainerInMainHand: '{lut.mechanic_prefix} <&c>Das Behälteritem in deiner Haupthand ist leer!'
+    noContainerInInventory: '{lut.mechanic_prefix} <&c>Du hast keine Behälteritems in deinem Inventar!'
+    allContainersInInventoryAreEmpty: '{lut.mechanic_prefix} <&c>Alle Behälteritems in deinem Inventar sind leer!'
+    targetInventoryIsFull: |
+      {lut.mechanic_prefix} <&c>Der Zielbehälter ist voll - nicht bewegt wurde:<space/>
+      <&4 *for-item="unfitted_items" *for-separator={,<space/>}>{item.amount}x <translate [item.key] /></>
+      .
+    unloadProcessCompleted: |
+      {lut.mechanic_prefix} <&7>In den Zielbehälter bewegt wurde<space/>
+      <container *if="container_count > 1">
+        aus insgesamt <&a>{container_count}</> Behälteritems<space/>
+      </container>
+      <&a *for-item="unloaded_items" *for-separator={,<space/>}>{item.amount}x <translate [item.key] /></>
+      <container *if="len(unfitted_items) > 0">
+        ; nicht hineingepasst hat <&c *for-item="unfitted_items" *for-separator={,<space/>}>{item.amount}x <translate [item.key] /></>
+      </container>
+      .
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'

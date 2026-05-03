@@ -82,6 +82,8 @@ permissions:
     description: 'Use the hopper mechanic'
   bbtweaks.mechanic.hidden-switch:
     description: 'Use the hidden-switch mechanic'
+  bbtweaks.mechanic.quick-unload:
+    description: 'Use the quick-unload mechanic'
   bbtweaks.markers:
     description: 'Browse all available markers'
   bbtweaks.setmarker:

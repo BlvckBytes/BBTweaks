@@ -11,6 +11,7 @@ import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchSection;
 import me.blvckbytes.bbtweaks.mechanic.hopper.HopperSection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.config.MagnetSection;
 import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderSection;
+import me.blvckbytes.bbtweaks.mechanic.quick_unload.QuickUnloadSection;
 import me.blvckbytes.bbtweaks.mechanic.sign_flipper.SignFlipperSection;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.TransmitterReceiverSection;
 
@@ -25,6 +26,7 @@ public class MechanicSection extends ConfigSection {
   public SignFlipperSection signFlipper;
   public HopperSection hopper;
   public HiddenSwitchSection hiddenSwitch;
+  public QuickUnloadSection quickUnload;
 
   public ComponentMarkup noWallSign;
 
