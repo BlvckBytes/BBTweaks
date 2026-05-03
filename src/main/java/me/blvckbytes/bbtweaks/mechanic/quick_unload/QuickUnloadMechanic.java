@@ -22,9 +22,12 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> implements Listener {
+
+  private static final int FLAGS_LINE = 2;
 
   public QuickUnloadMechanic(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
     super(plugin, config);
@@ -90,7 +93,7 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
         }
       }
 
-      if (counters.totalUnloadCountByType.isEmpty()) {
+      if (!instance.silent && counters.totalUnloadCountByType.isEmpty()) {
         config.rootSection.mechanic.quickUnload.targetInventoryIsFull.sendMessage(
           player,
           new InterpretationEnvironment()
@@ -104,13 +107,15 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
       // Make sure that we also relay an update to attached comparators, hoppers and the like.
       causeBlockUpdates(instance.getMountBlock(), targetInventory);
 
-      config.rootSection.mechanic.quickUnload.unloadProcessCompleted.sendMessage(
-        player,
-        new InterpretationEnvironment()
-          .withVariable("unloaded_items", TypeAndAmount.mapToList(counters.totalUnloadCountByType))
-          .withVariable("unfitted_items", TypeAndAmount.mapToList(counters.totalUnfittedCountByType))
-          .withVariable("container_count", counters.encounteredContainerItems)
-      );
+      if (!instance.silent) {
+        config.rootSection.mechanic.quickUnload.unloadProcessCompleted.sendMessage(
+          player,
+          new InterpretationEnvironment()
+            .withVariable("unloaded_items", TypeAndAmount.mapToList(counters.totalUnloadCountByType))
+            .withVariable("unfitted_items", TypeAndAmount.mapToList(counters.totalUnfittedCountByType))
+            .withVariable("container_count", counters.encounteredContainerItems)
+        );
+      }
 
       return true;
     }
@@ -250,7 +255,10 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
       return null;
     }
 
-    var instance = new QuickUnloadInstance(sign);
+    var flags = SignUtil.getPlainTextLine(sign, FLAGS_LINE).split(" ");
+    var silent = Arrays.stream(flags).anyMatch(it -> it.equalsIgnoreCase("silent"));
+
+    var instance = new QuickUnloadInstance(sign, silent);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 

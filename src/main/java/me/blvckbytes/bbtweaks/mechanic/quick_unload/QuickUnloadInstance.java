@@ -6,8 +6,12 @@ import org.bukkit.block.Sign;
 
 public class QuickUnloadInstance extends SISOInstance {
 
-  public QuickUnloadInstance(Sign sign) {
+  public final boolean silent;
+
+  public QuickUnloadInstance(Sign sign, boolean silent) {
     super(sign);
+
+    this.silent = silent;
   }
 
   @Override
