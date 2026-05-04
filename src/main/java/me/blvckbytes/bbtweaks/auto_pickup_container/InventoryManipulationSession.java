@@ -7,6 +7,7 @@ import org.bukkit.inventory.PlayerInventory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class InventoryManipulationSession {
 
@@ -17,7 +18,7 @@ public class InventoryManipulationSession {
 
   private boolean dirty;
 
-  public InventoryManipulationSession(Player player) {
+  public InventoryManipulationSession(Player player, Predicate<ItemStack> containerPredicate) {
     this.inventory = player.getInventory();
     this.storageContents = inventory.getStorageContents();
     this.containers = new ArrayList<>();
@@ -26,8 +27,13 @@ public class InventoryManipulationSession {
       if (item == null || item.getType().isAir())
         continue;
 
-      if (Tag.SHULKER_BOXES.isTagged(item.getType()))
-        containers.add(new LazyContainer(item));
+      if (!Tag.SHULKER_BOXES.isTagged(item.getType()))
+        continue;
+
+      if (!containerPredicate.test(item))
+        continue;
+
+      containers.add(new LazyContainer(item));
     }
   }
 

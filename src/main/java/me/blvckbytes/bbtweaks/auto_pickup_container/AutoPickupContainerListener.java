@@ -1,6 +1,5 @@
 package me.blvckbytes.bbtweaks.auto_pickup_container;
 
-import io.papermc.paper.persistence.PersistentDataContainerView;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
@@ -45,7 +44,7 @@ public class AutoPickupContainerListener implements Listener {
     if (!window.player.isOnline())
       return;
 
-    var session = new InventoryManipulationSession(window.player);
+    var session = new InventoryManipulationSession(window.player, this::doesContainMarker);
 
     for (var itemBucket : window.buckets) {
       var remainingAmountToReduce = session.tryAddItemToContainersAndGetAddedAmount(itemBucket.item, itemBucket.getTotalCount());
@@ -98,7 +97,7 @@ public class AutoPickupContainerListener implements Listener {
     if (!Tag.SHULKER_BOXES.isTagged(placedItem.getType()))
       return;
 
-    if (!doesContainMarker(placedItem.getPersistentDataContainer()))
+    if (!doesContainMarker(placedItem))
       return;
 
     shulkerBox.getPersistentDataContainer().set(placedItemKey, PersistentDataType.BYTE_ARRAY, placedItem.serializeAsBytes());
@@ -166,9 +165,8 @@ public class AutoPickupContainerListener implements Listener {
       .analyzePickupSlots(pickedUpItem, player.getInventory());
   }
 
-  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  private boolean doesContainMarker(PersistentDataContainerView pdc) {
-    var markerFlag = pdc.get(containerMarkerKey, PersistentDataType.BOOLEAN);
+  private boolean doesContainMarker(ItemStack item) {
+    var markerFlag = item.getPersistentDataContainer().get(containerMarkerKey, PersistentDataType.BOOLEAN);
     return markerFlag != null && markerFlag;
   }
 }
