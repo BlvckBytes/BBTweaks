@@ -199,7 +199,7 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
       if (initialAmount <= 0)
         continue;
 
-      var remainingAmount = InventoryUtil.addItemToInventoryAndGetRemainingAmount(currentItem, targetInventory);
+      var remainingAmount = InventoryUtil.addItemToInventoryAndGetRemainingAmount(currentItem, currentItem.getAmount(), targetInventory);
 
       var movedAmount = initialAmount - remainingAmount;
 
