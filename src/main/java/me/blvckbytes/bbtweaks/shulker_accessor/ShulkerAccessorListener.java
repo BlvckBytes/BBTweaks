@@ -117,6 +117,9 @@ public class ShulkerAccessorListener implements Listener {
 
     event.setCancelled(true);
 
+    // Register ahead of time, as to immediately provide the holder instance to other features accessing the change-detector.
+    changeDetector.manuallyRegisterHolder(newHolder);
+
     Bukkit.getScheduler().runTaskLater(plugin, () -> player.openInventory(newHolder.getInventory()), 1L);
   }
 
@@ -179,6 +182,9 @@ public class ShulkerAccessorListener implements Listener {
       return;
 
     event.setCancelled(true);
+
+    // Register ahead of time, as to immediately provide the holder instance to other features accessing the change-detector.
+    changeDetector.manuallyRegisterHolder(newHolder);
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> player.openInventory(newHolder.getInventory()), 1L);
   }

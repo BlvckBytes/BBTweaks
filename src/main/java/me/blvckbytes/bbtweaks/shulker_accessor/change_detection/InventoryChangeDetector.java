@@ -41,6 +41,11 @@ public class InventoryChangeDetector implements Listener {
     }, 0, 0);
   }
 
+  public void manuallyRegisterHolder(ChangeDetectionHolder holder) {
+    if (observedHolders.stream().noneMatch(it -> it == holder))
+      observedHolders.add(holder);
+  }
+
   public Collection<ChangeDetectionHolder> getObservedHolders() {
     return Collections.unmodifiableCollection(observedHolders);
   }
@@ -65,10 +70,7 @@ public class InventoryChangeDetector implements Listener {
     if (holder.getViewCount() > 1)
       return;
 
-    if (observedHolders.stream().anyMatch(it -> it == holder))
-      return;
-
-    observedHolders.add(holder);
+    manuallyRegisterHolder(holder);
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
