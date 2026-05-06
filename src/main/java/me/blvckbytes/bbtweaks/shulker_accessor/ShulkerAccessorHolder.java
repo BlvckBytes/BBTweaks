@@ -10,7 +10,6 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
@@ -109,10 +108,6 @@ public class ShulkerAccessorHolder extends ChangeDetectionHolder {
     shulkerItem.setItemMeta(blockStateMeta);
 
     return true;
-  }
-
-  public void closeAll() {
-    new ArrayList<>(getInventory().getViewers()).forEach(HumanEntity::closeInventory);
   }
 
   public static @Nullable ShulkerAccessorHolder instantiateIfValidShulker(

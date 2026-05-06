@@ -1,9 +1,12 @@
 package me.blvckbytes.bbtweaks.shulker_accessor.change_detection;
 
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
 
 public abstract class ChangeDetectionHolder implements InventoryHolder {
 
@@ -62,5 +65,9 @@ public abstract class ChangeDetectionHolder implements InventoryHolder {
       throw new IllegalStateException("Expected the inventory-refence to have been set");
 
     return inventory;
+  }
+
+  public void closeAll() {
+    new ArrayList<>(getInventory().getViewers()).forEach(HumanEntity::closeInventory);
   }
 }
