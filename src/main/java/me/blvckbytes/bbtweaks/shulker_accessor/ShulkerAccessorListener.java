@@ -71,7 +71,7 @@ public class ShulkerAccessorListener implements Listener {
 
     playerInventory.getHeldItemSlot();
 
-    if (doesAnyAccessorMatch(it -> it.isShulkerItemContainedByInventoryAtSlot(playerInventory, playerInventory.getHeldItemSlot())))
+    if (doesAnyAccessorHolderMatch(it -> it.isShulkerItemContainedByInventoryAtSlot(playerInventory, playerInventory.getHeldItemSlot())))
       event.setCancelled(true);
   }
 
@@ -83,16 +83,23 @@ public class ShulkerAccessorListener implements Listener {
     var player = event.getPlayer();
     var playerInventory = player.getInventory();
 
+    var itemSlot = playerInventory.getHeldItemSlot();
+
     var newHolder = ShulkerAccessorHolder.instantiateIfValidShulker(
       playerInventory.getItemInMainHand(),
       playerInventory,
-      playerInventory.getHeldItemSlot(),
+      itemSlot,
       null,
       config
     );
 
     if (newHolder == null)
       return;
+
+    if (doesAnyAccessorHolderMatch(otherHolder -> otherHolder.isShulkerItemContainedByInventoryAtSlot(playerInventory, itemSlot))) {
+      event.setCancelled(true);
+      return;
+    }
 
     if (touchCooldownAndGetIfStillActive(player))
       return;
@@ -138,7 +145,7 @@ public class ShulkerAccessorListener implements Listener {
     if (newHolder == null)
       return;
 
-    if (doesAnyAccessorMatch(otherHolder -> otherHolder.isShulkerItemContainedByInventoryAtSlot(clickedInventory, itemSlot) || otherHolder.sharesBlocksWith(newHolder))) {
+    if (doesAnyAccessorHolderMatch(otherHolder -> otherHolder.isShulkerItemContainedByInventoryAtSlot(clickedInventory, itemSlot) || otherHolder.sharesBlocksWith(newHolder))) {
       event.setCancelled(true);
       return;
     }
@@ -173,7 +180,7 @@ public class ShulkerAccessorListener implements Listener {
     return false;
   }
 
-  private boolean doesAnyAccessorMatch(Predicate<ShulkerAccessorHolder> predicate) {
+  private boolean doesAnyAccessorHolderMatch(Predicate<ShulkerAccessorHolder> predicate) {
     for (var observedHolder : changeDetector.getObservedHolders()) {
       if (!(observedHolder instanceof ShulkerAccessorHolder holder))
         continue;
