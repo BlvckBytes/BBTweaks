@@ -23,6 +23,7 @@ import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceSection;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportSection;
 import me.blvckbytes.bbtweaks.ping.PingSection;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideSection;
+import me.blvckbytes.bbtweaks.shulker_accessor.config.ShulkerAccessorSection;
 import me.blvckbytes.bbtweaks.un_craft.config.UnCraftSection;
 
 @CSAlways
@@ -48,6 +49,7 @@ public class MainSection extends ConfigSection {
   public MultiBreakSection multiBreak;
   public AutoToolSection autoTool;
   public InvMagnetSection invMagnet;
+  public ShulkerAccessorSection shulkerAccessor;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

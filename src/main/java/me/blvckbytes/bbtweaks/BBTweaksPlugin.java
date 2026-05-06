@@ -45,6 +45,8 @@ import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommandSection;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
+import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.InventoryChangeDetector;
+import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.NameScopedKeyValueStore;
@@ -266,6 +268,11 @@ public class BBTweaksPlugin extends JavaPlugin {
       var autoToolCommandExecutor = new AutoToolCommand(config, this);
       getServer().getPluginManager().registerEvents(autoToolCommandExecutor, this);
       Objects.requireNonNull(getCommand("autotool")).setExecutor(autoToolCommandExecutor);
+
+      var inventoryChangeDetector = new InventoryChangeDetector(this);
+      getServer().getPluginManager().registerEvents(inventoryChangeDetector, this);
+
+      getServer().getPluginManager().registerEvents(new ShulkerAccessorListener(this, inventoryChangeDetector, config), this);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);
