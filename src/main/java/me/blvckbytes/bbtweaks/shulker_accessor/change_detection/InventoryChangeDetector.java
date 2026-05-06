@@ -53,10 +53,14 @@ public class InventoryChangeDetector implements Listener {
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onInventoryOpen(InventoryOpenEvent event) {
+    if (!(event.getPlayer() instanceof Player player))
+      return;
+
     if (!(event.getInventory().getHolder() instanceof ChangeDetectionHolder holder))
       return;
 
     holder.incrementViewCount();
+    holder.onInventoryOpen(player);
 
     if (holder.getViewCount() > 1)
       return;
@@ -69,10 +73,14 @@ public class InventoryChangeDetector implements Listener {
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onInventoryClose(InventoryCloseEvent event) {
+    if (!(event.getPlayer() instanceof Player player))
+      return;
+
     if (!(event.getInventory().getHolder() instanceof ChangeDetectionHolder holder))
       return;
 
     holder.decrementViewCount();
+    holder.onInventoryClose(player);
 
     if (holder.getViewCount() > 0)
       return;

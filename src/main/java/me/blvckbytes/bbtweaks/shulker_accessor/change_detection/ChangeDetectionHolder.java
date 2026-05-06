@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.shulker_accessor.change_detection;
 
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +24,10 @@ public abstract class ChangeDetectionHolder implements InventoryHolder {
   }
 
   public abstract boolean isValid();
+
+  public abstract void onInventoryOpen(Player viewer);
+
+  public abstract void onInventoryClose(Player viewer);
 
   public void markDirty() {
     dirty = true;

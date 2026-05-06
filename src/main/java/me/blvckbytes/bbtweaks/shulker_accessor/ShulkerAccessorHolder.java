@@ -6,10 +6,13 @@ import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.ChangeDetectionH
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
+import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
@@ -65,6 +68,16 @@ public class ShulkerAccessorHolder extends ChangeDetectionHolder {
       return false;
 
     return shulkerItem.equals(currentItem);
+  }
+
+  @Override
+  public void onInventoryOpen(Player viewer) {
+    viewer.playSound(viewer.getEyeLocation(), Sound.BLOCK_SHULKER_BOX_OPEN, SoundCategory.BLOCKS, 1.0f, 1.0f);
+  }
+
+  @Override
+  public void onInventoryClose(Player viewer) {
+    viewer.playSound(viewer.getEyeLocation(), Sound.BLOCK_SHULKER_BOX_CLOSE, SoundCategory.BLOCKS, 1.0f, 1.0f);
   }
 
   public boolean sharesBlocksAndSlotWith(ShulkerAccessorHolder other) {
