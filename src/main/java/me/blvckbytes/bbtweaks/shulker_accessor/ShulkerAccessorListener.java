@@ -180,7 +180,7 @@ public class ShulkerAccessorListener implements Listener {
     return false;
   }
 
-  private boolean doesAnyAccessorHolderMatch(Predicate<ShulkerAccessorHolder> predicate) {
+  public boolean doesAnyAccessorHolderMatch(Predicate<ShulkerAccessorHolder> predicate) {
     for (var observedHolder : changeDetector.getObservedHolders()) {
       if (!(observedHolder instanceof ShulkerAccessorHolder holder))
         continue;

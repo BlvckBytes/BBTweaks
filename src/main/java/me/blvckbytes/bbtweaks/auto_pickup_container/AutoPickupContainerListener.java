@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.auto_pickup_container;
 
+import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
@@ -21,14 +22,19 @@ import java.util.*;
 
 public class AutoPickupContainerListener implements Listener {
 
-  // TODO: Feature-request by a user: pick up items into containers even if the inv is full
+  private final ShulkerAccessorListener shulkerAccessor;
 
   private final NamespacedKey containerMarkerKey;
   private final NamespacedKey placedItemKey;
 
   private final Map<UUID, PickupTickWindow> pickupTickWindowByPlayerId;
 
-  public AutoPickupContainerListener(Plugin plugin) {
+  public AutoPickupContainerListener(
+    Plugin plugin,
+    ShulkerAccessorListener shulkerAccessor
+  ) {
+    this.shulkerAccessor = shulkerAccessor;
+
     this.containerMarkerKey = new NamespacedKey(plugin, "auto-pickup-container");
     this.placedItemKey = new NamespacedKey(plugin, "auto-pickup-placed-item");
 
@@ -44,7 +50,13 @@ public class AutoPickupContainerListener implements Listener {
     if (!window.player.isOnline())
       return;
 
-    var session = new InventoryManipulationSession(window.player, this::doesContainMarker);
+    var session = new InventoryManipulationSession(window.player, (inventory, slot, item) -> {
+      if (!doesContainMarker(item))
+        return false;
+
+      // Disable auto-pickup for currently-viewed shulkers
+      return !shulkerAccessor.doesAnyAccessorHolderMatch(holder -> holder.isShulkerItemContainedByInventoryAtSlot(inventory, slot));
+    });
 
     for (var itemBucket : window.buckets) {
       var remainingAmountToReduce = session.tryAddItemToContainersAndGetAddedAmount(itemBucket.item, itemBucket.getTotalCount());
@@ -165,6 +177,7 @@ public class AutoPickupContainerListener implements Listener {
       .analyzePickupSlots(pickedUpItem, player.getInventory());
   }
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean doesContainMarker(ItemStack item) {
     var markerFlag = item.getPersistentDataContainer().get(containerMarkerKey, PersistentDataType.BOOLEAN);
     return markerFlag != null && markerFlag;

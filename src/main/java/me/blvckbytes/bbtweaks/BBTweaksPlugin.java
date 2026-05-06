@@ -96,13 +96,6 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       getServer().getPluginManager().registerEvents(rdBreakTool, this);
 
-      var autoPickupContainerListener = new AutoPickupContainerListener(this);
-      getServer().getPluginManager().registerEvents(autoPickupContainerListener, this);
-
-      var mainCommandExecutor = new MainCommand(config, rdBreakTool, autoPickupContainerListener, this);
-
-      Objects.requireNonNull(getCommand("bbtweaks")).setExecutor(mainCommandExecutor);
-
       getServer().getPluginManager().registerEvents(new LavaSponge(), this);
 
       var getUuidCommand = new GetUuidCommand(config);
@@ -272,7 +265,16 @@ public class BBTweaksPlugin extends JavaPlugin {
       var inventoryChangeDetector = new InventoryChangeDetector(this);
       getServer().getPluginManager().registerEvents(inventoryChangeDetector, this);
 
-      getServer().getPluginManager().registerEvents(new ShulkerAccessorListener(this, inventoryChangeDetector, config), this);
+      var shulkerAccessor = new ShulkerAccessorListener(this, inventoryChangeDetector, config);
+
+      getServer().getPluginManager().registerEvents(shulkerAccessor, this);
+
+      var autoPickupContainerListener = new AutoPickupContainerListener(this, shulkerAccessor);
+      getServer().getPluginManager().registerEvents(autoPickupContainerListener, this);
+
+      var mainCommandExecutor = new MainCommand(config, rdBreakTool, autoPickupContainerListener, this);
+
+      Objects.requireNonNull(getCommand("bbtweaks")).setExecutor(mainCommandExecutor);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);
