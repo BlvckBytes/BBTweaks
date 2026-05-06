@@ -859,6 +859,9 @@ invMagnet:
 
 shulkerAccessor:
   openShulkerCooldownTicks: 5
+  # Regular expressions matching against titles of inventories which are also allowed to be used for
+  # accessing shulkers in, next to player-inventory, ender-chest and physical containers.
+  # WARNING: Never ever add inventories willy-nilly, if you have no understanding of their working-principles!
   additionalAllowedInventoryTitlePatterns:
     - '^⚡ .+''s Privater Tresor #[0-9]+ ⚡$'
 
