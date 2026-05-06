@@ -145,7 +145,7 @@ public class ShulkerAccessorListener implements Listener {
     if (newHolder == null)
       return;
 
-    if (doesAnyAccessorHolderMatch(otherHolder -> otherHolder.isShulkerItemContainedByInventoryAtSlot(clickedInventory, itemSlot) || otherHolder.sharesBlocksWith(newHolder))) {
+    if (doesAnyAccessorHolderMatch(otherHolder -> otherHolder.isShulkerItemContainedByInventoryAtSlot(clickedInventory, itemSlot) || otherHolder.sharesBlocksAndSlotWith(newHolder))) {
       event.setCancelled(true);
       return;
     }

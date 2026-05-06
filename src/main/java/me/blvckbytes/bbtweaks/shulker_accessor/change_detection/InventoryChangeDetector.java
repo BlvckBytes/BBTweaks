@@ -47,9 +47,7 @@ public class InventoryChangeDetector implements Listener {
 
   @EventHandler
   public void onDisable(PluginDisableEvent event) {
-    for (var observedHolder : observedHolders)
-      observedHolder.closeAll();
-
+    new ArrayList<>(observedHolders).forEach(ChangeDetectionHolder::closeAll);
     observedHolders.clear();
   }
 

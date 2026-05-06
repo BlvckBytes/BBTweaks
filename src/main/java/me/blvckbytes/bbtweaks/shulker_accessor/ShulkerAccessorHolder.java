@@ -67,11 +67,11 @@ public class ShulkerAccessorHolder extends ChangeDetectionHolder {
     return shulkerItem.equals(currentItem);
   }
 
-  public boolean sharesBlocksWith(ShulkerAccessorHolder other) {
+  public boolean sharesBlocksAndSlotWith(ShulkerAccessorHolder other) {
     for (var thisBlockCapture : containerBlockCaptures) {
       for (var otherBlockCapture : other.containerBlockCaptures) {
         if (areBlockPositionsEqual(thisBlockCapture.block, otherBlockCapture.block))
-          return true;
+          return this.itemContainingInventorySlot == other.itemContainingInventorySlot;
       }
     }
 
