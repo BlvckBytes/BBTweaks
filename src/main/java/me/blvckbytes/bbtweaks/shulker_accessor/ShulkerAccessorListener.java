@@ -10,6 +10,7 @@ import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.InventoryInvalid
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
@@ -17,6 +18,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.Plugin;
 
 import java.util.UUID;
@@ -150,6 +152,14 @@ public class ShulkerAccessorListener implements Listener {
     event.setCancelled(true);
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> player.openInventory(newHolder.getInventory()), 1L);
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+  public void onTeleport(PlayerTeleportEvent event) {
+    var player = event.getPlayer();
+
+    if (player.getOpenInventory().getTopInventory().getHolder() instanceof ShulkerAccessorHolder)
+      Bukkit.getScheduler().runTaskLater(plugin, () -> player.closeInventory(), 1L);
   }
 
   private boolean touchCooldownAndGetIfStillActive(Player player) {
