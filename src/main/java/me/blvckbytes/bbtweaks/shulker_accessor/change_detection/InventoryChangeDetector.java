@@ -65,7 +65,7 @@ public class InventoryChangeDetector implements Listener {
     if (holder.getViewCount() > 1)
       return;
 
-    if (observedHolders.stream().anyMatch(it -> it.getIdentifier() == holder.getIdentifier()))
+    if (observedHolders.stream().anyMatch(it -> it == holder))
       return;
 
     observedHolders.add(holder);
@@ -85,7 +85,7 @@ public class InventoryChangeDetector implements Listener {
     if (holder.getViewCount() > 0)
       return;
 
-    observedHolders.removeIf(it -> it.getIdentifier() == holder.getIdentifier());
+    observedHolders.removeIf(it -> it == holder);
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)

@@ -11,17 +11,10 @@ import java.util.ArrayList;
 
 public abstract class ChangeDetectionHolder implements InventoryHolder {
 
-  private static long instanceCounter;
-
-  private final long identifier;
   private boolean dirty;
   private int viewCount;
 
   private @Nullable Inventory inventory;
-
-  public ChangeDetectionHolder() {
-    identifier = ++instanceCounter;
-  }
 
   public abstract boolean isValid();
 
@@ -39,10 +32,6 @@ public abstract class ChangeDetectionHolder implements InventoryHolder {
 
   public void clearDirty() {
     dirty = false;
-  }
-
-  public long getIdentifier() {
-    return identifier;
   }
 
   public int getViewCount() {
