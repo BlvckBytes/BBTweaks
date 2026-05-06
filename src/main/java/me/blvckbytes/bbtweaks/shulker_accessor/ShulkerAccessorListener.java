@@ -14,10 +14,12 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryAction;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.plugin.Plugin;
 
@@ -31,6 +33,7 @@ public class ShulkerAccessorListener implements Listener {
   private final ConfigKeeper<MainSection> config;
 
   private final Object2LongMap<UUID> lastShulkerAccessStampByPlayerId;
+  private final Object2LongMap<UUID> lastInventoryDropStampByPlayerId;
 
   private long relativeTime;
 
@@ -45,6 +48,9 @@ public class ShulkerAccessorListener implements Listener {
 
     this.lastShulkerAccessStampByPlayerId = new Object2LongOpenHashMap<>();
     this.lastShulkerAccessStampByPlayerId.defaultReturnValue(0);
+
+    this.lastInventoryDropStampByPlayerId = new Object2LongOpenHashMap<>();
+    this.lastInventoryDropStampByPlayerId.defaultReturnValue(0);
 
     Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> ++relativeTime, 0, 0);
   }
@@ -67,9 +73,14 @@ public class ShulkerAccessorListener implements Listener {
   @EventHandler
   public void onDropItem(PlayerDropItemEvent event) {
     var player = event.getPlayer();
-    var playerInventory = player.getInventory();
 
-    playerInventory.getHeldItemSlot();
+    var lastInventoryDropStamp = lastInventoryDropStampByPlayerId.getLong(player.getUniqueId());
+
+    // Allow players to drop items if they passed the preceding click-event; this event won't fire, should it have been cancelled.
+    if (relativeTime - lastInventoryDropStamp <= 1)
+      return;
+
+    var playerInventory = player.getInventory();
 
     if (doesAnyAccessorHolderMatch(it -> it.isShulkerItemContainedByInventoryAtSlot(playerInventory, playerInventory.getHeldItemSlot())))
       event.setCancelled(true);
@@ -113,6 +124,17 @@ public class ShulkerAccessorListener implements Listener {
   public void onClick(InventoryClickEvent event) {
     if (!(event.getWhoClicked() instanceof Player player))
       return;
+
+    var action = event.getAction();
+
+    if (
+      action == InventoryAction.DROP_ALL_CURSOR
+      || action == InventoryAction.DROP_ALL_SLOT
+      || action == InventoryAction.DROP_ONE_CURSOR
+      || action == InventoryAction.DROP_ONE_SLOT
+    ) {
+      lastInventoryDropStampByPlayerId.put(player.getUniqueId(), relativeTime);
+    }
 
     var slotType = event.getSlotType();
 
@@ -159,6 +181,14 @@ public class ShulkerAccessorListener implements Listener {
     event.setCancelled(true);
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> player.openInventory(newHolder.getInventory()), 1L);
+  }
+
+  @EventHandler
+  public void onQuit(PlayerQuitEvent event) {
+    var playerId = event.getPlayer().getUniqueId();
+
+    lastShulkerAccessStampByPlayerId.removeLong(playerId);
+    lastInventoryDropStampByPlayerId.removeLong(playerId);
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
