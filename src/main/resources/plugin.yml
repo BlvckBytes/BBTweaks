@@ -2,7 +2,7 @@ name: BBTweaks
 main: me.blvckbytes.bbtweaks.BBTweaksPlugin
 version: ${project.version}
 author: BlvckBytes
-api-version: 1.21
+api-version: 26.1
 depend: [ItemPredicateParser, WorldGuard]
 softdepend: [mcMMO, floodgate, CraftBook, EssentialsDiscord]
 commands:
