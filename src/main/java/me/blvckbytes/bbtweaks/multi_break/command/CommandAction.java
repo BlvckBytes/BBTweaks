@@ -6,6 +6,7 @@ import me.blvckbytes.item_predicate_parser.syllables_matcher.MatchableEnum;
 public enum CommandAction implements MatchableEnum {
   ON,
   OFF,
+  TOGGLE,
   SIZE,
   SET_FILTER,
   SET_FILTER_WITH_LANGUAGE,

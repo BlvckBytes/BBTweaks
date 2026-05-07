@@ -199,6 +199,18 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
         return true;
       }
 
+      case TOGGLE -> {
+        parameters.enabled ^= true;
+
+        if (parameters.enabled) {
+          config.rootSection.multiBreak.nowEnabled.sendMessage(player, parameters.makeEnvironment());
+          return true;
+        }
+
+        config.rootSection.multiBreak.nowDisabled.sendMessage(player);
+        return true;
+      }
+
       case SIZE -> {
         SizeValues sizeValues;
 
