@@ -4,7 +4,6 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.util.PredicateUtils;
-import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
@@ -44,6 +43,7 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
   private final Map<UUID, InventoryFilter> filterByPlayerId;
 
   public InvFilterCommand(
+    PredicateHelper predicateHelper,
     Command command,
     Plugin plugin,
     ConfigKeeper<MainSection> config
@@ -52,12 +52,7 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
     this.plugin = plugin;
     this.config = config;
 
-    ItemPredicateParserPlugin ipp;
-
-    if (!Bukkit.getServer().getPluginManager().isPluginEnabled("ItemPredicateParser") || (ipp = ItemPredicateParserPlugin.getInstance()) == null)
-      throw new IllegalArgumentException("Expected plugin ItemPredicateParser to have been loaded at this point");
-
-    this.predicateHelper = ipp.getPredicateHelper();
+    this.predicateHelper = predicateHelper;
 
     this.filterPredicateKey = new NamespacedKey(plugin, "invfilter-predicate");
     this.filterLanguageKey = new NamespacedKey(plugin, "invfilter-language");

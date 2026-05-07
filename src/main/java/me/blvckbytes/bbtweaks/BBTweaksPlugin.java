@@ -187,7 +187,7 @@ public class BBTweaksPlugin extends JavaPlugin {
       getServer().getPluginManager().registerEvents(customCommandsManager, this);
 
       var invFilterCommand = Objects.requireNonNull(getCommand("invfilter"));
-      var invFilterCommandExecutor = new InvFilterCommand(invFilterCommand, this, config);
+      var invFilterCommandExecutor = new InvFilterCommand(predicateHelper, invFilterCommand, this, config);
 
       getServer().getPluginManager().registerEvents(invFilterCommandExecutor, this);
 
