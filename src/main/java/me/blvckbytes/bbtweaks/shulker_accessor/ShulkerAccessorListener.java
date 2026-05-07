@@ -58,7 +58,7 @@ public class ShulkerAccessorListener implements Listener {
   @EventHandler
   public void onInventoryInvalidate(InventoryInvalidatedEvent event) {
     if (event.getHolder() instanceof ShulkerAccessorHolder holder)
-      Bukkit.getScheduler().runTaskLater(plugin, holder::closeAll, 1L);
+      holder.markLockedAndCloseAllNextTick(plugin);
   }
 
   @EventHandler
@@ -67,7 +67,7 @@ public class ShulkerAccessorListener implements Listener {
       return;
 
     if (!holder.tryWriteBackToItem())
-      Bukkit.getScheduler().runTaskLater(plugin, holder::closeAll, 1L);
+      holder.markLockedAndCloseAllNextTick(plugin);
   }
 
   @EventHandler

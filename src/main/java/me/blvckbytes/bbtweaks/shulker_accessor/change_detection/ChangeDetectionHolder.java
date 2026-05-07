@@ -1,9 +1,11 @@
 package me.blvckbytes.bbtweaks.shulker_accessor.change_detection;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,6 +14,7 @@ import java.util.ArrayList;
 public abstract class ChangeDetectionHolder implements InventoryHolder {
 
   private boolean dirty;
+  private boolean locked;
   private int viewCount;
 
   private @Nullable Inventory inventory;
@@ -28,6 +31,10 @@ public abstract class ChangeDetectionHolder implements InventoryHolder {
 
   public boolean isDirty() {
     return dirty;
+  }
+
+  public boolean isLocked() {
+    return locked;
   }
 
   public void clearDirty() {
@@ -63,5 +70,11 @@ public abstract class ChangeDetectionHolder implements InventoryHolder {
 
   public void closeAll() {
     new ArrayList<>(getInventory().getViewers()).forEach(HumanEntity::closeInventory);
+  }
+
+  public void markLockedAndCloseAllNextTick(Plugin plugin) {
+    this.locked = true;
+
+    Bukkit.getScheduler().runTaskLater(plugin, this::closeAll, 1L);
   }
 }

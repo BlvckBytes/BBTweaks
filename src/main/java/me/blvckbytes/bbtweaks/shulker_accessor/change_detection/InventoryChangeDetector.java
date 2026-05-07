@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
 
 public class InventoryChangeDetector implements Listener {
 
@@ -58,72 +59,81 @@ public class InventoryChangeDetector implements Listener {
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onInventoryOpen(InventoryOpenEvent event) {
-    if (!(event.getPlayer() instanceof Player player))
-      return;
+    tryAccessHolder(event, (player, holder) -> {
+      holder.incrementViewCount();
+      holder.onInventoryOpen(player);
 
-    if (!(event.getInventory().getHolder() instanceof ChangeDetectionHolder holder))
-      return;
+      if (holder.getViewCount() > 1)
+        return;
 
-    holder.incrementViewCount();
-    holder.onInventoryOpen(player);
-
-    if (holder.getViewCount() > 1)
-      return;
-
-    manuallyRegisterHolder(holder);
+      manuallyRegisterHolder(holder);
+    });
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onInventoryClose(InventoryCloseEvent event) {
-    if (!(event.getPlayer() instanceof Player player))
-      return;
+    tryAccessHolder(event, (player, holder) -> {
+      holder.decrementViewCount();
+      holder.onInventoryClose(player);
 
-    if (!(event.getInventory().getHolder() instanceof ChangeDetectionHolder holder))
-      return;
+      if (holder.getViewCount() > 0)
+        return;
 
-    holder.decrementViewCount();
-    holder.onInventoryClose(player);
+      observedHolders.removeIf(it -> it == holder);
+    });
+  }
 
-    if (holder.getViewCount() > 0)
-      return;
-
-    observedHolders.removeIf(it -> it == holder);
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+  public void onEarlyClick(InventoryClickEvent event) {
+    tryAccessHolder(event, (player, holder) -> {
+      if (holder.isLocked() || !holder.isValid())
+        event.setCancelled(true);
+    });
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onClick(InventoryClickEvent event) {
-    if (!(event.getWhoClicked() instanceof Player player))
-      return;
+    tryAccessHolder(event, (player, holder) -> {
+      var action = event.getAction();
 
-    var inventory = player.getOpenInventory().getTopInventory();
+      // Only mark as dirty if the action actually affected the top inventory, as to
+      // save on needless write-backs in cases where no delta occurred.
 
-    if (!(inventory.getHolder() instanceof ChangeDetectionHolder holder))
-      return;
+      if (
+        action == InventoryAction.MOVE_TO_OTHER_INVENTORY
+          || action == InventoryAction.HOTBAR_SWAP
+          || action == InventoryAction.COLLECT_TO_CURSOR
+          || action == InventoryAction.UNKNOWN
+      ) {
+        holder.markDirty();
+        return;
+      }
 
-    var action = event.getAction();
+      if (event.getRawSlot() < 0 || event.getRawSlot() >= holder.getInventory().getSize())
+        return;
 
-    // Only mark as dirty if the action actually affected the top inventory, as to
-    // save on needless write-backs in cases where no delta occurred.
-
-    if (
-      action == InventoryAction.MOVE_TO_OTHER_INVENTORY
-        || action == InventoryAction.HOTBAR_SWAP
-        || action == InventoryAction.COLLECT_TO_CURSOR
-        || action == InventoryAction.UNKNOWN
-    ) {
       holder.markDirty();
-      return;
-    }
+    });
+  }
 
-    if (event.getRawSlot() >= inventory.getSize())
-      return;
-
-    holder.markDirty();
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.LOWEST)
+  public void onEarlyDrag(InventoryDragEvent event) {
+    tryAccessHolder(event, (player, holder) -> {
+      if (holder.isLocked() || !holder.isValid())
+        event.setCancelled(true);
+    });
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
   public void onDrag(InventoryDragEvent event) {
-    if (!(event.getWhoClicked() instanceof Player player))
+    tryAccessHolder(event, (player, holder) -> {
+      // Let's rather not get too smart about change-detection on this one.
+      holder.markDirty();
+    });
+  }
+
+  private void tryAccessHolder(InventoryEvent event, BiConsumer<Player, ChangeDetectionHolder> handler) {
+    if (!(event.getView().getPlayer() instanceof Player player))
       return;
 
     var inventory = player.getOpenInventory().getTopInventory();
@@ -131,8 +141,6 @@ public class InventoryChangeDetector implements Listener {
     if (!(inventory.getHolder() instanceof ChangeDetectionHolder holder))
       return;
 
-    // Let's rather not get too smart about change-detection on this one.
-
-    holder.markDirty();
+    handler.accept(player, holder);
   }
 }
