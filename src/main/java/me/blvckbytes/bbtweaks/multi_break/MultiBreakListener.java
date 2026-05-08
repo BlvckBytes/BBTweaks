@@ -120,19 +120,27 @@ public class MultiBreakListener implements Listener {
 
     var directions = BlockDirections.determine(player);
 
-    var toolsMissingForTypes = new HashSet<Material>(2);
+    var missingToolsForBlockTypes = new HashSet<Material>();
+    var excludedBlockTypes = new HashSet<Material>();
 
     forEachBlockWithinParameters(originBlock, directions, parameters, block -> {
       if (!block.isSolid())
         return;
 
-      if (parameters.filter != null && !parameters.filter.predicate.test(new ItemStack(block.getType())))
+      var blockType = block.getType();
+
+      if (config.rootSection.multiBreak.isBlockExcluded(blockType)) {
+        excludedBlockTypes.add(blockType);
+        return;
+      }
+
+      if (parameters.filter != null && !parameters.filter.predicate.test(new ItemStack(blockType)))
         return;
 
       var toolUsed = DamageableHotbarItem.determineToolFromHotbar(block, playerInventory);
 
       if (toolUsed == null) {
-        toolsMissingForTypes.add(block.getType());
+        missingToolsForBlockTypes.add(blockType);
         return;
       }
 
@@ -174,19 +182,15 @@ public class MultiBreakListener implements Listener {
         playerInventory.setHeldItemSlot(priorSlotIndex);
     });
 
-    if (toolsMissingForTypes.isEmpty())
+    if (missingToolsForBlockTypes.isEmpty() && excludedBlockTypes.isEmpty())
       return;
 
-    // Notify next tick, as to shadow jobs-messages within the action-bar.
-    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-      var translationKeys = toolsMissingForTypes.stream().map(Material::translationKey).toList();
+    var environment = new InterpretationEnvironment()
+      .withVariable("missing_tools_for_blocks_type_keys", missingToolsForBlockTypes.stream().map(Material::translationKey).toList())
+      .withVariable("excluded_blocks_type_keys", excludedBlockTypes.stream().map(Material::translationKey).toList());
 
-      config.rootSection.multiBreak.noToolsInHotbarFor.sendActionBar(
-        player,
-        new InterpretationEnvironment()
-          .withVariable("block_type_keys", translationKeys)
-      );
-    }, 1);
+    // Notify delayed, as to shadow jobs-messages within the action-bar.
+    Bukkit.getScheduler().runTaskLater(plugin, () -> config.rootSection.multiBreak.hotbarNotification.sendActionBar(player, environment), 5);
   }
 
   public void simulateBlockBreak(Player player, ItemStack toolUsed, Block block, BlockBreakEvent breakEvent) {

@@ -6,6 +6,8 @@ import at.blvckbytes.cm_mapper.mapper.section.CSIgnore;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
+import me.blvckbytes.bbtweaks.un_craft.config.TypeRule;
+import org.bukkit.Material;
 
 import java.lang.reflect.Field;
 import java.util.*;
@@ -21,6 +23,8 @@ public class MultiBreakSection extends ConfigSection {
   public double perAdditionalBlockDurabilityDecreaseChance;
 
   public int customPickupDelay;
+
+  public List<TypeRule> blockExclusions = new ArrayList<>();
 
   public ComponentMarkup missingPermission;
   public ComponentMarkup unallowedWorld;
@@ -40,7 +44,7 @@ public class MultiBreakSection extends ConfigSection {
   public ComponentMarkup nowDisabled;
   public ComponentMarkup noFilterSet;
   public ComponentMarkup currentFilter;
-  public ComponentMarkup noToolsInHotbarFor;
+  public ComponentMarkup hotbarNotification;
   public ComponentMarkup sizeSetExceededDimensions;
   public ComponentMarkup sizeSet;
 
@@ -65,5 +69,17 @@ public class MultiBreakSection extends ConfigSection {
     }
 
     limitsInDescendingOrder.sort((a, b) -> -Integer.compare(a.maxDimension(), b.maxDimension()));
+  }
+
+  public boolean isBlockExcluded(Material material) {
+    if (blockExclusions == null)
+      return false;
+
+    for (var exclusion : blockExclusions) {
+      if (exclusion.matches(material))
+        return true;
+    }
+
+    return false;
   }
 }

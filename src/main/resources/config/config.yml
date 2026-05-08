@@ -607,6 +607,10 @@ multiBreak:
   limitsByTierName:
   allowedWorlds:
     - world
+  blockExclusions:
+    -
+      tags:
+        - LOGS
   perAdditionalBlockDurabilityDecreaseChance: 50
   customPickupDelay: 5
   missingPermission: '{lut.multi_break_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
@@ -651,10 +655,22 @@ multiBreak:
           <&a><u>{filter_predicate}
       </hover-text>
       .
-  noToolsInHotbarFor: |
-    <&c>Fehlende Werkzeuge:<space/>
-    <&4 *for-key="block_type_keys" *for-separator={,<space/>}>
-      <translate [key] />
+  hotbarNotification: |
+    <separate
+      separator={<&7> |<space/>}
+      value={
+        <container *if="len(missing_tools_for_blocks_type_keys) > 0">
+          <&c>Fehlende Werkzeuge:<space/>
+          <&4 *for-key="missing_tools_for_blocks_type_keys" *for-separator={,<space/>}>
+            <translate [key] />
+      }
+      value={
+        <container *if="len(excluded_blocks_type_keys) > 0">
+          <&c>Ausgenommene Blöcke:<space/>
+          <&4 *for-key="excluded_blocks_type_keys" *for-separator={,<space/>}>
+            <translate [key] />
+      }
+    />
   sizeSetExceededDimensions: '{lut.multi_break_prefix} <&c>Deine Eingabe überschritt den maximalen Durchmesser von <&4>{max_dimension} <&c>für <&4 *for-dimension="exceeded_dimensions" *for-separator={,<space/>}>{lut.break_dimension[dimension]}</>; schränke automatisch ein!'
   sizeSet: |
     {lut.multi_break_prefix} <&7>Abbaugröße gesetzt auf:<space/>
