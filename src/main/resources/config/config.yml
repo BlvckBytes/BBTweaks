@@ -888,6 +888,11 @@ autoPickupContainer:
       <color [shulker_color] lighten=30>
         Lege diese Box in dein Inventar, um aufgesammelte<br/>
         Items automatisch in sie hineinlegen zu lassen.
+      </color>
+      <container *if="filter_predicate">
+        <br/><br/>
+        <&a><word-wrap [filter_predicate] width=50 prefix={<&8>➥ <&7>Filter:<space/>} />
+      </container>
 
 sLut:
   textures:

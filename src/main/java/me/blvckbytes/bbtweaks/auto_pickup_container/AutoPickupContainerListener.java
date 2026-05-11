@@ -4,8 +4,14 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.color.PackedColor;
+import io.papermc.paper.persistence.PersistentDataContainerView;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
+import me.blvckbytes.item_predicate_parser.PredicateHelper;
+import me.blvckbytes.item_predicate_parser.event.*;
+import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
+import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
+import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.*;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Item;
@@ -13,19 +19,20 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
-import org.bukkit.event.block.BlockDropItemEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.*;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class AutoPickupContainerListener implements Listener {
 
@@ -87,24 +94,29 @@ public class AutoPickupContainerListener implements Listener {
 
   private final Plugin plugin;
   private final ShulkerAccessorListener shulkerAccessor;
+  private final PredicateHelper predicateHelper;
   private final ConfigKeeper<MainSection> config;
 
   private final NamespacedKey containerMarkerKey;
-  private final NamespacedKey placedItemKey;
+  private final NamespacedKey filterPredicateKey;
+  private final NamespacedKey filterPredicateLanguageKey;
 
   private final Map<UUID, PickupTickWindow> pickupTickWindowByPlayerId;
 
   public AutoPickupContainerListener(
     Plugin plugin,
     ShulkerAccessorListener shulkerAccessor,
+    PredicateHelper predicateHelper,
     ConfigKeeper<MainSection> config
   ) {
     this.plugin = plugin;
     this.shulkerAccessor = shulkerAccessor;
+    this.predicateHelper = predicateHelper;
     this.config = config;
 
     this.containerMarkerKey = new NamespacedKey(plugin, "auto-pickup-container");
-    this.placedItemKey = new NamespacedKey(plugin, "auto-pickup-placed-item");
+    this.filterPredicateKey = new NamespacedKey(plugin, "auto-pickup-container-predicate");
+    this.filterPredicateLanguageKey = new NamespacedKey(plugin, "auto-pickup-container-predicate-language");
 
     this.pickupTickWindowByPlayerId = new HashMap<>();
 
@@ -119,7 +131,7 @@ public class AutoPickupContainerListener implements Listener {
       return;
 
     var session = new InventoryManipulationSession(window.player, (inventory, slot, item) -> {
-      if (!doesContainMarker(item))
+      if (!doesContainMarker(item.getPersistentDataContainer()))
         return false;
 
       // Disable auto-pickup for currently-viewed shulkers
@@ -162,6 +174,9 @@ public class AutoPickupContainerListener implements Listener {
       return MarkerModifyError.ALREADY_MARKED;
 
     pdc.set(containerMarkerKey, PersistentDataType.BOOLEAN, true);
+
+    updateLore(meta, item.getType());
+
     item.setItemMeta(meta);
 
     return null;
@@ -177,10 +192,17 @@ public class AutoPickupContainerListener implements Listener {
     if (!Tag.SHULKER_BOXES.isTagged(placedItem.getType()))
       return;
 
-    if (!doesContainMarker(placedItem))
+    if (!doesContainMarker(placedItem.getPersistentDataContainer()))
       return;
 
-    shulkerBox.getPersistentDataContainer().set(placedItemKey, PersistentDataType.BYTE_ARRAY, placedItem.serializeAsBytes());
+    var blockPdc = shulkerBox.getPersistentDataContainer();
+
+    blockPdc.set(containerMarkerKey, PersistentDataType.BOOLEAN, true);
+
+    var itemPdc = placedItem.getPersistentDataContainer();
+
+    copyOverFilter(itemPdc, blockPdc);
+
     shulkerBox.update(true, false);
   }
 
@@ -189,9 +211,9 @@ public class AutoPickupContainerListener implements Listener {
     if (!(event.getBlockState() instanceof ShulkerBox shulkerBox))
       return;
 
-    var placedItemBytes = shulkerBox.getPersistentDataContainer().get(placedItemKey, PersistentDataType.BYTE_ARRAY);
+    var blockPdc = shulkerBox.getPersistentDataContainer();
 
-    if (placedItemBytes == null)
+    if (!doesContainMarker(blockPdc))
       return;
 
     Item droppedItem = null;
@@ -212,21 +234,7 @@ public class AutoPickupContainerListener implements Listener {
     if (droppedItem == null)
       return;
 
-    var placedItem = ItemStack.deserializeBytes(placedItemBytes);
-
-    var placedMeta = placedItem.getItemMeta();
-    var droppedMeta = droppedStack.getItemMeta();
-
-    if (placedMeta == null || droppedMeta == null)
-      return;
-
-    droppedMeta.displayName(placedMeta.displayName());
-
-    droppedMeta.getPersistentDataContainer().set(containerMarkerKey, PersistentDataType.BOOLEAN, true);
-
-    droppedStack.setItemMeta(droppedMeta);
-
-    updateLoreIfMarked(droppedStack);
+    markAndCopyFilterAndUpdateLore(blockPdc, droppedStack);
 
     droppedItem.setItemStack(droppedStack);
   }
@@ -291,7 +299,7 @@ public class AutoPickupContainerListener implements Listener {
   }
 
   private boolean updateLoreIfMarked(ItemStack item) {
-    if (!doesContainMarker(item))
+    if (!doesContainMarker(item.getPersistentDataContainer()))
       return false;
 
     var meta = item.getItemMeta();
@@ -299,17 +307,25 @@ public class AutoPickupContainerListener implements Listener {
     if (meta == null)
       return false;
 
-    var dyeColor = dyeColorByShulkerMaterial.getOrDefault(item.getType(), DyeColor.WHITE);
-    var bukkitColor = dyeColor.getColor();
-    var hexColor = PackedColor.asNonAlphaHex(PackedColor.of(bukkitColor.getRed(), bukkitColor.getGreen(), bukkitColor.getBlue(), 255));
-
-    var environment = new InterpretationEnvironment()
-      .withVariable("shulker_color", hexColor);
-
-    meta.lore(config.rootSection.autoPickupContainer.loreToSetOnUpdate.interpret(SlotType.ITEM_LORE, environment));
+    updateLore(meta, item.getType());
 
     item.setItemMeta(meta);
     return true;
+  }
+
+  private void updateLore(ItemMeta shulkerMeta, Material shulkerType) {
+    var dyeColor = dyeColorByShulkerMaterial.getOrDefault(shulkerType, DyeColor.WHITE);
+    var bukkitColor = dyeColor.getColor();
+    var hexColor = PackedColor.asNonAlphaHex(PackedColor.of(bukkitColor.getRed(), bukkitColor.getGreen(), bukkitColor.getBlue(), 255));
+
+    var filter = loadFilterFromPdc(shulkerMeta.getPersistentDataContainer(), null);
+
+    var environment = new InterpretationEnvironment()
+      .withVariable("shulker_color", hexColor)
+      .withVariable("filter_predicate", filter == null ? null : filter.getTokenPredicateString())
+      .withVariable("filter_language", filter == null ? null : filter.language.name());
+
+    shulkerMeta.lore(config.rootSection.autoPickupContainer.loreToSetOnUpdate.interpret(SlotType.ITEM_LORE, environment));
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -328,9 +344,127 @@ public class AutoPickupContainerListener implements Listener {
       .analyzePickupSlots(pickedUpItem, player.getInventory());
   }
 
+  @EventHandler
+  public void onPredicateGet(PredicateGetEvent event) {
+    tryAccessShulkerPdcAndAcknowledge(event, pdc -> {
+      var predicate = loadFilterFromPdc(pdc, event::setError);
+
+      if (predicate != null)
+        event.setResult(predicate);
+    }, false);
+  }
+
+  @EventHandler
+  public void onPredicateSet(PredicateSetEvent event) {
+    tryAccessShulkerPdcAndAcknowledge(event, pdc -> writeFilterToPdc(pdc, event.getValue()), true);
+  }
+
+  @EventHandler
+  public void onPredicateRemove(PredicateRemoveEvent event) {
+    tryAccessShulkerPdcAndAcknowledge(event, pdc -> {
+      var removedPredicate = loadFilterFromPdc(pdc, null);
+
+      if (removedPredicate == null)
+        return;
+
+      removeFilterFromPdc(pdc);
+
+      event.setRemovedPredicate(removedPredicate);
+    }, true);
+  }
+
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  private boolean doesContainMarker(ItemStack item) {
-    var markerFlag = item.getPersistentDataContainer().get(containerMarkerKey, PersistentDataType.BOOLEAN);
+  private boolean doesContainMarker(PersistentDataContainerView pdcView) {
+    var markerFlag = pdcView.get(containerMarkerKey, PersistentDataType.BOOLEAN);
     return markerFlag != null && markerFlag;
+  }
+
+  private void tryAccessShulkerPdcAndAcknowledge(PredicateEvent event, Consumer<PersistentDataContainer> handler, boolean needsUpdate) {
+    if (!(event.getBlock().getState() instanceof ShulkerBox shulkerBox))
+      return;
+
+    var pdc = shulkerBox.getPersistentDataContainer();
+
+    if (doesContainMarker(shulkerBox.getPersistentDataContainer()))
+      return;
+
+    event.acknowledge();
+    handler.accept(pdc);
+
+    if (needsUpdate)
+      shulkerBox.update(true, false);
+  }
+
+  private void writeFilterToPdc(PersistentDataContainer pdc, PredicateAndLanguage predicateAndLanguage) {
+    pdc.set(filterPredicateKey, PersistentDataType.STRING, predicateAndLanguage.getTokenPredicateString());
+    pdc.set(filterPredicateLanguageKey, PersistentDataType.STRING, predicateAndLanguage.language.name());
+  }
+
+  private void removeFilterFromPdc(PersistentDataContainer pdc) {
+    if (pdc.has(filterPredicateKey))
+      pdc.remove(filterPredicateKey);
+
+    if (pdc.has(filterPredicateLanguageKey))
+      pdc.remove(filterPredicateLanguageKey);
+  }
+
+  private @Nullable PredicateAndLanguage loadFilterFromPdc(PersistentDataContainerView pdc, @Nullable Consumer<ItemPredicateParseException> errorHandler) {
+    var languageString = pdc.get(filterPredicateLanguageKey, PersistentDataType.STRING);
+    TranslationLanguage language;
+
+    try {
+      language = TranslationLanguage.valueOf(languageString);
+    } catch (Throwable e) {
+      return null;
+    }
+
+    var predicateString = pdc.get(filterPredicateKey, PersistentDataType.STRING);
+    ItemPredicate predicate;
+
+    try {
+      var tokens = predicateHelper.parseTokens(predicateString);
+      predicate = predicateHelper.parsePredicate(language, tokens);
+    } catch (ItemPredicateParseException e) {
+      if (errorHandler != null)
+        errorHandler.accept(e);
+
+      return null;
+    }
+
+    if (predicate == null)
+      return null;
+
+    return new PredicateAndLanguage(predicate, language);
+  }
+
+  private void copyOverFilter(PersistentDataContainerView sourcePdc, PersistentDataContainer destinationPdc) {
+    copyOverStringKey(sourcePdc, destinationPdc, filterPredicateKey);
+    copyOverStringKey(sourcePdc, destinationPdc, filterPredicateLanguageKey);
+  }
+
+  private void copyOverStringKey(PersistentDataContainerView sourcePdc, PersistentDataContainer destinationPdc, NamespacedKey key) {
+    if (!sourcePdc.has(key))
+      return;
+
+    var value = sourcePdc.get(key, PersistentDataType.STRING);
+
+    if (value == null)
+      return;
+
+    destinationPdc.set(key, PersistentDataType.STRING, value);
+  }
+
+  private void markAndCopyFilterAndUpdateLore(PersistentDataContainer blockPdc, ItemStack droppedStack) {
+    var droppedMeta = droppedStack.getItemMeta();
+
+    var itemPdc = droppedMeta.getPersistentDataContainer();
+
+    itemPdc.set(containerMarkerKey, PersistentDataType.BOOLEAN, true);
+
+    copyOverFilter(blockPdc, itemPdc);
+
+    updateLore(droppedMeta, droppedStack.getType());
+
+    droppedStack.setItemMeta(droppedMeta);
   }
 }

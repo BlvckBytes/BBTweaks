@@ -269,7 +269,7 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       getServer().getPluginManager().registerEvents(shulkerAccessor, this);
 
-      var autoPickupContainerListener = new AutoPickupContainerListener(this, shulkerAccessor, config);
+      var autoPickupContainerListener = new AutoPickupContainerListener(this, shulkerAccessor, predicateHelper, config);
       getServer().getPluginManager().registerEvents(autoPickupContainerListener, this);
 
       var mainCommandExecutor = new MainCommand(config, rdBreakTool, autoPickupContainerListener, this);
