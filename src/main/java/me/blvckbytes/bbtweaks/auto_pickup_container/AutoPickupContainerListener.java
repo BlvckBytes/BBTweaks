@@ -454,7 +454,7 @@ public class AutoPickupContainerListener implements Listener {
 
     var pdc = shulkerBox.getPersistentDataContainer();
 
-    if (doesContainMarker(shulkerBox.getPersistentDataContainer()))
+    if (!doesContainMarker(shulkerBox.getPersistentDataContainer()))
       return;
 
     event.acknowledge();
