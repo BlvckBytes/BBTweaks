@@ -1,7 +1,9 @@
 package me.blvckbytes.bbtweaks.auto_pickup_container;
 
 import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
+import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.block.Container;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
@@ -9,7 +11,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class LazyContainer {
 
+  private final Player player;
   private final ItemStack itemStack;
+  private final FilterPredicateAccessor filterPredicateAccessor;
 
   private boolean dirty;
 
@@ -17,9 +21,16 @@ public class LazyContainer {
   private @Nullable BlockStateMeta blockStateMeta;
   private @Nullable Container container;
   private @Nullable Inventory inventory;
+  private @Nullable ItemPredicate filter;
 
-  public LazyContainer(ItemStack itemStack) {
+  public LazyContainer(
+    Player player,
+    ItemStack itemStack,
+    FilterPredicateAccessor filterPredicateAccessor
+  ) {
+    this.player = player;
     this.itemStack = itemStack;
+    this.filterPredicateAccessor = filterPredicateAccessor;
   }
 
   public void onCompletion() {
@@ -48,7 +59,11 @@ public class LazyContainer {
       blockStateMeta = _blockStateMeta;
       container = _container;
       inventory = _container.getInventory();
+      filter = filterPredicateAccessor.accessFilterPredicate(player, _blockStateMeta.getPersistentDataContainer());
     }
+
+    if (filter != null && !filter.test(itemToAdd))
+      return 0;
 
     var remainingAmount = InventoryUtil.addItemToInventoryAndGetRemainingAmount(itemToAdd, amount, inventory);
 

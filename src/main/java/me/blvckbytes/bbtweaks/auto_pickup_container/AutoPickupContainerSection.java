@@ -8,6 +8,7 @@ import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 public class AutoPickupContainerSection extends ConfigSection {
 
   public ComponentMarkup loreToSetOnUpdate;
+  public ComponentMarkup filterErrorNotification;
 
   public AutoPickupContainerSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

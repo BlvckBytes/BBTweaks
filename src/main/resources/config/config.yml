@@ -893,6 +893,7 @@ autoPickupContainer:
         <br/><br/>
         <&a><word-wrap [filter_predicate] width=50 prefix={<&8>➥ <&7>Filter:<space/>} />
       </container>
+  filterErrorNotification: '<&7>[<&5>Sammelbox<&7>] <&c>Der Filter <&4>{predicate} <&c>einer Box in deinem Inventar konnte nicht geladen werden: <&4>{error}.'
 
 sLut:
   textures:

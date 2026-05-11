@@ -17,7 +17,11 @@ public class InventoryManipulationSession {
 
   private boolean dirty;
 
-  public InventoryManipulationSession(Player player, InventoryItemPredicate shulkerPredicate) {
+  public InventoryManipulationSession(
+    Player player,
+    FilterPredicateAccessor filterPredicateAccessor,
+    InventoryItemPredicate shulkerPredicate
+  ) {
     this.inventory = player.getInventory();
     this.storageContents = inventory.getStorageContents();
     this.containers = new ArrayList<>();
@@ -34,7 +38,7 @@ public class InventoryManipulationSession {
       if (!shulkerPredicate.test(inventory, slotIndex, item))
         continue;
 
-      containers.add(new LazyContainer(item));
+      containers.add(new LazyContainer(player, item, filterPredicateAccessor));
     }
   }
 

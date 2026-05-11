@@ -37,7 +37,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class AutoPickupContainerListener implements Listener {
+public class AutoPickupContainerListener implements Listener, FilterPredicateAccessor {
 
   private record ShulkerCapture(Block block, ShulkerBox state, long time) {}
 
@@ -108,6 +108,7 @@ public class AutoPickupContainerListener implements Listener {
 
   private final Map<UUID, PickupTickWindow> pickupTickWindowByPlayerId;
   private final List<ShulkerCapture> markedShulkerCaptures;
+  private final Map<String, PredicateAndLanguage> filterPredicateAccessorCache;
 
   private long relativeTime;
 
@@ -128,20 +129,42 @@ public class AutoPickupContainerListener implements Listener {
 
     this.pickupTickWindowByPlayerId = new HashMap<>();
     this.markedShulkerCaptures = new ArrayList<>();
+    this.filterPredicateAccessorCache = new HashMap<>();
 
     Bukkit.getScheduler().runTaskTimer(plugin, () -> {
       ++relativeTime;
+
+      if (relativeTime % (20 * 60 * 5) == 0)
+        filterPredicateAccessorCache.clear();
 
       pickupTickWindowByPlayerId.values().forEach(this::processPickupTickWindow);
       pickupTickWindowByPlayerId.clear();
     }, 0L, 0L);
   }
 
+  @Override
+  public @Nullable ItemPredicate accessFilterPredicate(Player player, PersistentDataContainer pdc) {
+    var predicateAndLanguage = loadFilterFromPdc(pdc, filterPredicateAccessorCache, (predicate, language, exception) -> {
+      config.rootSection.autoPickupContainer.filterErrorNotification.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("predicate", predicate)
+          .withVariable("language", language)
+          .withVariable("error", predicateHelper.createExceptionMessage(exception))
+      );
+    });
+
+    if (predicateAndLanguage == null)
+      return null;
+
+    return predicateAndLanguage.predicate;
+  }
+
   private void processPickupTickWindow(PickupTickWindow window) {
     if (!window.player.isOnline())
       return;
 
-    var session = new InventoryManipulationSession(window.player, (inventory, slot, item) -> {
+    var session = new InventoryManipulationSession(window.player, this, (inventory, slot, item) -> {
       if (!doesContainMarker(item.getPersistentDataContainer()))
         return false;
 
@@ -387,7 +410,7 @@ public class AutoPickupContainerListener implements Listener {
     var bukkitColor = dyeColor.getColor();
     var hexColor = PackedColor.asNonAlphaHex(PackedColor.of(bukkitColor.getRed(), bukkitColor.getGreen(), bukkitColor.getBlue(), 255));
 
-    var filter = loadFilterFromPdc(shulkerMeta.getPersistentDataContainer(), null);
+    var filter = loadFilterFromPdc(shulkerMeta.getPersistentDataContainer(), null, null);
 
     var environment = new InterpretationEnvironment()
       .withVariable("shulker_color", hexColor)
@@ -416,7 +439,7 @@ public class AutoPickupContainerListener implements Listener {
   @EventHandler
   public void onPredicateGet(PredicateGetEvent event) {
     tryAccessShulkerPdcAndAcknowledge(event, pdc -> {
-      var predicate = loadFilterFromPdc(pdc, event::setError);
+      var predicate = loadFilterFromPdc(pdc, null, ((p, l, exception) -> event.setError(exception)));
 
       if (predicate != null)
         event.setResult(predicate);
@@ -431,7 +454,7 @@ public class AutoPickupContainerListener implements Listener {
   @EventHandler
   public void onPredicateRemove(PredicateRemoveEvent event) {
     tryAccessShulkerPdcAndAcknowledge(event, pdc -> {
-      var removedPredicate = loadFilterFromPdc(pdc, null);
+      var removedPredicate = loadFilterFromPdc(pdc, null, null);
 
       if (removedPredicate == null)
         return;
@@ -477,8 +500,38 @@ public class AutoPickupContainerListener implements Listener {
       pdc.remove(filterPredicateLanguageKey);
   }
 
-  private @Nullable PredicateAndLanguage loadFilterFromPdc(PersistentDataContainerView pdc, @Nullable Consumer<ItemPredicateParseException> errorHandler) {
+  private @Nullable PredicateAndLanguage loadFilterFromPdc(
+    PersistentDataContainerView pdc,
+    @Nullable Map<String, PredicateAndLanguage> cache,
+    @Nullable PredicateErrorHandler errorHandler
+  ) {
+    var predicateString = pdc.get(filterPredicateKey, PersistentDataType.STRING);
     var languageString = pdc.get(filterPredicateLanguageKey, PersistentDataType.STRING);
+
+    if (predicateString == null || predicateString.isBlank() || languageString == null || languageString.isBlank())
+      return null;
+
+    if (cache == null)
+      return tryParsePredicateAndLanguage(predicateString, languageString, errorHandler);
+
+    var identifier = languageString + ";" + predicateString;
+
+    // Also cache null-values, as to not try to parse malformed predicates over and over again
+    if (cache.containsKey(identifier))
+      return cache.get(identifier);
+
+    var result = tryParsePredicateAndLanguage(predicateString, languageString, errorHandler);
+
+    cache.put(identifier, result);
+
+    return result;
+  }
+
+  private @Nullable PredicateAndLanguage tryParsePredicateAndLanguage(
+    String predicateString,
+    String languageString,
+    @Nullable PredicateErrorHandler errorHandler
+  ) {
     TranslationLanguage language;
 
     try {
@@ -487,15 +540,14 @@ public class AutoPickupContainerListener implements Listener {
       return null;
     }
 
-    var predicateString = pdc.get(filterPredicateKey, PersistentDataType.STRING);
     ItemPredicate predicate;
 
     try {
       var tokens = predicateHelper.parseTokens(predicateString);
       predicate = predicateHelper.parsePredicate(language, tokens);
-    } catch (ItemPredicateParseException e) {
+    } catch (ItemPredicateParseException exception) {
       if (errorHandler != null)
-        errorHandler.accept(e);
+        errorHandler.handle(predicateString, languageString, exception);
 
       return null;
     }
