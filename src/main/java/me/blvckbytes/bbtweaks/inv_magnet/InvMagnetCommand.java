@@ -8,6 +8,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -155,6 +156,9 @@ public class InvMagnetCommand implements CommandExecutor, TabCompleter, Listener
       perTickAttractionSessionByEntityId.clear();
 
       for (var player : world.getPlayers()) {
+        if (player.getGameMode() != GameMode.SURVIVAL)
+          continue;
+
         var parameter = parametersStore.accessParameters(player);
         var radius = parameter.getRadius();
 
