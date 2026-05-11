@@ -13,6 +13,7 @@ import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.ShulkerBox;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -20,7 +21,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
+import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityPickupItemEvent;
+import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -35,6 +38,8 @@ import java.util.*;
 import java.util.function.Consumer;
 
 public class AutoPickupContainerListener implements Listener {
+
+  private record ShulkerCapture(Block block, ShulkerBox state, long time) {}
 
   private static final List<TransmuteRecipe> shulkerRecolorRecipes;
   private static final Map<Material, DyeColor> dyeColorByShulkerMaterial;
@@ -102,6 +107,9 @@ public class AutoPickupContainerListener implements Listener {
   private final NamespacedKey filterPredicateLanguageKey;
 
   private final Map<UUID, PickupTickWindow> pickupTickWindowByPlayerId;
+  private final List<ShulkerCapture> markedShulkerCaptures;
+
+  private long relativeTime;
 
   public AutoPickupContainerListener(
     Plugin plugin,
@@ -119,8 +127,11 @@ public class AutoPickupContainerListener implements Listener {
     this.filterPredicateLanguageKey = new NamespacedKey(plugin, "auto-pickup-container-predicate-language");
 
     this.pickupTickWindowByPlayerId = new HashMap<>();
+    this.markedShulkerCaptures = new ArrayList<>();
 
     Bukkit.getScheduler().runTaskTimer(plugin, () -> {
+      ++relativeTime;
+
       pickupTickWindowByPlayerId.values().forEach(this::processPickupTickWindow);
       pickupTickWindowByPlayerId.clear();
     }, 0L, 0L);
@@ -180,6 +191,64 @@ public class AutoPickupContainerListener implements Listener {
     item.setItemMeta(meta);
 
     return null;
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+  public void onItemSpawn(ItemSpawnEvent event) {
+    var item = event.getEntity();
+    var itemStack = item.getItemStack();
+
+    if (!Tag.SHULKER_BOXES.isTagged(itemStack.getType()))
+      return;
+
+    var location = event.getLocation();
+
+    for (var captureIndex = 0; captureIndex < markedShulkerCaptures.size(); ++captureIndex) {
+      var shulkerCapture = markedShulkerCaptures.get(captureIndex);
+      var block = shulkerCapture.block;
+
+      if (block.getWorld() != location.getWorld())
+        continue;
+
+      if (block.getX() != location.getBlockX() || block.getY() != location.getBlockY() || block.getZ() != location.getBlockZ())
+        continue;
+
+      markedShulkerCaptures.remove(captureIndex);
+
+      markAndCopyFilterAndUpdateLore(shulkerCapture.state.getPersistentDataContainer(), itemStack);
+      item.setItemStack(itemStack);
+
+      return;
+    }
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+  public void onPistonExtend(BlockPistonExtendEvent event) {
+    for (var movedBlock : event.getBlocks())
+      captureShulkerIfApplicable(movedBlock);
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+  public void onBlockExplode(EntityExplodeEvent event) {
+    for (var explodedBlock : event.blockList())
+      captureShulkerIfApplicable(explodedBlock);
+  }
+
+  private void captureShulkerIfApplicable(Block block) {
+    if (!Tag.SHULKER_BOXES.isTagged(block.getType()))
+      return;
+
+    if (!(block.getState() instanceof ShulkerBox shulkerBox))
+      return;
+
+    if (!doesContainMarker(shulkerBox.getPersistentDataContainer()))
+      return;
+
+    var capture = new ShulkerCapture(block, shulkerBox, relativeTime);
+
+    markedShulkerCaptures.add(capture);
+
+    Bukkit.getScheduler().runTaskLater(plugin, () -> markedShulkerCaptures.removeIf(it -> it == capture), 1);
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
