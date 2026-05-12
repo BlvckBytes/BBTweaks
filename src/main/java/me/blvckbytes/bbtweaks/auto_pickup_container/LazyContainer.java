@@ -33,11 +33,12 @@ public class LazyContainer {
     this.filterPredicateAccessor = filterPredicateAccessor;
   }
 
-  public void onCompletion() {
+  public void onCompletion(ContainerWritebackHandler writebackHandler) {
     if (!dirty || container == null || blockStateMeta == null)
       return;
 
     blockStateMeta.setBlockState(container);
+    writebackHandler.handle(itemStack, blockStateMeta);
     itemStack.setItemMeta(blockStateMeta);
   }
 

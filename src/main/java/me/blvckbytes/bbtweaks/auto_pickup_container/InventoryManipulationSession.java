@@ -80,11 +80,12 @@ public class InventoryManipulationSession {
     return amount - remainingAmount;
   }
 
-  public void onCompletion() {
+  public void onCompletion(ContainerWritebackHandler writebackHandler) {
     if (!dirty)
       return;
 
-    containers.forEach(LazyContainer::onCompletion);
+    for (var container : containers)
+      container.onCompletion(writebackHandler);
 
     inventory.setStorageContents(storageContents);
   }

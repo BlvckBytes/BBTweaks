@@ -192,7 +192,7 @@ public class AutoPickupContainerListener implements Listener, FilterPredicateAcc
       }
     }
 
-    session.onCompletion();
+    session.onCompletion((item, meta) -> updateLore(meta, item.getType()));
   }
 
   public @Nullable MarkerModifyError modifyItemToBecomeAutoPickupContainer(ItemStack item) {
@@ -410,12 +410,11 @@ public class AutoPickupContainerListener implements Listener, FilterPredicateAcc
     var bukkitColor = dyeColor.getColor();
     var hexColor = PackedColor.asNonAlphaHex(PackedColor.of(bukkitColor.getRed(), bukkitColor.getGreen(), bukkitColor.getBlue(), 255));
 
-    var filter = loadFilterFromPdc(shulkerMeta.getPersistentDataContainer(), null, null);
+    var predicateString = shulkerMeta.getPersistentDataContainer().get(filterPredicateKey, PersistentDataType.STRING);
 
     var environment = new InterpretationEnvironment()
       .withVariable("shulker_color", hexColor)
-      .withVariable("filter_predicate", filter == null ? null : filter.getTokenPredicateString())
-      .withVariable("filter_language", filter == null ? null : filter.language.name());
+      .withVariable("filter_predicate", predicateString);
 
     shulkerMeta.lore(config.rootSection.autoPickupContainer.loreToSetOnUpdate.interpret(SlotType.ITEM_LORE, environment));
   }
