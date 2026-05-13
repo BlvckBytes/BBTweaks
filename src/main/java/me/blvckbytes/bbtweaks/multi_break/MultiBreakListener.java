@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParameters;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
+import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -108,7 +109,7 @@ public class MultiBreakListener implements Listener {
     if (!originBlock.isSolid())
       return;
 
-    if (parameters.filter != null && !parameters.filter.predicate.test(new ItemStack(originBlock.getType())))
+    if (parameters.filter != null && doesMaterialMismatchPredicate(parameters.filter.predicate, originBlock.getType()))
       return;
 
     var playerInventory = player.getInventory();
@@ -134,7 +135,7 @@ public class MultiBreakListener implements Listener {
         return;
       }
 
-      if (parameters.filter != null && !parameters.filter.predicate.test(new ItemStack(blockType)))
+      if (parameters.filter != null && doesMaterialMismatchPredicate(parameters.filter.predicate, blockType))
         return;
 
       var toolUsed = DamageableHotbarItem.determineToolFromHotbar(block, playerInventory);
@@ -284,5 +285,14 @@ public class MultiBreakListener implements Listener {
 
     for (var down = 1; down <= parameters.getExtent(BreakExtent.DOWN); ++down)
       handler.accept(origin.getRelative(directions.down(), down));
+  }
+
+  private boolean doesMaterialMismatchPredicate(ItemPredicate predicate, Material material) {
+    var itemType = material.asItemType();
+
+    if (itemType == null)
+      return true;
+
+    return !predicate.test(itemType.createItemStack());
   }
 }
