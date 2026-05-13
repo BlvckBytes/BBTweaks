@@ -185,6 +185,7 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
 
       pdc.set(filterPredicateKey, PersistentDataType.STRING, Objects.requireNonNull(newFilter.predicateString));
       pdc.set(filterLanguageKey, PersistentDataType.STRING, language.name());
+      pdc.set(filterEnabledKey, PersistentDataType.BOOLEAN, true);
 
       config.rootSection.invFilter.filterSetAndEnabled.sendMessage(
         player,
@@ -329,9 +330,9 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
 
     var predicateAndLanguage = loadPredicateFromPlayerPdc(player);
 
-    var filterMode = pdc.get(filterEnabledKey, PersistentDataType.BOOLEAN);
+    var enabledState = pdc.get(filterEnabledKey, PersistentDataType.BOOLEAN);
 
-    filter = new InventoryFilter(predicateAndLanguage, filterMode != null && filterMode);
+    filter = new InventoryFilter(predicateAndLanguage, enabledState != null && enabledState);
 
     filterByPlayerId.put(playerId, filter);
 
