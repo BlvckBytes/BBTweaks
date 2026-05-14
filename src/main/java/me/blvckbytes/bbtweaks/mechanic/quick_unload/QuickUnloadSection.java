@@ -13,7 +13,9 @@ public class QuickUnloadSection extends ConfigSection {
   public ComponentMarkup creationSuccess;
   public ComponentMarkup noContainerInMainHand;
   public ComponentMarkup emptyContainerInMainHand;
+  public ComponentMarkup mainHandContainerHasNoItemMatchingFilter;
   public ComponentMarkup noContainerInInventory;
+  public ComponentMarkup noContainerInInventoryHasItemMatchingFilter;
   public ComponentMarkup allContainersInInventoryAreEmpty;
   public ComponentMarkup targetInventoryIsFull;
   public ComponentMarkup unloadProcessCompleted;

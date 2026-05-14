@@ -3,16 +3,21 @@ package me.blvckbytes.bbtweaks.mechanic.quick_unload;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
+import me.blvckbytes.bbtweaks.mechanic.PredicateMechanic;
+import me.blvckbytes.bbtweaks.mechanic.common.TransferCounters;
+import me.blvckbytes.bbtweaks.mechanic.common.TypeAndAmount;
 import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
 import me.blvckbytes.bbtweaks.util.MutableInt;
 import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.item_predicate_parser.PredicateHelper;
+import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Listener;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -25,12 +30,20 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> implements Listener {
+public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> {
 
   private static final int FLAGS_LINE = 2;
 
-  public QuickUnloadMechanic(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
-    super(plugin, config);
+  public QuickUnloadMechanic(
+    JavaPlugin plugin,
+    ConfigKeeper<MainSection> config,
+    PredicateHelper predicateHelper
+  ) {
+    super(
+      plugin, config, predicateHelper,
+      new NamespacedKey(plugin, "quick-unload-filter-predicate"),
+      new NamespacedKey(plugin, "quick-unload-filter-language")
+    );
   }
 
   @Override
@@ -51,10 +64,10 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
       var targetInventory = container.getInventory();
       var playerInventory = player.getInventory();
 
-      var counters = new UnloadCounters();
+      var counters = new TransferCounters();
 
       if (!player.isSneaking()) {
-        tryUnloadInto(playerInventory.getItemInMainHand(), targetInventory, counters);
+        tryUnloadInto(playerInventory.getItemInMainHand(), targetInventory, counters, instance);
 
         if (counters.encounteredContainerItems == 0) {
           config.rootSection.mechanic.quickUnload.noContainerInMainHand.sendMessage(player);
@@ -62,6 +75,11 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
         }
 
         if (counters.areTypeCountersEmpty()) {
+          if (counters.encounteredFilterMismatch) {
+            config.rootSection.mechanic.quickUnload.mainHandContainerHasNoItemMatchingFilter.sendMessage(player);
+            return true;
+          }
+
           config.rootSection.mechanic.quickUnload.emptyContainerInMainHand.sendMessage(player);
           return true;
         }
@@ -74,7 +92,7 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
           if (currentItem == null)
             continue;
 
-          tryUnloadInto(currentItem, targetInventory, counters);
+          tryUnloadInto(currentItem, targetInventory, counters, instance);
         }
 
         if (counters.encounteredContainerItems == 0) {
@@ -83,6 +101,11 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
         }
 
         if (counters.areTypeCountersEmpty()) {
+          if (counters.encounteredFilterMismatch) {
+            config.rootSection.mechanic.quickUnload.noContainerInInventoryHasItemMatchingFilter.sendMessage(player);
+            return true;
+          }
+
           config.rootSection.mechanic.quickUnload.allContainersInInventoryAreEmpty.sendMessage(
             player,
             new InterpretationEnvironment()
@@ -93,11 +116,11 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
         }
       }
 
-      if (!instance.silent && counters.totalUnloadCountByType.isEmpty()) {
+      if (!instance.silent && counters.totalTransferredCountByType.isEmpty()) {
         config.rootSection.mechanic.quickUnload.targetInventoryIsFull.sendMessage(
           player,
           new InterpretationEnvironment()
-            .withVariable("unfitted_items", TypeAndAmount.mapToList(counters.totalUnfittedCountByType))
+            .withVariable("unfitted_items", TypeAndAmount.mapToList(counters.totalExcessCountByType))
             .withVariable("container_count", counters.encounteredContainerItems)
         );
 
@@ -111,8 +134,8 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
         config.rootSection.mechanic.quickUnload.unloadProcessCompleted.sendMessage(
           player,
           new InterpretationEnvironment()
-            .withVariable("unloaded_items", TypeAndAmount.mapToList(counters.totalUnloadCountByType))
-            .withVariable("unfitted_items", TypeAndAmount.mapToList(counters.totalUnfittedCountByType))
+            .withVariable("unloaded_items", TypeAndAmount.mapToList(counters.totalTransferredCountByType))
+            .withVariable("unfitted_items", TypeAndAmount.mapToList(counters.totalExcessCountByType))
             .withVariable("container_count", counters.encounteredContainerItems)
         );
       }
@@ -143,7 +166,7 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
     }
   }
 
-  private void tryUnloadInto(ItemStack item, Inventory targetInventory, UnloadCounters counters) {
+  private void tryUnloadInto(ItemStack item, Inventory targetInventory, TransferCounters counters, QuickUnloadInstance instance) {
     var itemMeta = item.getItemMeta();
 
     if (itemMeta instanceof BlockStateMeta blockStateMeta) {
@@ -155,7 +178,7 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
       var inventory = container.getInventory();
       var contents = inventory.getStorageContents();
 
-      if (tryMoveItemsAndGetIfAny(contents, targetInventory, counters)) {
+      if (tryMoveItemsAndGetIfAny(contents, targetInventory, counters, instance)) {
         inventory.setStorageContents(contents);
         blockStateMeta.setBlockState(container);
         item.setItemMeta(blockStateMeta);
@@ -169,7 +192,7 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
 
       var contents = bundleMeta.getItems().toArray(ItemStack[]::new);
 
-      if (tryMoveItemsAndGetIfAny(contents, targetInventory, counters)) {
+      if (tryMoveItemsAndGetIfAny(contents, targetInventory, counters, instance)) {
         var items = new ArrayList<ItemStack>(contents.length);
 
         for (var content : contents) {
@@ -185,7 +208,7 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
     }
   }
 
-  private boolean tryMoveItemsAndGetIfAny(ItemStack[] items, Inventory targetInventory, UnloadCounters counters) {
+  private boolean tryMoveItemsAndGetIfAny(ItemStack[] items, Inventory targetInventory, TransferCounters counters, QuickUnloadInstance instance) {
     var movedAnyItems = false;
 
     for (var slotIndex = 0; slotIndex < items.length; ++slotIndex) {
@@ -199,17 +222,22 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
       if (initialAmount <= 0)
         continue;
 
+      if (instance.predicate != null && !instance.predicate.test(currentItem)) {
+        counters.encounteredFilterMismatch = true;
+        continue;
+      }
+
       var remainingAmount = InventoryUtil.addItemToInventoryAndGetRemainingAmount(currentItem, currentItem.getAmount(), targetInventory);
 
       var movedAmount = initialAmount - remainingAmount;
 
       if (movedAmount > 0) {
-        counters.totalUnloadCountByType.computeIfAbsent(currentItem.getType(), k -> new MutableInt()).value += movedAmount;
+        counters.totalTransferredCountByType.computeIfAbsent(currentItem.getType(), k -> new MutableInt()).value += movedAmount;
         movedAnyItems = true;
       }
 
       if (remainingAmount > 0) {
-        counters.totalUnfittedCountByType.computeIfAbsent(currentItem.getType(), k -> new MutableInt()).value += remainingAmount;
+        counters.totalExcessCountByType.computeIfAbsent(currentItem.getType(), k -> new MutableInt()).value += remainingAmount;
         currentItem.setAmount(remainingAmount);
         continue;
       }
@@ -255,10 +283,31 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
       return null;
     }
 
+    var predicateAndLanguage = loadPredicateFromSign(sign);
+    ItemPredicate predicate = null;
+
+    var frontSide = sign.getSide(Side.FRONT);
+
+    if (predicateAndLanguage != null) {
+      if (!frontSide.line(0).equals(COMPONENT_PREDICATE_MODE_ON)) {
+        frontSide.line(0, COMPONENT_PREDICATE_MODE_ON);
+        sign.update(true, false);
+      }
+
+      predicate = predicateAndLanguage.predicate;
+    }
+
+    else {
+      if (!frontSide.line(0).equals(COMPONENT_PREDICATE_MODE_OFF)) {
+        frontSide.line(0, COMPONENT_PREDICATE_MODE_OFF);
+        sign.update(true, false);
+      }
+    }
+
     var flags = SignUtil.getPlainTextLine(sign, FLAGS_LINE).split(" ");
     var silent = Arrays.stream(flags).anyMatch(it -> it.equalsIgnoreCase("silent"));
 
-    var instance = new QuickUnloadInstance(sign, silent);
+    var instance = new QuickUnloadInstance(sign, silent, predicate);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
@@ -266,5 +315,11 @@ public class QuickUnloadMechanic extends BaseMechanic<QuickUnloadInstance> imple
       config.rootSection.mechanic.quickUnload.creationSuccess.sendMessage(creator, environment);
 
     return instance;
+  }
+
+  @Override
+  protected @Nullable Sign tryGetSignByAuxiliaryBlock(Block block) {
+    // Let's rather not support the container too, seeing how that may be a direct pipe-input.
+    return null;
   }
 }

@@ -379,7 +379,9 @@ mechanic:
     creationSuccess: '{lut.mechanic_prefix} <&7>Das <&a>QuickUnload <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
     noContainerInMainHand: '{lut.mechanic_prefix} <&c>Du hältst kein Behälteritem in deiner Haupthand!'
     emptyContainerInMainHand: '{lut.mechanic_prefix} <&c>Das Behälteritem in deiner Haupthand ist leer!'
+    mainHandContainerHasNoItemMatchingFilter: '{lut.mechanic_prefix} <&c>Das Behälteritem in deiner Haupthand beinhaltet keine Items, die mit dem gesetzten Filter übereinstimmen!'
     noContainerInInventory: '{lut.mechanic_prefix} <&c>Du hast keine Behälteritems in deinem Inventar!'
+    noContainerInInventoryHasItemMatchingFilter: '{lut.mechanic_prefix} <&c>Kein Behälteritem in deinem Inventar beinhaltet Items, die mit dem gesetzten Filter übereinstimmen!'
     allContainersInInventoryAreEmpty: '{lut.mechanic_prefix} <&c>Alle Behälteritems in deinem Inventar sind leer!'
     targetInventoryIsFull: |
       {lut.mechanic_prefix} <&c>Der Zielbehälter ist voll - nicht bewegt wurde:<space/>

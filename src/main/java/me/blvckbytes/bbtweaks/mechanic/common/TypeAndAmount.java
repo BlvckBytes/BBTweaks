@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.mechanic.quick_unload;
+package me.blvckbytes.bbtweaks.mechanic.common;
 
 import at.blvckbytes.component_markup.markup.interpreter.DirectFieldAccess;
 import me.blvckbytes.bbtweaks.util.MutableInt;
