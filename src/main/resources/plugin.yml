@@ -3,8 +3,8 @@ main: me.blvckbytes.bbtweaks.BBTweaksPlugin
 version: ${project.version}
 author: BlvckBytes
 api-version: 26.1
-depend: [ItemPredicateParser, WorldGuard]
-softdepend: [mcMMO, floodgate, CraftBook, EssentialsDiscord]
+depend: [ItemPredicateParser, WorldGuard, CraftBook]
+softdepend: [mcMMO, floodgate, EssentialsDiscord]
 commands:
   bbtweaks:
     description: 'Administrative base-command of this plugin'

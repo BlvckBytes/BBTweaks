@@ -395,6 +395,14 @@ mechanic:
         ; nicht hineingepasst hat <&c *for-item="unfitted_items" *for-separator={,<space/>}>{item.amount}x <translate [item.key] /></>
       </container>
       .
+  pipeRequest:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um ein PipeRequest zu erstellen!'
+    maxStackCountMalformedExpression: '{lut.mechanic_prefix} <&c>Ungültige Eingabe für die maximale Stack-Zahl: <&4>{input}</>!'
+    maxStackCountNegativeOrZero: '{lut.mechanic_prefix} <&c>Die maximale Stack-Zahl darf nicht negativ oder null sein: <&4>{input}</>; Zeile leer lassen, um kein Limit zu setzen!'
+    handFlagOnlyWithShulkerFlag: '{lut.mechanic_prefix} <&c>Die <&4>hand</>-Option ist nur in Verbindung mit der <&4>shulker</>-Option gültig und gibt an, dass <&4>nur</> die aktuell gehaltene Shulker-Box aufgefüllt werden soll.'
+    handFlagIncompatibleWithContainer: '{lut.mechanic_prefix} <&c>Die <&4>hand</>-Option ist nur dann verfügbar, wenn das PipeRequest-Schild nicht an einem <&4>Behälterblock</> angebracht ist, da sonst ohnehin alle Items im Behälter, statt der vom Spieler gehaltenen Shulker-Box landen.'
+    unknownFlag: '{lut.mechanic_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="flags" *for-separator={,<space/>}>{flag}</>.'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Das <&a>PipeRequest <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
