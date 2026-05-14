@@ -9,8 +9,6 @@ import me.blvckbytes.bbtweaks.util.ReflectUtil;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.event.*;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -34,9 +32,6 @@ import java.util.List;
 import java.util.Objects;
 
 public class HopperMechanic extends PredicateMechanic<HopperInstance> implements Listener, ItemCompatibilities {
-
-  private static final Component COMPONENT_PREDICATE_MODE_ON = Component.text("Predicate Mode").color(NamedTextColor.GREEN);
-  private static final Component COMPONENT_PREDICATE_MODE_OFF = Component.empty();
 
   private static final BlockFace[] SIGN_MOUNT_FACES = {
     BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST

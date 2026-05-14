@@ -13,8 +13,6 @@ import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
@@ -36,9 +34,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements Listener {
-
-  private static final Component COMPONENT_PREDICATE_MODE_ON = Component.text("Predicate Mode").color(NamedTextColor.GREEN);
-  private static final Component COMPONENT_PREDICATE_MODE_OFF = Component.empty();
 
   // TODO: Hide visualization of A if editing A
   // TODO: Select param in the UI with any button

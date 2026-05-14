@@ -6,6 +6,8 @@ import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.event.*;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -16,6 +18,9 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class PredicateMechanic<InstanceType extends MechanicInstance> extends BaseMechanic<InstanceType> implements Listener {
+
+  protected static final Component COMPONENT_PREDICATE_MODE_ON = Component.text("Predicate Mode").color(NamedTextColor.GREEN);
+  protected static final Component COMPONENT_PREDICATE_MODE_OFF = Component.empty();
 
   protected final PredicateHelper predicateHelper;
 
