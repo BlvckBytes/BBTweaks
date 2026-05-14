@@ -6,15 +6,17 @@ import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
+
 public class QuickUnloadInstance extends SISOInstance {
 
-  public final boolean silent;
+  public final EnumSet<QuickUnloadFlag> flags;
   public final @Nullable ItemPredicate predicate;
 
-  public QuickUnloadInstance(Sign sign, boolean silent, @Nullable ItemPredicate predicate) {
+  public QuickUnloadInstance(Sign sign, EnumSet<QuickUnloadFlag> flags, @Nullable ItemPredicate predicate) {
     super(sign);
 
-    this.silent = silent;
+    this.flags = flags;
     this.predicate = predicate;
   }
 
