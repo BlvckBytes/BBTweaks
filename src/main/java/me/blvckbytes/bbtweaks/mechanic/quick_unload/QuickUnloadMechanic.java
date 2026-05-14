@@ -7,7 +7,6 @@ import me.blvckbytes.bbtweaks.mechanic.PredicateMechanic;
 import me.blvckbytes.bbtweaks.mechanic.common.TransferCounters;
 import me.blvckbytes.bbtweaks.mechanic.common.TypeAndAmount;
 import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
-import me.blvckbytes.bbtweaks.util.MutableInt;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
@@ -19,7 +18,6 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
@@ -129,7 +127,7 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
       }
 
       // Make sure that we also relay an update to attached comparators, hoppers and the like.
-      causeBlockUpdates(instance.getMountBlock(), targetInventory);
+      InventoryUtil.causeBlockUpdates(instance.getMountBlock(), targetInventory);
 
       if (!instance.silent) {
         config.rootSection.mechanic.quickUnload.unloadProcessCompleted.sendMessage(
@@ -149,24 +147,6 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
     return true;
   }
 
-  private void causeBlockUpdates(Block mountBlock, Inventory inventory) {
-    mountBlock.getState().update(true, true);
-
-    if (inventory instanceof DoubleChestInventory doubleChestInventory) {
-      if (doubleChestInventory.getRightSide().getHolder() instanceof Container rightContainer) {
-        if (!mountBlock.equals(rightContainer.getBlock())) {
-          rightContainer.update(true, true);
-          return;
-        }
-      }
-
-      if (doubleChestInventory.getLeftSide().getHolder() instanceof Container leftContainer) {
-        if (!mountBlock.equals(leftContainer.getBlock()))
-          leftContainer.update(true, true);
-      }
-    }
-  }
-
   private void tryUnloadInto(ItemStack item, Inventory targetInventory, TransferCounters counters, QuickUnloadInstance instance) {
     var itemMeta = item.getItemMeta();
 
@@ -179,7 +159,7 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
       var inventory = container.getInventory();
       var contents = inventory.getStorageContents();
 
-      if (tryMoveItemsAndGetIfAny(contents, targetInventory, counters, instance)) {
+      if (InventoryUtil.tryMoveItemsAndGetIfAny(contents, targetInventory, counters, instance.predicate)) {
         inventory.setStorageContents(contents);
         blockStateMeta.setBlockState(container);
         item.setItemMeta(blockStateMeta);
@@ -193,7 +173,7 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
 
       var contents = bundleMeta.getItems().toArray(ItemStack[]::new);
 
-      if (tryMoveItemsAndGetIfAny(contents, targetInventory, counters, instance)) {
+      if (InventoryUtil.tryMoveItemsAndGetIfAny(contents, targetInventory, counters, instance.predicate)) {
         var items = new ArrayList<ItemStack>(contents.length);
 
         for (var content : contents) {
@@ -207,46 +187,6 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
         item.setItemMeta(bundleMeta);
       }
     }
-  }
-
-  private boolean tryMoveItemsAndGetIfAny(ItemStack[] items, Inventory targetInventory, TransferCounters counters, QuickUnloadInstance instance) {
-    var movedAnyItems = false;
-
-    for (var slotIndex = 0; slotIndex < items.length; ++slotIndex) {
-      var currentItem = items[slotIndex];
-
-      if (currentItem == null || currentItem.getType().isAir())
-        continue;
-
-      var initialAmount = currentItem.getAmount();
-
-      if (initialAmount <= 0)
-        continue;
-
-      if (instance.predicate != null && !instance.predicate.test(currentItem)) {
-        counters.encounteredFilterMismatch = true;
-        continue;
-      }
-
-      var remainingAmount = InventoryUtil.addItemToInventoryAndGetRemainingAmount(currentItem, currentItem.getAmount(), targetInventory);
-
-      var movedAmount = initialAmount - remainingAmount;
-
-      if (movedAmount > 0) {
-        counters.totalTransferredCountByType.computeIfAbsent(currentItem.getType(), k -> new MutableInt()).value += movedAmount;
-        movedAnyItems = true;
-      }
-
-      if (remainingAmount > 0) {
-        counters.totalExcessCountByType.computeIfAbsent(currentItem.getType(), k -> new MutableInt()).value += remainingAmount;
-        currentItem.setAmount(remainingAmount);
-        continue;
-      }
-
-      items[slotIndex] = null;
-    }
-
-    return movedAnyItems;
   }
 
   @Override

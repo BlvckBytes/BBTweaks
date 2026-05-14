@@ -1,9 +1,74 @@
 package me.blvckbytes.bbtweaks.mechanic.util;
 
+import me.blvckbytes.bbtweaks.mechanic.common.TransferCounters;
+import me.blvckbytes.bbtweaks.util.MutableInt;
+import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
+import org.bukkit.block.Block;
+import org.bukkit.block.Container;
+import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 public class InventoryUtil {
+
+  public static void causeBlockUpdates(Block mountBlock, Inventory inventory) {
+    mountBlock.getState().update(true, true);
+
+    if (inventory instanceof DoubleChestInventory doubleChestInventory) {
+      if (doubleChestInventory.getRightSide().getHolder() instanceof Container rightContainer) {
+        if (!mountBlock.equals(rightContainer.getBlock())) {
+          rightContainer.update(true, true);
+          return;
+        }
+      }
+
+      if (doubleChestInventory.getLeftSide().getHolder() instanceof Container leftContainer) {
+        if (!mountBlock.equals(leftContainer.getBlock()))
+          leftContainer.update(true, true);
+      }
+    }
+  }
+
+  public static boolean tryMoveItemsAndGetIfAny(ItemStack[] items, Inventory targetInventory, TransferCounters counters, @Nullable ItemPredicate predicate) {
+    var movedAnyItems = false;
+
+    for (var slotIndex = 0; slotIndex < items.length; ++slotIndex) {
+      var currentItem = items[slotIndex];
+
+      if (currentItem == null || currentItem.getType().isAir())
+        continue;
+
+      var initialAmount = currentItem.getAmount();
+
+      if (initialAmount <= 0)
+        continue;
+
+      if (predicate != null && !predicate.test(currentItem)) {
+        counters.encounteredFilterMismatch = true;
+        continue;
+      }
+
+      var remainingAmount = InventoryUtil.addItemToInventoryAndGetRemainingAmount(currentItem, currentItem.getAmount(), targetInventory);
+
+      var movedAmount = initialAmount - remainingAmount;
+
+      if (movedAmount > 0) {
+        counters.totalTransferredCountByType.computeIfAbsent(currentItem.getType(), k -> new MutableInt()).value += movedAmount;
+        movedAnyItems = true;
+      }
+
+      if (remainingAmount > 0) {
+        counters.totalExcessCountByType.computeIfAbsent(currentItem.getType(), k -> new MutableInt()).value += remainingAmount;
+        currentItem.setAmount(remainingAmount);
+        continue;
+      }
+
+      items[slotIndex] = null;
+    }
+
+    return movedAnyItems;
+  }
 
   public static int addItemToInventoryAndGetRemainingAmount(ItemStack itemToAdd, int amount, Inventory inventory) {
     var firstVacantSlotIndex = -1;
