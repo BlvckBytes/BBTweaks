@@ -397,6 +397,27 @@ mechanic:
         ; nicht hineingepasst hat <&c *for-item="unfitted_items" *for-separator={,<space/>}>{item.amount}x <translate [item.key] /></>
       </container>
       .
+  invMove:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um ein InvMove zu erstellen!'
+    noContainer: '{lut.mechanic_prefix} <&c>Ein InvMove kann nur an einem Behälterblock angebracht werden!'
+    existingSign: '{lut.mechanic_prefix} <&c>Am Behälter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein InvMove!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Das <&a>InvMove <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
+    noItemsMatchingFilterInInventory: '{lut.mechanic_prefix} <&c>Dein Inventar beinhaltet keine Items, die mit dem gesetzten Filter übereinstimmen!'
+    noItemsInInventory: '{lut.mechanic_prefix} <&c>Es befinden sich aktuell keine Items in deinem Inventar!'
+    targetInventoryIsFull: |
+      {lut.mechanic_prefix} <&c>Der Zielbehälter ist voll - nicht bewegt wurde:<space/>
+      <&4 *for-item="unfitted_items" *for-separator={,<space/>}>{item.amount}x <translate [item.key] /></>
+      .
+    unloadProcessCompleted: |
+      {lut.mechanic_prefix} <&7>In den Zielbehälter bewegt wurde<space/>
+      <container *if="container_count > 1">
+        aus insgesamt <&a>{container_count}</> Behälteritems<space/>
+      </container>
+      <&a *for-item="unloaded_items" *for-separator={,<space/>}>{item.amount}x <translate [item.key] /></>
+      <container *if="len(unfitted_items) > 0">
+        ; nicht hineingepasst hat <&c *for-item="unfitted_items" *for-separator={,<space/>}>{item.amount}x <translate [item.key] /></>
+      </container>
+      .
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
