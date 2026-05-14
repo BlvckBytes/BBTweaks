@@ -12,7 +12,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 import org.jetbrains.annotations.Nullable;
 
-public record DamageableHotbarItem(int slotIndex, ItemStack item, Damageable itemMeta) {
+public record DamageableHotbarItem(int slotIndex, ItemStack item, Damageable itemMeta, boolean hasSilkTouch) {
 
   // One point will always be removed after the origin-block's break-event returns.
   // Let's rather keep some tolerance on this than to try and maximize usage.
@@ -93,7 +93,7 @@ public record DamageableHotbarItem(int slotIndex, ItemStack item, Damageable ite
     if (!damageable.isUnbreakable() && remainingDamage <= MIN_TOOL_HEALTH)
       return null;
 
-    return new DamageableHotbarItem(slotIndex, currentItem, damageable);
+    return new DamageableHotbarItem(slotIndex, currentItem, damageable, damageable.hasEnchant(Enchantment.SILK_TOUCH));
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")

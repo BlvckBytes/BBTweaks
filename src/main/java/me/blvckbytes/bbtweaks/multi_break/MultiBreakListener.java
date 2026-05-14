@@ -26,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 
 public class MultiBreakListener implements Listener {
@@ -159,9 +160,8 @@ public class MultiBreakListener implements Listener {
       //noinspection UnstableApiUsage
       var breakEvent = new BlockBreakEvent(block, player);
 
-      // TODO: Figure out how to determine the vanilla XP-value based on the block and set it here, seeing
-      //       how the default-constructor sets a value of zero, thereby not dropping anything.
-      breakEvent.setExpToDrop(0);
+      if (!toolUsed.hasSilkTouch())
+        breakEvent.setExpToDrop(getRandomizedExperienceForBlockType(blockType));
 
       ignoredBreakEvent = breakEvent;
       Bukkit.getPluginManager().callEvent(breakEvent);
@@ -294,5 +294,28 @@ public class MultiBreakListener implements Listener {
       return true;
 
     return !predicate.test(itemType.createItemStack());
+  }
+
+  private int getRandomizedExperienceForBlockType(Material material) {
+    // https://minecraft.wiki/w/Experience#Dropping_orbs
+    return switch (material) {
+      case NETHER_GOLD_ORE -> randomIntInRange(0, 1);
+      case COAL_ORE, DEEPSLATE_COAL_ORE -> randomIntInRange(0, 2);
+      case SCULK -> randomIntInRange(1, 1);
+      case REDSTONE_ORE, DEEPSLATE_REDSTONE_ORE -> randomIntInRange(1, 5);
+      case LAPIS_ORE, DEEPSLATE_LAPIS_ORE, NETHER_QUARTZ_ORE -> randomIntInRange(2, 5);
+      case DIAMOND_ORE, DEEPSLATE_DIAMOND_ORE, EMERALD_ORE, DEEPSLATE_EMERALD_ORE -> randomIntInRange(3, 7);
+      case SCULK_SENSOR, SCULK_SHRIEKER, SCULK_CATALYST -> randomIntInRange(5, 5);
+      case CREAKING_HEART -> randomIntInRange(20, 24);
+      case SPAWNER -> randomIntInRange(15, 43);
+      default -> 0;
+    };
+  }
+
+  private int randomIntInRange(int minInclusive, int maxInclusive) {
+    if (minInclusive == maxInclusive)
+      return minInclusive;
+
+    return minInclusive + ThreadLocalRandom.current().nextInt(maxInclusive - minInclusive + 1);
   }
 }
