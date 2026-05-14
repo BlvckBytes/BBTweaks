@@ -8,7 +8,7 @@ import org.bukkit.inventory.PlayerInventory;
 import java.util.ArrayList;
 import java.util.List;
 
-public class InventoryManipulationSession {
+public class AddToContainerSession {
 
   private final PlayerInventory inventory;
   private final ItemStack[] storageContents;
@@ -17,7 +17,7 @@ public class InventoryManipulationSession {
 
   private boolean dirty;
 
-  public InventoryManipulationSession(
+  public AddToContainerSession(
     Player player,
     FilterPredicateAccessor filterPredicateAccessor,
     InventoryItemPredicate shulkerPredicate
@@ -42,25 +42,8 @@ public class InventoryManipulationSession {
     }
   }
 
-  public void reduceItemInPlayerInventoryBy(int slot, int amountToTake) {
-    var targetItem = storageContents[slot];
-
-    if (targetItem == null || targetItem.getType().isAir())
-      return;
-
-    dirty = true;
-
-    var existingAmount = targetItem.getAmount();
-
-    if (existingAmount <= amountToTake) {
-      storageContents[slot] = null;
-      return;
-    }
-
-    targetItem.setAmount(existingAmount - amountToTake);
-  }
-
-  public int tryAddItemToContainersAndGetAddedAmount(ItemStack itemToAdd, int amount) {
+  public int tryAddItemToContainersAndGetAddedAmount(ItemStack itemToAdd) {
+    var amount = itemToAdd.getAmount();
     var remainingAmount = amount;
 
     for (var container : containers) {

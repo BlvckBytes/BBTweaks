@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.util.color.PackedColor;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.inv_magnet.PreAttractItemEvent;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.event.*;
@@ -22,16 +23,17 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityExplodeEvent;
-import org.bukkit.event.entity.EntityPickupItemEvent;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.util.Vector;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -106,7 +108,6 @@ public class AutoPickupContainerListener implements Listener, FilterPredicateAcc
   private final NamespacedKey filterPredicateKey;
   private final NamespacedKey filterPredicateLanguageKey;
 
-  private final Map<UUID, PickupTickWindow> pickupTickWindowByPlayerId;
   private final List<ShulkerCapture> markedShulkerCaptures;
   private final Map<String, PredicateAndLanguage> filterPredicateAccessorCache;
 
@@ -127,7 +128,6 @@ public class AutoPickupContainerListener implements Listener, FilterPredicateAcc
     this.filterPredicateKey = new NamespacedKey(plugin, "auto-pickup-container-predicate");
     this.filterPredicateLanguageKey = new NamespacedKey(plugin, "auto-pickup-container-predicate-language");
 
-    this.pickupTickWindowByPlayerId = new HashMap<>();
     this.markedShulkerCaptures = new ArrayList<>();
     this.filterPredicateAccessorCache = new HashMap<>();
 
@@ -136,9 +136,6 @@ public class AutoPickupContainerListener implements Listener, FilterPredicateAcc
 
       if (relativeTime % (20 * 60 * 5) == 0)
         filterPredicateAccessorCache.clear();
-
-      pickupTickWindowByPlayerId.values().forEach(this::processPickupTickWindow);
-      pickupTickWindowByPlayerId.clear();
     }, 0L, 0L);
   }
 
@@ -158,41 +155,6 @@ public class AutoPickupContainerListener implements Listener, FilterPredicateAcc
       return null;
 
     return predicateAndLanguage.predicate;
-  }
-
-  private void processPickupTickWindow(PickupTickWindow window) {
-    if (!window.player.isOnline())
-      return;
-
-    var session = new InventoryManipulationSession(window.player, this, (inventory, slot, item) -> {
-      if (!doesContainMarker(item.getPersistentDataContainer()))
-        return false;
-
-      // Disable auto-pickup for currently-viewed shulkers
-      return !shulkerAccessor.doesAnyAccessorHolderMatch(holder -> holder.isShulkerItemContainedByInventoryAtSlot(inventory, slot));
-    });
-
-    for (var itemBucket : window.buckets) {
-      var remainingAmountToReduce = session.tryAddItemToContainersAndGetAddedAmount(itemBucket.item, itemBucket.getTotalCount());
-
-      for (var slotIndex = 0; slotIndex < ItemBucket.INVENTORY_SIZE; ++slotIndex) {
-        if (remainingAmountToReduce <= 0)
-          break;
-
-        var pickedUpCount = itemBucket.getPickedUpCountForSlot(slotIndex);
-
-        if (pickedUpCount <= 0)
-          continue;
-
-        var amountToReduce = Math.min(pickedUpCount, remainingAmountToReduce);
-
-        session.reduceItemInPlayerInventoryBy(slotIndex, amountToReduce);
-
-        remainingAmountToReduce -= amountToReduce;
-      }
-    }
-
-    session.onCompletion((item, meta) -> updateLore(meta, item.getType()));
   }
 
   public @Nullable MarkerModifyError modifyItemToBecomeAutoPickupContainer(ItemStack item) {
@@ -419,20 +381,57 @@ public class AutoPickupContainerListener implements Listener, FilterPredicateAcc
     shulkerMeta.lore(config.rootSection.autoPickupContainer.loreToSetOnUpdate.interpret(SlotType.ITEM_LORE, environment));
   }
 
+  @EventHandler(ignoreCancelled = true)
+  public void onPreAttractItem(PreAttractItemEvent event) {
+    if (event.canHoldSome())
+      return;
+
+    // By simply not calling into the completion-handler, we're performing a "dry-run"
+    var dryRunSession = makePickupSession(event.getPlayer());
+
+    if (dryRunSession.tryAddItemToContainersAndGetAddedAmount(event.getAttractedItem()) > 0)
+      event.markCanHoldSome();
+  }
+
   @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
-  public void onPickup(EntityPickupItemEvent event) {
-    if (!(event.getEntity() instanceof Player player))
+  public void onPickupAttempt(PlayerAttemptPickupItemEvent event) {
+    var itemEntity = event.getItem();
+    var pickedUpStack = itemEntity.getItemStack();
+
+    var session = makePickupSession(event.getPlayer());
+
+    var availableAmount = pickedUpStack.getAmount();
+    var addedAmount = session.tryAddItemToContainersAndGetAddedAmount(pickedUpStack);
+
+    session.onCompletion((item, meta) -> updateLore(meta, item.getType()));
+
+    if (addedAmount == 0)
       return;
 
-    var pickedUpItem = event.getItem().getItemStack();
+    // Cancelling prevents the default pickup-behavior from being executed, but sets the fly-at-player
+    // flag to false, so we need to explicitly set it again; then, the pickup-animation will be played.
+    event.setCancelled(true);
+    event.setFlyAtPlayer(true);
 
-    if (Tag.SHULKER_BOXES.isTagged(pickedUpItem.getType()))
+    // We cannot immediately remove the entity, seeing how the pickup-animation packet is sent after this
+    // event completes; if we remove the entity ahead of time, the client disposes of it before playing
+    // said animation; therefore, let's just make it non-pickup-able in the meantime and remove it next tick.
+    itemEntity.setPickupDelay(1024);
+    Bukkit.getScheduler().runTaskLater(plugin, itemEntity::remove, 1L);
+
+    if (addedAmount >= availableAmount)
       return;
 
-    pickupTickWindowByPlayerId
-      .computeIfAbsent(player.getUniqueId(), k -> new PickupTickWindow(player))
-      .accessOrCreateBucket(pickedUpItem)
-      .analyzePickupSlots(pickedUpItem, player.getInventory());
+    var remainderStack = new ItemStack(pickedUpStack);
+    remainderStack.setAmount(availableAmount - addedAmount);
+
+    var remainderItem = itemEntity.getWorld().spawn(itemEntity.getLocation(), Item.class);
+    remainderItem.setItemStack(remainderStack);
+
+    // Since we've only spliced-off a part of the stack, which itself was pickupable, the remainder
+    // may also mimic that; also, as to not make it bounce around, let's clear its initial velocity.
+    remainderItem.setPickupDelay(0);
+    remainderItem.setVelocity(new Vector(0, 0, 0));
   }
 
   @EventHandler
@@ -586,5 +585,15 @@ public class AutoPickupContainerListener implements Listener, FilterPredicateAcc
     updateLore(droppedMeta, droppedStack.getType());
 
     droppedStack.setItemMeta(droppedMeta);
+  }
+
+  private AddToContainerSession makePickupSession(Player player) {
+    return new AddToContainerSession(player, this, (inventory, slot, item) -> {
+      if (!doesContainMarker(item.getPersistentDataContainer()))
+        return false;
+
+      // Disable auto-pickup for currently-viewed shulkers
+      return !shulkerAccessor.doesAnyAccessorHolderMatch(holder -> holder.isShulkerItemContainedByInventoryAtSlot(inventory, slot));
+    });
   }
 }
