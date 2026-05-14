@@ -52,6 +52,9 @@ import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.NameScopedKeyValueStore;
 import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
 import org.bukkit.Bukkit;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -100,7 +103,7 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       var getUuidCommand = new GetUuidCommand(config);
 
-      Objects.requireNonNull(getCommand("getuuid")).setExecutor(getUuidCommand);
+      setExecutorAndCompleter(Objects.requireNonNull(getCommand("getuuid")), getUuidCommand);
 
       getServer().getPluginManager().registerEvents(getUuidCommand, this);
 
@@ -111,13 +114,13 @@ public class BBTweaksPlugin extends JavaPlugin {
       var backtrackCommandExecutor = new BacktrackCommand(this, locationHistoryStore, config);
       var backtrackCommand = Objects.requireNonNull(getCommand(BacktrackCommandSection.INITIAL_NAME));
 
-      backtrackCommand.setExecutor(backtrackCommandExecutor);
+      setExecutorAndCompleter(backtrackCommand, backtrackCommandExecutor);
 
       getServer().getPluginManager().registerEvents(backtrackCommandExecutor, this);
 
       var backOverrideCommand = new BackOverrideCommand(locationHistoryStore, config);
 
-      Objects.requireNonNull(getCommand("back")).setExecutor(backOverrideCommand);
+      setExecutorAndCompleter(Objects.requireNonNull(getCommand("back")), backOverrideCommand);
 
       getServer().getPluginManager().registerEvents(backOverrideCommand, this);
 
@@ -125,14 +128,14 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       var unCraftCommand = new UnCraftCommand(this, config);
 
-      Objects.requireNonNull(getCommand("uncraft")).setExecutor(unCraftCommand);
+      setExecutorAndCompleter(Objects.requireNonNull(getCommand("uncraft")), unCraftCommand);
 
       var pingCommand = Objects.requireNonNull(getCommand("ping"));
       var pingExecutor = new PingCommand(pingCommand, config);
 
       getServer().getPluginManager().registerEvents(pingExecutor, this);
 
-      pingCommand.setExecutor(pingExecutor);
+      setExecutorAndCompleter(pingCommand, pingExecutor);
 
       McMMOIntegration mcMMOIntegration = null;
 
@@ -177,7 +180,7 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       var seedOverride = new SeedOverrideCommand(config);
 
-      Objects.requireNonNull(getCommand("seed")).setExecutor(seedOverride);
+      setExecutorAndCompleter(Objects.requireNonNull(getCommand("seed")), seedOverride);
 
       getServer().getPluginManager().registerEvents(seedOverride, this);
 
@@ -191,7 +194,7 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       getServer().getPluginManager().registerEvents(invFilterCommandExecutor, this);
 
-      invFilterCommand.setExecutor(invFilterCommandExecutor);
+      setExecutorAndCompleter(invFilterCommand, invFilterCommandExecutor);
 
       var floodgateIntegration = FloodgateIntegration.load(getLogger());
 
@@ -199,23 +202,23 @@ public class BBTweaksPlugin extends JavaPlugin {
       getServer().getPluginManager().registerEvents(markerDisplayHandler, this);
 
       var markerCommand = Objects.requireNonNull(getCommand(MarkersCommandSection.INITIAL_NAME));
-      markerCommand.setExecutor(new MarkersCommand(markerDisplayHandler, config));
+      setExecutorAndCompleter(markerCommand, new MarkersCommand(markerDisplayHandler, config));
 
       var setMarkerCommand = Objects.requireNonNull(getCommand(SetMarkerCommandSection.INITIAL_NAME));
-      setMarkerCommand.setExecutor(new SetMarkerCommand(config, getLogger()));
+      setExecutorAndCompleter(setMarkerCommand, new SetMarkerCommand(config, getLogger()));
 
       var autoFlyCommandExecutor = new AutoFlyCommand(this, preferencesStore, config);
       Bukkit.getServer().getPluginManager().registerEvents(autoFlyCommandExecutor, this);
 
       var autoFlyCommand = Objects.requireNonNull(getCommand(AutoFlyCommandSection.INITIAL_NAME));
-      autoFlyCommand.setExecutor(autoFlyCommandExecutor);
+      setExecutorAndCompleter(autoFlyCommand, autoFlyCommandExecutor);
 
       var newbieTeleportCommand = Objects.requireNonNull(getCommand(NewbieTeleportCommandSection.INITIAL_NAME));
       var newbieTeleportExecutor = new NewbieTeleportCommand(this, config);
-      newbieTeleportCommand.setExecutor(newbieTeleportExecutor);
+      setExecutorAndCompleter(newbieTeleportCommand, newbieTeleportExecutor);
 
       var newbieTeleportResetCommand = Objects.requireNonNull(getCommand(NewbieTeleportResetCommandSection.INITIAL_NAME));
-      newbieTeleportResetCommand.setExecutor(new NewbieTeleportResetCommand(newbieTeleportExecutor, config));
+      setExecutorAndCompleter(newbieTeleportResetCommand, new NewbieTeleportResetCommand(newbieTeleportExecutor, config));
 
       multiBreakParametersStore = new MultiBreakParametersStore(this, predicateHelper, config);
       getServer().getPluginManager().registerEvents(multiBreakParametersStore, this);
@@ -227,7 +230,7 @@ public class BBTweaksPlugin extends JavaPlugin {
       getServer().getPluginManager().registerEvents(multiBreakDisplayHandler, this);
 
       var multiBreakCommand = Objects.requireNonNull(getCommand(MultiBreakCommandSection.INITIAL_NAME));
-      multiBreakCommand.setExecutor(new MultiBreakCommand(multiBreakParametersStore, multiBreakDisplayHandler, predicateHelper, config));
+      setExecutorAndCompleter(multiBreakCommand, new MultiBreakCommand(multiBreakParametersStore, multiBreakDisplayHandler, predicateHelper, config));
 
       invMagnetParametersStore = new InvMagnetParametersStore(this, config);
       getServer().getPluginManager().registerEvents(invMagnetParametersStore, this);
@@ -235,7 +238,7 @@ public class BBTweaksPlugin extends JavaPlugin {
       var invMagnetCommand = Objects.requireNonNull(getCommand(InvMagnetCommandSection.INITIAL_NAME));
       var invMagnetExecutor = new InvMagnetCommand(this, invMagnetParametersStore, config);
       getServer().getPluginManager().registerEvents(invMagnetExecutor, this);
-      invMagnetCommand.setExecutor(invMagnetExecutor);
+      setExecutorAndCompleter(invMagnetCommand, invMagnetExecutor);
 
       Runnable updateCommands = () -> {
         config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);
@@ -260,7 +263,7 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       var autoToolCommandExecutor = new AutoToolCommand(config, this);
       getServer().getPluginManager().registerEvents(autoToolCommandExecutor, this);
-      Objects.requireNonNull(getCommand("autotool")).setExecutor(autoToolCommandExecutor);
+      setExecutorAndCompleter(Objects.requireNonNull(getCommand("autotool")), autoToolCommandExecutor);
 
       var inventoryChangeDetector = new InventoryChangeDetector(this);
       getServer().getPluginManager().registerEvents(inventoryChangeDetector, this);
@@ -274,7 +277,7 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       var mainCommandExecutor = new MainCommand(config, rdBreakTool, autoPickupContainerListener, this);
 
-      Objects.requireNonNull(getCommand("bbtweaks")).setExecutor(mainCommandExecutor);
+      setExecutorAndCompleter(Objects.requireNonNull(getCommand("bbtweaks")), mainCommandExecutor);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);
@@ -341,5 +344,12 @@ public class BBTweaksPlugin extends JavaPlugin {
     }
 
     return file;
+  }
+
+  private void setExecutorAndCompleter(PluginCommand command, CommandExecutor executor) {
+    command.setExecutor(executor);
+
+    if (executor instanceof TabCompleter tabCompleter)
+      command.setTabCompleter(tabCompleter);
   }
 }
