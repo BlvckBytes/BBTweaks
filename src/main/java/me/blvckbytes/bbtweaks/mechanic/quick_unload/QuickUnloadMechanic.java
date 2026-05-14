@@ -170,7 +170,7 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
       return;
     }
 
-    if (itemMeta instanceof BundleMeta bundleMeta) {
+    if (instance.flags.contains(QuickUnloadFlag.INCLUDE_BUNDLES) && itemMeta instanceof BundleMeta bundleMeta) {
       ++counters.encounteredContainerItems;
 
       var contents = bundleMeta.getItems().toArray(ItemStack[]::new);
