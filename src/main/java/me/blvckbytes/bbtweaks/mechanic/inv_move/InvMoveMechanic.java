@@ -4,8 +4,10 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.PredicateMechanic;
+import me.blvckbytes.bbtweaks.mechanic.common.FlagEnum;
 import me.blvckbytes.bbtweaks.mechanic.common.TransferCounters;
 import me.blvckbytes.bbtweaks.mechanic.common.TypeAndAmount;
+import me.blvckbytes.bbtweaks.mechanic.common.UnknownFlagException;
 import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
@@ -21,8 +23,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.function.IntPredicate;
 
 public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implements Listener {
 
@@ -60,7 +63,12 @@ public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implemen
 
       var storageContents = playerInventory.getStorageContents();
 
-      if (InventoryUtil.tryMoveItemsAndGetIfAny(storageContents, targetInventory, counters, instance.predicate))
+      IntPredicate slotPredicate = null;
+
+      if (instance.flags.contains(InvMoveFlag.IGNORE_HOTBAR))
+        slotPredicate = slot -> slot > 8;
+
+      if (InventoryUtil.tryMoveItemsAndGetIfAny(storageContents, targetInventory, counters, slotPredicate, instance.predicate))
         playerInventory.setStorageContents(storageContents);
 
       if (counters.areTypeCountersEmpty()) {
@@ -73,7 +81,7 @@ public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implemen
         return true;
       }
 
-      if (!instance.silent && counters.totalTransferredCountByType.isEmpty()) {
+      if (!instance.flags.contains(InvMoveFlag.SILENT) && counters.totalTransferredCountByType.isEmpty()) {
         config.rootSection.mechanic.invMove.targetInventoryIsFull.sendMessage(
           player,
           new InterpretationEnvironment()
@@ -87,7 +95,7 @@ public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implemen
       // Make sure that we also relay an update to attached comparators, hoppers and the like.
       InventoryUtil.causeBlockUpdates(instance.getMountBlock(), targetInventory);
 
-      if (!instance.silent) {
+      if (!instance.flags.contains(InvMoveFlag.SILENT)) {
         config.rootSection.mechanic.invMove.unloadProcessCompleted.sendMessage(
           player,
           new InterpretationEnvironment()
@@ -161,10 +169,18 @@ public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implemen
       }
     }
 
-    var flags = SignUtil.getPlainTextLine(sign, FLAGS_LINE).split(" ");
-    var silent = Arrays.stream(flags).anyMatch(it -> it.equalsIgnoreCase("silent"));
+    EnumSet<InvMoveFlag> flags;
 
-    var instance = new InvMoveInstance(sign, silent, predicate);
+    try {
+      flags = FlagEnum.parse(InvMoveFlag.class, SignUtil.getPlainTextLine(sign, FLAGS_LINE));
+    } catch (UnknownFlagException exception) {
+      if (creator != null)
+        config.rootSection.mechanic.invMove.unknownFlag.sendMessage(creator, exception.makeEnvironment());
+
+      return null;
+    }
+
+    var instance = new InvMoveInstance(sign, flags, predicate);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 

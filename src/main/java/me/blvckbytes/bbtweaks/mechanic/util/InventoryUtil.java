@@ -10,6 +10,8 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.IntPredicate;
+
 public class InventoryUtil {
 
   public static void causeBlockUpdates(Block mountBlock, Inventory inventory) {
@@ -30,10 +32,19 @@ public class InventoryUtil {
     }
   }
 
-  public static boolean tryMoveItemsAndGetIfAny(ItemStack[] items, Inventory targetInventory, TransferCounters counters, @Nullable ItemPredicate predicate) {
+  public static boolean tryMoveItemsAndGetIfAny(
+    ItemStack[] items,
+    Inventory targetInventory,
+    TransferCounters counters,
+    @Nullable IntPredicate slotPredicate,
+    @Nullable ItemPredicate itemPredicate
+  ) {
     var movedAnyItems = false;
 
     for (var slotIndex = 0; slotIndex < items.length; ++slotIndex) {
+      if (slotPredicate != null && !slotPredicate.test(slotIndex))
+        continue;
+
       var currentItem = items[slotIndex];
 
       if (currentItem == null || currentItem.getType().isAir())
@@ -44,7 +55,7 @@ public class InventoryUtil {
       if (initialAmount <= 0)
         continue;
 
-      if (predicate != null && !predicate.test(currentItem)) {
+      if (itemPredicate != null && !itemPredicate.test(currentItem)) {
         counters.encounteredFilterMismatch = true;
         continue;
       }

@@ -159,7 +159,7 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
       var inventory = container.getInventory();
       var contents = inventory.getStorageContents();
 
-      if (InventoryUtil.tryMoveItemsAndGetIfAny(contents, targetInventory, counters, instance.predicate)) {
+      if (InventoryUtil.tryMoveItemsAndGetIfAny(contents, targetInventory, counters, null, instance.predicate)) {
         inventory.setStorageContents(contents);
         blockStateMeta.setBlockState(container);
         item.setItemMeta(blockStateMeta);
@@ -173,7 +173,7 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
 
       var contents = bundleMeta.getItems().toArray(ItemStack[]::new);
 
-      if (InventoryUtil.tryMoveItemsAndGetIfAny(contents, targetInventory, counters, instance.predicate)) {
+      if (InventoryUtil.tryMoveItemsAndGetIfAny(contents, targetInventory, counters, null, instance.predicate)) {
         var items = new ArrayList<ItemStack>(contents.length);
 
         for (var content : contents) {

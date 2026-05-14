@@ -10,6 +10,7 @@ public class InvMoveSection extends ConfigSection {
   public ComponentMarkup noPermission;
   public ComponentMarkup noContainer;
   public ComponentMarkup existingSign;
+  public ComponentMarkup unknownFlag;
   public ComponentMarkup creationSuccess;
   public ComponentMarkup noItemsMatchingFilterInInventory;
   public ComponentMarkup noItemsInInventory;
