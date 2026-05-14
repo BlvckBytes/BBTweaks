@@ -12,6 +12,7 @@ import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
@@ -169,7 +170,7 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
   private void tryUnloadInto(ItemStack item, Inventory targetInventory, TransferCounters counters, QuickUnloadInstance instance) {
     var itemMeta = item.getItemMeta();
 
-    if (itemMeta instanceof BlockStateMeta blockStateMeta) {
+    if (Tag.SHULKER_BOXES.isTagged(item.getType()) && itemMeta instanceof BlockStateMeta blockStateMeta) {
       if (!(blockStateMeta.getBlockState() instanceof Container container))
         return;
 
