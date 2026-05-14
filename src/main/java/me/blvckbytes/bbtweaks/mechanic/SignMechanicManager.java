@@ -98,7 +98,7 @@ public class SignMechanicManager implements Listener {
     signMechanicByDiscriminatorLower.values().forEach(mechanic -> mechanic.tick(time));
   }
 
-  @EventHandler(ignoreCancelled = true)
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
   public void onBlockPlace(BlockPlaceEvent event) {
     var block = event.getBlock();
     var blockType = block.getType();
@@ -115,7 +115,7 @@ public class SignMechanicManager implements Listener {
     });
   }
 
-  @EventHandler(ignoreCancelled = true)
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
   public void onBlockBreak(BlockBreakEvent event) {
     var block = event.getBlock();
     var blockType = block.getType();
@@ -215,7 +215,7 @@ public class SignMechanicManager implements Listener {
     }
   }
 
-  @EventHandler
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
   public void onInteract(PlayerInteractEvent event) {
     var block = event.getClickedBlock();
 
