@@ -5,7 +5,6 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -16,9 +15,9 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +28,6 @@ import java.util.logging.Logger;
 public class InvMagnetCommand implements CommandExecutor, TabCompleter, Listener {
 
   private final InvMagnetParametersStore parametersStore;
-  private final InvFilterCommand invFilter;
   private final ConfigKeeper<MainSection> config;
   private final Logger logger;
 
@@ -39,11 +37,9 @@ public class InvMagnetCommand implements CommandExecutor, TabCompleter, Listener
   public InvMagnetCommand(
     Plugin plugin,
     InvMagnetParametersStore parametersStore,
-    InvFilterCommand invFilter,
     ConfigKeeper<MainSection> config
   ) {
     this.parametersStore = parametersStore;
-    this.invFilter = invFilter;
     this.config = config;
     this.logger = plugin.getLogger();
 
@@ -167,7 +163,6 @@ public class InvMagnetCommand implements CommandExecutor, TabCompleter, Listener
 
         // Attract near their chest
         var playerLocation = player.getLocation().add(0, .75, 0);
-        var playerInventory = player.getInventory();
 
         for (var nearbyEntity : player.getNearbyEntities(radius, radius, radius)) {
           if (!(nearbyEntity instanceof Item item))
@@ -176,10 +171,11 @@ public class InvMagnetCommand implements CommandExecutor, TabCompleter, Listener
           if (item.getPickupDelay() > 0 || item.isDead() || !item.isValid())
             continue;
 
-          if (!canHoldItem(playerInventory, item.getItemStack()))
-            continue;
+          var attractEvent = new PreAttractItemEvent(player, item.getItemStack());
 
-          if (invFilter.isExcludedByFilter(player, item.getItemStack()))
+          Bukkit.getPluginManager().callEvent(attractEvent);
+
+          if (attractEvent.isCancelled() || !attractEvent.canHoldSome())
             continue;
 
           perTickAttractionSessionByEntityId
@@ -190,26 +186,30 @@ public class InvMagnetCommand implements CommandExecutor, TabCompleter, Listener
     }
   }
 
-  private boolean canHoldItem(PlayerInventory inventory, ItemStack itemToHold) {
-    var stackSize = itemToHold.getMaxStackSize();
-    var remainingCount = itemToHold.getAmount();
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
+  public void onPreAttractItem(PreAttractItemEvent event) {
+    var inventory = event.getPlayer().getInventory();
+    var attractedItem = event.getAttractedItem();
 
     for (var slotIndex = 0; slotIndex < 9 * 4; ++slotIndex) {
       var currentItem = inventory.getItem(slotIndex);
 
-      if (currentItem == null || currentItem.getType().isAir())
-        return true;
+      if (currentItem == null || currentItem.getType().isAir()) {
+        event.markCanHoldSome();
+        return;
+      }
 
-      if (!itemToHold.isSimilar(currentItem))
+      if (!attractedItem.isSimilar(currentItem))
         continue;
 
-      remainingCount -= stackSize - currentItem.getAmount();
+      var remainingSpace = currentItem.getMaxStackSize() - currentItem.getAmount();
 
-      if (remainingCount <= 0)
-        return true;
+      if (remainingSpace <= 0)
+        continue;
+
+      event.markCanHoldSome();
+      return;
     }
-
-    return false;
   }
 
   private void loadWorldsFromConfig() {

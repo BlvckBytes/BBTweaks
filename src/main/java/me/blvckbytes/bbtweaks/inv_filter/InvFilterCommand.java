@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.inv_filter;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.inv_magnet.PreAttractItemEvent;
 import me.blvckbytes.bbtweaks.util.PredicateUtils;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
@@ -289,6 +290,12 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
   @EventHandler(ignoreCancelled = true)
   public void onPickup(PlayerAttemptPickupItemEvent event) {
     if (isExcludedByFilter(event.getPlayer(), event.getItem().getItemStack()))
+      event.setCancelled(true);
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onPreAttractItem(PreAttractItemEvent event) {
+    if (isExcludedByFilter(event.getPlayer(), event.getAttractedItem()))
       event.setCancelled(true);
   }
 

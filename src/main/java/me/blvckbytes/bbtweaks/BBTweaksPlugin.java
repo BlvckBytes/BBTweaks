@@ -233,7 +233,7 @@ public class BBTweaksPlugin extends JavaPlugin {
       getServer().getPluginManager().registerEvents(invMagnetParametersStore, this);
 
       var invMagnetCommand = Objects.requireNonNull(getCommand(InvMagnetCommandSection.INITIAL_NAME));
-      var invMagnetExecutor = new InvMagnetCommand(this, invMagnetParametersStore, invFilterCommandExecutor, config);
+      var invMagnetExecutor = new InvMagnetCommand(this, invMagnetParametersStore, config);
       getServer().getPluginManager().registerEvents(invMagnetExecutor, this);
       invMagnetCommand.setExecutor(invMagnetExecutor);
 
