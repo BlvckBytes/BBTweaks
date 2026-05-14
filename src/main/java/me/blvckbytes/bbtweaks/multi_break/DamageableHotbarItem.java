@@ -112,8 +112,10 @@ public record DamageableHotbarItem(int slotIndex, ItemStack item, Damageable ite
     if (Tag.MINEABLE_AXE.isTagged(blockType) && Tag.ITEMS_AXES.isTagged(tool.getType()))
       return true;
 
-    if (Tag.MINEABLE_PICKAXE.isTagged(blockType) && Tag.ITEMS_PICKAXES.isTagged(tool.getType()))
-      return true;
+    if (Tag.MINEABLE_PICKAXE.isTagged(blockType) && Tag.ITEMS_PICKAXES.isTagged(tool.getType())) {
+      // Make sure to not drop, say, diamonds when breaking diamond-ore with a wooden-pickaxe.
+      return block.isPreferredTool(tool);
+    }
 
     if (Tag.MINEABLE_SHOVEL.isTagged(blockType) && Tag.ITEMS_SHOVELS.isTagged(tool.getType()))
       return true;
