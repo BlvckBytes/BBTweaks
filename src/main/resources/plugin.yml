@@ -59,6 +59,9 @@ commands:
   invmagnet:
     description: 'Toggles and configures the inv-magnet functionality'
     permission: bbtweaks.invmagnet
+  getexp:
+    description: 'Retrieve stored experience from blocks'
+    permission: bbtweaks.getexp
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

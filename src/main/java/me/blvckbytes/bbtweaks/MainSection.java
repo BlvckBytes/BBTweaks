@@ -12,6 +12,7 @@ import me.blvckbytes.bbtweaks.auto_tool.AutoToolSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideSection;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsSection;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
+import me.blvckbytes.bbtweaks.get_exp.GetExpSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordSection;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterSection;
@@ -52,6 +53,7 @@ public class MainSection extends ConfigSection {
   public InvMagnetSection invMagnet;
   public ShulkerAccessorSection shulkerAccessor;
   public AutoPickupContainerSection autoPickupContainer;
+  public GetExpSection getExp;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

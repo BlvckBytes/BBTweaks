@@ -920,6 +920,22 @@ autoPickupContainer:
       </container>
   filterErrorNotification: '<&7>[<&5>Sammelbox<&7>] <&c>Der Filter <&4>{predicate} <&c>einer Box in deinem Inventar konnte nicht geladen werden: <&4>{error}.'
 
+getExp:
+  command:
+    name: getexp
+  interactionExpirySeconds: 15
+  playersOnly: '{lut.getexp_prefix} <&c>Dieser Befehl ist nur für Spieler verfügbar!'
+  noPermission: '{lut.getexp_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  alreadyInASession: '{lut.getexp_prefix} <&c>Du befindest dich bereits in einer GetExp-Interaktion!'
+  sessionInitialized: '{lut.getexp_prefix} <&7>Interagiere mit einem Block, um dessen <&a>gespeicherte Erfahrung</> zu <&a>erhalten</>; nutze <&a>Sneak + Linksklick</>, um in den Multi-Modus zu wechseln.'
+  interactionExpired: '{lut.getexp_prefix} <&c>Deine ausstehende GetExp-Interaktion ist aufgrund von <&4>Inaktivität nach {expiry_seconds}s <&c>abgelaufen.'
+  interactionMultiModeActionBarSignal: null
+  interactionMultiModeEntered: '{lut.getexp_prefix} <&7>Du hast den Multi-Modus <&a>betreten <&7>und kannst <&a>Get-Exp</> nun mehrfach durch klicken ausführen; nutze <&a>Sneak + Linksklick<&7>, um den Multi-Modus zu verlassen.'
+  interactionMultiModeExited: '{lut.getexp_prefix} <&7>Du hast den Multi-Modus <&a>verlassen<&7>.'
+  notAFurnace: '{lut.getexp_prefix} <&c>Der Block bei <&4>{x} {y} {z}</> ist kein Ofen!'
+  noExperienceStored: '{lut.getexp_prefix} <&c>Der Block bei <&4>{x} {y} {z}</> hat keine gespeicherte Erfahrung!'
+  retrievedFromFurnace: '{lut.getexp_prefix} <&7>Es wurden <&a>{added_experience}exp</> vom Ofen bei <&a>{x} {y} {z}</> ausgegeben (Level: <&a>{level_before}</> → <&a>{level_after}</>).'
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -942,6 +958,7 @@ cLut:
   multi_break_prefix: '<&7>[<&6>MultiBreak<&7>]'
   auto_tool_prefix: '<&7>[<&6>AutoTool<&7>]'
   inv_magnet_prefix: '<&7>[<&6>InvMagnet<&7>]'
+  getexp_prefix: '<&7>[<&6>GetExp<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

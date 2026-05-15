@@ -17,6 +17,8 @@ import me.blvckbytes.bbtweaks.back.LocationHistoryStore;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
+import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
+import me.blvckbytes.bbtweaks.get_exp.GetExpCommandSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegrationSingleton;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegration;
@@ -240,6 +242,11 @@ public class BBTweaksPlugin extends JavaPlugin {
       getServer().getPluginManager().registerEvents(invMagnetExecutor, this);
       setExecutorAndCompleter(invMagnetCommand, invMagnetExecutor);
 
+      var getExpCommand = Objects.requireNonNull(getCommand(GetExpCommandSection.INITIAL_NAME));
+      var getExpExecutor = new GetExpCommand(furnaceLevelDisplay, this, config);
+      getServer().getPluginManager().registerEvents(getExpExecutor, this);
+      setExecutorAndCompleter(getExpCommand, getExpExecutor);
+
       Runnable updateCommands = () -> {
         config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);
         config.rootSection.markersMenu.setMarkerCommand.apply(setMarkerCommand, commandUpdater);
@@ -249,6 +256,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         config.rootSection.newbieTeleport.resetCommand.apply(newbieTeleportResetCommand, commandUpdater);
         config.rootSection.multiBreak.command.apply(multiBreakCommand, commandUpdater);
         config.rootSection.invMagnet.command.apply(invMagnetCommand, commandUpdater);
+        config.rootSection.getExp.command.apply(getExpCommand, commandUpdater);
       };
 
       updateCommands.run();
