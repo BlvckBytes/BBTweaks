@@ -28,7 +28,7 @@ public class GetExpSection extends ConfigSection {
   public ComponentMarkup interactionMultiModeExited;
   public ComponentMarkup notAFurnace;
   public ComponentMarkup noExperienceStored;
-  public ComponentMarkup retrievedFromFurnace;
+  public ComponentMarkup retrievedFromFurnaceSubtitle;
 
   public GetExpSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

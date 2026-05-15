@@ -1,12 +1,15 @@
 package me.blvckbytes.bbtweaks.get_exp;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
+import net.kyori.adventure.title.TitlePart;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
@@ -27,6 +30,7 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.*;
 
 public class GetExpCommand implements CommandExecutor, TabCompleter, Listener {
@@ -90,12 +94,12 @@ public class GetExpCommand implements CommandExecutor, TabCompleter, Listener {
 
       var totalExperience = furnaceLevelDisplay.calculateTotalExperience(player, furnaceAccess);
 
-      if (totalExperience <= 0) {
+      var addedExperience = (int) Math.round(totalExperience);
+
+      if (addedExperience <= 0) {
         config.rootSection.getExp.noExperienceStored.sendMessage(player, environment);
         return;
       }
-
-      var addedExperience = (int) totalExperience;
 
       var levelBefore = player.getLevel();
       player.giveExp(addedExperience);
@@ -103,13 +107,24 @@ public class GetExpCommand implements CommandExecutor, TabCompleter, Listener {
 
       furnaceAccess.recipesUsed().clear();
 
-      config.rootSection.getExp.retrievedFromFurnace.sendMessage(
-        player,
-        environment
-          .withVariable("added_experience", addedExperience)
-          .withVariable("level_before", levelBefore)
-          .withVariable("level_after", levelAfter)
+      player.sendTitlePart(TitlePart.TITLE, Component.empty());
+
+      player.sendTitlePart(
+        TitlePart.SUBTITLE,
+        config.rootSection.getExp.retrievedFromFurnaceSubtitle.interpret(
+          SlotType.SINGLE_LINE_CHAT,
+          environment
+            .withVariable("added_experience", addedExperience)
+            .withVariable("level_before", levelBefore)
+            .withVariable("level_after", levelAfter)
+        ).getFirst()
       );
+
+      player.sendTitlePart(TitlePart.TIMES, Title.Times.times(
+        Duration.ofMillis(120),
+        Duration.ofMillis(1000),
+        Duration.ofMillis(120)
+      ));
     }));
 
     config.rootSection.getExp.sessionInitialized.sendMessage(player);

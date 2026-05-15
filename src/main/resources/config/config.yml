@@ -934,7 +934,7 @@ getExp:
   interactionMultiModeExited: '{lut.getexp_prefix} <&7>Du hast den Multi-Modus <&a>verlassen<&7>.'
   notAFurnace: '{lut.getexp_prefix} <&c>Der Block bei <&4>{x} {y} {z}</> ist kein Ofen!'
   noExperienceStored: '{lut.getexp_prefix} <&c>Der Block bei <&4>{x} {y} {z}</> hat keine gespeicherte Erfahrung!'
-  retrievedFromFurnace: '{lut.getexp_prefix} <&7>Es wurden <&a>{added_experience}exp</> vom Ofen bei <&a>{x} {y} {z}</> ausgegeben (Level: <&a>{level_before}</> → <&a>{level_after}</>).'
+  retrievedFromFurnaceSubtitle: '<&a>+{added_experience}exp <&7>(Level: <&a>{level_before}</> → <&a>{level_after}</>)'
 
 sLut:
   textures:
