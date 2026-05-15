@@ -17,7 +17,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.CookingRecipe;
-import org.bukkit.inventory.FurnaceInventory;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -35,11 +34,6 @@ public class FurnaceLevelDisplay implements Listener {
     long lastSendStamp;
     long lastFurnaceBlockId;
   }
-
-  private record FurnaceAccess(
-    Reference2IntMap<?> recipesUsed,
-    FurnaceInventory inventory
-  ) {}
 
   private static final List<Tag<Material>> ORE_TAGS = List.of(
     Tag.ITEMS_COAL_ORES,
@@ -61,7 +55,6 @@ public class FurnaceLevelDisplay implements Listener {
 
   private final Object2FloatMap<String> recipeExperienceByKey;
   private final HashSet<String> oreRecipeKeys;
-  private final HashSet<Material> oreRecipeResults;
 
   private final CacheByPosition<FurnaceAccess> furnaceAccessCache;
 
@@ -82,7 +75,6 @@ public class FurnaceLevelDisplay implements Listener {
     this.recipeExperienceByKey = new Object2FloatOpenHashMap<>();
     this.recipeExperienceByKey.defaultReturnValue(-1);
     this.oreRecipeKeys = new HashSet<>();
-    this.oreRecipeResults = new HashSet<>();
     this.furnaceAccessCache = new CacheByPosition<>();
 
     var publicLookup = MethodHandles.publicLookup();
@@ -143,10 +135,8 @@ public class FurnaceLevelDisplay implements Listener {
 
       recipeExperienceByKey.put(key, cookingRecipe.getExperience());
 
-      if (isOreRecipe(cookingRecipe)) {
+      if (isOreRecipe(cookingRecipe))
         oreRecipeKeys.add(key);
-        oreRecipeResults.add(cookingRecipe.getResult().getType());
-      }
     }
   }
 
@@ -235,6 +225,25 @@ public class FurnaceLevelDisplay implements Listener {
     });
   }
 
+  public @Nullable FurnaceAccess getFurnaceAccess(Block targetBlock) {
+    return furnaceAccessCache.computeIfAbsent(
+      targetBlock.getWorld(),
+      targetBlock.getX(), targetBlock.getY(), targetBlock.getZ(),
+      () -> {
+        var furnaceState = targetBlock.getState();
+        var accessor = accessorByType.get(furnaceState.getClass());
+
+        if (accessor == null)
+          return null;
+
+        var accessedRecipesUsed = accessor.access(furnaceState);
+        var inventory = ((Furnace) furnaceState).getInventory();
+
+        return new FurnaceAccess(accessedRecipesUsed, inventory);
+      }
+    );
+  }
+
   private void handleDisplays() {
     for (var player : Bukkit.getOnlinePlayers()) {
       var targetBlock = getTargetedFurnaceBlock(player);
@@ -259,22 +268,7 @@ public class FurnaceLevelDisplay implements Listener {
       if (playerData != null && playerData.lastFurnaceBlockId == blockId && System.currentTimeMillis() - playerData.lastSendStamp < 500)
         continue;
 
-      var furnaceAccess = furnaceAccessCache.computeIfAbsent(
-        targetBlock.getWorld(),
-        targetBlock.getX(), targetBlock.getY(), targetBlock.getZ(),
-        () -> {
-          var furnaceState = targetBlock.getState();
-          var accessor = accessorByType.get(furnaceState.getClass());
-
-          if (accessor == null)
-            return null;
-
-          var accessedRecipesUsed = accessor.access(furnaceState);
-          var inventory = ((Furnace) furnaceState).getInventory();
-
-          return new FurnaceAccess(accessedRecipesUsed, inventory);
-        }
-      );
+      var furnaceAccess = getFurnaceAccess(targetBlock);
 
       if (furnaceAccess == null)
         continue;
@@ -291,11 +285,10 @@ public class FurnaceLevelDisplay implements Listener {
     }
   }
 
-  private void displayForPlayer(Player player, FurnaceAccess furnaceAccess) {
-    float totalExperience = 0;
-    var encounteredOreRecipe = false;
+  public double calculateTotalExperience(Player player, FurnaceAccess furnaceAccess) {
+    double totalExperience = 0;
 
-    for (var recipeEntry : furnaceAccess.recipesUsed.reference2IntEntrySet()) {
+    for (var recipeEntry : furnaceAccess.recipesUsed().reference2IntEntrySet()) {
       var recipeKey = recipeEntry.getKey();
 
       String recipePath;
@@ -316,29 +309,27 @@ public class FurnaceLevelDisplay implements Listener {
       }
 
       var totalRecipeSmeltCount = recipeEntry.getIntValue();
+      var totalRecipeExperience = recipeExperience * totalRecipeSmeltCount;
 
-      totalExperience += recipeExperience * totalRecipeSmeltCount;
+      // mcMMO boosts experience of ore-recipes within the FurnaceExtractEvent, which fires once per recipe-type
+      if (mcMMOIntegration != null && oreRecipeKeys.contains(recipePath)) {
+        var wholePart = (int) Math.floor(totalRecipeExperience);
+        var fractionalPart = totalRecipeExperience - wholePart;
+        totalRecipeExperience = mcMMOIntegration.vanillaXPBoost(player, wholePart) + fractionalPart;
+      }
 
-      if (!encounteredOreRecipe)
-        encounteredOreRecipe = oreRecipeKeys.contains(recipePath);
+      totalExperience += totalRecipeExperience;
     }
+
+    return totalExperience;
+  }
+
+  private void displayForPlayer(Player player, FurnaceAccess furnaceAccess) {
+    var totalExperience = calculateTotalExperience(player, furnaceAccess);
 
     if (totalExperience == 0) {
       config.rootSection.furnaceLevel.noLevelsStored.sendActionBar(player);
       return;
-    }
-
-    var furnaceResult = furnaceAccess.inventory.getResult();
-    var outputType = furnaceResult == null ? null : furnaceResult.getType();
-
-    // Let's be lenient and allow for a vacant result-slot
-    var hasOreResultInOutput = outputType == null || outputType.isAir() || oreRecipeResults.contains(outputType);
-
-    // The mcMMO xp-boost only applies if the item the user took out is an ore.
-    if (mcMMOIntegration != null && encounteredOreRecipe && hasOreResultInOutput) {
-      var wholePart = (int) Math.floor(totalExperience);
-      var fractionalPart = totalExperience - wholePart;
-      totalExperience = mcMMOIntegration.vanillaXPBoost(player, wholePart) + fractionalPart;
     }
 
     var formattedTotalExperience = String.format("%.1f", totalExperience);
