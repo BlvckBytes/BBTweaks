@@ -13,6 +13,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,7 +32,7 @@ public class InvMagnetCommand implements CommandExecutor, TabCompleter, Listener
   private final ConfigKeeper<MainSection> config;
   private final Logger logger;
 
-  private final Int2ObjectMap<ItemAttractionSession> perTickAttractionSessionByEntityId;
+  private final Int2ObjectMap<EntityAttractionSession> perTickAttractionSessionByEntityId;
   private final List<World> worlds;
 
   public InvMagnetCommand(
@@ -50,7 +51,7 @@ public class InvMagnetCommand implements CommandExecutor, TabCompleter, Listener
 
     config.registerReloadListener(this::loadWorldsFromConfig);
 
-    Bukkit.getScheduler().runTaskTimer(plugin, this::attractNearbyItems, 0L, 1L);
+    Bukkit.getScheduler().runTaskTimer(plugin, this::attractNearbyItemsAndOrbs, 0L, 1L);
   }
 
   @Override
@@ -147,7 +148,7 @@ public class InvMagnetCommand implements CommandExecutor, TabCompleter, Listener
     return List.of();
   }
 
-  private void attractNearbyItems() {
+  private void attractNearbyItemsAndOrbs() {
     for (var world : worlds) {
       perTickAttractionSessionByEntityId.clear();
 
@@ -165,22 +166,27 @@ public class InvMagnetCommand implements CommandExecutor, TabCompleter, Listener
         var playerLocation = player.getLocation().add(0, .75, 0);
 
         for (var nearbyEntity : player.getNearbyEntities(radius, radius, radius)) {
-          if (!(nearbyEntity instanceof Item item))
+          if (nearbyEntity.isDead() || !nearbyEntity.isValid())
             continue;
 
-          if (item.getPickupDelay() > 0 || item.isDead() || !item.isValid())
-            continue;
+          if (nearbyEntity instanceof Item item) {
+            if (item.getPickupDelay() > 0)
+              continue;
 
-          var attractEvent = new PreAttractItemEvent(player, item.getItemStack());
+            var attractEvent = new PreAttractItemEvent(player, item.getItemStack());
 
-          Bukkit.getPluginManager().callEvent(attractEvent);
+            Bukkit.getPluginManager().callEvent(attractEvent);
 
-          if (attractEvent.isCancelled() || !attractEvent.canHoldSome())
+            if (attractEvent.isCancelled() || !attractEvent.canHoldSome())
+              continue;
+          }
+
+          else if (!(nearbyEntity instanceof ExperienceOrb))
             continue;
 
           perTickAttractionSessionByEntityId
-            .computeIfAbsent(item.getEntityId(), k -> new ItemAttractionSession(item))
-            .attractIfClosest(item, playerLocation);
+            .computeIfAbsent(nearbyEntity.getEntityId(), k -> new EntityAttractionSession(nearbyEntity))
+            .attractIfClosest(nearbyEntity, playerLocation);
         }
       }
     }

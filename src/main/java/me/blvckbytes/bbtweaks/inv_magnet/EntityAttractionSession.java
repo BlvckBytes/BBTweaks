@@ -1,10 +1,10 @@
 package me.blvckbytes.bbtweaks.inv_magnet;
 
 import org.bukkit.Location;
-import org.bukkit.entity.Item;
+import org.bukkit.entity.Entity;
 import org.bukkit.util.Vector;
 
-public class ItemAttractionSession {
+public class EntityAttractionSession {
 
   private static final double OLD_VELOCITY_FACTOR = .4;
 
@@ -13,15 +13,15 @@ public class ItemAttractionSession {
 
   private double lastDistanceSquared = -1;
 
-  public ItemAttractionSession(Item item) {
-    velocity = item.getVelocity();
+  public EntityAttractionSession(Entity entity) {
+    velocity = entity.getVelocity();
 
-    x = item.getX();
-    y = item.getY();
-    z = item.getZ();
+    x = entity.getX();
+    y = entity.getY();
+    z = entity.getZ();
   }
 
-  public void attractIfClosest(Item item, Location to) {
+  public void attractIfClosest(Entity entity, Location to) {
     var deltaX = to.getX() - x;
     var deltaY = to.getY() - y;
     var deltaZ = to.getZ() - z;
@@ -38,7 +38,7 @@ public class ItemAttractionSession {
     // TODO: Experiment with these parameters
     var speed = Math.min(0.65, 0.12 + (distance * 0.08));
 
-    item.setVelocity(new Vector(
+    entity.setVelocity(new Vector(
       deltaX / distance * speed + OLD_VELOCITY_FACTOR * velocity.getX(),
       deltaY / distance * speed + OLD_VELOCITY_FACTOR * velocity.getY(),
       deltaZ / distance * speed + OLD_VELOCITY_FACTOR * velocity.getZ()
