@@ -158,16 +158,6 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       getServer().getPluginManager().registerEvents(furnaceLevelDisplay, this);
 
-      Bukkit.getScheduler().runTaskLater(this, () -> {
-        if (!furnaceLevelDisplay.setUp()) {
-          getLogger().severe("Failed trying to set up furnace-level displays; disabling!");
-          Bukkit.getPluginManager().disablePlugin(this);
-          return;
-        }
-
-        getLogger().info("Successfully set up furnace-level displays!");
-      }, 10L);
-
       ItemPredicateParserPlugin ipp;
 
       if (!Bukkit.getServer().getPluginManager().isPluginEnabled("ItemPredicateParser") || (ipp = ItemPredicateParserPlugin.getInstance()) == null)

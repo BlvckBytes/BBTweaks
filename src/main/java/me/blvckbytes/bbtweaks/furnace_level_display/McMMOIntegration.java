@@ -4,6 +4,6 @@ import org.bukkit.entity.Player;
 
 public interface McMMOIntegration {
 
-  int vanillaXPBoost(Player player, int experience);
+  int applySmeltingRecipeExpBoost(Player player, int experience);
 
 }

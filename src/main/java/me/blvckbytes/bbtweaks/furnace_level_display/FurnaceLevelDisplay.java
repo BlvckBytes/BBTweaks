@@ -2,31 +2,21 @@ package me.blvckbytes.bbtweaks.furnace_level_display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import it.unimi.dsi.fastutil.objects.*;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
-import me.blvckbytes.bbtweaks.util.ReflectUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockBreakEvent;
-import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.inventory.CookingRecipe;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class FurnaceLevelDisplay implements Listener {
 
@@ -48,45 +38,18 @@ public class FurnaceLevelDisplay implements Listener {
 
   private final @Nullable McMMOIntegration mcMMOIntegration;
   private final ConfigKeeper<MainSection> config;
-  private final Logger logger;
 
-  private final Map<Class<? extends BlockState>, RecipesUsedAccessor> accessorByType;
   private final Map<UUID, PlayerData> dataByPlayerId;
-
-  private final Object2FloatMap<String> recipeExperienceByKey;
-  private final HashSet<String> oreRecipeKeys;
-
-  private final CacheByPosition<FurnaceAccess> furnaceAccessCache;
-
-  private final MethodHandle resourceKeyGetIdentifier;
-  private final MethodHandle identifierGetPath;
 
   public FurnaceLevelDisplay(
     Plugin plugin,
     @Nullable McMMOIntegration mcMMOIntegration,
     ConfigKeeper<MainSection> config
-  ) throws Exception {
-    this.logger = plugin.getLogger();
+  ) {
     this.mcMMOIntegration = mcMMOIntegration;
     this.config = config;
 
-    this.accessorByType = new HashMap<>();
     this.dataByPlayerId = new HashMap<>();
-    this.recipeExperienceByKey = new Object2FloatOpenHashMap<>();
-    this.recipeExperienceByKey.defaultReturnValue(-1);
-    this.oreRecipeKeys = new HashSet<>();
-    this.furnaceAccessCache = new CacheByPosition<>();
-
-    var publicLookup = MethodHandles.publicLookup();
-
-    var resourceKeyClass = Class.forName("net.minecraft.resources.ResourceKey");
-    var identifierClass = Class.forName("net.minecraft.resources.Identifier");
-
-    // Identifier net.minecraft.resources.ResourceKey#identifier
-    resourceKeyGetIdentifier = publicLookup.findVirtual(resourceKeyClass, "identifier", MethodType.methodType(identifierClass));
-
-    // String net.minecraft.resources.Identifier#getPath
-    identifierGetPath = publicLookup.findVirtual(identifierClass, "getPath", MethodType.methodType(String.class));
 
     Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::handleDisplays, 0L, 1L);
   }
@@ -94,50 +57,6 @@ public class FurnaceLevelDisplay implements Listener {
   @EventHandler
   public void onQuit(PlayerQuitEvent event) {
     dataByPlayerId.remove(event.getPlayer().getUniqueId());
-  }
-
-  @EventHandler
-  public void onChunkUnload(ChunkUnloadEvent event) {
-    for (var tileEntity : event.getChunk().getTileEntities()) {
-      if (!(tileEntity instanceof Furnace))
-        continue;
-
-      furnaceAccessCache.invalidate(tileEntity.getWorld(), tileEntity.getX(), tileEntity.getY(), tileEntity.getZ());
-    }
-  }
-
-  @EventHandler(ignoreCancelled = true)
-  public void onBreak(BlockBreakEvent event) {
-    var block = event.getBlock();
-    furnaceAccessCache.invalidate(block.getWorld(), block.getX(), block.getY(), block.getZ());
-  }
-
-  @EventHandler(ignoreCancelled = true)
-  public void onPlace(BlockPlaceEvent event) {
-    var block = event.getBlock();
-    furnaceAccessCache.invalidate(block.getWorld(), block.getX(), block.getY(), block.getZ());
-  }
-
-  public boolean setUp() {
-    if (!setUpAccessors())
-      return false;
-
-    loadRecipes();
-    return true;
-  }
-
-  private void loadRecipes() {
-    for (var recipeIterator = Bukkit.recipeIterator(); recipeIterator.hasNext();) {
-      if (!(recipeIterator.next() instanceof CookingRecipe<?> cookingRecipe))
-        continue;
-
-      var key = cookingRecipe.getKey().getKey();
-
-      recipeExperienceByKey.put(key, cookingRecipe.getExperience());
-
-      if (isOreRecipe(cookingRecipe))
-        oreRecipeKeys.add(key);
-    }
   }
 
   private boolean isOreRecipe(CookingRecipe<?> cookingRecipe) {
@@ -152,96 +71,6 @@ public class FurnaceLevelDisplay implements Listener {
     }
 
     return false;
-  }
-
-  private boolean setUpAccessors() {
-    var mainWorld = Bukkit.getWorlds().get(0);
-    var probingLocation = new Location(mainWorld, 0, mainWorld.getMinHeight(), 0);
-
-    var probingBlock = probingLocation.getBlock();
-    var dataBackup = probingBlock.getBlockData();
-
-    // Just to make absolutely sure that we cover all cases, since they may
-    // alter abstractions based on the furnace-type at hand in the future.
-    var targetTypes = new Material[] { Material.FURNACE, Material.BLAST_FURNACE, Material.SMOKER };
-
-    for (var targetType : targetTypes) {
-      probingBlock.setType(targetType, false);
-      var probingState = probingBlock.getState();
-
-      try {
-        registerRecipesUsedAccessorFor(probingState);
-      } catch (Throwable e) {
-        logger.log(Level.SEVERE, "An error occurred while trying to set up the recipesUsed-accessor for " + targetType, e);
-        return false;
-      }
-    }
-
-    probingBlock.setBlockData(dataBackup);
-    return true;
-  }
-
-  private void registerRecipesUsedAccessorFor(BlockState blockState) {
-    var stateClass = blockState.getClass();
-
-    var getHandleMethod = ReflectUtil.tryLocateNonStaticMember(stateClass, Class::getDeclaredMethods, method -> method.getName().equals("getBlockEntity"));
-
-    if (getHandleMethod == null)
-      throw new IllegalArgumentException("Could not locate the get-handle method on " + stateClass);
-
-    Object handle;
-
-    try {
-      getHandleMethod.setAccessible(true);
-      handle = getHandleMethod.invoke(blockState);
-    } catch (Throwable e) {
-      throw new IllegalArgumentException("An error occurred while trying to invoke the get-handle method on " + stateClass, e);
-    }
-
-    if (handle == null)
-      throw new IllegalArgumentException("Invoking the get-handle method yielded null on " + stateClass);
-
-    var usedRecipesField = ReflectUtil.tryLocateNonStaticMember(handle.getClass(), Class::getDeclaredFields, field -> Reference2IntMap.class.isAssignableFrom(field.getType()));
-
-    if (usedRecipesField == null)
-      throw new IllegalArgumentException("Could not locate field of type " + Reference2IntMap.class + " on " + stateClass);
-
-    try {
-      usedRecipesField.setAccessible(true);
-      if (usedRecipesField.get(handle) == null)
-        throw new IllegalArgumentException("Expected non-null used-recipes-map");
-    } catch (Throwable e) {
-      throw new IllegalArgumentException("An error occurred while trying to access the used-recipes field on " + stateClass, e);
-    }
-
-    accessorByType.put(stateClass, targetState -> {
-      try {
-        var targetHandle = getHandleMethod.invoke(targetState);
-        return (Reference2IntOpenHashMap<?>) usedRecipesField.get(targetHandle);
-      } catch (Throwable e) {
-        logger.log(Level.WARNING, "An error occurred while trying to access the used-recipes field on " + (targetState == null ? null : targetState.getClass()));
-        return null;
-      }
-    });
-  }
-
-  public @Nullable FurnaceAccess getFurnaceAccess(Block targetBlock) {
-    return furnaceAccessCache.computeIfAbsent(
-      targetBlock.getWorld(),
-      targetBlock.getX(), targetBlock.getY(), targetBlock.getZ(),
-      () -> {
-        var furnaceState = targetBlock.getState();
-        var accessor = accessorByType.get(furnaceState.getClass());
-
-        if (accessor == null)
-          return null;
-
-        var accessedRecipesUsed = accessor.access(furnaceState);
-        var inventory = ((Furnace) furnaceState).getInventory();
-
-        return new FurnaceAccess(accessedRecipesUsed, inventory);
-      }
-    );
   }
 
   private void handleDisplays() {
@@ -268,9 +97,7 @@ public class FurnaceLevelDisplay implements Listener {
       if (playerData != null && playerData.lastFurnaceBlockId == blockId && System.currentTimeMillis() - playerData.lastSendStamp < 500)
         continue;
 
-      var furnaceAccess = getFurnaceAccess(targetBlock);
-
-      if (furnaceAccess == null)
+      if (!(targetBlock.getState() instanceof Furnace furnace))
         continue;
 
       if (playerData == null) {
@@ -281,41 +108,22 @@ public class FurnaceLevelDisplay implements Listener {
       playerData.lastSendStamp = System.currentTimeMillis();
       playerData.lastFurnaceBlockId = blockId;
 
-      displayForPlayer(player, furnaceAccess);
+      displayForPlayer(player, furnace);
     }
   }
 
-  public double calculateTotalExperience(Player player, FurnaceAccess furnaceAccess) {
+  public double calculateExperience(Player player, Map<CookingRecipe<?>, Integer> recipesUsed) {
     double totalExperience = 0;
 
-    for (var recipeEntry : furnaceAccess.recipesUsed().reference2IntEntrySet()) {
-      var recipeKey = recipeEntry.getKey();
-
-      String recipePath;
-
-      try {
-        var recipeIdentifier = resourceKeyGetIdentifier.invoke(recipeKey);
-        recipePath = (String) identifierGetPath.invoke(recipeIdentifier);
-      } catch (Throwable e) {
-        logger.log(Level.WARNING, "An error occurred while trying to access the recipe-path of recipeKey=" + recipeKey);
-        continue;
-      }
-
-      var recipeExperience = recipeExperienceByKey.getFloat(recipePath);
-
-      if (recipeExperience < 0) {
-        logger.log(Level.WARNING, "Could not access experience for recipe of path " + recipePath);
-        continue;
-      }
-
-      var totalRecipeSmeltCount = recipeEntry.getIntValue();
+    for (var recipeEntry : recipesUsed.entrySet()) {
+      var recipeExperience = recipeEntry.getKey().getExperience();
+      var totalRecipeSmeltCount = recipeEntry.getValue();
       var totalRecipeExperience = recipeExperience * totalRecipeSmeltCount;
 
-      // mcMMO boosts experience of ore-recipes within the FurnaceExtractEvent, which fires once per recipe-type
-      if (mcMMOIntegration != null && oreRecipeKeys.contains(recipePath)) {
+      if (mcMMOIntegration != null && isOreRecipe(recipeEntry.getKey())) {
         var wholePart = (int) Math.floor(totalRecipeExperience);
         var fractionalPart = totalRecipeExperience - wholePart;
-        totalRecipeExperience = mcMMOIntegration.vanillaXPBoost(player, wholePart) + fractionalPart;
+        totalRecipeExperience = mcMMOIntegration.applySmeltingRecipeExpBoost(player, wholePart) + fractionalPart;
       }
 
       totalExperience += totalRecipeExperience;
@@ -324,8 +132,8 @@ public class FurnaceLevelDisplay implements Listener {
     return totalExperience;
   }
 
-  private void displayForPlayer(Player player, FurnaceAccess furnaceAccess) {
-    var totalExperience = calculateTotalExperience(player, furnaceAccess);
+  private void displayForPlayer(Player player, Furnace furnace) {
+    var totalExperience = calculateExperience(player, furnace.getRecipesUsed());
 
     if (totalExperience == 0) {
       config.rootSection.furnaceLevel.noLevelsStored.sendActionBar(player);

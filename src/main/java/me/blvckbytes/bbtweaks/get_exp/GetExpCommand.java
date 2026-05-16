@@ -12,6 +12,7 @@ import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
+import org.bukkit.block.Furnace;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -85,14 +86,12 @@ public class GetExpCommand implements CommandExecutor, TabCompleter, Listener {
         .withVariable("y", block.getY())
         .withVariable("z", block.getZ());
 
-      var furnaceAccess = furnaceLevelDisplay.getFurnaceAccess(block);
-
-      if (furnaceAccess == null) {
+      if (!(block.getState() instanceof Furnace furnace)) {
         config.rootSection.getExp.notAFurnace.sendMessage(player, environment);
         return;
       }
 
-      var totalExperience = furnaceLevelDisplay.calculateTotalExperience(player, furnaceAccess);
+      var totalExperience = furnaceLevelDisplay.calculateExperience(player, furnace.getRecipesUsed());
 
       var addedExperience = (int) Math.round(totalExperience);
 
@@ -105,7 +104,8 @@ public class GetExpCommand implements CommandExecutor, TabCompleter, Listener {
       player.giveExp(addedExperience);
       var levelAfter = player.getLevel();
 
-      furnaceAccess.recipesUsed().clear();
+      furnace.setRecipesUsed(new HashMap<>());
+      furnace.update(true, false);
 
       player.sendTitlePart(TitlePart.TITLE, Component.empty());
 
