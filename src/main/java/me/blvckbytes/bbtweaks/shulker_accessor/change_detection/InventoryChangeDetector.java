@@ -6,7 +6,6 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
-import org.bukkit.event.server.PluginDisableEvent;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
@@ -51,8 +50,7 @@ public class InventoryChangeDetector implements Listener {
     return Collections.unmodifiableCollection(observedHolders);
   }
 
-  @EventHandler
-  public void onDisable(PluginDisableEvent event) {
+  public void onShutdown() {
     new ArrayList<>(observedHolders).forEach(ChangeDetectionHolder::closeAll);
     observedHolders.clear();
   }

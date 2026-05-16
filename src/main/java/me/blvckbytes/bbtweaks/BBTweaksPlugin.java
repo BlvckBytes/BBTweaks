@@ -74,6 +74,7 @@ public class BBTweaksPlugin extends JavaPlugin {
   private MultiBreakDisplayHandler multiBreakDisplayHandler;
   private MultiBreakParametersStore multiBreakParametersStore;
   private InvMagnetParametersStore invMagnetParametersStore;
+  private InventoryChangeDetector inventoryChangeDetector;
 
   // TODO: Idea - /empty-out [all]
 
@@ -264,7 +265,7 @@ public class BBTweaksPlugin extends JavaPlugin {
       getServer().getPluginManager().registerEvents(autoToolCommandExecutor, this);
       setExecutorAndCompleter(Objects.requireNonNull(getCommand("autotool")), autoToolCommandExecutor);
 
-      var inventoryChangeDetector = new InventoryChangeDetector(this);
+      inventoryChangeDetector = new InventoryChangeDetector(this);
       getServer().getPluginManager().registerEvents(inventoryChangeDetector, this);
 
       var shulkerAccessor = new ShulkerAccessorListener(this, inventoryChangeDetector, config);
@@ -320,6 +321,11 @@ public class BBTweaksPlugin extends JavaPlugin {
     if (invMagnetParametersStore != null) {
       catchAll(invMagnetParametersStore::onShutdown);
       invMagnetParametersStore = null;
+    }
+
+    if (inventoryChangeDetector != null) {
+      catchAll(inventoryChangeDetector::onShutdown);
+      inventoryChangeDetector = null;
     }
   }
 
