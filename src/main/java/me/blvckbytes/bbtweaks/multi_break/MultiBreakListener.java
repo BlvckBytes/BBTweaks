@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.multi_break;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParameters;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
@@ -12,6 +13,9 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.Particle;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
+import org.bukkit.block.Container;
+import org.bukkit.block.Furnace;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -37,15 +41,18 @@ public class MultiBreakListener implements Listener {
 
   private final Plugin plugin;
   private final MultiBreakParametersStore parametersStore;
+  private final FurnaceLevelDisplay furnaceLevelDisplay;
   private final ConfigKeeper<MainSection> config;
 
   public MultiBreakListener(
     Plugin plugin,
     MultiBreakParametersStore parametersStore,
+    FurnaceLevelDisplay furnaceLevelDisplay,
     ConfigKeeper<MainSection> config
   ) {
     this.plugin = plugin;
     this.parametersStore = parametersStore;
+    this.furnaceLevelDisplay = furnaceLevelDisplay;
     this.config = config;
   }
 
@@ -157,11 +164,20 @@ public class MultiBreakListener implements Listener {
       if (toolUsed.slotIndex() != priorSlotIndex)
         playerInventory.setHeldItemSlot(toolUsed.slotIndex());
 
+      var blockState = block.getState();
+
       //noinspection UnstableApiUsage
       var breakEvent = new BlockBreakEvent(block, player);
 
+      var expToDrop = 0;
+
       if (!toolUsed.hasSilkTouch())
-        breakEvent.setExpToDrop(getRandomizedExperienceForBlockType(blockType));
+        expToDrop += getRandomizedExperienceForBlockType(blockType);
+
+      if (blockState instanceof Furnace furnace)
+        expToDrop += (int) furnaceLevelDisplay.calculateExperience(player, furnace.getRecipesUsed());
+
+      breakEvent.setExpToDrop(expToDrop);
 
       ignoredBreakEvent = breakEvent;
       Bukkit.getPluginManager().callEvent(breakEvent);
@@ -177,7 +193,7 @@ public class MultiBreakListener implements Listener {
           return;
       }
 
-      simulateBlockBreak(player, toolUsed.item(), block, breakEvent);
+      simulateBlockBreak(player, toolUsed.item(), block, blockState, breakEvent);
 
       if (toolUsed.slotIndex() != priorSlotIndex)
         playerInventory.setHeldItemSlot(priorSlotIndex);
@@ -194,12 +210,20 @@ public class MultiBreakListener implements Listener {
     Bukkit.getScheduler().runTaskLater(plugin, () -> config.rootSection.multiBreak.hotbarNotification.sendActionBar(player, environment), 5);
   }
 
-  public void simulateBlockBreak(Player player, ItemStack toolUsed, Block block, BlockBreakEvent breakEvent) {
+  public void simulateBlockBreak(
+    Player player,
+    ItemStack toolUsed,
+    Block block,
+    BlockState blockState,
+    BlockBreakEvent breakEvent
+  ) {
+    var pickupDelay = config.rootSection.multiBreak.customPickupDelay;
+    var world = block.getWorld();
+
     if (breakEvent.isDropItems()) {
       var droppedItems = block.getDrops(toolUsed, player);
       var dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
 
-      var world = block.getWorld();
       var itemEntities = new ArrayList<Item>();
 
       for (ItemStack droppedItem : droppedItems) {
@@ -217,7 +241,6 @@ public class MultiBreakListener implements Listener {
       Bukkit.getPluginManager().callEvent(dropEvent);
 
       if (!dropEvent.isCancelled()) {
-        var pickupDelay = config.rootSection.multiBreak.customPickupDelay;
 
         for (Item item : dropEvent.getItems()) {
           if (pickupDelay >= 0)
@@ -231,11 +254,23 @@ public class MultiBreakListener implements Listener {
 
     if (breakEvent.getExpToDrop() > 0) {
       var dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
-      var expOrb = block.getWorld().spawn(dropLocation, ExperienceOrb.class);
+      var expOrb = world.spawn(dropLocation, ExperienceOrb.class);
       expOrb.setExperience(breakEvent.getExpToDrop());
     }
 
-    block.getWorld().spawnParticle(
+    if (blockState instanceof Container container) {
+      for (var containerItem : container.getInventory().getContents()) {
+        if (containerItem == null || containerItem.getType().isAir())
+          continue;
+
+        var item = world.dropItem(block.getLocation(), containerItem);
+
+        if (pickupDelay >= 0)
+          item.setPickupDelay(pickupDelay);
+      }
+    }
+
+    world.spawnParticle(
       Particle.BLOCK,
       block.getLocation(),
       10,

@@ -215,7 +215,7 @@ public class BBTweaksPlugin extends JavaPlugin {
       multiBreakParametersStore = new MultiBreakParametersStore(this, predicateHelper, config);
       getServer().getPluginManager().registerEvents(multiBreakParametersStore, this);
 
-      var multiBreakListener = new MultiBreakListener(this, multiBreakParametersStore, config);
+      var multiBreakListener = new MultiBreakListener(this, multiBreakParametersStore, furnaceLevelDisplay, config);
       getServer().getPluginManager().registerEvents(multiBreakListener, this);
 
       multiBreakDisplayHandler = new MultiBreakDisplayHandler(floodgateIntegration, predicateHelper, config, this);
