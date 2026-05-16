@@ -14,6 +14,7 @@ import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
 import me.blvckbytes.bbtweaks.back.BacktrackCommand;
 import me.blvckbytes.bbtweaks.back.BacktrackCommandSection;
 import me.blvckbytes.bbtweaks.back.LocationHistoryStore;
+import me.blvckbytes.bbtweaks.command_items.CommandItemListener;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
@@ -276,6 +277,8 @@ public class BBTweaksPlugin extends JavaPlugin {
       var mainCommandExecutor = new MainCommand(config, rdBreakTool, autoPickupContainerListener, this);
 
       setExecutorAndCompleter(Objects.requireNonNull(getCommand("bbtweaks")), mainCommandExecutor);
+
+      getServer().getPluginManager().registerEvents(new CommandItemListener(config), this);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);
