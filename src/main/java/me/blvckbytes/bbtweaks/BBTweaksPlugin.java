@@ -16,6 +16,10 @@ import me.blvckbytes.bbtweaks.back.BacktrackCommandSection;
 import me.blvckbytes.bbtweaks.back.LocationHistoryStore;
 import me.blvckbytes.bbtweaks.command_items.CommandItemListener;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
+import me.blvckbytes.bbtweaks.durability_warnings.DurabilityWarningsListener;
+import me.blvckbytes.bbtweaks.durability_warnings.WarningsProfileStore;
+import me.blvckbytes.bbtweaks.durability_warnings.command.DurabilityWarningCommand;
+import me.blvckbytes.bbtweaks.durability_warnings.config.DurabilityWarningCommandSection;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
 import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
@@ -75,6 +79,7 @@ public class BBTweaksPlugin extends JavaPlugin {
   private MultiBreakParametersStore multiBreakParametersStore;
   private InvMagnetParametersStore invMagnetParametersStore;
   private InventoryChangeDetector inventoryChangeDetector;
+  private WarningsProfileStore warningsProfileStore;
 
   // TODO: Idea - /empty-out [all]
 
@@ -239,6 +244,14 @@ public class BBTweaksPlugin extends JavaPlugin {
       getServer().getPluginManager().registerEvents(getExpExecutor, this);
       setExecutorAndCompleter(getExpCommand, getExpExecutor);
 
+      warningsProfileStore = new WarningsProfileStore(this);
+      getServer().getPluginManager().registerEvents(warningsProfileStore, this);
+
+      var durabilityWarningCommand = Objects.requireNonNull(getCommand(DurabilityWarningCommandSection.INITIAL_NAME));
+      setExecutorAndCompleter(durabilityWarningCommand, new DurabilityWarningCommand(warningsProfileStore, config));
+
+      getServer().getPluginManager().registerEvents(new DurabilityWarningsListener(warningsProfileStore, config, this), this);
+
       Runnable updateCommands = () -> {
         config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);
         config.rootSection.markersMenu.setMarkerCommand.apply(setMarkerCommand, commandUpdater);
@@ -249,6 +262,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         config.rootSection.multiBreak.command.apply(multiBreakCommand, commandUpdater);
         config.rootSection.invMagnet.command.apply(invMagnetCommand, commandUpdater);
         config.rootSection.getExp.command.apply(getExpCommand, commandUpdater);
+        config.rootSection.durabilityWarnings.command.apply(durabilityWarningCommand, commandUpdater);
       };
 
       updateCommands.run();
@@ -326,6 +340,11 @@ public class BBTweaksPlugin extends JavaPlugin {
     if (inventoryChangeDetector != null) {
       catchAll(inventoryChangeDetector::onShutdown);
       inventoryChangeDetector = null;
+    }
+
+    if (warningsProfileStore != null) {
+      catchAll(warningsProfileStore::onShutdown);
+      warningsProfileStore = null;
     }
   }
 

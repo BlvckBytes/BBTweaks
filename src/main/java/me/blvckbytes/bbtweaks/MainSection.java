@@ -12,6 +12,7 @@ import me.blvckbytes.bbtweaks.auto_tool.AutoToolSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideSection;
 import me.blvckbytes.bbtweaks.command_items.CommandItemsSection;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsSection;
+import me.blvckbytes.bbtweaks.durability_warnings.config.DurabilityWarningsSection;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
 import me.blvckbytes.bbtweaks.get_exp.GetExpSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
@@ -56,6 +57,7 @@ public class MainSection extends ConfigSection {
   public AutoPickupContainerSection autoPickupContainer;
   public GetExpSection getExp;
   public CommandItemsSection commandItems;
+  public DurabilityWarningsSection durabilityWarnings;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

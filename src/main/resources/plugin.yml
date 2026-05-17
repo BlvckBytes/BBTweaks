@@ -62,6 +62,9 @@ commands:
   getexp:
     description: 'Retrieve stored experience from blocks'
     permission: bbtweaks.getexp
+  durabilitywarning:
+    description: 'Manage personal durability-warning settings'
+    permission: bbtweaks.durabilitywarning
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

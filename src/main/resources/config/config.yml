@@ -940,6 +940,59 @@ commandItems:
   useCooldownMs: 1500
   items:
 
+durabilityWarnings:
+  command:
+    name: durabilitywarning
+    aliases:
+      - abnutzungswarnung
+  playersOnly: '{lut.durability_warnings.prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+  missingPermission: '{lut.durability_warnings.prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  commandActionUsage: '{lut.durability_warnings.prefix} <&c>Benutzung: /{label} \<<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>>'
+  toggleSound: |
+    {lut.durability_warnings.prefix} <&7>Der Warnungston wird nun<space/>
+    <&a *if="state">wieder abgespielt</>
+    <&c *else>nicht mehr abgespielt</>
+    .
+  toggleEnabled: |
+    {lut.durability_warnings.prefix} <&7>Die Gesamtfunktion ist nun<space/>
+    <&a *if="state">aktiviert</>
+    <&c *else>deaktiviert</>
+    .
+  warnings:
+    -
+      itemTypes:
+        - NETHERITE_SHOVEL
+        - NETHERITE_PICKAXE
+        - NETHERITE_AXE
+        - NETHERITE_HOE
+        - NETHERITE_SWORD
+        - NETHERITE_SPEAR
+        - DIAMOND_SHOVEL
+        - DIAMOND_PICKAXE
+        - DIAMOND_AXE
+        - DIAMOND_HOE
+        - DIAMOND_SWORD
+        - DIAMOND_SPEAR
+      notificationByPercentage:
+        8%:
+          sound: 'BLOCK_NOTE_BLOCK_PLING'
+          chat: '<$lut.durability_warnings.chat />'
+          title: '<$lut.durability_warnings.title />'
+          subtitle: '<$lut.durability_warnings.subtitle />'
+          titleStayMs: 2500
+        5%:
+          sound: 'BLOCK_ANVIL_LAND'
+          chat: '<$lut.durability_warnings.chat />'
+          title: '<$lut.durability_warnings.title />'
+          subtitle: '<$lut.durability_warnings.subtitle />'
+          titleStayMs: 3500
+        3%,2%,1%:
+          sound: 'ENTITY_ENDERMAN_SCREAM'
+          chat: '<$lut.durability_warnings.chat />'
+          title: '<$lut.durability_warnings.title />'
+          subtitle: '<$lut.durability_warnings.subtitle />'
+          titleStayMs: 3500
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -1063,3 +1116,12 @@ cLut:
     WIDTH: 'Breite'
     HEIGHT: 'Höhe'
     DEPTH: 'Tiefe'
+  durability_warnings:
+    prefix: '<&7>[<&6>Abnutzungswarnung<&7>]'
+    chat: |
+      {lut.durability_warnings.prefix} <&4><&l>ACHTUNG!</> <&c>Das Item <&4><translate [type_key] /></> liegt bei <&4>{remaining_durability_percentage}% Haltbarkeit</> <&7>(
+        <container *if="is_offhand">Zweithand</>
+        <container *else>Hotbar-Slot {slot}</>
+      )</>.
+    title: '<&c>⚠ <&4><&l>Haltbarkeit</> <&c>⚠'
+    subtitle: '<&c><translate [type_key] /></> bei <&4>{remaining_durability_percentage}%'
