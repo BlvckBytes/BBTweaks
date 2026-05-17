@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.auto_pickup_container;
 
 import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
+import org.bukkit.Tag;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -43,6 +44,9 @@ public class LazyContainer {
   }
 
   public int tryAddItemAndGetAddedAmount(ItemStack itemToAdd, int amount) {
+    if (Tag.SHULKER_BOXES.isTagged(itemToAdd.getType()))
+      return 0;
+
     if (inventory == null) {
       if (inaccessible)
         return 0;
