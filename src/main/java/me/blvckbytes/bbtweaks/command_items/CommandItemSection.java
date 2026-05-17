@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.command_items;
 
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
+import at.blvckbytes.cm_mapper.mapper.MappingError;
 import at.blvckbytes.cm_mapper.mapper.section.CSIgnore;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
@@ -30,11 +31,11 @@ public class CommandItemSection extends ConfigSection {
 
     itemName = itemName.trim();
 
-    if (itemType != null) {
-      var matchedMaterial = XMaterial.matchXMaterial(itemType);
+    if (itemType != null && !itemType.isBlank()) {
+      var matchedMaterial = XMaterial.matchXMaterial(itemType.trim());
 
       if (matchedMaterial.isEmpty() || (_itemType = matchedMaterial.get().get()) == null)
-        throw new IllegalStateException("Invalid \"itemType\" XMaterial-value: " + itemType);
+        throw new MappingError("Invalid \"itemType\" XMaterial-value: " + itemType);
     }
   }
 }
