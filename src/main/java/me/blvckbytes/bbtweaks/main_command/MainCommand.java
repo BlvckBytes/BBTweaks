@@ -2,13 +2,19 @@ package me.blvckbytes.bbtweaks.main_command;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import com.google.gson.*;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.RDBreakTool;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
+import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.syllables_matcher.EnumMatcher;
 import me.blvckbytes.syllables_matcher.MatchableEnum;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -20,6 +26,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Level;
@@ -31,6 +40,7 @@ public class MainCommand implements CommandExecutor, TabExecutor {
     MARK_RD_BREAKER,
     LWC_EXTEND_BLOCKS,
     MARK_AUTO_PICKUP_CONTAINER,
+    PATCH_SIGNS_FROM_FILE,
     ;
 
     static final EnumMatcher<Action> matcher = new EnumMatcher<>(values());
@@ -205,6 +215,91 @@ public class MainCommand implements CommandExecutor, TabExecutor {
 
         return true;
       }
+
+      // Seeing how that's yet-another internal tool, I won't bother with fancy messages.
+      case PATCH_SIGNS_FROM_FILE -> {
+        var inputFile = new File(plugin.getDataFolder(), "sign_patch_data.json");
+
+        if (!inputFile.isFile() || inputFile.length() == 0) {
+          sender.sendMessage("§cExpected data to be present at " + inputFile);
+          return true;
+        }
+
+        var gson = new GsonBuilder().create();
+
+        JsonArray patchEntriesArray;
+
+        try (var fileReader = new FileReader(inputFile)) {
+          patchEntriesArray = gson.fromJson(fileReader, JsonArray.class);
+        } catch (Throwable e) {
+          plugin.getLogger().log(Level.SEVERE, "An error occurred while trying to parse JSON-file " + inputFile);
+          sender.sendMessage("§cAn error occurred; see console!");
+          return true;
+        }
+
+        entryLoop:
+        for (var patchIndex = 0; patchIndex < patchEntriesArray.size(); ++patchIndex) {
+          if (!(patchEntriesArray.get(patchIndex) instanceof JsonObject patchEntry)) {
+            plugin.getLogger().log(Level.WARNING, "Expected json-object at index=" + patchIndex + "; skipping");
+            continue;
+          }
+
+          var x = tryAccessJsonInteger(patchEntry.get("x"));
+          var y = tryAccessJsonInteger(patchEntry.get("y"));
+          var z = tryAccessJsonInteger(patchEntry.get("z"));
+          var worldName = tryAccessJsonString(patchEntry.get("world"));
+
+          if (x == null || y == null || z == null || worldName == null) {
+            plugin.getLogger().log(Level.WARNING, "Missing valid coordinates in json-object at index=" + patchIndex + "; skipping");
+            continue;
+          }
+
+          var world = Bukkit.getWorld(worldName);
+
+          if (world == null) {
+            plugin.getLogger().log(Level.WARNING, "Unknown world \"" + worldName + "\" in json-object at index=" + patchIndex + "; skipping");
+            continue;
+          }
+
+          if (!(world.getBlockAt(x, y, z).getState() instanceof Sign sign)) {
+            plugin.getLogger().log(Level.WARNING, "Coordinates do not point at a sign in json-object at index=" + patchIndex + "; skipping");
+            continue;
+          }
+
+          var expectedLines = tryAccessJsonStringArray(patchEntry.get("expectedLines"));
+
+          if (expectedLines.size() != 4) {
+            plugin.getLogger().log(Level.WARNING, "Missing or malformed \"expectedLines\" in json-object at index=" + patchIndex + "; skipping");
+            continue;
+          }
+
+          for (var lineIndex = 0; lineIndex < expectedLines.size(); ++lineIndex) {
+            var expectedLine = expectedLines.get(lineIndex);
+            var actualLine = SignUtil.getPlainTextLine(sign, lineIndex);
+
+            if (!(expectedLine.trim().equals(actualLine.trim()))) {
+              plugin.getLogger().log(Level.WARNING, "Mismatched on expected line " + (lineIndex + 1) + " in json-object at index=" + patchIndex + "; skipping");
+              continue entryLoop;
+            }
+          }
+
+          var replacementLines = tryAccessJsonStringArray(patchEntry.get("replacementLines"));
+
+          if (replacementLines.size() != 4) {
+            plugin.getLogger().log(Level.WARNING, "Missing or malformed \"replacementLines\" in json-object at index=" + patchIndex + "; skipping");
+            continue;
+          }
+
+          var frontSide = sign.getSide(Side.FRONT);
+
+          for (var lineIndex = 0; lineIndex < replacementLines.size(); ++lineIndex)
+            frontSide.line(lineIndex, Component.text(replacementLines.get(lineIndex)));
+
+          sign.update(true, false);
+
+          plugin.getLogger().log(Level.INFO, "Patched sign at " + x + " " + y + " " + z + " " + worldName + " (" + (patchIndex + 1) + "/" + patchEntriesArray.size() + ")");
+        }
+      }
     }
 
     return true;
@@ -235,5 +330,43 @@ public class MainCommand implements CommandExecutor, TabExecutor {
       return List.of();
 
     return Action.matcher.createCompletions(args[0]);
+  }
+
+  private static List<String> tryAccessJsonStringArray(JsonElement element) {
+    if (!(element instanceof JsonArray array))
+      return Collections.emptyList();
+
+    var result = new ArrayList<String>();
+
+    for (var entry : array) {
+      var string = tryAccessJsonString(entry);
+
+      if (string == null)
+        return Collections.emptyList();
+
+      result.add(string);
+    }
+
+    return result;
+  }
+
+  private static @Nullable String tryAccessJsonString(JsonElement element) {
+    if (!(element instanceof JsonPrimitive primitive))
+      return null;
+
+    if (!primitive.isString())
+      return null;
+
+    return primitive.getAsString();
+  }
+
+  private static @Nullable Integer tryAccessJsonInteger(JsonElement element) {
+    if (!(element instanceof JsonPrimitive primitive))
+      return null;
+
+    if (!primitive.isNumber())
+      return null;
+
+    return primitive.getAsInt();
   }
 }
