@@ -8,6 +8,7 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.inv_magnet.PreAttractItemEvent;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
+import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorWriteEvent;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.event.*;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
@@ -432,6 +433,12 @@ public class AutoPickupContainerListener implements Listener, FilterPredicateAcc
     // may also mimic that; also, as to not make it bounce around, let's clear its initial velocity.
     remainderItem.setPickupDelay(0);
     remainderItem.setVelocity(new Vector(0, 0, 0));
+  }
+
+  @EventHandler
+  public void onShulkerAccessorWrite(ShulkerAccessorWriteEvent event) {
+    if (doesContainMarker(event.meta.getPersistentDataContainer()))
+      updateLore(event.meta, event.type);
   }
 
   @EventHandler
