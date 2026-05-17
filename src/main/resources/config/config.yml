@@ -939,6 +939,10 @@ getExp:
 commandItems:
   useCooldownMs: 1500
   items:
+    -
+      itemName: 'Backstick'
+      itemType: 'STICK'
+      command: 'back'
 
 durabilityWarnings:
   command:
