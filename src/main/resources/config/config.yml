@@ -926,6 +926,7 @@ getExp:
   interactionExpirySeconds: 15
   playersOnly: '{lut.getexp_prefix} <&c>Dieser Befehl ist nur für Spieler verfügbar!'
   noPermission: '{lut.getexp_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  noPermissionOrb: '{lut.getexp_prefix} <&c>Du hast keinen Zugriff auf die Orb-Ausgabe!'
   alreadyInASession: '{lut.getexp_prefix} <&c>Du befindest dich bereits in einer GetExp-Interaktion!'
   sessionInitialized: '{lut.getexp_prefix} <&7>Interagiere mit einem Block, um dessen <&a>gespeicherte Erfahrung</> zu <&a>erhalten</>; nutze <&a>Sneak + Linksklick</>, um in den Multi-Modus zu wechseln.'
   interactionExpired: '{lut.getexp_prefix} <&c>Deine ausstehende GetExp-Interaktion ist aufgrund von <&4>Inaktivität nach {expiry_seconds}s <&c>abgelaufen.'

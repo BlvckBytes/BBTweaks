@@ -17,6 +17,7 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -40,6 +41,7 @@ public class GetExpCommand implements CommandExecutor, TabCompleter, Listener {
   // We could extract that into a utility one day, but so far, that'd be overkill.
 
   private final FurnaceLevelDisplay furnaceLevelDisplay;
+  private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
 
   private final Map<UUID, GetExpInteractionSession> interactionSessionByPlayerId;
@@ -53,6 +55,7 @@ public class GetExpCommand implements CommandExecutor, TabCompleter, Listener {
     ConfigKeeper<MainSection> config
   ) {
     this.furnaceLevelDisplay = furnaceLevelDisplay;
+    this.plugin = plugin;
     this.config = config;
 
     Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 0, 1);
@@ -80,6 +83,13 @@ public class GetExpCommand implements CommandExecutor, TabCompleter, Listener {
       return true;
     }
 
+    var dropOrb = args.length > 0 && args[0].equalsIgnoreCase("orb");
+
+    if (dropOrb && !player.hasPermission("bbtweaks.getexp.orb")) {
+      config.rootSection.getExp.noPermissionOrb.sendMessage(player);
+      return true;
+    }
+
     interactionSessionByPlayerId.put(playerId, new GetExpInteractionSession(player, block -> {
       var environment = new InterpretationEnvironment()
         .withVariable("x", block.getX())
@@ -100,39 +110,55 @@ public class GetExpCommand implements CommandExecutor, TabCompleter, Listener {
         return;
       }
 
-      var levelBefore = player.getLevel();
-      player.giveExp(addedExperience);
-      var levelAfter = player.getLevel();
-
       furnace.setRecipesUsed(new HashMap<>());
       furnace.update(true, false);
 
-      player.sendTitlePart(TitlePart.TITLE, Component.empty());
+      var levelBefore = player.getLevel();
 
-      player.sendTitlePart(
-        TitlePart.SUBTITLE,
-        config.rootSection.getExp.retrievedFromFurnaceSubtitle.interpret(
-          SlotType.SINGLE_LINE_CHAT,
-          environment
-            .withVariable("added_experience", addedExperience)
-            .withVariable("level_before", levelBefore)
-            .withVariable("level_after", levelAfter)
-        ).getFirst()
-      );
+      if (!dropOrb) {
+        player.giveExp(addedExperience);
+        sendInfoTitle(player, environment, levelBefore, addedExperience);
+        return;
+      }
 
-      player.sendTitlePart(TitlePart.TIMES, Title.Times.times(
-        Duration.ofMillis(120),
-        Duration.ofMillis(1000),
-        Duration.ofMillis(120)
-      ));
+      var orb = player.getWorld().spawn(player.getLocation().add(0, .5, 0), ExperienceOrb.class);
+      orb.setExperience(addedExperience);
+
+      Bukkit.getScheduler().runTaskLater(plugin, () -> sendInfoTitle(player, environment, levelBefore, addedExperience), 5L);
     }));
 
     config.rootSection.getExp.sessionInitialized.sendMessage(player);
     return true;
   }
 
+  private void sendInfoTitle(Player player, InterpretationEnvironment environment, int levelBefore, int addedExperience) {
+    var levelAfter = player.getLevel();
+
+    player.sendTitlePart(TitlePart.TITLE, Component.empty());
+
+    player.sendTitlePart(
+      TitlePart.SUBTITLE,
+      config.rootSection.getExp.retrievedFromFurnaceSubtitle.interpret(
+        SlotType.SINGLE_LINE_CHAT,
+        environment
+          .withVariable("added_experience", addedExperience)
+          .withVariable("level_before", levelBefore)
+          .withVariable("level_after", levelAfter)
+      ).getFirst()
+    );
+
+    player.sendTitlePart(TitlePart.TIMES, Title.Times.times(
+      Duration.ofMillis(120),
+      Duration.ofMillis(1000),
+      Duration.ofMillis(120)
+    ));
+  }
+
   @Override
   public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
+    if (sender.hasPermission("bbtweaks.getexp.orb") && args.length == 1)
+      return List.of("orb");
+
     return List.of();
   }
 

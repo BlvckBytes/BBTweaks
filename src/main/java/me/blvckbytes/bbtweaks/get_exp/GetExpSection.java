@@ -20,6 +20,7 @@ public class GetExpSection extends ConfigSection {
 
   public ComponentMarkup playersOnly;
   public ComponentMarkup noPermission;
+  public ComponentMarkup noPermissionOrb;
   public ComponentMarkup alreadyInASession;
   public ComponentMarkup sessionInitialized;
   public ComponentMarkup interactionExpired;
