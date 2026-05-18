@@ -65,7 +65,7 @@ public class SignMechanicManager implements Listener {
     registerMechanic(transmitterMechanic);
     registerMechanic(receiverMechanic);
 
-    registerMechanic(new AutoDisposeMechanic(plugin, config));
+    registerMechanic(new AutoDisposeMechanic(plugin, predicateHelper, config));
     registerMechanic(new SignFlipperMechanic(plugin, config));
     registerMechanic(new HopperMechanic(plugin, config, predicateHelper));
     registerMechanic(new HiddenSwitchMechanic(plugin, config));
