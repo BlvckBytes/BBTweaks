@@ -128,6 +128,7 @@ public class MultiBreakParameters {
       .withVariable("exceeded_height_limit", didExceedLimit(BreakDimension.HEIGHT))
       .withVariable("exceeded_depth_limit", didExceedLimit(BreakDimension.DEPTH))
       .withVariable("slot_index", slotIndex)
-      .withVariable("slot_count", parametersSlots.parametersBySlotIndex.size());
+      .withVariable("slot_count", parametersSlots.parametersBySlotIndex.size())
+      .withVariable("slot_enabled", parametersSlots.getSelectedSlotIndex() == slotIndex);
   }
 }

@@ -712,10 +712,10 @@ multiBreak:
     durationMillis: 2500
   display:
     title: '<&8>MultiBreak-Einstellungen'
-    rows: 3
+    rows: 5
     items:
       extentLeft:
-        slots: 10
+        slots: 18
         type: 'ORANGE_CONCRETE'
         name: |
           <reset>
@@ -737,7 +737,7 @@ multiBreak:
             <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
             {lut.spacer}
       extentRight:
-        slots: 12
+        slots: 20
         type: 'ORANGE_CONCRETE'
         name: |
           <reset>
@@ -759,7 +759,7 @@ multiBreak:
             <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
             {lut.spacer}
       extentUp:
-        slots: 2
+        slots: 10
         type: 'ORANGE_CONCRETE'
         name: |
           <reset>
@@ -781,7 +781,7 @@ multiBreak:
             <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
             {lut.spacer}
       extentDown:
-        slots: 20
+        slots: 28
         type: 'ORANGE_CONCRETE'
         name: |
           <reset>
@@ -803,7 +803,7 @@ multiBreak:
             <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
             {lut.spacer}
       extentDepth:
-        slots: 11
+        slots: 19
         type: 'ORANGE_CONCRETE'
         name: |
           <reset>
@@ -825,7 +825,7 @@ multiBreak:
             <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
             {lut.spacer}
       currentFilter:
-        slots: 14
+        slots: 22
         type: '{filter_predicate neq null then "PURPLE_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
         name: |
           <reset>
@@ -844,7 +844,7 @@ multiBreak:
             <&8>➥ <&e>{filter_set_command} <&7>Filter setzen<br/>
             {lut.spacer}
       sneakMode:
-        slots: 15
+        slots: 23
         type: 'LIGHT_BLUE_CONCRETE'
         name: |
           <reset>
@@ -861,7 +861,7 @@ multiBreak:
             <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
             {lut.spacer}
       toggleEnabled:
-        slots: 16
+        slots: 24
         name: |
           <reset>
             <&8>»<space/>
@@ -876,6 +876,26 @@ multiBreak:
             <&7>Schalte die Funktion ein oder aus.<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Umschalten<br/>
+            {lut.spacer}
+      parametersSlot:
+        slots: '[8, 8+9, 8+9*2, 8+9*3, 8+9*4]'
+        type: '{slot_enabled then "YELLOW_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <style [color]="slot_enabled then '&6' else '&7'">Einstellungsslot {slot_index + 1}</> «
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>♦ <&e>Durchmesser: <&6>{total_width}x{total_height}x{total_depth}<br/>
+            <&8>♦ <&e>Einzelwerte: <&6>{extent_up} ↑<&7>, <&6>{extent_down} ↓<&7>, <&6>{extent_left} L<&7>, <&6>{extent_right} R<&7>, <&6>{extent_depth} T<br/>
+            <&8>♦ <&e>Sneakmodus: <&6>{lut.sneak_mode[sneak_mode]}<br/>
+            <&8>♦ <&e>Filter: <container>
+              <&6 *if="filter_predicate">{filter_predicate}</>
+              <&c *else>Nicht gesetzt</>
+            </container><br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Slot auswählen<br/>
             {lut.spacer}
       filler:
         type: BLACK_STAINED_GLASS_PANE

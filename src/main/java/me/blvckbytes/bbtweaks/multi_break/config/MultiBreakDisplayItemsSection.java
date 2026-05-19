@@ -19,6 +19,8 @@ public class MultiBreakDisplayItemsSection extends ConfigSection {
   public GuiItemStackSection sneakMode;
   public GuiItemStackSection toggleEnabled;
 
+  public GuiItemStackSection parametersSlot;
+
   public GuiItemStackSection filler;
 
   public MultiBreakDisplayItemsSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {

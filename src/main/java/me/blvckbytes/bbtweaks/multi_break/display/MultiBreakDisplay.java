@@ -43,6 +43,26 @@ public class MultiBreakDisplay extends Display<MultiBreakDisplayData> {
     config.rootSection.multiBreak.display.items.currentFilter.renderInto(inventory, environment);
     config.rootSection.multiBreak.display.items.sneakMode.renderInto(inventory, environment);
     config.rootSection.multiBreak.display.items.toggleEnabled.renderInto(inventory, environment);
+
+    renderSlotSelectionItems(environment);
+  }
+
+  private void renderSlotSelectionItems(InterpretationEnvironment displayEnvironment) {
+    var itemSection = config.rootSection.multiBreak.display.items.parametersSlot;
+    var slotsInOrder = itemSection.getDisplaySlots().stream().sorted().toList();
+
+    var parametersSlotIndex = 0;
+    var parametersSlots = displayData.parametersSlots().parametersBySlotIndex;
+
+    for (var slot : slotsInOrder) {
+      if (parametersSlotIndex >= parametersSlots.size())
+        break;
+
+      var parametersSlot = parametersSlots.get(parametersSlotIndex++);
+      var slotEnvironment = parametersSlot.makeEnvironment().inheritFrom(displayEnvironment, false);
+
+      inventory.setItem(slot, itemSection.build(slotEnvironment));
+    }
   }
 
   @Override

@@ -14,6 +14,8 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;
 
+import java.util.Set;
+
 public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, MultiBreakDisplayData> {
 
   private final FloodgateIntegration floodgateIntegration;
@@ -43,7 +45,8 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
   }
 
   private boolean handleSlotClickAndGetIfRender(Player player, MultiBreakDisplay display, ClickType clickType, int slot) {
-    var selectedParameters = display.displayData.parametersSlots().getSelectedParameters();
+    var parametersSlots = display.displayData.parametersSlots();
+    var selectedParameters = parametersSlots.getSelectedParameters();
 
     if (config.rootSection.multiBreak.display.items.extentLeft.getDisplaySlots().contains(slot))
       return handleExtentManipulation(display, BreakExtent.LEFT, clickType);
@@ -106,6 +109,35 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
       }
 
       return false;
+    }
+
+    Set<Integer> slots;
+
+    if ((slots = config.rootSection.multiBreak.display.items.parametersSlot.getDisplaySlots()).contains(slot)) {
+      if (clickType != ClickType.LEFT)
+        return false;
+
+      var parametersSlotIndex = (int) slots.stream().filter(it -> it < slot).count();
+
+      if (parametersSlots.getSelectedSlotIndex() == parametersSlotIndex) {
+        config.rootSection.multiBreak.slotAlreadySelected.sendMessage(
+          player,
+          new InterpretationEnvironment()
+            .withVariable("slot", parametersSlotIndex + 1)
+        );
+
+        return false;
+      }
+
+      parametersSlots.setSelectedSlotIndex(parametersSlotIndex);
+
+      config.rootSection.multiBreak.slotSelected.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("slot", parametersSlots.getSelectedSlotIndex() + 1)
+      );
+
+      return true;
     }
 
     return false;
