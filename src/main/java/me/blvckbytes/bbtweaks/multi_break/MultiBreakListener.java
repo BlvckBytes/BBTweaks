@@ -8,10 +8,7 @@ import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParameters;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.Particle;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Container;
@@ -272,12 +269,16 @@ public class MultiBreakListener implements Listener {
       }
     }
 
+    var blockData = block.getBlockData();
+
+    player.incrementStatistic(Statistic.MINE_BLOCK, blockData.getMaterial());
+
     world.spawnParticle(
       Particle.BLOCK,
       block.getLocation(),
       10,
       0.33, 0.33, 0.33,
-      block.getBlockData()
+      blockData
     );
 
     block.setType(Material.AIR);
