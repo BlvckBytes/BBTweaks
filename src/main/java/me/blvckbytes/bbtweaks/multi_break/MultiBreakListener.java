@@ -91,22 +91,24 @@ public class MultiBreakListener implements Listener {
     if (player.getGameMode() != GameMode.SURVIVAL)
       return;
 
-    var parameters = parametersStore.accessParameters(player);
+    var parametersSlots = parametersStore.accessParametersSlots(player);
 
-    if (parameters == null)
+    if (parametersSlots == null)
       return;
 
-    if (!parameters.enabled)
+    if (!parametersSlots.enabled)
       return;
 
     // In case they've been revoked permissions and are still having the extents of their prior tier set.
-    if (parameters.getLimits().maxDimension() == 0) {
-      parameters.zeroOutAllExtents();
-      parameters.enabled = false;
+    if (parametersSlots.getLimits().maxDimension() == 0) {
+      parametersSlots.parametersBySlotIndex.forEach(MultiBreakParameters::zeroOutAllExtents);
+      parametersSlots.enabled = false;
       return;
     }
 
-    if (!parameters.sneakMode.doesMatch(player.isSneaking()))
+    var selectedParameters = parametersSlots.getSelectedParameters();
+
+    if (!selectedParameters.sneakMode.doesMatch(player.isSneaking()))
       return;
 
     if (!config.rootSection.multiBreak.allowedWorlds.contains(player.getWorld().getName()))
@@ -117,7 +119,7 @@ public class MultiBreakListener implements Listener {
     if (!originBlock.isSolid())
       return;
 
-    if (parameters.filter != null && doesMaterialMismatchPredicate(parameters.filter.predicate, originBlock.getType()))
+    if (selectedParameters.filter != null && doesMaterialMismatchPredicate(selectedParameters.filter.predicate, originBlock.getType()))
       return;
 
     var playerInventory = player.getInventory();
@@ -132,7 +134,7 @@ public class MultiBreakListener implements Listener {
     var missingToolsForBlockTypes = new HashSet<Material>();
     var excludedBlockTypes = new HashSet<Material>();
 
-    forEachBlockWithinParameters(originBlock, directions, parameters, block -> {
+    forEachBlockWithinParameters(originBlock, directions, selectedParameters, block -> {
       if (!block.isSolid())
         return;
 
@@ -143,7 +145,7 @@ public class MultiBreakListener implements Listener {
         return;
       }
 
-      if (parameters.filter != null && doesMaterialMismatchPredicate(parameters.filter.predicate, blockType))
+      if (selectedParameters.filter != null && doesMaterialMismatchPredicate(selectedParameters.filter.predicate, blockType))
         return;
 
       var toolUsed = DamageableHotbarItem.determineToolFromHotbar(block, playerInventory);

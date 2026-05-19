@@ -667,7 +667,7 @@ multiBreak:
         <suggest-command value=`{set_command}`>
           <&a><u>{filter_predicate}
       </hover-text><space/>
-      wurde <&a>entfernt<&7>.
+      wurde <&c>entfernt<&7>.
   alreadyEnabled: '{lut.multi_break_prefix} <&c>Die Funktion ist bereits aktiviert!'
   nowEnabled: '{lut.multi_break_prefix} <&7>Die Funktion ist nun <&a>aktiviert <&7>(<&a>{total_width}x{total_height}x{total_depth}<&7>).'
   alreadyDisabled: '{lut.multi_break_prefix} <&c>Die Funktion ist bereits deaktiviert!'
@@ -702,6 +702,9 @@ multiBreak:
     <&a>{total_width}x{total_height}x{total_depth} <&7>(
     <&a>{extent_up} ↑<&7>, <&a>{extent_down} ↓<&7>, <&a>{extent_left} L<&7>, <&a>{extent_right} R<&7>, <&a>{extent_depth} T
     <&7>).
+  selectSlotUsage: '{lut.multi_break_prefix} <&c>Benutzung: /{label} {action} \<<&4>1-{max_slot}</>>'
+  slotSelected: '{lut.multi_break_prefix} <&7>Der <&a>Einstellungsslot {slot}</> ist nun selektiert.'
+  slotAlreadySelected: '{lut.multi_break_prefix} <&7>Der <&c>Einstellungsslot {slot}</> ist bereits selektiert!'
   enabledJoinWarning:
     enabled: true
     title: '<&4>Achtung: Multi-Break'

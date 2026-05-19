@@ -1,54 +1,28 @@
 package me.blvckbytes.bbtweaks.multi_break.parameters;
 
-import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakLimits;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
 public class MultiBreakParameters {
 
-  public final Player player;
-  private final ConfigKeeper<MainSection> config;
+  private final MultiBreakParametersSlots parametersSlots;
+  public final int slotIndex;
 
-  public boolean enabled;
   public @Nullable PredicateAndLanguage filter;
   public SneakMode sneakMode;
 
   public final int[] extentByOrdinal;
   private final boolean[] didExceedLimitByDimensionOrdinal;
 
-  private MultiBreakLimits limits;
-
-  public MultiBreakParameters(Player player, ConfigKeeper<MainSection> config) {
-    this.player = player;
-    this.config = config;
-
+  public MultiBreakParameters(MultiBreakParametersSlots parametersSlots, int slotIndex) {
+    this.parametersSlots = parametersSlots;
+    this.slotIndex = slotIndex;
     this.sneakMode = SneakMode.NONE;
     this.extentByOrdinal = new int[BreakExtent.values.size()];
     this.didExceedLimitByDimensionOrdinal = new boolean[BreakDimension.values.size()];
-
-    updateLimits();
-  }
-
-  public MultiBreakLimits getLimits() {
-    return limits;
-  }
-
-  public void updateLimits() {
-    for (var limits : config.rootSection.multiBreak.limitsInDescendingOrder) {
-      if (!player.hasPermission("bbtweaks.multibreak.tier." + limits.tierName()))
-        continue;
-
-      this.limits = limits;
-      return;
-    }
-
-    this.limits = MultiBreakLimits.ZERO;
   }
 
   public void zeroOutAllExtents() {
@@ -87,7 +61,7 @@ public class MultiBreakParameters {
           sum += currentValue;
         }
 
-        if (sum <= limits.maxDimension() || largestOrTargetExtent == null)
+        if (sum <= parametersSlots.getLimits().maxDimension() || largestOrTargetExtent == null)
           break;
 
         --extentByOrdinal[largestOrTargetExtent.ordinal()];
@@ -146,12 +120,14 @@ public class MultiBreakParameters {
       .withVariable("extent_up", getExtent(BreakExtent.UP))
       .withVariable("extent_down", getExtent(BreakExtent.DOWN))
       .withVariable("extent_depth", getExtent(BreakExtent.DEPTH))
-      .withVariable("max_dimension", getLimits().maxDimension())
-      .withVariable("enabled", enabled)
+      .withVariable("max_dimension", parametersSlots.getLimits().maxDimension())
+      .withVariable("enabled", parametersSlots.enabled)
       .withVariable("sneak_mode", sneakMode.name())
       .withVariable("filter_predicate", filter == null ? null : filter.getTokenPredicateString())
       .withVariable("exceeded_width_limit", didExceedLimit(BreakDimension.WIDTH))
       .withVariable("exceeded_height_limit", didExceedLimit(BreakDimension.HEIGHT))
-      .withVariable("exceeded_depth_limit", didExceedLimit(BreakDimension.DEPTH));
+      .withVariable("exceeded_depth_limit", didExceedLimit(BreakDimension.DEPTH))
+      .withVariable("slot_index", slotIndex)
+      .withVariable("slot_count", parametersSlots.parametersBySlotIndex.size());
   }
 }

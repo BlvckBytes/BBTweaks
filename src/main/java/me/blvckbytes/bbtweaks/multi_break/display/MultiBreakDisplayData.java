@@ -1,8 +1,8 @@
 package me.blvckbytes.bbtweaks.multi_break.display;
 
-import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParameters;
+import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersSlots;
 
 public record MultiBreakDisplayData(
-  MultiBreakParameters breakParameters,
+  MultiBreakParametersSlots parametersSlots,
   String commandLabel
 ) {}

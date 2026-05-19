@@ -56,7 +56,7 @@ public class MultiBreakDisplay extends Display<MultiBreakDisplayData> {
   }
 
   private InterpretationEnvironment createEnvironment() {
-    return displayData.breakParameters().makeEnvironment()
+    return displayData.parametersSlots().getSelectedParameters().makeEnvironment()
       .withVariable("is_floodgate", isFloodgate)
       .withVariable("filter_set_command", "/" + displayData.commandLabel() + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER));
   }

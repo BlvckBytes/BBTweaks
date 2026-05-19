@@ -5,8 +5,8 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakDimension;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
+import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParameters;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
-import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakLimits;
 import me.blvckbytes.bbtweaks.multi_break.display.MultiBreakDisplayData;
 import me.blvckbytes.bbtweaks.multi_break.display.MultiBreakDisplayHandler;
 import me.blvckbytes.bbtweaks.util.PredicateUtils;
@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.IntStream;
 
 public class MultiBreakCommand implements CommandExecutor, TabCompleter {
 
@@ -64,24 +65,24 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
       return true;
     }
 
-    var parameters = parametersStore.accessParameters(player);
+    var parametersSlots = parametersStore.accessParametersSlots(player);
 
     // Just in case that they've ranked up and now want to increase their extents.
-    parameters.updateLimits();
+    parametersSlots.updateLimits();
 
-    if (parameters.getLimits() == MultiBreakLimits.ZERO) {
+    // Let's also once again constrain, because it could happen that their limits decreased (temporary permissions, etc.)
+    parametersSlots.parametersBySlotIndex.forEach(parameters -> parameters.constrainAndSetFlags(false));
+
+    if (parametersSlots.getLimits().maxDimension() == 0) {
+      parametersSlots.parametersBySlotIndex.forEach(MultiBreakParameters::zeroOutAllExtents);
+      parametersSlots.enabled = false;
+
       config.rootSection.multiBreak.noAccessToAnyVolume.sendMessage(player);
       return true;
     }
 
     if (args.length == 0) {
-      // Let's also once again constrain, because it could happen that their limits decreased (temporary permissions, etc.)
-      parameters.constrainAndSetFlags(false);
-
-      parameters.clearFlags();
-
-      displayHandler.show(player, new MultiBreakDisplayData(parameters, label));
-
+      displayHandler.show(player, new MultiBreakDisplayData(parametersSlots, label));
       config.rootSection.multiBreak.openingSettingsMenu.sendMessage(player);
       return true;
     }
@@ -97,6 +98,8 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
       );
       return true;
     }
+
+    var selectedParameters = parametersSlots.getSelectedParameters();
 
     if (normalizedAction.constant == CommandAction.SET_FILTER || normalizedAction.constant == CommandAction.SET_FILTER_WITH_LANGUAGE) {
       var selectedLangauge = predicateHelper.getSelectedLanguage(player);
@@ -165,12 +168,12 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
         return true;
       }
 
-      parameters.filter = new PredicateAndLanguage(predicate, language);
+      selectedParameters.filter = new PredicateAndLanguage(predicate, language);
 
       config.rootSection.multiBreak.filterSet.sendMessage(
         player,
-          parameters.makeEnvironment()
-          .withVariable("set_command", makeFilterSetCommand(label, selectedLangauge, parameters.filter))
+          selectedParameters.makeEnvironment()
+          .withVariable("set_command", makeFilterSetCommand(label, selectedLangauge, selectedParameters.filter))
       );
 
       return true;
@@ -178,32 +181,32 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
 
     switch (normalizedAction.constant) {
       case ON -> {
-        if (parameters.enabled) {
+        if (parametersSlots.enabled) {
           config.rootSection.multiBreak.alreadyEnabled.sendMessage(player);
           return true;
         }
 
-        parameters.enabled = true;
-        config.rootSection.multiBreak.nowEnabled.sendMessage(player, parameters.makeEnvironment());
+        parametersSlots.enabled = true;
+        config.rootSection.multiBreak.nowEnabled.sendMessage(player, selectedParameters.makeEnvironment());
         return true;
       }
 
       case OFF -> {
-        if (!parameters.enabled) {
+        if (!parametersSlots.enabled) {
           config.rootSection.multiBreak.alreadyDisabled.sendMessage(player);
           return true;
         }
 
-        parameters.enabled = false;
+        parametersSlots.enabled = false;
         config.rootSection.multiBreak.nowDisabled.sendMessage(player);
         return true;
       }
 
       case TOGGLE -> {
-        parameters.enabled ^= true;
+        parametersSlots.enabled ^= true;
 
-        if (parameters.enabled) {
-          config.rootSection.multiBreak.nowEnabled.sendMessage(player, parameters.makeEnvironment());
+        if (parametersSlots.enabled) {
+          config.rootSection.multiBreak.nowEnabled.sendMessage(player, selectedParameters.makeEnvironment());
           return true;
         }
 
@@ -225,62 +228,106 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
           return true;
         }
 
-        parameters.setExtent(BreakExtent.LEFT, (sizeValues.width - 1 + 1) / 2, false);
-        parameters.setExtent(BreakExtent.RIGHT, (sizeValues.width - 1) / 2, false);
-        parameters.setExtent(BreakExtent.UP, (sizeValues.height - 1 + 1) / 2, false);
-        parameters.setExtent(BreakExtent.DOWN, (sizeValues.height - 1) / 2, false);
-        parameters.setExtent(BreakExtent.DEPTH, sizeValues.depth - 1, false);
+        selectedParameters.setExtent(BreakExtent.LEFT, (sizeValues.width - 1 + 1) / 2, false);
+        selectedParameters.setExtent(BreakExtent.RIGHT, (sizeValues.width - 1) / 2, false);
+        selectedParameters.setExtent(BreakExtent.UP, (sizeValues.height - 1 + 1) / 2, false);
+        selectedParameters.setExtent(BreakExtent.DOWN, (sizeValues.height - 1) / 2, false);
+        selectedParameters.setExtent(BreakExtent.DEPTH, sizeValues.depth - 1, false);
 
-        parameters.constrainAndSetFlags(true);
+        selectedParameters.constrainAndSetFlags(true);
 
         var exceededDimensions = new HashSet<String>();
 
         for (var dimension : BreakDimension.values) {
-          if (parameters.didExceedLimit(dimension))
+          if (selectedParameters.didExceedLimit(dimension))
             exceededDimensions.add(dimension.name());
         }
 
         if (!exceededDimensions.isEmpty()) {
           config.rootSection.multiBreak.sizeSetExceededDimensions.sendMessage(
             player,
-            parameters.makeEnvironment()
+            selectedParameters.makeEnvironment()
               .withVariable("exceeded_dimensions", exceededDimensions)
           );
         }
 
-        parameters.clearFlags();
+        selectedParameters.clearFlags();
 
-        config.rootSection.multiBreak.sizeSet.sendMessage(player, parameters.makeEnvironment());
+        config.rootSection.multiBreak.sizeSet.sendMessage(player, selectedParameters.makeEnvironment());
         return true;
       }
 
       case GET_FILTER -> {
-        if (parameters.filter == null) {
+        if (selectedParameters.filter == null) {
           config.rootSection.multiBreak.noFilterSet.sendMessage(player);
           return true;
         }
 
         config.rootSection.multiBreak.currentFilter.sendMessage(
           player,
-          parameters.makeEnvironment()
-            .withVariable("set_command", makeFilterSetCommand(label, predicateHelper.getSelectedLanguage(player), parameters.filter))
+          selectedParameters.makeEnvironment()
+            .withVariable("set_command", makeFilterSetCommand(label, predicateHelper.getSelectedLanguage(player), selectedParameters.filter))
         );
         return true;
       }
 
       case REMOVE_FILTER -> {
-        if (parameters.filter == null) {
+        if (selectedParameters.filter == null) {
           config.rootSection.multiBreak.noFilterSet.sendMessage(player);
           return true;
         }
 
         config.rootSection.multiBreak.filterRemoved.sendMessage(
           player,
-          parameters.makeEnvironment()
-            .withVariable("set_command", makeFilterSetCommand(label, predicateHelper.getSelectedLanguage(player), parameters.filter))
+          selectedParameters.makeEnvironment()
+            .withVariable("set_command", makeFilterSetCommand(label, predicateHelper.getSelectedLanguage(player), selectedParameters.filter))
         );
 
-        parameters.filter = null;
+        selectedParameters.filter = null;
+        return true;
+      }
+
+      case SELECT_SLOT -> {
+        int slot;
+
+        try {
+          if (args.length != 2)
+            throw new IllegalStateException();
+
+          slot = Integer.parseInt(args[1]);
+
+          if (slot <= 0 || slot > parametersSlots.parametersBySlotIndex.size())
+            throw new IllegalStateException();
+        } catch (Throwable e) {
+          config.rootSection.multiBreak.selectSlotUsage.sendMessage(
+            player,
+            new InterpretationEnvironment()
+              .withVariable("label", label)
+              .withVariable("action", normalizedAction.getNormalizedName())
+              .withVariable("max_slot", parametersSlots.parametersBySlotIndex.size())
+          );
+
+          return true;
+        }
+
+        if (parametersSlots.getSelectedSlotIndex() == slot - 1) {
+          config.rootSection.multiBreak.slotAlreadySelected.sendMessage(
+            player,
+            new InterpretationEnvironment()
+              .withVariable("slot", slot)
+          );
+
+          return true;
+        }
+
+        parametersSlots.setSelectedSlotIndex(slot - 1);
+
+        config.rootSection.multiBreak.slotSelected.sendMessage(
+          player,
+          new InterpretationEnvironment()
+            .withVariable("slot", parametersSlots.getSelectedSlotIndex() + 1)
+        );
+
         return true;
       }
     }
@@ -304,13 +351,13 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
     if (normalizedAction.constant == CommandAction.SET_FILTER || normalizedAction.constant == CommandAction.SET_FILTER_WITH_LANGUAGE)
       return PredicateUtils.tabCompletePredicate(player, args, 1, predicateHelper, normalizedAction.constant == CommandAction.SET_FILTER_WITH_LANGUAGE);
 
+    var parametersSlots = parametersStore.accessParametersSlots(player);
+
     if (normalizedAction.constant == CommandAction.SIZE) {
-      var parameters = parametersStore.accessParameters(player);
-
       // Seeing how seldomly this branch is invoked, I'd rather keep the displayed suggestions in sync with the current permissions.
-      parameters.updateLimits();
+      parametersSlots.updateLimits();
 
-      var maxDimension = parameters.getLimits().maxDimension();
+      var maxDimension = parametersSlots.getLimits().maxDimension();
 
       var suggestedSizes = new ArrayList<String>();
 
@@ -322,6 +369,16 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
       }
 
       return suggestedSizes;
+    }
+
+    if (normalizedAction.constant == CommandAction.SELECT_SLOT) {
+      if (args.length != 2)
+        return List.of();
+
+      return IntStream.range(1, parametersSlots.parametersBySlotIndex.size() + 1)
+        .mapToObj(String::valueOf)
+        .filter(it -> it.startsWith(args[1]))
+        .toList();
     }
 
     return List.of();

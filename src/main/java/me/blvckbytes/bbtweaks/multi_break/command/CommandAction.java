@@ -12,6 +12,7 @@ public enum CommandAction implements MatchableEnum {
   SET_FILTER_WITH_LANGUAGE,
   GET_FILTER,
   REMOVE_FILTER,
+  SELECT_SLOT,
   ;
 
   public static final EnumMatcher<CommandAction> matcher = new EnumMatcher<>(values());

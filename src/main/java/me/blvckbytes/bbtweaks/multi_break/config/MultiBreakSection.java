@@ -47,6 +47,9 @@ public class MultiBreakSection extends ConfigSection {
   public ComponentMarkup hotbarNotification;
   public ComponentMarkup sizeSetExceededDimensions;
   public ComponentMarkup sizeSet;
+  public ComponentMarkup selectSlotUsage;
+  public ComponentMarkup slotSelected;
+  public ComponentMarkup slotAlreadySelected;
 
   public EnabledJoinWarningSection enabledJoinWarning;
 

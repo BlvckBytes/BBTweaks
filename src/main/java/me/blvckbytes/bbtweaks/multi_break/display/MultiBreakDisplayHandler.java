@@ -43,6 +43,8 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
   }
 
   private boolean handleSlotClickAndGetIfRender(Player player, MultiBreakDisplay display, ClickType clickType, int slot) {
+    var selectedParameters = display.displayData.parametersSlots().getSelectedParameters();
+
     if (config.rootSection.multiBreak.display.items.extentLeft.getDisplaySlots().contains(slot))
       return handleExtentManipulation(display, BreakExtent.LEFT, clickType);
 
@@ -60,7 +62,7 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
 
     if (config.rootSection.multiBreak.display.items.currentFilter.getDisplaySlots().contains(slot)) {
       if (clickType == ClickType.LEFT) {
-        var currentFilter = display.displayData.breakParameters().filter;
+        var currentFilter = selectedParameters.filter;
 
         if (currentFilter == null) {
           config.rootSection.multiBreak.noFilterSet.sendMessage(player);
@@ -74,7 +76,7 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
             .withVariable("set_command", makeFilterSetCommand(display.displayData.commandLabel(), predicateHelper.getSelectedLanguage(player), currentFilter))
         );
 
-        display.displayData.breakParameters().filter = null;
+        selectedParameters.filter = null;
         return true;
       }
 
@@ -83,7 +85,7 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
 
     if (config.rootSection.multiBreak.display.items.sneakMode.getDisplaySlots().contains(slot)) {
       if (clickType == ClickType.LEFT) {
-        display.displayData.breakParameters().sneakMode = display.displayData.breakParameters().sneakMode.next();
+        selectedParameters.sneakMode = selectedParameters.sneakMode.next();
         return true;
       }
 
@@ -92,7 +94,14 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
 
     if (config.rootSection.multiBreak.display.items.toggleEnabled.getDisplaySlots().contains(slot)) {
       if (clickType == ClickType.LEFT) {
-        display.displayData.breakParameters().enabled ^= true;
+        var newState = display.displayData.parametersSlots().enabled ^= true;
+
+        if (newState) {
+          config.rootSection.multiBreak.nowEnabled.sendMessage(player, selectedParameters.makeEnvironment());
+          return true;
+        }
+
+        config.rootSection.multiBreak.nowDisabled.sendMessage(player);
         return true;
       }
 
@@ -103,13 +112,15 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
   }
 
   private boolean handleExtentManipulation(MultiBreakDisplay display, BreakExtent extent, ClickType clickType) {
+    var selectedParameters = display.displayData.parametersSlots().getSelectedParameters();
+
     if (clickType == ClickType.LEFT) {
-      display.displayData.breakParameters().decreaseExtent(extent);
+      selectedParameters.decreaseExtent(extent);
       return true;
     }
 
     if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
-      display.displayData.breakParameters().increaseExtent(extent);
+      selectedParameters.increaseExtent(extent);
       return true;
     }
 
