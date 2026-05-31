@@ -3,8 +3,8 @@ main: me.blvckbytes.bbtweaks.BBTweaksPlugin
 version: ${project.version}
 author: BlvckBytes
 api-version: 26.1
-depend: [ItemPredicateParser, WorldGuard]
-softdepend: [mcMMO, floodgate, CraftBook, EssentialsDiscord]
+depend: [ItemPredicateParser, WorldGuard, Essentials, PlaytimeRewards, LuckPerms]
+softdepend: [mcMMO, floodgate, CraftBook, EssentialsDiscord, Jobs, mcMMO]
 commands:
   bbtweaks:
     description: 'Administrative base-command of this plugin'
@@ -65,6 +65,9 @@ commands:
   durabilitywarning:
     description: 'Manage personal durability-warning settings'
     permission: bbtweaks.durabilitywarning
+  sidebar:
+    description: 'Configure the sidebar scoreboard'
+    permission: bbtweaks.sidebar
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

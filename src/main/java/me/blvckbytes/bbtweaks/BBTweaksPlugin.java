@@ -54,6 +54,13 @@ import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
 import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.InventoryChangeDetector;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
+import me.blvckbytes.bbtweaks.sidebar.SidebarBoardManager;
+import me.blvckbytes.bbtweaks.sidebar.color_display.SidebarColorDisplayHandler;
+import me.blvckbytes.bbtweaks.sidebar.command.SidebarCommand;
+import me.blvckbytes.bbtweaks.sidebar.command.SidebarCommandSection;
+import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferencesStore;
+import me.blvckbytes.bbtweaks.sidebar.settings_display.SidebarSettingsDisplayHandler;
+import me.blvckbytes.bbtweaks.sidebar.sorting_display.SidebarSortingDisplayHandler;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.NameScopedKeyValueStore;
@@ -80,6 +87,10 @@ public class BBTweaksPlugin extends JavaPlugin {
   private InvMagnetParametersStore invMagnetParametersStore;
   private InventoryChangeDetector inventoryChangeDetector;
   private WarningsProfileStore warningsProfileStore;
+  private SidebarColorDisplayHandler sidebarColorDisplayHandler;
+  private SidebarSettingsDisplayHandler sidebarSettingsDisplayHandler;
+  private SidebarSortingDisplayHandler sidebarSortingDisplayHandler;
+  private SidebarPreferencesStore sidebarPreferencesStore;
 
   // TODO: Idea - /empty-out [all]
 
@@ -252,6 +263,21 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       getServer().getPluginManager().registerEvents(new DurabilityWarningsListener(warningsProfileStore, config, this), this);
 
+      sidebarColorDisplayHandler = new SidebarColorDisplayHandler(floodgateIntegration, config, this);
+      getServer().getPluginManager().registerEvents(sidebarColorDisplayHandler, this);
+
+      sidebarPreferencesStore = new SidebarPreferencesStore(this, config);
+      getServer().getPluginManager().registerEvents(sidebarPreferencesStore, this);
+
+      sidebarSortingDisplayHandler = new SidebarSortingDisplayHandler(floodgateIntegration, config, this);
+      getServer().getPluginManager().registerEvents(sidebarSortingDisplayHandler, this);
+
+      sidebarSettingsDisplayHandler = new SidebarSettingsDisplayHandler(sidebarColorDisplayHandler, sidebarSortingDisplayHandler, floodgateIntegration, config, this);
+      getServer().getPluginManager().registerEvents(sidebarSettingsDisplayHandler, this);
+
+      var sidebarCommand = Objects.requireNonNull(getCommand(SidebarCommandSection.INITIAL_NAME));
+      setExecutorAndCompleter(sidebarCommand, new SidebarCommand(sidebarPreferencesStore, sidebarSettingsDisplayHandler, config));
+
       Runnable updateCommands = () -> {
         config.rootSection.markersMenu.markersCommand.apply(markerCommand, commandUpdater);
         config.rootSection.markersMenu.setMarkerCommand.apply(setMarkerCommand, commandUpdater);
@@ -263,6 +289,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         config.rootSection.invMagnet.command.apply(invMagnetCommand, commandUpdater);
         config.rootSection.getExp.command.apply(getExpCommand, commandUpdater);
         config.rootSection.durabilityWarnings.command.apply(durabilityWarningCommand, commandUpdater);
+        config.rootSection.sidebar.command.apply(sidebarCommand, commandUpdater);
       };
 
       updateCommands.run();
@@ -294,6 +321,8 @@ public class BBTweaksPlugin extends JavaPlugin {
       setExecutorAndCompleter(Objects.requireNonNull(getCommand("bbtweaks")), mainCommandExecutor);
 
       getServer().getPluginManager().registerEvents(new CommandItemListener(config), this);
+
+      getServer().getPluginManager().registerEvents(new SidebarBoardManager(this, sidebarPreferencesStore, config), this);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);
@@ -345,6 +374,26 @@ public class BBTweaksPlugin extends JavaPlugin {
     if (warningsProfileStore != null) {
       catchAll(warningsProfileStore::onShutdown);
       warningsProfileStore = null;
+    }
+
+    if (sidebarColorDisplayHandler != null) {
+      catchAll(sidebarColorDisplayHandler::onShutdown);
+      sidebarColorDisplayHandler = null;
+    }
+
+    if (sidebarSettingsDisplayHandler != null) {
+      catchAll(sidebarSettingsDisplayHandler::onShutdown);
+      sidebarSettingsDisplayHandler = null;
+    }
+
+    if (sidebarPreferencesStore != null) {
+      catchAll(sidebarPreferencesStore::onShutdown);
+      sidebarPreferencesStore = null;
+    }
+
+    if (sidebarSortingDisplayHandler != null) {
+      catchAll(sidebarSortingDisplayHandler::onShutdown);
+      sidebarSortingDisplayHandler = null;
     }
   }
 

@@ -1021,6 +1021,577 @@ durabilityWarnings:
           subtitle: '<$lut.durability_warnings.subtitle />'
           titleStayMs: 3500
 
+sidebar:
+  command:
+    name: 'sidebar'
+    usage: '{lut.sidebar_prefix} <&c>Benutzung: /{label} [<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>]'
+  allDeactivatedItemsAlreadyAtEnd: '{lut.sidebar_prefix} <&c>Alle deaktivierten Einträge befinden sich bereits am Ende der Liste!'
+  movedAllDeactivatedItemsToEnd: '{lut.sidebar_prefix} <&7>Alle <&a>deaktivierten Einträge</> wurden an das <&a>Ende</> der Liste bewegt.'
+  entryAlreadyAtTheVeryBeginning: '{lut.sidebar_prefix} <&c>Der Eintrag <&4>{name}</> befindet sich bereits ganz am Anfang der Liste!'
+  entryAlreadyAtTheVeryEnd: '{lut.sidebar_prefix} <&c>Der Eintrag <&4>{name}</> befindet sich bereits ganz am Ende der Liste!'
+  sidebarNowEnabled: '{lut.sidebar_prefix} <&7>Die Anzeige der Sidebar ist nun <&a>aktiviert</>.'
+  sidebarNowDisabled: '{lut.sidebar_prefix} <&7>Die Anzeige der Sidebar ist nun <&c>deaktiviert</>.'
+  doubleSneakMaxDelayMs: 350
+  scrollIntervalTicks: 45
+  updateIntervalTicks: 5
+  boardTitle: '<&6><&l>Blockstal.de'
+  colors:
+    WHITE:
+      color: '#F7F7F7'
+      displayName: '<color [color]>Weiß'
+      iconType: 'WHITE_CONCRETE'
+    LIGHT_GRAY:
+      color: '#A8A8A8'
+      displayName: '<color [color]>Hellgrau'
+      iconType: 'LIGHT_GRAY_CONCRETE'
+    GRAY:
+      color: '#696969'
+      displayName: '<color [color]>Grau'
+      iconType: 'GRAY_CONCRETE'
+    BROWN:
+      color: '#8A3A0E'
+      displayName: '<color [color]>Braun'
+      iconType: 'BROWN_CONCRETE'
+    LIGHT_BROWN:
+      color: '#B05A27'
+      displayName: '<color [color]>Hellbraun'
+      iconType: 'BROWN_CONCRETE_POWDER'
+    RED:
+      color: '#992222'
+      displayName: '<color [color]>Braun'
+      iconType: 'RED_CONCRETE'
+    LIGHT_RED:
+      color: '#D93636'
+      displayName: '<color [color]>Hellrot'
+      iconType: 'RED_CONCRETE_POWDER'
+    ORANGE:
+      color: '#FA6C00'
+      displayName: '<color [color]>Orange'
+      iconType: 'ORANGE_CONCRETE'
+    GOLD:
+      color: '&6'
+      displayName: '<color [color]>Gold'
+      iconType: 'YELLOW_CONCRETE'
+    YELLOW:
+      color: '&e'
+      displayName: '<color [color]>Gelb'
+      iconType: 'YELLOW_CONCRETE_POWDER'
+    LIGHT_GREEN:
+      color: '#76E02B'
+      displayName: '<color [color]>Hellgrün'
+      iconType: 'LIME_CONCRETE'
+    GREEN:
+      color: '#6E8C31'
+      displayName: '<color [color]>Grün'
+      iconType: 'GREEN_CONCRETE'
+    CYAN:
+      color: '#279EE3'
+      displayName: '<color [color]>Türkis'
+      iconType: 'CYAN_CONCRETE'
+    LIGHT_BLUE:
+      color: '#67CDF5'
+      displayName: '<color [color]>Hellblau'
+      iconType: 'LIGHT_BLUE_CONCRETE'
+    BLUE:
+      color: '#4848F0'
+      displayName: '<color [color]>Blau'
+      iconType: 'BLUE_CONCRETE_POWDER'
+    DARK_BLUE:
+      color: '#0D0DBD'
+      displayName: '<color [color]>Dunkelblau'
+      iconType: 'BLUE_CONCRETE'
+    PURPLE:
+      color: '#711DB8'
+      displayName: '<color [color]>Lila'
+      iconType: 'PURPLE_CONCRETE'
+    MAGENTA:
+      color: '#D927E8'
+      displayName: '<color [color]>Magenta'
+      iconType: 'MAGENTA_CONCRETE'
+    PINK:
+      color: '#FF63DB'
+      displayName: '<color [color]>Pink'
+      iconType: 'PINK_CONCRETE'
+  defaultValueColor: 'WHITE'
+  statistics:
+    GROUP_PREFIX:
+      iconData:
+        name: 'Rang'
+        description: 'Dein aktueller Rang.'
+        iconType: 'NETHER_STAR'
+      defaultLabelColor: 'ORANGE'
+      defaultEnabled: true
+      render: |
+        <color [label_color]>
+          ⯪ Rang:<space/>
+        </color>
+        <color [value_color]>
+          {prefix}
+        </color>
+    MONEY:
+      iconData:
+        name: 'Kontostand'
+        description: 'Dein aktueller Kontostand.'
+        iconType: 'DIAMOND'
+      defaultLabelColor: 'YELLOW'
+      defaultEnabled: true
+      render: |
+        <color [label_color]>
+          ⛁ Geld:<space/>
+        </color>
+        <color [value_color]>
+          <number [balance] format="###,###" locale="de_DE" /> BT
+        </color>
+    TOTAL_PLAYTIME:
+      iconData:
+        name: 'Spielzeit Gesamt'
+        description: |
+          Die gesamte, aktive Zeit, die du auf dem<br/>
+          Server verbracht hast.
+        iconType: 'LEATHER_BOOTS'
+      defaultLabelColor: 'LIGHT_GREEN'
+      defaultEnabled: true
+      render: |
+        <color [label_color]>
+          ⌛ Spielzeit:<space/>
+        </color>
+        <color [value_color]>
+          <$lut.sidebar.playtime_format>
+        </color>
+    TOTAL_PLAYTIME_TOP_PLACE:
+      iconData:
+        name: 'Top-Platz Spielzeit Gesamt'
+        description: |
+          Deine Platzierung in der Topliste aller<br/>
+          aktiven Spielzeiten.
+        iconType: 'LADDER'
+      defaultLabelColor: 'LIGHT_GREEN'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          🠙 Top Spielzeit:<space/>
+        </color>
+        <color [value_color]>
+          #{place}
+        </color>
+    TOTAL_AFKTIME:
+      iconData:
+        name: 'Afk-Zeit Gesamt'
+        description: |
+          Die gesamte, inaktive Zeit, die du auf dem<br/>
+          Server verbracht hast.
+        iconType: 'BUCKET'
+      defaultLabelColor: 'LIGHT_GRAY'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          ⌛ Afk-Zeit:<space/>
+        </color>
+        <color [value_color]>
+          <$lut.sidebar.playtime_format>
+        </color>
+    TOTAL_AFKTIME_TOP_PLACE:
+      iconData:
+        name: 'Top-Platz Afk-Zeit Gesamt'
+        description: |
+          Deine Platzierung in der Topliste aller<br/>
+          inaktiven (AFK) Spielzeiten.
+        iconType: 'LADDER'
+      defaultLabelColor: 'LIGHT_GRAY'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          🠙 Top Afk-Zeit:<space/>
+        </color>
+        <color [value_color]>
+          #{place}
+        </color>
+    HOME_COUNT:
+      iconData:
+        name: 'Anzahl Homepunkte'
+        description: |
+          Die Anzahl deiner genutzten- sowie<br/>
+          verbleibenden Homepunkte.
+        iconType: 'RED_BED'
+      defaultLabelColor: 'GREEN'
+      defaultEnabled: true
+      render: |
+        <color [label_color]>
+          🏛 Homepunkte:<space/>
+        </color>
+        <color [value_color]>
+          {current_home_count}/{total_home_count}
+        </color>
+    PING:
+      iconData:
+        name: 'Ping'
+        description: |
+          Die Latenz deiner Verbindung zum Server,<br/>
+          gemessen als die Zeit, die ein Paket vom<br/>
+          Server zu deinem Client und wieder zurück<br/>
+          benötigt (round-trip).
+        iconType: 'REPEATER'
+      defaultLabelColor: 'LIGHT_BLUE'
+      defaultEnabled: true
+      render: |
+        <color [label_color]>
+          📶 Ping:<space/>
+        </color>
+        <color [value_color]>
+          {ping}ms
+        </color>
+    DATE:
+      iconData:
+        name: 'Aktuelles Datum'
+        description: 'Das heutige Datum.'
+        iconType: 'PAPER'
+      defaultLabelColor: 'MAGENTA'
+      defaultEnabled: true
+      render: |
+        <color [label_color]>
+          🗓 Datum:<space/>
+        </color>
+        <color [value_color]>
+          <date [millis] format="EEE dd.MM.yyyy" zone="Europe/Berlin" locale="de_DE" />
+        </color>
+    REAL_TIME:
+      iconData:
+        name: 'Aktuelle Uhrzeit'
+        description: 'Die aktuelle Uhrzeit.'
+        iconType: 'CLOCK'
+      defaultLabelColor: 'MAGENTA'
+      defaultEnabled: true
+      render: |
+        <color [label_color]>
+          🕓 Uhrzeit:<space/>
+        </color>
+        <color [value_color]>
+          <date [millis] format="HH:mm" zone="Europe/Berlin" locale="de_DE" />
+        </color>
+    COORDINATES:
+      iconData:
+        name: 'Koordinaten'
+        description: 'Deine aktuellen Koordinaten.'
+        iconType: 'COMPASS'
+      defaultLabelColor: 'BLUE'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          🖈 Position:<space/>
+        </color>
+        <color [value_color]>
+          {x} {y} {z}
+        </color>
+    BIOME:
+      iconData:
+        name: 'Biom'
+        description: 'Das Biom, in dem du dich aktuell aufhältst.'
+        iconType: 'CACTUS'
+      defaultLabelColor: 'BROWN'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          🌵 Biom:<space/>
+        </color>
+        <color [value_color]>
+          <translate [biome_key] />
+        </color>
+    LOOKING_DIRECTION:
+      iconData:
+        name: 'Blickrichtung'
+        description: 'Die Himmelsrichtung, in die du aktuell blickst.'
+        iconType: 'SPYGLASS'
+      defaultLabelColor: 'PINK'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          👁 Richtung:<space/>
+        </color>
+        <color [value_color]>
+          {direction}
+        </color>
+    GAME_TIME:
+      iconData:
+        name: 'InGame-Uhrzeit'
+        description: |
+          Die InGame-Uhrzeit der Welt, in der<br/>
+          du dich aktuell aufhältst.
+        iconType: 'CLOCK'
+      defaultLabelColor: 'PURPLE'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          🕓 Weltzeit:<space/>
+        </color>
+        <color [value_color]>
+          <number [hours] format="00" />:<number [minutes] format="00" />
+        </color>
+    FIRST_JOB_PROGRESSION:
+      iconData:
+        name: 'Fortschritt erster Job'
+        description: |
+          Der aktuelle Fortschritt innerhalb deines<br/>
+          ersten Jobs (/jobs).
+        iconType: 'CHEST'
+      defaultLabelColor: 'ORANGE'
+      defaultEnabled: false
+      render: |
+        <container *if="progression">
+          <color [label_color]>
+            💼 {name}-Job:<space/>
+          </color>
+          <color [value_color]>
+            <$lut.sidebar.job_progression_format />
+          </color>
+        </container>
+        <&c *else>💼 Job 1: Kein Job
+    SECOND_JOB_PROGRESSION:
+      iconData:
+        name: 'Fortschritt zweiter Job'
+        description: |
+          Der aktuelle Fortschritt innerhalb deines<br/>
+          zweiten Jobs (/jobs).
+        iconType: 'CHEST'
+      defaultLabelColor: 'ORANGE'
+      defaultEnabled: false
+      render: |
+        <container *if="progression">
+          <color [label_color]>
+            💼 {name}-Job:<space/>
+          </color>
+          <color [value_color]>
+            <$lut.sidebar.job_progression_format />
+          </color>
+        </container>
+        <&c *else>💼 Job 2: Kein Job
+    MCMMO_POWER_LEVEL:
+      iconData:
+        name: 'McMMO Powerlevel'
+        description: |
+          Dein aktuelles McMMO-Powerlevel, auch als<br/>
+          Gesamtlevel bekannt (/mcmmo).
+        iconType: 'DIAMOND_PICKAXE'
+      defaultLabelColor: 'PURPLE'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          ⛏ Powerlevel:<space/>
+        </color>
+        <color [value_color]>
+          {power_level}
+        </color>
+    PLAYER_NAME:
+      iconData:
+        name: 'Spielername'
+        description: 'Der Name deines Accounts.'
+        iconType: 'NAME_TAG'
+      defaultLabelColor: 'LIGHT_BLUE'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          👤 Name:<space/>
+        </color>
+        <color [value_color]>
+          {name}
+        </color>
+    TPS:
+      iconData:
+        name: 'Ticks Per Second'
+        description: |
+          Gibt an, wie viele Ticks pro Sekunde verarbeitet<br/>
+          werden konnten, innerhalb der letzten Minute,<br/>
+          fünf Minuten und zehn Minuten.<br/>
+          <br/>
+          Um flüssig zu laufen, benötigt Minecraft 20 TPS.<br/>
+          Niedrigere Werte signalisieren eine Überlastung.
+        iconType: 'REDSTONE'
+      defaultLabelColor: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          ⚡ TPS:<space/>
+        </color>
+        <color [value_color]>
+          <number *for-value="tps" *for-separator={<space/>} [value] format='#.##' locale="de_DE" />
+        </color>
+  colorDisplay:
+    title: '<&8>Farbauswahl'
+    rows: 4
+    items:
+      filler:
+        type: BLACK_STAINED_GLASS_PANE
+        name: ' '
+        slots: '(last_slot - 8)..last_slot'
+      backButton:
+        slots: 'last_slot - 4'
+        type: PLAYER_HEAD
+        textures: '{lut.textures["ARROW_LEFT_BLACK"]}'
+        name: |
+          <reset>
+            <&8>» <&6>Zurück <&8>«
+        lore: |
+          <reset>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Gelange zu den Einstellungen<br/>
+            {lut.spacer}
+      colorIcon:
+        type: '{icon_type}'
+        name:
+          <reset>
+            <&8>» {display_name} «
+        lore: |
+          <reset>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Wähle diese Farbe<br/>
+            {lut.spacer}
+  settingsDisplay:
+    title: '<&8>Sidebar-Einstellungen'
+    rows: 6
+    items:
+      filler:
+        type: BLACK_STAINED_GLASS_PANE
+        name: ' '
+        slots: '(last_slot - 8)..last_slot'
+      nextSneakMode:
+        type: 'IRON_BOOTS'
+        name: |
+          <reset>
+            <&8>» <&6>Sneak-Modus</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Wählt das Verhalten hinsichtlich deines<br/>
+            Sneakzustandes aus, um dadurch die Sidebar<br/>
+            im Alltag schnell ein- und auszublenden.<br/>
+            {lut.spacer}<br/>
+            <&8>♦ <&e>Aktueller Modus: {lut.sidebar.sneak_mode[sneak_mode]}<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
+            {lut.spacer}
+        slots: 'last_slot - 7'
+      enabled:
+        type: '{sidebar_enabled then "GREEN_CONCRETE" else "RED_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>»<space/>
+            <&a *if="sidebar_enabled">Anzeige Aktiviert</>
+            <&c *else>Anzeige Deaktiviert</>
+            <space/>«
+        lore: |
+          <reset>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Anzeige {sidebar_enabled then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+        slots: 'last_slot - 5'
+      showTitle:
+        type: '{show_title then "GREEN_CONCRETE" else "RED_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>»<space/>
+            <&a *if="show_title">Titel wird angezeigt</>
+            <&c *else>Titel wird ausgeblendet</>
+            <space/>«
+        lore: |
+          <reset>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Board-Titel {sidebar_enabled then "ausblenden" else "anzeigen"}<br/>
+            {lut.spacer}
+        slots: 'last_slot - 4'
+      valueColor:
+        type: '{value_color.icon_type}'
+        name: |
+          <reset>
+            <&8>» <&6>Farbe der Werte <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Die Farbe, mit welcher die individuellen<br/>
+            Werte aller Statistiken angezeigt werden.<br/>
+            {lut.spacer}<br/>
+            <&8>♦ <&e>Aktuelle Farbe: {value_color.display_name}<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Neue Farbe auswählen<br/>
+            {lut.spacer}
+        slots: 'last_slot - 3'
+      openSorting:
+        type: 'COMPARATOR'
+        name: |
+          <reset>
+            <&8>» <&6>Einträge Sortieren <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Sortiere die Einträge in deiner<br/>
+            Sidebar nach individuellem Belieben.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Ins Sortiermenü wechseln<br/>
+            {lut.spacer}
+        slots: 'last_slot - 1'
+      statisticIcon:
+        type: '{icon_type}'
+        glint: 'enabled'
+        name: |
+          <reset>
+            <&8>» <&6>{name}</> <&7>(<&a *if="enabled">aktiviert</><&c *else>deaktiviert</>)</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>{description}<br/>
+            {lut.spacer}<br/>
+            <&8>♦ <&e>Aktuelle Farbe: {label_color.display_name}<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Statistik {enabled then "deaktivieren" else "aktivieren"}<br/>
+            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Neue Farbe auswählen<br/>
+            {lut.spacer}
+  sortingDisplay:
+    title: '<&8>Sidebar-Sortierung'
+    rows: 6
+    items:
+      filler:
+        type: BLACK_STAINED_GLASS_PANE
+        name: ' '
+        slots: '(last_slot - 8)..last_slot'
+      backButton:
+        slots: 'last_slot - 5'
+        type: 'PLAYER_HEAD'
+        textures: '{lut.textures["ARROW_LEFT_BLACK"]}'
+        name: |
+          <reset>
+            <&8>» <&6>Zurück <&8>«
+        lore: |
+          <reset>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Gelange zu den Einstellungen<br/>
+            {lut.spacer}
+      moveDisabledToEnd:
+        slots: 'last_slot - 3'
+        type: 'PISTON'
+        name: |
+          <reset>
+            <&8>» <&6>Deaktivierte ans Ende bewegen <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Bewege alle aktuell deaktivierte Einträge<br/>
+            ans Ende der Liste, um die Sortierung zu vereinfachen.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Deaktivierte ans Ende bewegen<br/>
+            {lut.spacer}
+      statisticIcon:
+        type: '{icon_type}'
+        glint: 'enabled'
+        name: |
+          <reset>
+            <&8>» <&6>{name}</> <&7>(<&a *if="enabled">aktiviert</><&c *else>deaktiviert</>)</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>{description}<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Vorwärts bewegen<br/>
+            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Rückwärts bewegen<br/>
+            {lut.spacer}
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -1044,6 +1615,7 @@ cLut:
   auto_tool_prefix: '<&7>[<&6>AutoTool<&7>]'
   inv_magnet_prefix: '<&7>[<&6>InvMagnet<&7>]'
   getexp_prefix: '<&7>[<&6>GetExp<&7>]'
+  sidebar_prefix: '<&7>[<&6>Sidebar<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}
@@ -1153,3 +1725,26 @@ cLut:
       )</>.
     title: '<&c>⚠ <&4><&l>Haltbarkeit</> <&c>⚠'
     subtitle: '<&c><translate [type_key] /></> bei <&4>{remaining_durability_percentage}%'
+  sidebar:
+    playtime_format: |
+      <duration [value]="time / 20.0 * 1000.0" units="mhd" [zeroes]="time < 20 * 60 then 's'" />
+    job_progression_format: |
+      {progression.level},<space/>
+      <container *if="progression.current_experience < 1000">
+        {progression.current_experience}
+      </container>
+      <container *else>
+        <number [value]="progression.current_experience / 1000.0" format="0.#" locale="de_DE"/>k
+      </>
+      /
+      <container *if="progression.max_experience < 1000">
+        {progression.max_experience}
+      </container>
+      <container *else>
+        <number [value]="progression.max_experience / 1000.0" format="0.#" locale="de_DE"/>k
+      </>
+    sneak_mode:
+      NONE: '<&7>Keine Funktion'
+      DOUBLE_SNEAK_TOGGLES: '<&a>Doppel-Sneak schaltet an/aus'
+      ENABLE_DURING_SNEAK: '<&3>Während sneaken anzeigen'
+      DISABLE_DURING_SNEAK: '<&3>Während sneaken nicht anzeigen'

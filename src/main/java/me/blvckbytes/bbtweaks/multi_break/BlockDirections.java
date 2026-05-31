@@ -31,7 +31,7 @@ public record BlockDirections(BlockFace forwards, BlockFace left, BlockFace righ
     };
   }
 
-  private static BlockFace directionToBlockFace(Vector direction) {
+  public static BlockFace directionToBlockFace(Vector direction) {
     var x = direction.getX();
     var z = direction.getZ();
 
