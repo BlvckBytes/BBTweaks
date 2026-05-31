@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.durability_warnings.config;
 
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
+import at.blvckbytes.cm_mapper.mapper.MappingError;
 import at.blvckbytes.cm_mapper.mapper.section.CSIgnore;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
@@ -17,6 +18,8 @@ import java.util.List;
 public class DurabilityWarningsSection extends ConfigSection {
 
   public DurabilityWarningCommandSection command;
+
+  public int trackingResetMinDurabilityDelta;
 
   public ComponentMarkup playersOnly;
   public ComponentMarkup missingPermission;
@@ -53,5 +56,8 @@ public class DurabilityWarningsSection extends ConfigSection {
           .add(warning);
       }
     }
+
+    if (trackingResetMinDurabilityDelta <= 0)
+      throw new MappingError("Property \"trackingResetMinDurabilityDelta\" cannot be less than or equal to zero");
   }
 }

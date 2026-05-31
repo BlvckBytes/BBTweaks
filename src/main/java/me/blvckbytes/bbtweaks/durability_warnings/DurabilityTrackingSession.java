@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.durability_warnings;
 
+import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.durability_warnings.config.DurabilityWarningSection;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.Damageable;
@@ -10,11 +12,13 @@ import java.util.List;
 public class DurabilityTrackingSession {
 
   private final WarningsProfile profile;
+  private final ConfigKeeper<MainSection> config;
 
   private final SlotTrackingInfo[] trackingInfoBySlot;
 
-  public DurabilityTrackingSession(WarningsProfile profile) {
+  public DurabilityTrackingSession(WarningsProfile profile, ConfigKeeper<MainSection> config) {
     this.profile = profile;
+    this.config = config;
 
     // Hotbar and off-hand
     this.trackingInfoBySlot = new SlotTrackingInfo[9 + 1];
@@ -30,7 +34,7 @@ public class DurabilityTrackingSession {
     var trackingInfo = trackingInfoBySlot[slot];
 
     if (trackingInfo == null) {
-      trackingInfo = new SlotTrackingInfo();
+      trackingInfo = new SlotTrackingInfo(config);
       trackingInfoBySlot[slot] = trackingInfo;
     }
 

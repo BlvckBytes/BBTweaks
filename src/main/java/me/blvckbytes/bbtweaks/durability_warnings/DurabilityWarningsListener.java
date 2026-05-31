@@ -141,7 +141,7 @@ public class DurabilityWarningsListener implements Listener {
         return;
 
       trackingSessionByPlayerId
-        .computeIfAbsent(player.getUniqueId(), k -> new DurabilityTrackingSession(profile))
+        .computeIfAbsent(player.getUniqueId(), k -> new DurabilityTrackingSession(profile, config))
         .submitDamageUpdate(slotIndex, targetItem, postDamage, applicativeWarnings);
     }, 1L);
   }
