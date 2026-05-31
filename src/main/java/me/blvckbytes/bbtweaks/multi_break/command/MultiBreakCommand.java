@@ -169,6 +169,7 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
       }
 
       selectedParameters.filter = new PredicateAndLanguage(predicate, language);
+      selectedParameters.filterEnabled = true;
 
       config.rootSection.multiBreak.filterSet.sendMessage(
         player,
@@ -284,6 +285,58 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
         );
 
         selectedParameters.filter = null;
+        selectedParameters.filterEnabled = false;
+        return true;
+      }
+
+      case ENABLE_FILTER -> {
+        if (selectedParameters.filter == null) {
+          config.rootSection.multiBreak.noFilterSet.sendMessage(player);
+          return true;
+        }
+
+        if (selectedParameters.filterEnabled) {
+          config.rootSection.multiBreak.filterAlreadyEnabled.sendMessage(player);
+          return true;
+        }
+
+        config.rootSection.multiBreak.filterNowEnabled.sendMessage(player);
+
+        selectedParameters.filterEnabled = true;
+        return true;
+      }
+
+      case DISABLE_FILTER -> {
+        if (selectedParameters.filter == null) {
+          config.rootSection.multiBreak.noFilterSet.sendMessage(player);
+          return true;
+        }
+
+        if (!selectedParameters.filterEnabled) {
+          config.rootSection.multiBreak.filterAlreadyDisabled.sendMessage(player);
+          return true;
+        }
+
+        config.rootSection.multiBreak.filterNowDisabled.sendMessage(player);
+
+        selectedParameters.filterEnabled = false;
+        return true;
+      }
+
+      case TOGGLE_FILTER -> {
+        if (selectedParameters.filter == null) {
+          config.rootSection.multiBreak.noFilterSet.sendMessage(player);
+          return true;
+        }
+
+        selectedParameters.filterEnabled ^= true;
+
+        if (selectedParameters.filterEnabled) {
+          config.rootSection.multiBreak.filterNowEnabled.sendMessage(player);
+          return true;
+        }
+
+        config.rootSection.multiBreak.filterNowDisabled.sendMessage(player);
         return true;
       }
 

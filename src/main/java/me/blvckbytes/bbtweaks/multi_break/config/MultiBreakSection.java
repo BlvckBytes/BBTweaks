@@ -44,6 +44,10 @@ public class MultiBreakSection extends ConfigSection {
   public ComponentMarkup nowDisabled;
   public ComponentMarkup noFilterSet;
   public ComponentMarkup currentFilter;
+  public ComponentMarkup filterAlreadyEnabled;
+  public ComponentMarkup filterNowEnabled;
+  public ComponentMarkup filterAlreadyDisabled;
+  public ComponentMarkup filterNowDisabled;
   public ComponentMarkup hotbarNotification;
   public ComponentMarkup sizeSetExceededDimensions;
   public ComponentMarkup sizeSet;

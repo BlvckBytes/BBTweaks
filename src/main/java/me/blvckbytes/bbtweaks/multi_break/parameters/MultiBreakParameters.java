@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.multi_break.parameters;
 
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
+import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -12,6 +13,7 @@ public class MultiBreakParameters {
   public final int slotIndex;
 
   public @Nullable PredicateAndLanguage filter;
+  public boolean filterEnabled;
   public SneakMode sneakMode;
 
   public final int[] extentByOrdinal;
@@ -124,11 +126,24 @@ public class MultiBreakParameters {
       .withVariable("enabled", parametersSlots.enabled)
       .withVariable("sneak_mode", sneakMode.name())
       .withVariable("filter_predicate", filter == null ? null : filter.getTokenPredicateString())
+      .withVariable("filter_enabled", filterEnabled)
       .withVariable("exceeded_width_limit", didExceedLimit(BreakDimension.WIDTH))
       .withVariable("exceeded_height_limit", didExceedLimit(BreakDimension.HEIGHT))
       .withVariable("exceeded_depth_limit", didExceedLimit(BreakDimension.DEPTH))
       .withVariable("slot_index", slotIndex)
       .withVariable("slot_count", parametersSlots.parametersBySlotIndex.size())
       .withVariable("slot_enabled", parametersSlots.getSelectedSlotIndex() == slotIndex);
+  }
+
+  public boolean doesMaterialMismatchFilter(Material material) {
+    if (filter == null || !filterEnabled)
+      return false;
+
+    var itemType = material.asItemType();
+
+    if (itemType == null)
+      return false;
+
+    return !filter.predicate.test(itemType.createItemStack());
   }
 }

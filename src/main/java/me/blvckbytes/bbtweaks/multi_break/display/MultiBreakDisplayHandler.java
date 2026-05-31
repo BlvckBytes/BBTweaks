@@ -83,6 +83,23 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
         return true;
       }
 
+      if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
+        if (selectedParameters.filter == null) {
+          config.rootSection.multiBreak.noFilterSet.sendMessage(player);
+          return true;
+        }
+
+        selectedParameters.filterEnabled ^= true;
+
+        if (selectedParameters.filterEnabled) {
+          config.rootSection.multiBreak.filterNowEnabled.sendMessage(player);
+          return true;
+        }
+
+        config.rootSection.multiBreak.filterNowDisabled.sendMessage(player);
+        return true;
+      }
+
       return false;
     }
 

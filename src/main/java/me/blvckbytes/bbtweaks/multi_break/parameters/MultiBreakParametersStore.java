@@ -33,7 +33,7 @@ public class MultiBreakParametersStore implements Listener {
 
   public static final int PARAMETERS_SLOTS_COUNT = 5;
 
-  private final NamespacedKey[] keysSneakMode, keysExtents, keysFilterPredicate, keysFilterLanguage;
+  private final NamespacedKey[] keysSneakMode, keysExtents, keysFilterPredicate, keysFilterLanguage, keysFilterEnabled;
   private final NamespacedKey keySelectedSlotIndex;
   private final NamespacedKey keyEnabled;
 
@@ -52,6 +52,7 @@ public class MultiBreakParametersStore implements Listener {
     this.keysExtents = new NamespacedKey[PARAMETERS_SLOTS_COUNT];
     this.keysFilterPredicate = new NamespacedKey[PARAMETERS_SLOTS_COUNT];
     this.keysFilterLanguage = new NamespacedKey[PARAMETERS_SLOTS_COUNT];
+    this.keysFilterEnabled = new NamespacedKey[PARAMETERS_SLOTS_COUNT];
 
     this.keySelectedSlotIndex = new NamespacedKey(plugin, "multi-break-selected-slot-index");
     this.keyEnabled = new NamespacedKey(plugin, "multi-break-enabled");
@@ -68,6 +69,7 @@ public class MultiBreakParametersStore implements Listener {
       keysExtents[slotIndex] = new NamespacedKey(plugin, baseKey + "-extents");
       keysFilterPredicate[slotIndex] = new NamespacedKey(plugin, baseKey + "-filter-predicate");
       keysFilterLanguage[slotIndex] = new NamespacedKey(plugin, baseKey + "-filter-language");
+      keysFilterEnabled[slotIndex] = new NamespacedKey(plugin, baseKey + "-filter-enabled");
     }
 
     this.predicateHelper = predicateHelper;
@@ -176,6 +178,10 @@ public class MultiBreakParametersStore implements Listener {
 
     result.filter = tryLoadFilter(pdc, keysFilterPredicate[slotIndex], keysFilterLanguage[slotIndex]);
 
+    var enabledValue = pdc.get(keysFilterEnabled[slotIndex], PersistentDataType.BOOLEAN);
+
+    result.filterEnabled = enabledValue == null ? result.filter != null : enabledValue;
+
     result.constrainAndSetFlags(false);
 
     return result;
@@ -245,5 +251,6 @@ public class MultiBreakParametersStore implements Listener {
     pdc.set(keysExtents[parameters.slotIndex], PersistentDataType.INTEGER_ARRAY, parameters.extentByOrdinal);
 
     saveFilter(parameters.filter, pdc, keysFilterPredicate[parameters.slotIndex], keysFilterLanguage[parameters.slotIndex]);
+    pdc.set(keysFilterEnabled[parameters.slotIndex], PersistentDataType.BOOLEAN, parameters.filterEnabled);
   }
 }

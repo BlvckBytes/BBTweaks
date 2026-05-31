@@ -12,6 +12,9 @@ public enum CommandAction implements MatchableEnum {
   SET_FILTER_WITH_LANGUAGE,
   GET_FILTER,
   REMOVE_FILTER,
+  ENABLE_FILTER,
+  DISABLE_FILTER,
+  TOGGLE_FILTER,
   SELECT_SLOT,
   ;
 

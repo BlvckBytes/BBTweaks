@@ -680,6 +680,10 @@ multiBreak:
           <&a><u>{filter_predicate}
       </hover-text>
       .
+  filterAlreadyEnabled: '{lut.multi_break_prefix} <&c>Der Filter ist bereits aktiviert!'
+  filterNowEnabled: '{lut.multi_break_prefix} <&7>Der Filter ist nun <&a>aktiviert<&7>.'
+  filterAlreadyDisabled: '{lut.multi_break_prefix} <&c>Der Filter ist bereits deaktiviert!'
+  filterNowDisabled: '{lut.multi_break_prefix} <&7>Der Filter ist nun <&c>deaktiviert<&7>.'
   hotbarNotification: |
     <separate
       separator={<&7> |<space/>}
@@ -827,6 +831,7 @@ multiBreak:
       currentFilter:
         slots: 22
         type: '{filter_predicate neq null then "PURPLE_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        glint: 'filter_predicate neq null and filter_enabled'
         name: |
           <reset>
             <&8>» <&6>Abbaufilter <&8>«
@@ -839,8 +844,12 @@ multiBreak:
             <&8>♦ <&e>Aktueller Filter:<space/>
             <&6 *if="filter_predicate">{filter_predicate}</>
             <&c *else>Nicht gesetzt</><br/>
+            <&8>♦ <&e>Aktueller Zustand:<space/>
+            <&a *if="filter_enabled">aktiviert</>
+            <&c *else>deaktiviert</><br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Filter entfernen<br/>
+            <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Filter {filter_enabled then "deaktivieren" else "aktivieren"}<br/>
             <&8>➥ <&e>{filter_set_command} <&7>Filter setzen<br/>
             {lut.spacer}
       sneakMode:
