@@ -3,8 +3,7 @@ package me.blvckbytes.bbtweaks.command_items;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -13,7 +12,6 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 public class CommandItemListener implements Listener {
 
@@ -48,7 +46,7 @@ public class CommandItemListener implements Listener {
 
     var nameBuilder = new StringBuilder();
 
-    forEachTextOfComponent(displayName, nameBuilder::append);
+    ComponentUtil.forEachTextOfComponent(displayName, nameBuilder::append);
 
     var nameLower = nameBuilder.toString().trim().toLowerCase();
     var commandItem = config.rootSection.commandItems.commandItemByNameLower.get(nameLower);
@@ -81,13 +79,5 @@ public class CommandItemListener implements Listener {
   @EventHandler
   public void onQuit(PlayerQuitEvent event) {
     lastUseStampByNamerByPlayerId.remove(event.getPlayer().getUniqueId());
-  }
-
-  private static void forEachTextOfComponent(Component component, Consumer<String> textHandler) {
-    if (component instanceof TextComponent textComponent)
-      textHandler.accept(textComponent.content());
-
-    for (var child : component.children())
-      forEachTextOfComponent(child, textHandler);
   }
 }

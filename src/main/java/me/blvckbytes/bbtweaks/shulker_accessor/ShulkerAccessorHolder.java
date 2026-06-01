@@ -3,8 +3,8 @@ package me.blvckbytes.bbtweaks.shulker_accessor;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.ChangeDetectionHolder;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
@@ -201,7 +201,7 @@ public class ShulkerAccessorHolder extends ChangeDetectionHolder {
 
     var titleTextBuilder = new StringBuilder();
 
-    walkTextComponentsAndAppend(currentViewTitle, titleTextBuilder);
+    ComponentUtil.forEachTextOfComponent(currentViewTitle, titleTextBuilder::append);
 
     var titleText = titleTextBuilder.toString();
 
@@ -214,13 +214,5 @@ public class ShulkerAccessorHolder extends ChangeDetectionHolder {
     }
 
     return null;
-  }
-
-  private static void walkTextComponentsAndAppend(Component component, StringBuilder output) {
-    if (component instanceof TextComponent textComponent)
-      output.append(textComponent.content());
-
-    for (var child : component.children())
-      walkTextComponentsAndAppend(child, output);
   }
 }

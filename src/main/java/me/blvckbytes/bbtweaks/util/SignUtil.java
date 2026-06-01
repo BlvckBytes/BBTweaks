@@ -1,7 +1,6 @@
 package me.blvckbytes.bbtweaks.util;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -69,16 +68,8 @@ public class SignUtil {
 
     var result = new StringBuilder();
 
-    componentToPlainText(targetLine, result);
+    ComponentUtil.forEachTextOfComponent(targetLine, result::append);
 
     return result.toString().trim();
-  }
-
-  private static void componentToPlainText(Component component, StringBuilder output) {
-    if (component instanceof TextComponent textComponent)
-      output.append(textComponent.content());
-
-    for (var child : component.children())
-      componentToPlainText(child, output);
   }
 }
