@@ -67,6 +67,14 @@ public class SidebarBoard {
 
   public void advanceScrollingAndSetLines(long relativeTime, List<? extends Component> lines, SidebarPreferences preferences) {
     var scoreboard = holder.bukkitPlayer().getScoreboard();
+
+    // By default, everyone shares the same scoreboard - overwrite with a custom new board only if
+    // another plugin hasn't already done so, as to not lose out on their possible additions.
+    if (scoreboard == Bukkit.getScoreboardManager().getMainScoreboard()) {
+      scoreboard = Bukkit.getScoreboardManager().getNewScoreboard();
+      holder.bukkitPlayer().setScoreboard(scoreboard);
+    }
+
     var sidebarObjective = scoreboard.getObjective(DisplaySlot.SIDEBAR);
 
     if (sidebarObjective == null) {
