@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
 import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.*;
 
@@ -72,18 +73,17 @@ public class SidebarBoard {
       sidebarObjective = scoreboard.registerNewObjective(pluginName, Criteria.DUMMY, preferences.getBoardTitle());
       sidebarObjective.setDisplaySlot(DisplaySlot.SIDEBAR);
       sidebarObjective.numberFormat(NumberFormat.blank());
-    }
-
-    else {
-      var boardTitle = preferences.getBoardTitle();
-
-      if (!sidebarObjective.displayName().equals(boardTitle))
-        sidebarObjective.displayName(boardTitle);
+      cachedScoreAndTeamByIndex.clear();
     }
 
     // Do not modify foreign objectives - simply NOOP in that case.
     if (!sidebarObjective.getName().equals(pluginName))
       return;
+
+    var boardTitle = preferences.getBoardTitle();
+
+    if (!sidebarObjective.displayName().equals(boardTitle))
+      sidebarObjective.displayName(boardTitle);
 
     if (lines.isEmpty()) {
       cachedScoreAndTeamByIndex.values().forEach(it -> it.score().resetScore());
@@ -118,6 +118,8 @@ public class SidebarBoard {
   }
 
   public void unregisterIfShown() {
+    cachedScoreAndTeamByIndex.clear();
+
     var scoreboard = holder.bukkitPlayer().getScoreboard();
     var sidebarObjective = scoreboard.getObjective(DisplaySlot.SIDEBAR);
 
@@ -127,7 +129,6 @@ public class SidebarBoard {
           team.unregister();
       }
 
-      cachedScoreAndTeamByIndex.clear();
       sidebarObjective.unregister();
     }
   }
