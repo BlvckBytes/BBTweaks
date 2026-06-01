@@ -1599,7 +1599,8 @@ sidebar:
           <reset>
             <br/>
             <&7>Bewege alle aktuell deaktivierte Einträge<br/>
-            ans Ende der Liste, um die Sortierung zu vereinfachen.<br/>
+            ans Ende der Liste, um die Sortierung zu<br/>
+            vereinfachen.<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Deaktivierte ans Ende bewegen<br/>
             {lut.spacer}
@@ -1753,7 +1754,7 @@ cLut:
     subtitle: '<&c><translate [type_key] /></> bei <&4>{remaining_durability_percentage}%'
   sidebar:
     playtime_format: |
-      <duration [value]="time / 20.0 * 1000.0" units="mhd" [zeroes]="time < 20 * 60 then 's'" />
+      <duration [value]="time / 20.0 * 1000.0" units="hd" [zeroes]="time < 20 * 60 then 'h'" />
     job_progression_format: |
       {progression.level},<space/>
       <container *if="progression.current_experience < 1000">
