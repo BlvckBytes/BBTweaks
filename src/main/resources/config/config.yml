@@ -1615,8 +1615,8 @@ sidebar:
             <br/>
             <&7>{description}<br/>
             {lut.spacer}<br/>
-            <&8>➥ <&e>Linksklick <&7>Vorwärts bewegen<br/>
-            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Rückwärts bewegen<br/>
+            <&8>➥ <&e>Linksklick <&7>Rückwärts bewegen<br/>
+            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Vorwärts bewegen<br/>
             {lut.spacer}
 
 sLut:

@@ -68,7 +68,7 @@ public class SidebarSortingDisplayHandler extends DisplayHandler<SidebarSortingD
     if (statistic == null)
       return;
 
-    if (clickType == ClickType.LEFT) {
+    if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
       var list = display.displayData.preferences().statisticsInOrder;
       var currentIndex = list.indexOf(statistic);
 
@@ -91,7 +91,7 @@ public class SidebarSortingDisplayHandler extends DisplayHandler<SidebarSortingD
       return;
     }
 
-    if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
+    if (clickType == ClickType.LEFT) {
       var list = display.displayData.preferences().statisticsInOrder;
       var currentIndex = list.indexOf(statistic);
 
