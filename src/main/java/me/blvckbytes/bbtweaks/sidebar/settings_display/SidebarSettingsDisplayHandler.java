@@ -70,6 +70,23 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
       return;
     }
 
+    if (config.rootSection.sidebar.settingsDisplay.items.resetToDefaults.getDisplaySlots().contains(slot)) {
+      if (clickType != ClickType.LEFT)
+        return;
+
+      if (!display.displayData.divergesFromDefaults()) {
+        config.rootSection.sidebar.noChangesMadeToReset.sendMessage(player);
+        return;
+      }
+
+      display.displayData.resetToDefaults();
+
+      config.rootSection.sidebar.settingsHaveBeenReset.sendMessage(player);
+
+      display.renderItems();
+      return;
+    }
+
     if (config.rootSection.sidebar.settingsDisplay.items.valueColor.getDisplaySlots().contains(slot)) {
       if (clickType != ClickType.LEFT)
         return;

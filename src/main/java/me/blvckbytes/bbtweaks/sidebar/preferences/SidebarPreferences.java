@@ -37,15 +37,50 @@ public class SidebarPreferences {
     this.player = player;
     this.config = config;
 
+    // This flag is consciously excluded from the public reset-API.
     this.enabled = DEFAULT_ENABLED;
+
+    this.enabledStatistics = EnumSet.noneOf(SidebarStatistic.class);
+    this.labelColorByStatistic = new EnumMap<>(SidebarStatistic.class);
+    this.statisticsInOrder = new ArrayList<>();
+
+    this.resetToDefaults();
+  }
+
+  public boolean divergesFromDefaults() {
+    if (showTitle != DEFAULT_SHOW_TITLE)
+      return true;
+
+    if (sneakMode != DEFAULT_SNEAK_MODE)
+      return true;
+
+    if (this.valueColor != config.rootSection.sidebar._defaultValueColor)
+      return true;
+
+    for (var statistic : SidebarStatistic.ALL_VALUES) {
+      if (statisticsInOrder.get(statistic.ordinal()) != statistic)
+        return true;
+
+      var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
+
+      if (labelColorByStatistic.get(statistic) != statisticSection._defaultLabelColor)
+        return true;
+
+      if (enabledStatistics.contains(statistic) != statisticSection.defaultEnabled)
+        return true;
+    }
+
+    return false;
+  }
+
+  public void resetToDefaults() {
     this.showTitle = DEFAULT_SHOW_TITLE;
     this.sneakMode = DEFAULT_SNEAK_MODE;
 
     this.valueColor = config.rootSection.sidebar._defaultValueColor;
 
-    this.enabledStatistics = EnumSet.noneOf(SidebarStatistic.class);
-    this.labelColorByStatistic = new EnumMap<>(SidebarStatistic.class);
-    this.statisticsInOrder = new ArrayList<>();
+    this.enabledStatistics.clear();
+    this.statisticsInOrder.clear();
 
     for (var statistic : SidebarStatistic.ALL_VALUES) {
       var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);

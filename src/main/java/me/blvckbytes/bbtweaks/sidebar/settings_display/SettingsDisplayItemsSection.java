@@ -14,6 +14,7 @@ public class SettingsDisplayItemsSection extends ConfigSection {
   public GuiItemStackSection nextSneakMode;
   public GuiItemStackSection valueColor;
   public GuiItemStackSection openSorting;
+  public GuiItemStackSection resetToDefaults;
   public ItemStackSection statisticIcon;
 
   public SettingsDisplayItemsSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {

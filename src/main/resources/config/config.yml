@@ -1041,6 +1041,8 @@ sidebar:
   entryAlreadyAtTheVeryEnd: '{lut.sidebar_prefix} <&c>Der Eintrag <&4>{name}</> befindet sich bereits ganz am Ende der Liste!'
   sidebarNowEnabled: '{lut.sidebar_prefix} <&7>Die Anzeige der Sidebar ist nun <&a>aktiviert</>.'
   sidebarNowDisabled: '{lut.sidebar_prefix} <&7>Die Anzeige der Sidebar ist nun <&c>deaktiviert</>.'
+  noChangesMadeToReset: '{lut.sidebar_prefix} <&c>Deine aktuellen Einstellungen weichen noch nicht von den Standardwerten ab!'
+  settingsHaveBeenReset: '{lut.sidebar_prefix} <&7>Deine Einstellungen wurden auf die <&a>Standardwerte</> zurückgesetzt.'
   doubleSneakMaxDelayMs: 350
   scrollIntervalTicks: 45
   updateIntervalTicks: 5
@@ -1478,35 +1480,35 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
             {lut.spacer}
-        slots: 'last_slot - 7'
+        slots: 'last_slot - 4'
       enabled:
         type: '{sidebar_enabled then "GREEN_CONCRETE" else "RED_CONCRETE"}'
         name: |
           <reset>
             <&8>»<space/>
-            <&a *if="sidebar_enabled">Anzeige Aktiviert</>
-            <&c *else>Anzeige Deaktiviert</>
+            <&a *if="sidebar_enabled">Anzeige aktiviert</>
+            <&c *else>Anzeige deaktiviert</>
             <space/>«
         lore: |
           <reset>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Anzeige {sidebar_enabled then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
-        slots: 'last_slot - 5'
+        slots: 'last_slot - 8'
       showTitle:
         type: '{show_title then "GREEN_CONCRETE" else "RED_CONCRETE"}'
         name: |
           <reset>
             <&8>»<space/>
-            <&a *if="show_title">Titel wird angezeigt</>
-            <&c *else>Titel wird ausgeblendet</>
+            <&a *if="show_title">Titel angezeigt</>
+            <&c *else>Titel ausgeblendet</>
             <space/>«
         lore: |
           <reset>
             {lut.spacer}<br/>
-            <&8>➥ <&e>Linksklick <&7>Board-Titel {sidebar_enabled then "ausblenden" else "anzeigen"}<br/>
+            <&8>➥ <&e>Linksklick <&7>Board-Titel {show_title then "ausblenden" else "anzeigen"}<br/>
             {lut.spacer}
-        slots: 'last_slot - 4'
+        slots: 'last_slot - 7'
       valueColor:
         type: '{value_color.icon_type}'
         name: |
@@ -1522,12 +1524,12 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Neue Farbe auswählen<br/>
             {lut.spacer}
-        slots: 'last_slot - 3'
+        slots: 'last_slot - 6'
       openSorting:
         type: 'COMPARATOR'
         name: |
           <reset>
-            <&8>» <&6>Einträge Sortieren <&8>«
+            <&8>» <&6>Einträge sortieren <&8>«
         lore: |
           <reset>
             <br/>
@@ -1536,7 +1538,21 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Ins Sortiermenü wechseln<br/>
             {lut.spacer}
-        slots: 'last_slot - 1'
+        slots: 'last_slot - 3'
+      resetToDefaults:
+        type: 'LAVA_BUCKET'
+        name: |
+          <reset>
+            <&8>» <&c>Einstellungen zurücksetzen</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Setzt alle gewählten Einstellungen zu den<br/>
+            ursprünglichen Standardwerten zurück.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Zurücksetzen<br/>
+            {lut.spacer}
+        slots: 'last_slot'
       statisticIcon:
         type: '{icon_type}'
         glint: 'enabled'

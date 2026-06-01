@@ -29,6 +29,8 @@ public class SidebarSection extends ConfigSection {
   public ComponentMarkup entryAlreadyAtTheVeryEnd;
   public ComponentMarkup sidebarNowEnabled;
   public ComponentMarkup sidebarNowDisabled;
+  public ComponentMarkup noChangesMadeToReset;
+  public ComponentMarkup settingsHaveBeenReset;
 
   public int doubleSneakMaxDelayMs;
   public int scrollIntervalTicks;
