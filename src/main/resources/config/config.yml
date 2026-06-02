@@ -1416,7 +1416,7 @@ sidebar:
         name: 'Ticks Per Second'
         description: |
           Gibt an, wie viele Ticks pro Sekunde verarbeitet<br/>
-          werden konnten, innerhalb der letzten Minute,<br/>
+          werden konnten, als Mittelwerte der letzten Minute,<br/>
           fünf Minuten und zehn Minuten.<br/>
           <br/>
           Um flüssig zu laufen, benötigt Minecraft 20 TPS.<br/>
@@ -1496,6 +1496,8 @@ sidebar:
             <space/>«
         lore: |
           <reset>
+            <br/>
+            <&7>Schaltet die Gesamtanzeige der Sidebar um.<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Anzeige {sidebar_enabled then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
@@ -1510,6 +1512,10 @@ sidebar:
             <space/>«
         lore: |
           <reset>
+            <br/>
+            <&7>Ermöglicht, den Titel der Sidebar<br/>
+            auszublenden, um die Transparenz in<br/>
+            diesem Bereich zu erhöhen.<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Board-Titel {show_title then "ausblenden" else "anzeigen"}<br/>
             {lut.spacer}
