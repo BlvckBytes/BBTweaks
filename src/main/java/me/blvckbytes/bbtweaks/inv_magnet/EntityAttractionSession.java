@@ -35,7 +35,6 @@ public class EntityAttractionSession {
 
     var distance = Math.sqrt(distanceSquared);
 
-    // TODO: Experiment with these parameters
     var speed = Math.min(0.65, 0.12 + (distance * 0.08));
 
     entity.setVelocity(new Vector(
