@@ -1429,7 +1429,7 @@ sidebar:
           ⚡ TPS:<space/>
         </color>
         <color [value_color]>
-          <number *for-value="tps" *for-separator={<space/>} [value] format='#.##' locale="de_DE" />
+          <number *for-value="tps" *for-separator={<space/>} [value] format='#.#' locale="de_DE" />
         </color>
   colorDisplay:
     title: '<&8>Farbauswahl'
