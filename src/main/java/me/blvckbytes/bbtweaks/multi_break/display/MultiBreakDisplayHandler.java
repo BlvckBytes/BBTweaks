@@ -10,8 +10,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;
 
-import java.util.Set;
-
 public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, MultiBreakDisplayData> {
 
   private final FloodgateIntegration floodgateIntegration;
@@ -63,11 +61,17 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
 
     if (config.rootSection.multiBreak.display.items.currentFilter.getDisplaySlots().contains(slot)) {
       if (isRightClick) {
+        if (selectedParameters.tellIfLocked())
+          return false;
+
         selectedParameters.removeFilter(display.displayData.commandLabel(), predicateHelper.getSelectedLanguage(player));
         return true;
       }
 
       if (clickType == ClickType.LEFT) {
+        if (selectedParameters.tellIfLocked())
+          return false;
+
         selectedParameters.setFilterEnabled(null);
         return true;
       }
@@ -77,6 +81,9 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
 
     if (config.rootSection.multiBreak.display.items.sneakMode.getDisplaySlots().contains(slot)) {
       if (clickType == ClickType.LEFT) {
+        if (selectedParameters.tellIfLocked())
+          return false;
+
         selectedParameters.sneakMode = selectedParameters.sneakMode.next();
         return true;
       }
@@ -93,10 +100,10 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
       return false;
     }
 
-    Set<Integer> slots;
+    var slotsSlotIndices = config.rootSection.multiBreak.display.items.parametersSlot.getDisplaySlots();
 
-    if ((slots = config.rootSection.multiBreak.display.items.parametersSlot.getDisplaySlots()).contains(slot)) {
-      var parametersSlotIndex = (int) slots.stream().filter(it -> it < slot).count();
+    if (slotsSlotIndices.contains(slot)) {
+      var parametersSlotIndex = (int) slotsSlotIndices.stream().filter(it -> it < slot).count();
 
       if (clickType == ClickType.LEFT) {
         if (parametersSlots.getSelectedSlotIndex() == parametersSlotIndex) {
@@ -118,6 +125,10 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
         return true;
       }
 
+      if (isRightClick) {
+        parametersSlots.parametersBySlotIndex.get(parametersSlotIndex).toggleLocked();
+        return true;
+      }
 
       return false;
     }
@@ -129,11 +140,17 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
     var selectedParameters = display.displayData.parametersSlots().getSelectedParameters();
 
     if (clickType == ClickType.LEFT) {
+      if (selectedParameters.tellIfLocked())
+        return false;
+
       selectedParameters.decreaseExtent(extent);
       return true;
     }
 
     if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
+      if (selectedParameters.tellIfLocked())
+        return false;
+
       selectedParameters.increaseExtent(extent);
       return true;
     }

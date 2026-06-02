@@ -54,6 +54,9 @@ public class MultiBreakSection extends ConfigSection {
   public ComponentMarkup selectSlotUsage;
   public ComponentMarkup slotSelected;
   public ComponentMarkup slotAlreadySelected;
+  public ComponentMarkup slotIsLocked;
+  public ComponentMarkup slotNowLocked;
+  public ComponentMarkup slotNowUnlocked;
 
   public EnabledJoinWarningSection enabledJoinWarning;
 

@@ -17,6 +17,7 @@ public class MultiBreakParameters {
   public @Nullable PredicateAndLanguage filter;
   public boolean filterEnabled;
   public SneakMode sneakMode;
+  public boolean locked;
 
   public final int[] extentByOrdinal;
   private final boolean[] didExceedLimitByDimensionOrdinal;
@@ -134,7 +135,8 @@ public class MultiBreakParameters {
       .withVariable("exceeded_depth_limit", didExceedLimit(BreakDimension.DEPTH))
       .withVariable("slot_index", slotIndex)
       .withVariable("slot_count", parametersSlots.parametersBySlotIndex.size())
-      .withVariable("slot_enabled", parametersSlots.getSelectedSlotIndex() == slotIndex);
+      .withVariable("slot_enabled", parametersSlots.getSelectedSlotIndex() == slotIndex)
+      .withVariable("is_locked", locked);
   }
 
   public boolean doesMaterialMismatchFilter(Material material) {
@@ -150,6 +152,9 @@ public class MultiBreakParameters {
   }
 
   public void removeFilter(String commandLabel, TranslationLanguage currentLanguage) {
+    if (tellIfLocked())
+      return;
+
     if (filter == null) {
       parametersSlots.config.rootSection.multiBreak.noFilterSet.sendMessage(parametersSlots.player, makeEnvironment());
       return;
@@ -176,6 +181,9 @@ public class MultiBreakParameters {
   }
 
   public void setFilterEnabled(@Nullable Boolean value) {
+    if (tellIfLocked())
+      return;
+
     if (filter == null) {
       parametersSlots.config.rootSection.multiBreak.noFilterSet.sendMessage(parametersSlots.player, makeEnvironment());
       return;
@@ -203,5 +211,25 @@ public class MultiBreakParameters {
     }
 
     parametersSlots.config.rootSection.multiBreak.filterNowDisabled.sendMessage(parametersSlots.player, makeEnvironment());
+  }
+
+  public void toggleLocked() {
+    locked ^= true;
+
+    if (locked) {
+      parametersSlots.config.rootSection.multiBreak.slotNowLocked.sendMessage(parametersSlots.player, makeEnvironment());
+      return;
+    }
+
+    parametersSlots.config.rootSection.multiBreak.slotNowUnlocked.sendMessage(parametersSlots.player, makeEnvironment());
+  }
+
+  public boolean tellIfLocked() {
+    if (locked) {
+      parametersSlots.config.rootSection.multiBreak.slotIsLocked.sendMessage(parametersSlots.player, makeEnvironment());
+      return true;
+    }
+
+    return false;
   }
 }

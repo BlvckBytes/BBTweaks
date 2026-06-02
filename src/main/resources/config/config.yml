@@ -709,6 +709,9 @@ multiBreak:
   selectSlotUsage: '{lut.multi_break_prefix} <&c>Benutzung: /{label} {action} \<<&4>1-{max_slot}</>>'
   slotSelected: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist nun selektiert.'
   slotAlreadySelected: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist bereits selektiert!'
+  slotIsLocked: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist für Änderungen <&c>gesperrt</>!'
+  slotNowLocked: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist nun für Änderungen <&c>gesperrt</>.'
+  slotNowUnlocked: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist nun für Änderungen <&a>entsperrt</>.'
   enabledJoinWarning:
     enabled: true
     title: '<&4>Achtung: Multi-Break'
@@ -882,7 +885,7 @@ multiBreak:
           <reset>
             <br/>
             {lut.spacer}<br/>
-            <&7>Schalte die Funktion ein oder aus.<br/>
+            <&7>Schalte die MultiBreak-Funktion ein oder aus.<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Umschalten<br/>
             {lut.spacer}
@@ -903,8 +906,17 @@ multiBreak:
               <&6 *if="filter_predicate">{filter_predicate}</>
               <&c *else>Nicht gesetzt</>
             </container><br/>
+            <&8>♦ <&e>Änderungen: <container>
+              <&c *if="is_locked">gesperrt</>
+              <&a *else>entsperrt</>
+            </container><br/>
             {lut.spacer}<br/>
+            <&e>🛈</> <&7>Sperre einen Slot, um ihn vorübergehend<br/>
+            vor weiteren (versehentlichen) Änderungen<br/>
+            zu schützen.<br/>
+            <br/>
             <&8>➥ <&e>Linksklick <&7>Slot auswählen<br/>
+            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Slot {is_locked then "entsperren" else "sperren"}<br/>
             {lut.spacer}
       filler:
         type: BLACK_STAINED_GLASS_PANE

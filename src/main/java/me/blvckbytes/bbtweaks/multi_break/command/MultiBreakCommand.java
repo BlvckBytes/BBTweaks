@@ -102,6 +102,9 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
     var selectedParameters = parametersSlots.getSelectedParameters();
 
     if (normalizedAction.constant == CommandAction.SET_FILTER || normalizedAction.constant == CommandAction.SET_FILTER_WITH_LANGUAGE) {
+      if (selectedParameters.tellIfLocked())
+        return true;
+
       var selectedLangauge = predicateHelper.getSelectedLanguage(player);
 
       int argsOffset;
@@ -197,6 +200,9 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
       }
 
       case SIZE -> {
+        if (selectedParameters.tellIfLocked())
+          return true;
+
         SizeValues sizeValues;
 
         if (args.length != 2 || (sizeValues = tryParseSizeValues(args[1])) == null) {
@@ -243,7 +249,7 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
         var setCommand = selectedParameters.makeFilterSetCommand(label, predicateHelper.getSelectedLanguage(player));
 
         if (setCommand == null) {
-          config.rootSection.multiBreak.noFilterSet.sendMessage(player);
+          config.rootSection.multiBreak.noFilterSet.sendMessage(player, selectedParameters.makeEnvironment());
           return true;
         }
 
