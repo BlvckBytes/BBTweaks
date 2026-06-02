@@ -322,7 +322,7 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       getServer().getPluginManager().registerEvents(new CommandItemListener(config), this);
 
-      getServer().getPluginManager().registerEvents(new SidebarBoardManager(this, sidebarPreferencesStore, config), this);
+      getServer().getPluginManager().registerEvents(new SidebarBoardManager(this, floodgateIntegration, sidebarPreferencesStore, config), this);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);

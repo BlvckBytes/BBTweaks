@@ -18,7 +18,6 @@ public class SidebarPreferences {
 
   private static final boolean DEFAULT_ENABLED = false;
   private static final boolean DEFAULT_SHOW_TITLE = true;
-  private static final SneakMode DEFAULT_SNEAK_MODE = SneakMode.NONE;
 
   public final Player player;
   private final ConfigKeeper<MainSection> config;
@@ -27,6 +26,7 @@ public class SidebarPreferences {
 
   public boolean enabled;
   public boolean showTitle;
+  public DelimitersMode delimitersMode;
   public SneakMode sneakMode;
 
   public final EnumSet<SidebarStatistic> enabledStatistics;
@@ -51,7 +51,10 @@ public class SidebarPreferences {
     if (showTitle != DEFAULT_SHOW_TITLE)
       return true;
 
-    if (sneakMode != DEFAULT_SNEAK_MODE)
+    if (sneakMode != SneakMode.DEFAULT_VALUE)
+      return true;
+
+    if (delimitersMode != DelimitersMode.DEFAULT_VALUE)
       return true;
 
     if (this.valueColor != config.rootSection.sidebar._defaultValueColor)
@@ -75,7 +78,8 @@ public class SidebarPreferences {
 
   public void resetToDefaults() {
     this.showTitle = DEFAULT_SHOW_TITLE;
-    this.sneakMode = DEFAULT_SNEAK_MODE;
+    this.sneakMode = SneakMode.DEFAULT_VALUE;
+    this.delimitersMode = DelimitersMode.DEFAULT_VALUE;
 
     this.valueColor = config.rootSection.sidebar._defaultValueColor;
 
@@ -111,7 +115,7 @@ public class SidebarPreferences {
 
   public Component getBoardTitle() {
     if (!showTitle)
-      return Component.empty();
+      return Component.text(" ");
 
     return config.rootSection.sidebar.boardTitle.interpret(
       SlotType.SINGLE_LINE_CHAT,

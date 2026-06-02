@@ -45,6 +45,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
     config.rootSection.sidebar.settingsDisplay.items.filler.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.enabled.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.showTitle.renderInto(inventory, environment);
+    config.rootSection.sidebar.settingsDisplay.items.delimitersMode.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.valueColor.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.nextSneakMode.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.openSorting.renderInto(inventory, environment);
@@ -97,6 +98,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
       .withVariable("value_color", displayData.valueColor)
       .withVariable("sidebar_enabled", displayData.enabled)
       .withVariable("show_title", displayData.showTitle)
+      .withVariable("delimiters_mode", displayData.delimitersMode.name())
       .withVariable("sneak_mode", displayData.sneakMode.name());
   }
 }

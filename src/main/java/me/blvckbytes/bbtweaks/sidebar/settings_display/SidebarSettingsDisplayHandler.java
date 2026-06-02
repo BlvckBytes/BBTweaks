@@ -60,6 +60,16 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
       return;
     }
 
+    if (config.rootSection.sidebar.settingsDisplay.items.delimitersMode.getDisplaySlots().contains(slot)) {
+      if (clickType != ClickType.LEFT)
+        return;
+
+      display.displayData.delimitersMode = display.displayData.delimitersMode.next();
+
+      display.renderItems();
+      return;
+    }
+
     if (config.rootSection.sidebar.settingsDisplay.items.nextSneakMode.getDisplaySlots().contains(slot)) {
       if (clickType != ClickType.LEFT)
         return;

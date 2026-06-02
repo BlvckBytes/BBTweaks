@@ -1047,6 +1047,11 @@ sidebar:
   scrollIntervalTicks: 45
   updateIntervalTicks: 5
   boardTitle: '<&6><&l>Blockstal.de'
+  delimiter: |
+    <&8 *if="is_floodgate">{"-" ** (max_line_length * 0.65)}</>
+    <container *else>
+      <&8><&m>{" " ** (max_line_length * 1.25)}
+    </container>
   colors:
     WHITE:
       color: '#F7F7F7'
@@ -1480,7 +1485,7 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
             {lut.spacer}
-        slots: 'last_slot - 4'
+        slots: 'last_slot - 3'
       enabled:
         type: '{sidebar_enabled then "GREEN_CONCRETE" else "RED_CONCRETE"}'
         name: |
@@ -1509,6 +1514,22 @@ sidebar:
             <&8>➥ <&e>Linksklick <&7>Board-Titel {show_title then "ausblenden" else "anzeigen"}<br/>
             {lut.spacer}
         slots: 'last_slot - 7'
+      delimitersMode:
+        type: 'OAK_FENCE'
+        name: |
+          <reset>
+            <&8>» <&6>Abgrenzungslinien</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Die Linien oberhalb der ersten und<br/>
+            unterhalb der letzten Statistik.<br/>
+            {lut.spacer}<br/>
+            <&8>♦ <&e>Aktueller Modus: {lut.sidebar.delimiters_mode[delimiters_mode]}<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
+            {lut.spacer}
+        slots: 'last_slot - 6'
       valueColor:
         type: '{value_color.icon_type}'
         name: |
@@ -1524,7 +1545,7 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Neue Farbe auswählen<br/>
             {lut.spacer}
-        slots: 'last_slot - 6'
+        slots: 'last_slot - 5'
       openSorting:
         type: 'COMPARATOR'
         name: |
@@ -1538,7 +1559,7 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Ins Sortiermenü wechseln<br/>
             {lut.spacer}
-        slots: 'last_slot - 3'
+        slots: 'last_slot - 2'
       resetToDefaults:
         type: 'LAVA_BUCKET'
         name: |
@@ -1775,3 +1796,7 @@ cLut:
       DOUBLE_SNEAK_TOGGLES: '<&a>Doppel-Sneak schaltet an/aus'
       ENABLE_DURING_SNEAK: '<&3>Während sneaken anzeigen'
       DISABLE_DURING_SNEAK: '<&3>Während sneaken nicht anzeigen'
+    delimiters_mode:
+      NONE: '<&7>Keine Linien'
+      TOP_AND_BOTTOM: '<&a>Oberhalb und unterhalb'
+      TOP_ONLY: '<&3>Nur oberhalb'

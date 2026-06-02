@@ -37,6 +37,7 @@ public class SidebarSection extends ConfigSection {
   public int updateIntervalTicks;
 
   public ComponentMarkup boardTitle;
+  public ComponentMarkup delimiter;
 
   public ComponentMarkup defaultValueColor;
   public @CSIgnore NamedColor _defaultValueColor;

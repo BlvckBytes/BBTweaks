@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.sidebar;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.playtime_rewards.PlaytimeRewardsAPI;
 import at.blvckbytes.playtime_rewards.store.TimeType;
@@ -10,10 +11,15 @@ import com.gamingmesh.jobs.Jobs;
 import com.gmail.nossr50.util.player.UserManager;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.multi_break.BlockDirections;
+import me.blvckbytes.bbtweaks.sidebar.preferences.DelimitersMode;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferencesStore;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SneakMode;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
+import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.util.MutableInt;
 import net.ess3.api.IEssentials;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import org.apache.commons.lang3.StringUtils;
@@ -26,9 +32,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.plugin.Plugin;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class SidebarBoardManager implements Listener, StatisticEnvironmentResolver {
 
@@ -39,6 +43,7 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
   private static final double TICKS_PER_SECOND = TICKS_PER_MINUTE / 60d;
 
   private final Plugin plugin;
+  private final FloodgateIntegration floodgateIntegration;
   private final SidebarPreferencesStore sidebarPreferencesStore;
   private final PlaytimeRewardsAPI playtimeRewards;
   private final LuckPerms luckPerms;
@@ -54,9 +59,11 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
 
   public SidebarBoardManager(
     Plugin plugin,
+    FloodgateIntegration floodgateIntegration,
     SidebarPreferencesStore sidebarPreferencesStore,
     ConfigKeeper<MainSection> config
   ) {
+    this.floodgateIntegration = floodgateIntegration;
     this.sidebarPreferencesStore = sidebarPreferencesStore;
 
     var playtimeRegistration = Bukkit.getServicesManager().getRegistration(PlaytimeRewardsAPI.class);
@@ -173,7 +180,7 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
         return;
       }
 
-      var holder = new BoardHolder(player, essentialsUser);
+      var holder = new BoardHolder(player, essentialsUser, floodgateIntegration.isFloodgatePlayer(player));
 
       var board = new SidebarBoard(plugin, holder, config);
 
@@ -188,10 +195,53 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
   }
 
   private void renderAndUpdateLinesForBoard(SidebarBoard board, SidebarPreferences preferences) {
-    var lines = preferences.statisticsInOrder.stream()
-      .filter(preferences.enabledStatistics::contains)
-      .map(it -> it.renderFor(board.holder, config.rootSection.sidebar._statisticsMap.get(it), preferences, this))
-      .toList();
+    var totalLineCount = preferences.enabledStatistics.size();
+
+    switch (preferences.delimitersMode) {
+      case NONE -> {}
+      case TOP_ONLY -> ++totalLineCount;
+      case TOP_AND_BOTTOM -> totalLineCount += 2;
+      default -> throw new IllegalStateException("Unaccounted-for delimiters-mode: " + preferences.delimitersMode);
+    }
+
+    var lines = new ArrayList<Component>(totalLineCount);
+
+    if (preferences.delimitersMode != DelimitersMode.NONE)
+      lines.add(Component.empty());
+
+    var lengthBuffer = new MutableInt();
+    var maxLineLength = 0;
+
+    for (var statistic : preferences.statisticsInOrder) {
+      if (!preferences.enabledStatistics.contains(statistic))
+        continue;
+
+      var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
+      var line = statistic.renderFor(board.holder, statisticSection, preferences, this);
+
+      lengthBuffer.value = 0;
+
+      ComponentUtil.forEachTextOfComponent(line, text -> lengthBuffer.value += text.length());
+
+      if (lengthBuffer.value > maxLineLength)
+        maxLineLength = lengthBuffer.value;
+
+      lines.add(line);
+    }
+
+    if (preferences.delimitersMode != DelimitersMode.NONE) {
+      var delimiter = config.rootSection.sidebar.delimiter.interpret(
+        SlotType.SINGLE_LINE_CHAT,
+        new InterpretationEnvironment()
+          .withVariable("is_floodgate", board.holder.isFloodgate())
+          .withVariable("max_line_length", maxLineLength)
+      ).getFirst();
+
+      lines.set(0, delimiter);
+
+      if (preferences.delimitersMode == DelimitersMode.TOP_AND_BOTTOM)
+        lines.add(delimiter);
+    }
 
     board.advanceScrollingAndSetLines(relativeTime, lines, preferences);
   }
@@ -200,60 +250,63 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
   public InterpretationEnvironment resolve(BoardHolder holder, SidebarStatistic statistic) {
     var player = holder.bukkitPlayer();
 
+    var environment = new InterpretationEnvironment()
+      .withVariable("is_floodgate", holder.isFloodgate());
+
     switch (statistic) {
       case GROUP_PREFIX -> {
         var prefix = luckPerms.getPlayerAdapter(Player.class).getMetaData(player).getPrefix();
 
         if (prefix == null)
-          return new InterpretationEnvironment().withVariable("prefix", "?");
+          return environment.withVariable("prefix", "?");
 
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("prefix", LegacyComponentSerializer.legacySection().deserialize(enableColors(prefix.trim())));
       }
 
       case MONEY -> {
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("balance", holder.essentialsUser().getMoney().doubleValue());
       }
 
       case TOTAL_PLAYTIME -> {
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("time", playtimeRewards.getTotalTimeTicks(player, TimeType.PLAY_TIME));
       }
 
       case TOTAL_PLAYTIME_TOP_PLACE -> {
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("place", playtimeRewards.getTopListNumber(player, TopListType.TOTAL, TopListDirection.DESCENDING, TimeType.PLAY_TIME));
       }
 
       case TOTAL_AFKTIME -> {
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("time", playtimeRewards.getTotalTimeTicks(player, TimeType.AFK_TIME));
       }
 
       case TOTAL_AFKTIME_TOP_PLACE -> {
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("place", playtimeRewards.getTopListNumber(player, TopListType.TOTAL, TopListDirection.DESCENDING, TimeType.AFK_TIME));
       }
 
       case HOME_COUNT -> {
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("current_home_count", holder.essentialsUser().getHomes().size())
           .withVariable("total_home_count", essentials.getSettings().getHomeLimit(holder.essentialsUser()));
       }
 
       case PING -> {
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("ping", player.getPing());
       }
 
       case DATE, REAL_TIME -> {
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("millis", System.currentTimeMillis());
       }
 
       case COORDINATES -> {
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("x", (int) player.getX())
           .withVariable("y", (int) player.getY())
           .withVariable("z", (int) player.getZ())
@@ -264,14 +317,14 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
         var location = player.getLocation();
         var biome = player.getWorld().getBiome(location);
 
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("biome_key", biome.translationKey());
       }
 
       case LOOKING_DIRECTION -> {
         var face = BlockDirections.directionToBlockFace(player.getLocation().getDirection());
 
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("direction", StringUtils.capitalize(face.name().toLowerCase()));
       }
 
@@ -298,7 +351,7 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
           time -= TICKS_PER_SECOND;
         }
 
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("hours", hours)
           .withVariable("minutes", minutes)
           .withVariable("seconds", seconds);
@@ -306,61 +359,61 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
 
       case FIRST_JOB_PROGRESSION -> {
         if (!hasJobs)
-          return new InterpretationEnvironment().withVariable("progression", null);
+          return environment.withVariable("progression", null);
 
         var progressions = Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression();
 
         if (progressions.isEmpty())
-          return new InterpretationEnvironment().withVariable("progression", null);
+          return environment.withVariable("progression", null);
 
         var progression = progressions.getFirst();
 
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("name", progression.getJob().getName())
           .withVariable("progression", JobProgressionData.fromProgression(progression));
       }
 
       case SECOND_JOB_PROGRESSION -> {
         if (!hasJobs)
-          return new InterpretationEnvironment().withVariable("progression", null);
+          return environment.withVariable("progression", null);
 
         var progressions = Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression();
 
         if (progressions.size() < 2)
-          return new InterpretationEnvironment().withVariable("progression", null);
+          return environment.withVariable("progression", null);
 
         var progression = progressions.get(1);
 
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("name", progression.getJob().getName())
           .withVariable("progression", JobProgressionData.fromProgression(progression));
       }
 
       case MCMMO_POWER_LEVEL -> {
         if (!hasMcMMO)
-          return new InterpretationEnvironment().withVariable("power_level", "?");
+          return environment.withVariable("power_level", "?");
 
         var user = UserManager.getPlayer(player);
 
         if (user == null)
-          return new InterpretationEnvironment().withVariable("power_level", "?");
+          return environment.withVariable("power_level", "?");
 
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("power_level", user.getPowerLevel());
       }
 
       case PLAYER_NAME -> {
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("name", player.getName());
       }
 
       case TPS -> {
-        return new InterpretationEnvironment()
+        return environment
           .withVariable("tps", Bukkit.getServer().getTPS());
       }
     }
 
-    return new InterpretationEnvironment();
+    return environment;
   }
 
   private static boolean isColorChar(char c) {

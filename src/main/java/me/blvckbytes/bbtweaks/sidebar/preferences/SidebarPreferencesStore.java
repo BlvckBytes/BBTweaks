@@ -19,7 +19,7 @@ public class SidebarPreferencesStore implements Listener {
 
   private final ConfigKeeper<MainSection> config;
 
-  private final NamespacedKey keyEnabled, keyShowTitle, keySneakMode, keyValueColor,
+  private final NamespacedKey keyEnabled, keyShowTitle, keyDelimitersMode, keySneakMode, keyValueColor,
     keyEnabledStatistics, keyStatisticsOrder, keyStatisticsColors;
 
   private final Map<UUID, SidebarPreferences> preferencesByPlayerId;
@@ -32,6 +32,7 @@ public class SidebarPreferencesStore implements Listener {
 
     this.keyEnabled = new NamespacedKey(plugin, "sidebar-enabled");
     this.keyShowTitle = new NamespacedKey(plugin, "sidebar-show-title");
+    this.keyDelimitersMode = new NamespacedKey(plugin, "sidebar-delimiters-mode");
     this.keySneakMode = new NamespacedKey(plugin, "sidebar-sneak-mode");
     this.keyValueColor= new NamespacedKey(plugin, "sidebar-value-color");
     this.keyEnabledStatistics = new NamespacedKey(plugin, "sidebar-enabled-statistics");
@@ -73,10 +74,15 @@ public class SidebarPreferencesStore implements Listener {
     if (enabledValue != null)
       result.enabled = enabledValue;
 
-    var showTitleValue = pdc.get(keyEnabled, PersistentDataType.BOOLEAN);
+    var showTitleValue = pdc.get(keyShowTitle, PersistentDataType.BOOLEAN);
 
     if (showTitleValue != null)
       result.showTitle = showTitleValue;
+
+    var delimitersModeValue = pdc.get(keyDelimitersMode, PersistentDataType.INTEGER);
+
+    if (delimitersModeValue != null)
+      result.delimitersMode = DelimitersMode.byOrdinalOrDefault(delimitersModeValue);
 
     var sneakModeValue = pdc.get(keySneakMode, PersistentDataType.INTEGER);
 
@@ -151,6 +157,7 @@ public class SidebarPreferencesStore implements Listener {
 
     pdc.set(keyEnabled, PersistentDataType.BOOLEAN, preferences.enabled);
     pdc.set(keyShowTitle, PersistentDataType.BOOLEAN, preferences.showTitle);
+    pdc.set(keyDelimitersMode, PersistentDataType.INTEGER, preferences.delimitersMode.ordinal());
     pdc.set(keySneakMode, PersistentDataType.INTEGER, preferences.sneakMode.ordinal());
     pdc.set(keyValueColor, PersistentDataType.STRING, preferences.valueColor.name());
 
