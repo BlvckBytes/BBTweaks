@@ -64,7 +64,7 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
       return handleExtentManipulation(display, BreakExtent.DEPTH, clickType);
 
     if (config.rootSection.multiBreak.display.items.currentFilter.getDisplaySlots().contains(slot)) {
-      if (clickType == ClickType.LEFT) {
+      if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
         var currentFilter = selectedParameters.filter;
 
         if (currentFilter == null) {
@@ -83,7 +83,7 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
         return true;
       }
 
-      if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
+      if (clickType == ClickType.LEFT) {
         if (selectedParameters.filter == null) {
           config.rootSection.multiBreak.noFilterSet.sendMessage(player);
           return true;

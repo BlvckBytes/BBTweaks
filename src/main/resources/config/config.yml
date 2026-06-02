@@ -738,7 +738,7 @@ multiBreak:
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
-            <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
+            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Wert erhöhen<br/>
             {lut.spacer}
       extentRight:
         slots: 20
@@ -760,7 +760,7 @@ multiBreak:
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
-            <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
+            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Wert erhöhen<br/>
             {lut.spacer}
       extentUp:
         slots: 10
@@ -782,7 +782,7 @@ multiBreak:
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
-            <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
+            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Wert erhöhen<br/>
             {lut.spacer}
       extentDown:
         slots: 28
@@ -804,7 +804,7 @@ multiBreak:
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
-            <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
+            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Wert erhöhen<br/>
             {lut.spacer}
       extentDepth:
         slots: 19
@@ -826,7 +826,7 @@ multiBreak:
             </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Wert verringern<br/>
-            <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Wert erhöhen<br/>
+            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Wert erhöhen<br/>
             {lut.spacer}
       currentFilter:
         slots: 22
@@ -848,8 +848,8 @@ multiBreak:
             <&a *if="filter_enabled">aktiviert</>
             <&c *else>deaktiviert</><br/>
             {lut.spacer}<br/>
-            <&8>➥ <&e>Linksklick <&7>Filter entfernen<br/>
-            <&8>➥ <&e>{is_floodgate then "Drop" else "Rechtsklick"} <&7>Filter {filter_enabled then "deaktivieren" else "aktivieren"}<br/>
+            <&8>➥ <&e>Linksklick <&7>Filter {filter_enabled then "deaktivieren" else "aktivieren"}<br/>
+            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Filter entfernen<br/>
             <&8>➥ <&e>{filter_set_command} <&7>Filter setzen<br/>
             {lut.spacer}
       sneakMode:
