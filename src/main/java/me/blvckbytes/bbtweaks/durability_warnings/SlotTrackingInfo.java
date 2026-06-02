@@ -30,8 +30,19 @@ public class SlotTrackingInfo {
 
       lastDamageDeltas.add(damageDelta);
 
+      var deltaSum = lastDamageDeltas.calculateSum();
+
+      // What we're trying to measure is a positive delta-sum "streak" that exceeds the configured
+      // threshold as to then unmark notification-percentages as used. If the sum turned negative,
+      // the player has damaged the tool more than they've repaired it, so they are definitely merely
+      // picking up a few exp-orbs here and there, which is exactly what we're trying to avoid causing
+      // a reset. Proper repairing will cause a far longer streak. This way, we're also not carrying
+      // a huge negative sum that has then to be exceeded (plus the positive delta!) when repairing.
+      if (deltaSum < 0)
+        lastDamageDeltas.clear();
+
       // Different tool or has been repaired far enough
-      if (this.material != material || lastDamageDeltas.calculateSum() >= config.rootSection.durabilityWarnings.trackingResetMinDurabilityDelta)
+      if (this.material != material || deltaSum >= config.rootSection.durabilityWarnings.trackingResetMinDurabilityDelta)
         reset();
     }
 
