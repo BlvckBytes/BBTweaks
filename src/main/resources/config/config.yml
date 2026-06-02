@@ -994,7 +994,7 @@ durabilityWarnings:
     name: durabilitywarning
     aliases:
       - abnutzungswarnung
-  trackingResetMinDurabilityDelta: 50
+  trackingResetMinDurabilityDelta: 85
   playersOnly: '{lut.durability_warnings.prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
   missingPermission: '{lut.durability_warnings.prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
   commandActionUsage: '{lut.durability_warnings.prefix} <&c>Benutzung: /{label} \<<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>>'
