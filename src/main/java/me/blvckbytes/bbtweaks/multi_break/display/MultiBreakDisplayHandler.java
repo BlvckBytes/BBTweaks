@@ -1,7 +1,6 @@
 package me.blvckbytes.bbtweaks.multi_break.display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
-import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
@@ -60,8 +59,10 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
     if (config.rootSection.multiBreak.display.items.extentDepth.getDisplaySlots().contains(slot))
       return handleExtentManipulation(display, BreakExtent.DEPTH, clickType);
 
+    var isRightClick = display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT;
+
     if (config.rootSection.multiBreak.display.items.currentFilter.getDisplaySlots().contains(slot)) {
-      if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
+      if (isRightClick) {
         selectedParameters.removeFilter(display.displayData.commandLabel(), predicateHelper.getSelectedLanguage(player));
         return true;
       }
@@ -95,30 +96,30 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
     Set<Integer> slots;
 
     if ((slots = config.rootSection.multiBreak.display.items.parametersSlot.getDisplaySlots()).contains(slot)) {
-      if (clickType != ClickType.LEFT)
-        return false;
-
       var parametersSlotIndex = (int) slots.stream().filter(it -> it < slot).count();
 
-      if (parametersSlots.getSelectedSlotIndex() == parametersSlotIndex) {
-        config.rootSection.multiBreak.slotAlreadySelected.sendMessage(
+      if (clickType == ClickType.LEFT) {
+        if (parametersSlots.getSelectedSlotIndex() == parametersSlotIndex) {
+          config.rootSection.multiBreak.slotAlreadySelected.sendMessage(
+            player,
+            parametersSlots.getSelectedParameters().makeEnvironment()
+          );
+
+          return false;
+        }
+
+        parametersSlots.setSelectedSlotIndex(parametersSlotIndex);
+
+        config.rootSection.multiBreak.slotSelected.sendMessage(
           player,
-          new InterpretationEnvironment()
-            .withVariable("slot", parametersSlotIndex + 1)
+          parametersSlots.getSelectedParameters().makeEnvironment()
         );
 
-        return false;
+        return true;
       }
 
-      parametersSlots.setSelectedSlotIndex(parametersSlotIndex);
 
-      config.rootSection.multiBreak.slotSelected.sendMessage(
-        player,
-        new InterpretationEnvironment()
-          .withVariable("slot", parametersSlots.getSelectedSlotIndex() + 1)
-      );
-
-      return true;
+      return false;
     }
 
     return false;

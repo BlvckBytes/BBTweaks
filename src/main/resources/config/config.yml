@@ -643,9 +643,9 @@ multiBreak:
   noAccessToAnyVolume: '{lut.multi_break_prefix} <&c>Du hast keinen Zugriff auf ein verfügbares Abbauvolumen!'
   openingSettingsMenu: '{lut.multi_break_prefix} <&7>Öffne das Einstellungsmenü.'
   commandActionUsage: |
-    {lut.multi_break_prefix} <&c>Benutzung: /{label} \<
+    {lut.multi_break_prefix} <&c>Benutzung: /{label} [
     <&4 *for-action="actions" *for-separator={<&c>,<space/>}>{action}</>
-    >
+    ]
   commandFilterLanguageUsage: |
     {lut.multi_break_prefix} <&c>Benutzung: /{label} {action} \<
     <&4 *for-language="languages" *for-separator={<&c>,<space/>}>{language}</>
@@ -660,30 +660,30 @@ multiBreak:
         <suggest-command value=`{set_command}`>
           <&a><u>{filter_predicate}
       </hover-text><space/>
-      wurde <&a>gesetzt<&7>.
+      wurde auf <&6>Einstellungsslot {slot_index + 1}</> <&a>gesetzt<&7>.
   filterRemoved: |
     {lut.multi_break_prefix} <&7>Der Filter<space/>
       <hover-text value={<&a>Klicke, um einen Befehl zum setzen vorzuschlagen.}>
         <suggest-command value=`{set_command}`>
           <&a><u>{filter_predicate}
       </hover-text><space/>
-      wurde <&c>entfernt<&7>.
+      wurde von <&6>Einstellungsslot {slot_index + 1}</> <&c>entfernt<&7>.
   alreadyEnabled: '{lut.multi_break_prefix} <&c>Die Funktion ist bereits aktiviert!'
   nowEnabled: '{lut.multi_break_prefix} <&7>Die Funktion ist nun <&a>aktiviert <&7>(<&a>{total_width}x{total_height}x{total_depth}<&7>).'
   alreadyDisabled: '{lut.multi_break_prefix} <&c>Die Funktion ist bereits deaktiviert!'
   nowDisabled: '{lut.multi_break_prefix} <&7>Die Funktion ist nun <&c>deaktiviert<&7>.'
-  noFilterSet: '{lut.multi_break_prefix} <&c>Es ist aktuell kein Filter gesetzt!'
+  noFilterSet: '{lut.multi_break_prefix} <&c>Es ist aktuell kein Filter auf <&6>Einstellungsslot {slot_index + 1}</> gesetzt!'
   currentFilter: |
-    {lut.multi_break_prefix} <&7>Aktueller Filter:<space/>
+    {lut.multi_break_prefix} <&7>Aktueller Filter von <&6>Einstellungsslot {slot_index + 1}</>:<space/>
       <hover-text value={<&a>Klicke, um einen Befehl zum editieren vorzuschlagen.}>
         <suggest-command value=`{set_command}`>
           <&a><u>{filter_predicate}
       </hover-text>
       .
-  filterAlreadyEnabled: '{lut.multi_break_prefix} <&c>Der Filter ist bereits aktiviert!'
-  filterNowEnabled: '{lut.multi_break_prefix} <&7>Der Filter ist nun <&a>aktiviert<&7>.'
-  filterAlreadyDisabled: '{lut.multi_break_prefix} <&c>Der Filter ist bereits deaktiviert!'
-  filterNowDisabled: '{lut.multi_break_prefix} <&7>Der Filter ist nun <&c>deaktiviert<&7>.'
+  filterAlreadyEnabled: '{lut.multi_break_prefix} <&c>Der Filter von <&6>Einstellungsslot {slot_index + 1}</> ist bereits aktiviert!'
+  filterNowEnabled: '{lut.multi_break_prefix} <&7>Der Filter von <&6>Einstellungsslot {slot_index + 1}</> ist nun <&a>aktiviert<&7>.'
+  filterAlreadyDisabled: '{lut.multi_break_prefix} <&c>Der Filter von <&6>Einstellungsslot {slot_index + 1}</> ist bereits deaktiviert!'
+  filterNowDisabled: '{lut.multi_break_prefix} <&7>Der Filter von <&6>Einstellungsslot {slot_index + 1}</> ist nun <&c>deaktiviert<&7>.'
   hotbarNotification: |
     <separate
       separator={<&7> |<space/>}
@@ -702,13 +702,13 @@ multiBreak:
     />
   sizeSetExceededDimensions: '{lut.multi_break_prefix} <&c>Deine Eingabe überschritt den maximalen Durchmesser von <&4>{max_dimension} <&c>für <&4 *for-dimension="exceeded_dimensions" *for-separator={,<space/>}>{lut.break_dimension[dimension]}</>; schränke automatisch ein!'
   sizeSet: |
-    {lut.multi_break_prefix} <&7>Abbaugröße gesetzt auf:<space/>
+    {lut.multi_break_prefix} <&7>Abbaugröße von <&6>Einstellungsslot {slot_index + 1}</> gesetzt auf:<space/>
     <&a>{total_width}x{total_height}x{total_depth} <&7>(
     <&a>{extent_up} ↑<&7>, <&a>{extent_down} ↓<&7>, <&a>{extent_left} L<&7>, <&a>{extent_right} R<&7>, <&a>{extent_depth} T
     <&7>).
   selectSlotUsage: '{lut.multi_break_prefix} <&c>Benutzung: /{label} {action} \<<&4>1-{max_slot}</>>'
-  slotSelected: '{lut.multi_break_prefix} <&7>Der <&a>Einstellungsslot {slot}</> ist nun selektiert.'
-  slotAlreadySelected: '{lut.multi_break_prefix} <&7>Der <&c>Einstellungsslot {slot}</> ist bereits selektiert!'
+  slotSelected: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist nun selektiert.'
+  slotAlreadySelected: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist bereits selektiert!'
   enabledJoinWarning:
     enabled: true
     title: '<&4>Achtung: Multi-Break'

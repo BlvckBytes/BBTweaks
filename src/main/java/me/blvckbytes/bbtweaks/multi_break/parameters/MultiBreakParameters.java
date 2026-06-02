@@ -151,14 +151,13 @@ public class MultiBreakParameters {
 
   public void removeFilter(String commandLabel, TranslationLanguage currentLanguage) {
     if (filter == null) {
-      parametersSlots.config.rootSection.multiBreak.noFilterSet.sendMessage(parametersSlots.player);
+      parametersSlots.config.rootSection.multiBreak.noFilterSet.sendMessage(parametersSlots.player, makeEnvironment());
       return;
     }
 
     parametersSlots.config.rootSection.multiBreak.filterRemoved.sendMessage(
       parametersSlots.player,
-      new InterpretationEnvironment()
-        .withVariable("filter_predicate", filter.getTokenPredicateString())
+      makeEnvironment()
         .withVariable("set_command", makeFilterSetCommand(commandLabel, currentLanguage))
     );
 
@@ -178,18 +177,18 @@ public class MultiBreakParameters {
 
   public void setFilterEnabled(@Nullable Boolean value) {
     if (filter == null) {
-      parametersSlots.config.rootSection.multiBreak.noFilterSet.sendMessage(parametersSlots.player);
+      parametersSlots.config.rootSection.multiBreak.noFilterSet.sendMessage(parametersSlots.player, makeEnvironment());
       return;
     }
 
     if (value != null) {
       if (filterEnabled == value) {
         if (filterEnabled) {
-          parametersSlots.config.rootSection.multiBreak.filterAlreadyEnabled.sendMessage(parametersSlots.player);
+          parametersSlots.config.rootSection.multiBreak.filterAlreadyEnabled.sendMessage(parametersSlots.player, makeEnvironment());
           return;
         }
 
-        parametersSlots.config.rootSection.multiBreak.filterAlreadyDisabled.sendMessage(parametersSlots.player);
+        parametersSlots.config.rootSection.multiBreak.filterAlreadyDisabled.sendMessage(parametersSlots.player, makeEnvironment());
         return;
       }
 
@@ -199,10 +198,10 @@ public class MultiBreakParameters {
       filterEnabled ^= true;
 
     if (filterEnabled) {
-      parametersSlots.config.rootSection.multiBreak.filterNowEnabled.sendMessage(parametersSlots.player);
+      parametersSlots.config.rootSection.multiBreak.filterNowEnabled.sendMessage(parametersSlots.player, makeEnvironment());
       return;
     }
 
-    parametersSlots.config.rootSection.multiBreak.filterNowDisabled.sendMessage(parametersSlots.player);
+    parametersSlots.config.rootSection.multiBreak.filterNowDisabled.sendMessage(parametersSlots.player, makeEnvironment());
   }
 }
