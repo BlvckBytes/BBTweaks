@@ -9,6 +9,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class SlotTrackingInfo {
 
+  // TODO: Properly implement threshold after fixing the regression
+
   private final ConfigKeeper<MainSection> config;
   private final IntSet playedNotificationPercentages;
 
@@ -25,7 +27,7 @@ public class SlotTrackingInfo {
       var damageDelta = this.lastKnownDamage - damage;
 
       // Different tool or has been repaired
-      if (this.material != material || damageDelta >= config.rootSection.durabilityWarnings.trackingResetMinDurabilityDelta)
+      if (this.material != material || damageDelta > 0)
         reset();
     }
 
