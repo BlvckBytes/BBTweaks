@@ -4,6 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakLimits;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,7 +14,7 @@ public class MultiBreakParametersSlots {
   public final Player player;
   public final List<MultiBreakParameters> parametersBySlotIndex;
 
-  private final ConfigKeeper<MainSection> config;
+  public final ConfigKeeper<MainSection> config;
 
   public boolean enabled;
 
@@ -65,5 +66,30 @@ public class MultiBreakParametersSlots {
 
   public int getSelectedSlotIndex() {
     return selectedSlotIndex;
+  }
+
+  public void setEnabled(@Nullable Boolean value) {
+    if (value != null) {
+      if (enabled == value) {
+        if (enabled) {
+          config.rootSection.multiBreak.alreadyEnabled.sendMessage(player);
+          return;
+        }
+
+        config.rootSection.multiBreak.alreadyDisabled.sendMessage(player);
+        return;
+      }
+
+      enabled = value;
+    }
+    else
+      enabled ^= true;
+
+    if (enabled) {
+      config.rootSection.multiBreak.nowEnabled.sendMessage(player, getSelectedParameters().makeEnvironment());
+      return;
+    }
+
+    config.rootSection.multiBreak.nowDisabled.sendMessage(player);
   }
 }

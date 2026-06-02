@@ -174,7 +174,7 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
       config.rootSection.multiBreak.filterSet.sendMessage(
         player,
           selectedParameters.makeEnvironment()
-          .withVariable("set_command", makeFilterSetCommand(label, selectedLangauge, selectedParameters.filter))
+          .withVariable("set_command", selectedParameters.makeFilterSetCommand(label, selectedLangauge))
       );
 
       return true;
@@ -182,36 +182,17 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
 
     switch (normalizedAction.constant) {
       case ON -> {
-        if (parametersSlots.enabled) {
-          config.rootSection.multiBreak.alreadyEnabled.sendMessage(player);
-          return true;
-        }
-
-        parametersSlots.enabled = true;
-        config.rootSection.multiBreak.nowEnabled.sendMessage(player, selectedParameters.makeEnvironment());
+        parametersSlots.setEnabled(true);
         return true;
       }
 
       case OFF -> {
-        if (!parametersSlots.enabled) {
-          config.rootSection.multiBreak.alreadyDisabled.sendMessage(player);
-          return true;
-        }
-
-        parametersSlots.enabled = false;
-        config.rootSection.multiBreak.nowDisabled.sendMessage(player);
+        parametersSlots.setEnabled(false);
         return true;
       }
 
       case TOGGLE -> {
-        parametersSlots.enabled ^= true;
-
-        if (parametersSlots.enabled) {
-          config.rootSection.multiBreak.nowEnabled.sendMessage(player, selectedParameters.makeEnvironment());
-          return true;
-        }
-
-        config.rootSection.multiBreak.nowDisabled.sendMessage(player);
+        parametersSlots.setEnabled(null);
         return true;
       }
 
@@ -259,7 +240,9 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
       }
 
       case GET_FILTER -> {
-        if (selectedParameters.filter == null) {
+        var setCommand = selectedParameters.makeFilterSetCommand(label, predicateHelper.getSelectedLanguage(player));
+
+        if (setCommand == null) {
           config.rootSection.multiBreak.noFilterSet.sendMessage(player);
           return true;
         }
@@ -267,76 +250,29 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
         config.rootSection.multiBreak.currentFilter.sendMessage(
           player,
           selectedParameters.makeEnvironment()
-            .withVariable("set_command", makeFilterSetCommand(label, predicateHelper.getSelectedLanguage(player), selectedParameters.filter))
+            .withVariable("set_command", setCommand)
         );
+
         return true;
       }
 
       case REMOVE_FILTER -> {
-        if (selectedParameters.filter == null) {
-          config.rootSection.multiBreak.noFilterSet.sendMessage(player);
-          return true;
-        }
-
-        config.rootSection.multiBreak.filterRemoved.sendMessage(
-          player,
-          selectedParameters.makeEnvironment()
-            .withVariable("set_command", makeFilterSetCommand(label, predicateHelper.getSelectedLanguage(player), selectedParameters.filter))
-        );
-
-        selectedParameters.filter = null;
-        selectedParameters.filterEnabled = false;
+        selectedParameters.removeFilter(label, predicateHelper.getSelectedLanguage(player));
         return true;
       }
 
       case ENABLE_FILTER -> {
-        if (selectedParameters.filter == null) {
-          config.rootSection.multiBreak.noFilterSet.sendMessage(player);
-          return true;
-        }
-
-        if (selectedParameters.filterEnabled) {
-          config.rootSection.multiBreak.filterAlreadyEnabled.sendMessage(player);
-          return true;
-        }
-
-        config.rootSection.multiBreak.filterNowEnabled.sendMessage(player);
-
-        selectedParameters.filterEnabled = true;
+        selectedParameters.setFilterEnabled(true);
         return true;
       }
 
       case DISABLE_FILTER -> {
-        if (selectedParameters.filter == null) {
-          config.rootSection.multiBreak.noFilterSet.sendMessage(player);
-          return true;
-        }
-
-        if (!selectedParameters.filterEnabled) {
-          config.rootSection.multiBreak.filterAlreadyDisabled.sendMessage(player);
-          return true;
-        }
-
-        config.rootSection.multiBreak.filterNowDisabled.sendMessage(player);
-
-        selectedParameters.filterEnabled = false;
+        selectedParameters.setFilterEnabled(false);
         return true;
       }
 
       case TOGGLE_FILTER -> {
-        if (selectedParameters.filter == null) {
-          config.rootSection.multiBreak.noFilterSet.sendMessage(player);
-          return true;
-        }
-
-        selectedParameters.filterEnabled ^= true;
-
-        if (selectedParameters.filterEnabled) {
-          config.rootSection.multiBreak.filterNowEnabled.sendMessage(player);
-          return true;
-        }
-
-        config.rootSection.multiBreak.filterNowDisabled.sendMessage(player);
+        selectedParameters.setFilterEnabled(null);
         return true;
       }
 
@@ -435,13 +371,6 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
     }
 
     return List.of();
-  }
-
-  private String makeFilterSetCommand(String label, TranslationLanguage currentLanguage, PredicateAndLanguage predicateAndLanguage) {
-    if (currentLanguage == predicateAndLanguage.language)
-      return "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER) + " " + predicateAndLanguage.getTokenPredicateString();
-
-    return "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER_WITH_LANGUAGE) + " " + TranslationLanguage.matcher.getNormalizedName(predicateAndLanguage.language) + " " + predicateAndLanguage.getTokenPredicateString();
   }
 
   private @Nullable SizeValues tryParseSizeValues(String input) {

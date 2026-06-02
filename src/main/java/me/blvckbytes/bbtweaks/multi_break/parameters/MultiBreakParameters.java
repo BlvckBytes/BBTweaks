@@ -1,7 +1,9 @@
 package me.blvckbytes.bbtweaks.multi_break.parameters;
 
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import me.blvckbytes.bbtweaks.multi_break.command.CommandAction;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
+import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
 
@@ -145,5 +147,62 @@ public class MultiBreakParameters {
       return false;
 
     return !filter.predicate.test(itemType.createItemStack());
+  }
+
+  public void removeFilter(String commandLabel, TranslationLanguage currentLanguage) {
+    if (filter == null) {
+      parametersSlots.config.rootSection.multiBreak.noFilterSet.sendMessage(parametersSlots.player);
+      return;
+    }
+
+    parametersSlots.config.rootSection.multiBreak.filterRemoved.sendMessage(
+      parametersSlots.player,
+      new InterpretationEnvironment()
+        .withVariable("filter_predicate", filter.getTokenPredicateString())
+        .withVariable("set_command", makeFilterSetCommand(commandLabel, currentLanguage))
+    );
+
+    filter = null;
+    filterEnabled = false;
+  }
+
+  public @Nullable String makeFilterSetCommand(String label, TranslationLanguage currentLanguage) {
+    if (filter == null)
+      return null;
+
+    if (currentLanguage == filter.language)
+      return "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER) + " " + filter.getTokenPredicateString();
+
+    return "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER_WITH_LANGUAGE) + " " + TranslationLanguage.matcher.getNormalizedName(filter.language) + " " + filter.getTokenPredicateString();
+  }
+
+  public void setFilterEnabled(@Nullable Boolean value) {
+    if (filter == null) {
+      parametersSlots.config.rootSection.multiBreak.noFilterSet.sendMessage(parametersSlots.player);
+      return;
+    }
+
+    if (value != null) {
+      if (filterEnabled == value) {
+        if (filterEnabled) {
+          parametersSlots.config.rootSection.multiBreak.filterAlreadyEnabled.sendMessage(parametersSlots.player);
+          return;
+        }
+
+        parametersSlots.config.rootSection.multiBreak.filterAlreadyDisabled.sendMessage(parametersSlots.player);
+        return;
+      }
+
+      filterEnabled = value;
+    }
+    else
+      filterEnabled ^= true;
+
+    if (filterEnabled) {
+      parametersSlots.config.rootSection.multiBreak.filterNowEnabled.sendMessage(parametersSlots.player);
+      return;
+    }
+
+    parametersSlots.config.rootSection.multiBreak.filterNowDisabled.sendMessage(parametersSlots.player);
   }
 }

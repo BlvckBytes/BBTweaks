@@ -4,12 +4,9 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
-import me.blvckbytes.bbtweaks.multi_break.command.CommandAction;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
-import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
-import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;
@@ -65,38 +62,12 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
 
     if (config.rootSection.multiBreak.display.items.currentFilter.getDisplaySlots().contains(slot)) {
       if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
-        var currentFilter = selectedParameters.filter;
-
-        if (currentFilter == null) {
-          config.rootSection.multiBreak.noFilterSet.sendMessage(player);
-          return false;
-        }
-
-        config.rootSection.multiBreak.filterRemoved.sendMessage(
-          player,
-          new InterpretationEnvironment()
-            .withVariable("filter_predicate", currentFilter.getTokenPredicateString())
-            .withVariable("set_command", makeFilterSetCommand(display.displayData.commandLabel(), predicateHelper.getSelectedLanguage(player), currentFilter))
-        );
-
-        selectedParameters.filter = null;
+        selectedParameters.removeFilter(display.displayData.commandLabel(), predicateHelper.getSelectedLanguage(player));
         return true;
       }
 
       if (clickType == ClickType.LEFT) {
-        if (selectedParameters.filter == null) {
-          config.rootSection.multiBreak.noFilterSet.sendMessage(player);
-          return true;
-        }
-
-        selectedParameters.filterEnabled ^= true;
-
-        if (selectedParameters.filterEnabled) {
-          config.rootSection.multiBreak.filterNowEnabled.sendMessage(player);
-          return true;
-        }
-
-        config.rootSection.multiBreak.filterNowDisabled.sendMessage(player);
+        selectedParameters.setFilterEnabled(null);
         return true;
       }
 
@@ -114,14 +85,7 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
 
     if (config.rootSection.multiBreak.display.items.toggleEnabled.getDisplaySlots().contains(slot)) {
       if (clickType == ClickType.LEFT) {
-        var newState = display.displayData.parametersSlots().enabled ^= true;
-
-        if (newState) {
-          config.rootSection.multiBreak.nowEnabled.sendMessage(player, selectedParameters.makeEnvironment());
-          return true;
-        }
-
-        config.rootSection.multiBreak.nowDisabled.sendMessage(player);
+        parametersSlots.setEnabled(null);
         return true;
       }
 
@@ -174,12 +138,5 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
     }
 
     return false;
-  }
-
-  private String makeFilterSetCommand(String label, TranslationLanguage currentLanguage, PredicateAndLanguage predicateAndLanguage) {
-    if (currentLanguage == predicateAndLanguage.language)
-      return "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER) + " " + predicateAndLanguage.getTokenPredicateString();
-
-    return "/" + label + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER_WITH_LANGUAGE) + " " + TranslationLanguage.matcher.getNormalizedName(predicateAndLanguage.language) + " " + predicateAndLanguage.getTokenPredicateString();
   }
 }
