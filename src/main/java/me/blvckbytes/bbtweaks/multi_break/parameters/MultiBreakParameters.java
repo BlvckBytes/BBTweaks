@@ -4,7 +4,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.multi_break.command.CommandAction;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
-import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
@@ -139,14 +139,24 @@ public class MultiBreakParameters {
       .withVariable("is_locked", locked);
   }
 
-  public boolean doesMaterialMismatchFilter(Material material) {
+  public boolean doesBlockMismatchFilter(Block block) {
     if (filter == null || !filterEnabled)
       return false;
 
-    var itemType = material.asItemType();
+    var itemType = block.getType().asItemType();
 
-    if (itemType == null)
-      return false;
+    if (itemType == null) {
+      // Some materials like WALL_SIGN, WALL_TORCH, etc. don't seem to yield a result on
+      // #asItemType, so falling back on testing their drops seems like a perfectly
+      // reasonable approach to provide working filters without large hard-coded mappings.
+      for (var drop : block.getDrops()) {
+        if (filter.predicate.test(drop))
+          return false;
+      }
+
+      // IMPORTANT! Fall back to exclusion, as to not break some undesired blocks, like PISTON_HEAD, etc.
+      return true;
+    }
 
     return !filter.predicate.test(itemType.createItemStack());
   }

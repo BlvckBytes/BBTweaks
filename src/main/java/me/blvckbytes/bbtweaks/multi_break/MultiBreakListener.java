@@ -115,7 +115,7 @@ public class MultiBreakListener implements Listener {
     if (!originBlock.isSolid())
       return;
 
-    if (selectedParameters.doesMaterialMismatchFilter(originBlock.getType()))
+    if (selectedParameters.doesBlockMismatchFilter(originBlock))
       return;
 
     var playerInventory = player.getInventory();
@@ -141,7 +141,7 @@ public class MultiBreakListener implements Listener {
         return;
       }
 
-      if (selectedParameters.doesMaterialMismatchFilter(blockType))
+      if (selectedParameters.doesBlockMismatchFilter(block))
         return;
 
       var toolUsed = DamageableHotbarItem.determineToolFromHotbar(block, playerInventory);
