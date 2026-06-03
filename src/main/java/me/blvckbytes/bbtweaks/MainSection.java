@@ -29,6 +29,7 @@ import me.blvckbytes.bbtweaks.ping.PingSection;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideSection;
 import me.blvckbytes.bbtweaks.shulker_accessor.config.ShulkerAccessorSection;
 import me.blvckbytes.bbtweaks.sidebar.config.SidebarSection;
+import me.blvckbytes.bbtweaks.sign_copier.SignCopierSection;
 import me.blvckbytes.bbtweaks.un_craft.config.UnCraftSection;
 
 @CSAlways
@@ -60,6 +61,7 @@ public class MainSection extends ConfigSection {
   public CommandItemsSection commandItems;
   public DurabilityWarningsSection durabilityWarnings;
   public SidebarSection sidebar;
+  public SignCopierSection signCopier;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

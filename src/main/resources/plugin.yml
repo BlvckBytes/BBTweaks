@@ -68,6 +68,12 @@ commands:
   sidebar:
     description: 'Configure the sidebar scoreboard'
     permission: bbtweaks.sidebar
+  signcopy:
+    description: 'Use the sign-copier mechanic'
+    permission: bbtweaks.sign-copier
+  signedit:
+    description: 'Shortcut command to edit lines in the buffer'
+    permission: bbtweaks.sign-copier
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

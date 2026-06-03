@@ -1658,6 +1658,32 @@ sidebar:
             <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Vorwärts bewegen<br/>
             {lut.spacer}
 
+signCopier:
+  alsoHandleCancelledInteractions: true
+  playersOnly: '{lut.sign_copier_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+  helpScreen: |
+    <&8><&m>{" " ** 25}</> <&6>SignCopier <&8><&m>{" " ** 25}</><br/>
+    <&7>- <&6>/{label}</> <&e>Edit</> \<<&e>Zeile</>> [<&e>Inhalt</>] - Editiere eine Zeile in deinem Bearbeitungsspeicher (Kurzform: <&6>/{sign_edit_command}</> \<<&e>Zeile</>> [<&e>Inhalt</>])<br/>
+    <&7>- <&6>/{label}</> <&e>Edit-Plain</> \<<&e>Zeile</>> [<&e>Inhalt</>] - Editiere eine Zeile, ohne Farbcodes auszuführen<br/>
+    <&7>- <&6>/{label}</> <&e>Preview</> - Zeigt den Inhalt deines Bearbeitungsspeichers (Kurzform: <&6>/{sign_edit_command}</> <&e>Preview</>)<br/>
+    <&7>- <&6>/{label}</> <&e>Clear</> - Leert deinen Bearbeitungsspeicher<br/>
+  noSignCopied: '{lut.sign_copier_prefix} <&c>Du hast noch kein Schild durch Rechtsklick mit einem Tintenbeutel kopiert!'
+  copiedSignRemoved: '{lut.sign_copier_prefix} <&7>Dein Bearbeitungsspeicher wurde <&a>gelöscht</>.'
+  actionEditUsage: '{lut.sign_copier_prefix} <&c>Benutzung: /{label} {action} \<Zeile> [Inhalt]'
+  signEditUsage: '{lut.sign_copier_prefix} <&c>Benutzung: /{label} \<Zeile> [Inhalt]'
+  malformedLineNumber: '{lut.sign_copier_prefix} <&c>Die Zeilennummer <&4>{input}</> ist keine valide Ganzzahl größer als Null!'
+  outOfBoundsLineNumber: '{lut.sign_copier_prefix} <&c>Die Zeilennummer <&4>{line_number}</> ist größer als das Maximum von <&4>{max_line_number}</>!'
+  setLineToBlank: '{lut.sign_copier_prefix} <&7>Die Zeile <&a>{line_number}</> wurde <&a>geleert</>.'
+  setLineToContents: '{lut.sign_copier_prefix} <&7>Der Inhalt von Zeile <&a>{line_number}</> wurde auf "{contents}" gesetzt.'
+  previewScreen: |
+    <&8><&m>{" " ** 25}</> <&6>Bearbeitungsspeicher <&8><&m>{" " ** 25}</><br/>
+    <container *for-line="lines" *for-separator={<br/>}>
+      <&7>Zeile {loop.index + 1}: {line}
+    </container>
+  signCopied: '{lut.sign_copier_prefix} <&7>Der Inhalt des Schildes bei <&a>{x} {y} {z}</> wurde in deinen Bearbeitungsspeichers kopiert.'
+  signPasted: '{lut.sign_copier_prefix} <&7>Der Inhalt deines Bearbeitungsspeichers wurde am Schild bei <&a>{x} {y} {z}</> eingefügt.'
+  signPasteWasCancelled: '{lut.sign_copier_prefix} <&c>Das Einfügen des Schildes bei <&4>{x} {y} {z}</> wurde verweigert; bestehen Baurechte?'
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -1682,6 +1708,7 @@ cLut:
   inv_magnet_prefix: '<&7>[<&6>InvMagnet<&7>]'
   getexp_prefix: '<&7>[<&6>GetExp<&7>]'
   sidebar_prefix: '<&7>[<&6>Sidebar<&7>]'
+  sign_copier_prefix: '<&7>[<&6>SignCopier<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

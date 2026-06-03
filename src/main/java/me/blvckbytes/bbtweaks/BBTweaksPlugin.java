@@ -61,6 +61,8 @@ import me.blvckbytes.bbtweaks.sidebar.command.SidebarCommandSection;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferencesStore;
 import me.blvckbytes.bbtweaks.sidebar.settings_display.SidebarSettingsDisplayHandler;
 import me.blvckbytes.bbtweaks.sidebar.sorting_display.SidebarSortingDisplayHandler;
+import me.blvckbytes.bbtweaks.sign_copier.SignCopyCommand;
+import me.blvckbytes.bbtweaks.sign_copier.SignEditCommand;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.NameScopedKeyValueStore;
@@ -323,6 +325,16 @@ public class BBTweaksPlugin extends JavaPlugin {
       getServer().getPluginManager().registerEvents(new CommandItemListener(config), this);
 
       getServer().getPluginManager().registerEvents(new SidebarBoardManager(this, floodgateIntegration, sidebarPreferencesStore, config), this);
+
+      var signEditCommand = Objects.requireNonNull(getCommand("signedit"));
+      var signCopyCommand = Objects.requireNonNull(getCommand("signcopy"));
+
+      var signCopyCommandHandler = new SignCopyCommand(this, signEditCommand, config);
+      getServer().getPluginManager().registerEvents(signCopyCommandHandler, this);
+      setExecutorAndCompleter(signCopyCommand, signCopyCommandHandler);
+
+      var signEditCommandHandler = new SignEditCommand(signCopyCommandHandler, config);
+      setExecutorAndCompleter(signEditCommand, signEditCommandHandler);
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to enable the plugin; disabling!", e);
       Bukkit.getPluginManager().disablePlugin(this);
