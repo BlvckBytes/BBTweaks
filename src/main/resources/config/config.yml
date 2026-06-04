@@ -1537,16 +1537,20 @@ sidebar:
           der gewählte Einstellungsslot von<br/>
           MultiBreak (/mb).<br/>
           <br/>
-          Wert: \<An/Aus> (S\<Einstellungsslot>)
+          Wert: \<An/Aus> (S\<Einstellungsslot>)<br/>
+          <br/>
+          <&e>🛈 Der Wert zeigt die eingestellte Farbe nur<br/>
+          dann an, wenn die Funktion aktiv ist und verbleibt<br/>
+          im inaktiven Zustand ausgegraut.
         iconType: 'NETHERITE_PICKAXE'
       defaultLabelStyle:
         color: 'LIGHT_GRAY'
       defaultValueStyle:
-        color: 'WHITE'
+        color: 'LIGHT_GREEN'
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="⛏" label="MultiBreak"
+          icon="⛏" label="MultiBreak" [value-color-override]="not enabled then '&7'"
           value={
             {enabled then `An (S{slot_index + 1})` else "Aus"}
           }
@@ -1559,16 +1563,20 @@ sidebar:
           der gewählte Radius des Inventarmagneten<br/>
           (/invmagnet).<br/>
           <br/>
-          Wert: \<An/Aus> (R\<Radius>)
+          Wert: \<An/Aus> (R\<Radius>)<br/>
+          <br/>
+          <&e>🛈 Der Wert zeigt die eingestellte Farbe nur<br/>
+          dann an, wenn die Funktion aktiv ist und verbleibt<br/>
+          im inaktiven Zustand ausgegraut.
         iconType: 'WIND_CHARGE'
       defaultLabelStyle:
         color: 'LIGHT_GRAY'
       defaultValueStyle:
-        color: 'WHITE'
+        color: 'LIGHT_GREEN'
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="🧲" label="InvMagnet"
+          icon="🧲" label="InvMagnet" [value-color-override]="not enabled then '&7'"
           value={
             {enabled then `An (R{radius})` else "Aus"}
           }
@@ -1578,16 +1586,20 @@ sidebar:
         name: 'InvFilter Status'
         description: |
           Der aktuelle Aktivierungszustand des<br/>
-          Inventarfilters (/invfilter).
+          Inventarfilters (/invfilter).<br/>
+          <br/>
+          <&e>🛈 Der Wert zeigt die eingestellte Farbe nur<br/>
+          dann an, wenn die Funktion aktiv ist und verbleibt<br/>
+          im inaktiven Zustand ausgegraut.
         iconType: 'HOPPER'
       defaultLabelStyle:
         color: 'LIGHT_GRAY'
       defaultValueStyle:
-        color: 'WHITE'
+        color: 'LIGHT_GREEN'
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="✔" label="InvFilter"
+          icon="✔" label="InvFilter" [value-color-override]="not enabled then '&7'"
           value={
             {enabled then "An" else "Aus"}
           }
@@ -1597,16 +1609,20 @@ sidebar:
         name: 'AutoTool Status'
         description: |
           Der aktuelle Aktivierungszustand der<br/>
-          automatischen Werkzeugauswahl (/autotool).
+          automatischen Werkzeugauswahl (/autotool).<br/>
+          <br/>
+          <&e>🛈 Der Wert zeigt die eingestellte Farbe nur<br/>
+          dann an, wenn die Funktion aktiv ist und verbleibt<br/>
+          im inaktiven Zustand ausgegraut.
         iconType: 'GOLD_AXE'
       defaultLabelStyle:
         color: 'LIGHT_GRAY'
       defaultValueStyle:
-        color: 'WHITE'
+        color: 'LIGHT_GREEN'
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="🪓" label="AutoTool"
+          icon="🪓" label="AutoTool" [value-color-override]="not enabled then '&7'"
           value={
             {enabled then "An" else "Aus"}
           }
@@ -1615,9 +1631,10 @@ sidebar:
       iconData:
         name: 'Aktuelle AFK-Dauer'
         description: |
-          Die Dauer deiner aktuellen AFK-Phase seit<br/>
-          Beginn; <&e>diese Zeile wird automatisch<br/>
-          ausgeblendet, wenn du aktiv spielst</>.
+          Die Dauer deiner aktuellen AFK-Phase.<br/>
+          <br/>
+          <&e>🛈 Diese Zeile wird automatisch ausgeblendet,<br/>
+          wenn du aktiv spielst, um Platz zu sparen.</>
         iconType: 'RECOVERY_COMPASS'
       defaultLabelStyle:
         color: 'LIGHT_RED'
@@ -1701,7 +1718,8 @@ sidebar:
         name: 'Leerzeile #1'
         description: |
           Eine leere Zeile, die du aktivieren- und<br/>
-          zur visuellen Einteilung nutzen kannst.
+          mittels Sortierung der Einträge zur<br/>
+          visuellen Einteilung nutzen kannst.
         iconType: 'GLASS'
       defaultEnabled: false
       render: '<space/>'
@@ -1710,7 +1728,8 @@ sidebar:
         name: 'Leerzeile #2'
         description: |
           Eine leere Zeile, die du aktivieren- und<br/>
-          zur visuellen Einteilung nutzen kannst.
+          mittels Sortierung der Einträge zur<br/>
+          visuellen Einteilung nutzen kannst.
         iconType: 'GLASS'
       defaultEnabled: false
       render: '<space/>'
@@ -1719,7 +1738,8 @@ sidebar:
         name: 'Leerzeile #3'
         description: |
           Eine leere Zeile, die du aktivieren- und<br/>
-          zur visuellen Einteilung nutzen kannst.
+          mittels Sortierung der Einträge zur<br/>
+          visuellen Einteilung nutzen kannst.
         iconType: 'GLASS'
       defaultEnabled: false
       render: '<space/>'
@@ -2264,6 +2284,11 @@ cLut:
         <style [label_style.bold] [label_style.italic] [label_style.underlined]>{label}:</><space/>
       </color>
       <color [value_style.color.hex]>
-        <style [value_style.bold] [value_style.italic] [value_style.underlined]>
+        <style
+          [color]="has(value_color_override) then value_color_override"
+          [value_style.bold]
+          [value_style.italic]
+          [value_style.underlined]
+        >
           {value}
       </color>
