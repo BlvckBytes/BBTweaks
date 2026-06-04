@@ -1650,7 +1650,7 @@ sidebar:
         <$lut.sidebar.statistic_renderer
           icon="⌛" label="Rank-Up"
           value={
-            <$lut.sidebar.playtime_format *if="time > 0" />
+            <$lut.sidebar.playtime_format [time]="time / 1000.0 * 20.0" *if="time > 0" />
             <container *else>/</>
           }
         />
@@ -1671,7 +1671,7 @@ sidebar:
         <$lut.sidebar.statistic_renderer
           icon="⌛" label="Shopregion"
           value={
-            <$lut.sidebar.playtime_format *if="time > 0" />
+            <$lut.sidebar.playtime_format [time]="time / 1000.0 * 20.0" *if="time > 0" />
             <container *else>/</>
           }
         />
