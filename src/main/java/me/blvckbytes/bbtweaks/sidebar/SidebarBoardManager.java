@@ -221,23 +221,23 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
   }
 
   private void renderAndUpdateLinesForBoard(SidebarBoard board, SidebarPreferences preferences) {
-    var totalLineCount = preferences.enabledStatistics.size();
+    var maxLineCount = SidebarStatistic.ALL_VALUES.size();
     var staticLineIndices = IntSet.of();
 
     switch (preferences.delimitersMode) {
       case NONE -> {}
       case TOP_ONLY -> {
-        ++totalLineCount;
+        ++maxLineCount;
         staticLineIndices = new IntArraySet(1);
       }
       case TOP_AND_BOTTOM -> {
-        totalLineCount += 2;
+        maxLineCount += 2;
         staticLineIndices = new IntArraySet(2);
       }
       default -> throw new IllegalStateException("Unaccounted-for delimiters-mode: " + preferences.delimitersMode);
     }
 
-    var lines = new ArrayList<Component>(totalLineCount);
+    var lines = new ArrayList<Component>(maxLineCount);
 
     if (preferences.delimitersMode != DelimitersMode.NONE) {
       staticLineIndices.add(0);
@@ -248,9 +248,6 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
     var maxLineLength = 0;
 
     for (var statistic : preferences.statisticsInOrder) {
-      if (!preferences.enabledStatistics.contains(statistic))
-        continue;
-
       var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
       var line = statistic.renderFor(board.holder, statisticSection, preferences, this);
 

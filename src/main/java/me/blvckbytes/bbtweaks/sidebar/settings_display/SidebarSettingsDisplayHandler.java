@@ -139,11 +139,7 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
       return;
 
     if (clickType == ClickType.LEFT) {
-      if (display.displayData.enabledStatistics.contains(statistic._sidebarStatistic))
-        display.displayData.enabledStatistics.remove(statistic._sidebarStatistic);
-      else
-        display.displayData.enabledStatistics.add(statistic._sidebarStatistic);
-
+      display.displayData.enableModeByStatistic.computeIfPresent(statistic._sidebarStatistic, (k, currentMode) -> currentMode.next());
       display.renderItems();
       return;
     }

@@ -68,13 +68,16 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
 
       statisticBySlotIndex.put(index, statisticSection);
 
+      var enableMode = displayData.enableModeByStatistic.get(statistic);
+
       environment
         .withVariable("name", statisticSection.iconData.name.markupNode)
         .withVariable("description", statisticSection.iconData.description.markupNode)
         .withVariable("icon_type", statisticSection.iconData._iconType)
         .withVariable("label_style", displayData.labelStyleByStatistic.get(statistic))
         .withVariable("value_style", displayData.valueStyleByStatistic.get(statistic))
-        .withVariable("enabled", displayData.enabledStatistics.contains(statistic));
+        .withVariable("enabled", enableMode.enabled)
+        .withVariable("show_label", enableMode.showLabel);
 
       inventory.setItem(index, config.rootSection.sidebar.settingsDisplay.items.statisticIcon.build(environment));
     }

@@ -47,8 +47,8 @@ public class SidebarSortingDisplayHandler extends DisplayHandler<SidebarSortingD
       var list = display.displayData.preferences().statisticsInOrder;
 
       var newOrder = Stream.concat(
-        list.stream().filter(it -> display.displayData.preferences().enabledStatistics.contains(it)),
-        list.stream().filter(it -> !display.displayData.preferences().enabledStatistics.contains(it))
+        list.stream().filter(it -> display.displayData.preferences().enableModeByStatistic.get(it).enabled),
+        list.stream().filter(it -> !display.displayData.preferences().enableModeByStatistic.get(it).enabled)
       ).toList();
 
       if (newOrder.equals(list)) {

@@ -1956,7 +1956,13 @@ sidebar:
         hideAdditionalTooltips: true
         name: |
           <reset>
-            <&8>» <&6>{name}</> <&7>(<&a *if="enabled">aktiviert</><&c *else>deaktiviert</>)</> «
+            <&8>» <&6>{name}</> <&7>(
+              <container *if="enabled">
+                <&a *if="show_label">angezeigt</>
+                <&e *else>ohne Name angezeigt</>
+              </container>
+              <&c *else>deaktiviert</>
+            )</> «
         lore: |
           <reset>
             <br/>
@@ -1966,7 +1972,7 @@ sidebar:
             Name <style [label_style.bold] [label_style.italic] [label_style.underlined]>{label_style.color.display_name}</>,<space/>
             Wert <style [value_style.bold] [value_style.italic] [value_style.underlined]>{value_style.color.display_name}</><br/>
             {lut.spacer}<br/>
-            <&8>➥ <&e>Linksklick <&7>Statistik {enabled then "deaktivieren" else "aktivieren"}<br/>
+            <&8>➥ <&e>Linksklick <&7>Anzeigemodus umschalten<br/>
             <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Neue Farben auswählen<br/>
             {lut.spacer}
   sortingDisplay:
@@ -2009,7 +2015,13 @@ sidebar:
         glint: 'enabled'
         name: |
           <reset>
-            <&8>» <&6>{name}</> <&7>(<&a *if="enabled">aktiviert</><&c *else>deaktiviert</>)</> «
+            <&8>» <&6>{name}</> <&7>(
+              <container *if="enabled">
+                <&a *if="show_label">angezeigt</>
+                <&e *else>ohne Name angezeigt</>
+              </container>
+              <&c *else>deaktiviert</>
+            )</> «
         lore: |
           <reset>
             <br/>
@@ -2214,8 +2226,8 @@ cLut:
       TOP_AND_BOTTOM: '<&a>Oberhalb und unterhalb'
       TOP_ONLY: '<&3>Nur oberhalb'
     statistic_renderer: |
-      <color [label_style.color.hex]>
-        <container *if="show_icons">
+      <color [label_style.color.hex] *if="show_label">
+        <container *if="show_icon">
           {icon}<space/>
         </container>
         <style [label_style.bold] [label_style.italic] [label_style.underlined]>{label}:</><space/>

@@ -10,7 +10,6 @@ import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.List;
 
 public class SidebarPreferences {
@@ -28,7 +27,7 @@ public class SidebarPreferences {
   public DelimitersMode delimitersMode;
   public SneakMode sneakMode;
 
-  public final EnumSet<SidebarStatistic> enabledStatistics;
+  public final EnumMap<SidebarStatistic, StatisticEnableMode> enableModeByStatistic;
   public final EnumMap<SidebarStatistic, ColorAndFormats> labelStyleByStatistic;
   public final EnumMap<SidebarStatistic, ColorAndFormats> valueStyleByStatistic;
   public final List<SidebarStatistic> statisticsInOrder;
@@ -40,7 +39,7 @@ public class SidebarPreferences {
     // This flag is consciously excluded from the public reset-API.
     this.enabled = DEFAULT_ENABLED;
 
-    this.enabledStatistics = EnumSet.noneOf(SidebarStatistic.class);
+    this.enableModeByStatistic = new EnumMap<>(SidebarStatistic.class);
     this.labelStyleByStatistic = new EnumMap<>(SidebarStatistic.class);
     this.valueStyleByStatistic = new EnumMap<>(SidebarStatistic.class);
     this.statisticsInOrder = new ArrayList<>();
@@ -73,7 +72,7 @@ public class SidebarPreferences {
       if (!valueStyleByStatistic.get(statistic).equals(statisticSection._defaultValueStyle))
         return true;
 
-      if (enabledStatistics.contains(statistic) != statisticSection.defaultEnabled)
+      if (enableModeByStatistic.get(statistic) != statisticSection._defaultEnableMode)
         return true;
     }
 
@@ -86,14 +85,12 @@ public class SidebarPreferences {
     this.sneakMode = SneakMode.DEFAULT_VALUE;
     this.delimitersMode = DelimitersMode.DEFAULT_VALUE;
 
-    this.enabledStatistics.clear();
     this.statisticsInOrder.clear();
 
     for (var statistic : SidebarStatistic.ALL_VALUES) {
       var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
 
-      if (statisticSection.defaultEnabled)
-        enabledStatistics.add(statistic);
+      enableModeByStatistic.put(statistic, statisticSection._defaultEnableMode);
 
       // We're modifying styles in place, so cloning before setting is crucial as
       // to not mess up the stored defaults by editing them by reference.

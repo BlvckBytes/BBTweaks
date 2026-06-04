@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +24,7 @@ public class SidebarPreferencesStore implements Listener {
   private final ConfigKeeper<MainSection> config;
 
   private final NamespacedKey keyEnabled, keyShowTitle, keyShowIcons, keyDelimitersMode, keySneakMode,
-    keyEnabledStatistics, keyStatisticsOrder, keyStatisticsLabelStyles, keyStatisticsValueStyles;
+    keyEnabledStatistics, keyStatisticEnableModes, keyStatisticsOrder, keyStatisticsLabelStyles, keyStatisticsValueStyles;
 
   private final Map<UUID, SidebarPreferences> preferencesByPlayerId;
 
@@ -39,6 +40,7 @@ public class SidebarPreferencesStore implements Listener {
     this.keyDelimitersMode = new NamespacedKey(plugin, "sidebar-delimiters-mode");
     this.keySneakMode = new NamespacedKey(plugin, "sidebar-sneak-mode");
     this.keyEnabledStatistics = new NamespacedKey(plugin, "sidebar-enabled-statistics");
+    this.keyStatisticEnableModes = new NamespacedKey(plugin, "sidebar-statistic-enable-modes");
     this.keyStatisticsOrder = new NamespacedKey(plugin, "sidebar-statistics-order");
 
     // Due to backwards compatibility, the naming will be a bit off...
@@ -75,6 +77,8 @@ public class SidebarPreferencesStore implements Listener {
 
     var pdc = player.getPersistentDataContainer();
 
+    possiblyMigrateEnableModes(pdc);
+
     var enabledValue = pdc.get(keyEnabled, PersistentDataType.BOOLEAN);
 
     if (enabledValue != null)
@@ -100,16 +104,20 @@ public class SidebarPreferencesStore implements Listener {
     if (sneakModeValue != null)
       result.sneakMode = SneakMode.byOrdinalOrDefault(sneakModeValue);
 
-    var enabledStatisticsValue = pdc.get(keyEnabledStatistics, PersistentDataType.INTEGER_ARRAY);
+    var enableModesValue = pdc.get(keyStatisticEnableModes, PersistentDataType.INTEGER_ARRAY);
 
-    if (enabledStatisticsValue != null) {
-      result.enabledStatistics.clear();
+    if (enableModesValue != null) {
+      for (var statistic : SidebarStatistic.ALL_VALUES) {
+        var enableMode = config.rootSection.sidebar._statisticsMap.get(statistic)._defaultEnableMode;
 
-      for (var ordinal : enabledStatisticsValue) {
-        var statistic = SidebarStatistic.byOrdinalOrNull(ordinal);
+        if (statistic.ordinal() < enableModesValue.length) {
+          var modeValue = StatisticEnableMode.byOrdinalOrNull(enableModesValue[statistic.ordinal()]);
 
-        if (statistic != null)
-          result.enabledStatistics.add(statistic);
+          if (modeValue != null)
+            enableMode = modeValue;
+        }
+
+        result.enableModeByStatistic.put(statistic, enableMode);
       }
     }
 
@@ -184,14 +192,7 @@ public class SidebarPreferencesStore implements Listener {
     pdc.set(keyDelimitersMode, PersistentDataType.INTEGER, preferences.delimitersMode.ordinal());
     pdc.set(keySneakMode, PersistentDataType.INTEGER, preferences.sneakMode.ordinal());
 
-    var enabledStatistics = new IntArrayList();
-
-    for (var statistic : SidebarStatistic.ALL_VALUES) {
-      if (preferences.enabledStatistics.contains(statistic))
-        enabledStatistics.add(statistic.ordinal());
-    }
-
-    pdc.set(keyEnabledStatistics, PersistentDataType.INTEGER_ARRAY, enabledStatistics.toIntArray());
+    saveEnableModes(pdc, preferences.enableModeByStatistic);
 
     pdc.set(keyStatisticsLabelStyles, PersistentDataType.STRING, serializeStatisticStyles(preferences.labelStyleByStatistic::get));
     pdc.set(keyStatisticsValueStyles, PersistentDataType.STRING, serializeStatisticStyles(preferences.valueStyleByStatistic::get));
@@ -202,6 +203,15 @@ public class SidebarPreferencesStore implements Listener {
       statisticsOrder.add(statistic.ordinal());
 
     pdc.set(keyStatisticsOrder, PersistentDataType.INTEGER_ARRAY, statisticsOrder.toIntArray());
+  }
+
+  private void saveEnableModes(PersistentDataContainer pdc, Map<SidebarStatistic, StatisticEnableMode> modeMap) {
+    var enableModes = new IntArrayList();
+
+    for (var statistic : SidebarStatistic.ALL_VALUES)
+      enableModes.add(modeMap.get(statistic).ordinal());
+
+    pdc.set(keyStatisticEnableModes, PersistentDataType.INTEGER_ARRAY, enableModes.toIntArray());
   }
 
   private String serializeStatisticStyles(Function<SidebarStatistic, ColorAndFormats> getter) {
@@ -221,5 +231,30 @@ public class SidebarPreferencesStore implements Listener {
     }
 
     return colorsJoiner.toString();
+  }
+
+  private void possiblyMigrateEnableModes(PersistentDataContainer pdc) {
+    // We've transitioned from a simple list of enabled ordinals to a mode-enum per statistic.
+
+    var enabledStatisticsValue = pdc.get(keyEnabledStatistics, PersistentDataType.INTEGER_ARRAY);
+
+    if (enabledStatisticsValue == null)
+      return;
+
+    var modeMap = new HashMap<SidebarStatistic, StatisticEnableMode>();
+
+    for (var statistic : SidebarStatistic.ALL_VALUES)
+      modeMap.put(statistic, StatisticEnableMode.OFF);
+
+    for (var enabledStatistic : enabledStatisticsValue) {
+      var statistic = SidebarStatistic.byOrdinalOrNull(enabledStatistic);
+
+      if (statistic != null)
+        modeMap.put(statistic, StatisticEnableMode.ON);
+    }
+
+    saveEnableModes(pdc, modeMap);
+
+    pdc.remove(keyEnabledStatistics);
   }
 }

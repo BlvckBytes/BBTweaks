@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.sidebar;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import me.blvckbytes.bbtweaks.sidebar.config.StatisticSection;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
+import me.blvckbytes.bbtweaks.sidebar.preferences.StatisticEnableMode;
 import net.kyori.adventure.text.Component;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,16 +45,22 @@ public enum SidebarStatistic {
 
   public @Nullable Component renderFor(
     BoardHolder holder,
-    StatisticSection statistic,
+    StatisticSection statisticSection,
     SidebarPreferences preferences,
     StatisticEnvironmentResolver environmentResolver
   ) {
-    var result = statistic.render.interpret(
+    var enableMode = preferences.enableModeByStatistic.get(statisticSection._sidebarStatistic);
+
+    if (enableMode == StatisticEnableMode.OFF)
+      return null;
+
+    var result = statisticSection.render.interpret(
       SlotType.SINGLE_LINE_CHAT,
       environmentResolver.resolve(holder, this)
-        .withVariable("label_style", preferences.labelStyleByStatistic.get(statistic._sidebarStatistic))
-        .withVariable("value_style", preferences.valueStyleByStatistic.get(statistic._sidebarStatistic))
-        .withVariable("show_icons", preferences.showIcons)
+        .withVariable("label_style", preferences.labelStyleByStatistic.get(statisticSection._sidebarStatistic))
+        .withVariable("value_style", preferences.valueStyleByStatistic.get(statisticSection._sidebarStatistic))
+        .withVariable("show_icon", preferences.showIcons)
+        .withVariable("show_label", enableMode.showLabel)
     ).getFirst();
 
     // Empty results are not rendered at all, which enables renderers to conditionally display themselves.
