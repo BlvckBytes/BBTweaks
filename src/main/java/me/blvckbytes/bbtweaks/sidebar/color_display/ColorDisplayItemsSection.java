@@ -10,6 +10,8 @@ public class ColorDisplayItemsSection extends ConfigSection {
 
   public GuiItemStackSection filler;
   public GuiItemStackSection backButton;
+  public GuiItemStackSection labelColorMode;
+  public GuiItemStackSection valueColorMode;
   public ItemStackSection colorIcon;
 
   public ColorDisplayItemsSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {

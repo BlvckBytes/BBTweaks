@@ -72,6 +72,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
         .withVariable("description", statisticSection.iconData.description.markupNode)
         .withVariable("icon_type", statisticSection.iconData._iconType)
         .withVariable("label_color", displayData.labelColorByStatistic.get(statistic))
+        .withVariable("value_color", displayData.valueColorByStatistic.get(statistic))
         .withVariable("enabled", displayData.enabledStatistics.contains(statistic));
 
       inventory.setItem(index, config.rootSection.sidebar.settingsDisplay.items.statisticIcon.build(environment));
@@ -95,7 +96,6 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
   private InterpretationEnvironment makeEnvironment() {
     return new InterpretationEnvironment()
       .withVariable("is_floodgate", isFloodgate)
-      .withVariable("value_color", displayData.valueColor)
       .withVariable("sidebar_enabled", displayData.enabled)
       .withVariable("show_title", displayData.showTitle)
       .withVariable("delimiters_mode", displayData.delimitersMode.name())

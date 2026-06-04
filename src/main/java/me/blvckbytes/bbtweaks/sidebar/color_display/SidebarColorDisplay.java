@@ -15,8 +15,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class SidebarColorDisplay extends Display<ColorDisplayData> {
 
+  // TODO: Allow to select formats like bold, italic, etc. and display them in the statistic-lore also
+
   public final boolean isFloodgate;
-  private NamedColor selectedColor;
+
+  public boolean selectingLabelColor = true;
 
   private final Int2ObjectMap<NamedColor> colorBySlotIndex;
 
@@ -30,7 +33,6 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
     super(player, displayData, config, plugin);
 
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
-    this.selectedColor = displayData.initialSelection();
 
     this.colorBySlotIndex = new Int2ObjectOpenHashMap<>();
 
@@ -45,6 +47,11 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
 
     config.rootSection.sidebar.colorDisplay.items.filler.renderInto(inventory, environment);
     config.rootSection.sidebar.colorDisplay.items.backButton.renderInto(inventory, environment);
+
+    if (displayData.statistic() != null) {
+      config.rootSection.sidebar.colorDisplay.items.labelColorMode.renderInto(inventory, environment);
+      config.rootSection.sidebar.colorDisplay.items.valueColorMode.renderInto(inventory, environment);
+    }
 
     var colors = config.rootSection.sidebar._colors;
     var nextColorIndex = 0;
@@ -62,6 +69,13 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
 
       colorBySlotIndex.put(index, color);
 
+      NamedColor selectedColor = null;
+
+      if (displayData.statistic() != null) {
+        var colorMap = selectingLabelColor ? displayData.preferences().labelColorByStatistic : displayData.preferences().valueColorByStatistic;
+        selectedColor = colorMap.get(displayData.statistic()._sidebarStatistic);
+      }
+
       environment
         .withVariable("color", color.hexColor())
         .withVariable("selected", color == selectedColor)
@@ -77,13 +91,18 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
     return colorBySlotIndex.get(slotIndex);
   }
 
-  public void onColorSelection(@Nullable NamedColor color) {
-    displayData.callback().onColorSelect(color);
+  public void onColorSelection(NamedColor color) {
+    if (displayData.statistic() == null) {
+      for (var valueColorEntry : displayData.preferences().valueColorByStatistic.entrySet())
+        valueColorEntry.setValue(color);
 
-    if (color == null)
       return;
+    }
 
-    this.selectedColor = color;
+    var colorMap = selectingLabelColor ? displayData.preferences().labelColorByStatistic : displayData.preferences().valueColorByStatistic;
+
+    colorMap.put(displayData.statistic()._sidebarStatistic, color);
+
     renderItems();
   }
 
@@ -99,6 +118,8 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
 
   private InterpretationEnvironment makeEnvironment() {
     return new InterpretationEnvironment()
-      .withVariable("is_floodgate", isFloodgate);
+      .withVariable("is_floodgate", isFloodgate)
+      .withVariable("is_label_color", selectingLabelColor)
+      .withVariable("statistic", displayData.statistic() == null ? null : displayData.statistic().iconData.name.markupNode);
   }
 }

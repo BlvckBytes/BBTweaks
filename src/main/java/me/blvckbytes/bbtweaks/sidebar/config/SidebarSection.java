@@ -42,9 +42,6 @@ public class SidebarSection extends ConfigSection {
   public ComponentMarkup boardTitle;
   public ComponentMarkup delimiter;
 
-  public ComponentMarkup defaultValueColor;
-  public @CSIgnore NamedColor _defaultValueColor;
-
   public Map<String, StatisticSection> statistics = new LinkedHashMap<>();
 
   public Map<String, ColorSection> colors = new LinkedHashMap<>();
@@ -116,6 +113,12 @@ public class SidebarSection extends ConfigSection {
       if (statisticSection._defaultLabelColor == null)
         throw new MappingError("Could not find a named color of \"" + defaultLabelColorName + "\" for the defaultLabelColor of statistic " + statisticName);
 
+      var defaultValueColorName = statisticSection.defaultValueColor.asPlainString(null);
+      statisticSection._defaultValueColor = _colorByNameLower.get(defaultValueColorName.toLowerCase());
+
+      if (statisticSection._defaultValueColor == null)
+        throw new MappingError("Could not find a named color of \"" + defaultValueColorName + "\" for the defaultValueColor of statistic " + statisticName);
+
       statisticSection._sidebarStatistic = statistic;
 
       _statisticsMap.put(statistic, statisticSection);
@@ -126,12 +129,6 @@ public class SidebarSection extends ConfigSection {
       if (!_statisticsMap.containsKey(statistic))
         throw new MappingError("Missing statistic: " + statistic.name());
     }
-
-    var defaultValueColorName = defaultValueColor.asPlainString(null);
-    _defaultValueColor = _colorByNameLower.get(defaultValueColorName.toLowerCase());
-
-    if (_defaultValueColor == null)
-      throw new MappingError("Could not find the named color of \"" + defaultValueColorName + "\" specified on the property \"defaultValueColor\"");
 
     if (doubleSneakMaxDelayMs <= 0)
       throw new MappingError("Property \"doubleSneakMaxDelayMs\" cannot be less than or equal to zero");

@@ -11,11 +11,16 @@ import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
 public class StatisticSection extends ConfigSection {
 
   public ComponentMarkup render;
+
   public ComponentMarkup defaultLabelColor;
+  public @CSIgnore NamedColor _defaultLabelColor;
+
+  public ComponentMarkup defaultValueColor;
+  public @CSIgnore NamedColor _defaultValueColor;
+
   public boolean defaultEnabled;
 
   public @CSAlways StatisticIconData iconData;
-  public @CSIgnore NamedColor _defaultLabelColor;
   public @CSIgnore SidebarStatistic _sidebarStatistic;
 
   public StatisticSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {

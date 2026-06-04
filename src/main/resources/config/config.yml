@@ -1150,7 +1150,6 @@ sidebar:
       color: '#FF63DB'
       displayName: '<color [color]>Pink'
       iconType: 'PINK_CONCRETE'
-  defaultValueColor: 'WHITE'
   statistics:
     GROUP_PREFIX:
       iconData:
@@ -1158,6 +1157,7 @@ sidebar:
         description: 'Dein aktueller Rang.'
         iconType: 'NETHER_STAR'
       defaultLabelColor: 'ORANGE'
+      defaultValueColor: 'WHITE'
       defaultEnabled: true
       render: |
         <color [label_color]>
@@ -1172,6 +1172,7 @@ sidebar:
         description: 'Dein aktueller Kontostand.'
         iconType: 'DIAMOND'
       defaultLabelColor: 'YELLOW'
+      defaultValueColor: 'WHITE'
       defaultEnabled: true
       render: |
         <color [label_color]>
@@ -1188,6 +1189,7 @@ sidebar:
           Server verbracht hast.
         iconType: 'LEATHER_BOOTS'
       defaultLabelColor: 'LIGHT_GREEN'
+      defaultValueColor: 'WHITE'
       defaultEnabled: true
       render: |
         <color [label_color]>
@@ -1204,6 +1206,7 @@ sidebar:
           aktiven Spielzeiten.
         iconType: 'LADDER'
       defaultLabelColor: 'LIGHT_GREEN'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1220,6 +1223,7 @@ sidebar:
           Server verbracht hast.
         iconType: 'BUCKET'
       defaultLabelColor: 'LIGHT_GRAY'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1236,6 +1240,7 @@ sidebar:
           inaktiven (AFK) Spielzeiten.
         iconType: 'LADDER'
       defaultLabelColor: 'LIGHT_GRAY'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1252,6 +1257,7 @@ sidebar:
           verbleibenden Homepunkte.
         iconType: 'RED_BED'
       defaultLabelColor: 'GREEN'
+      defaultValueColor: 'WHITE'
       defaultEnabled: true
       render: |
         <color [label_color]>
@@ -1270,6 +1276,7 @@ sidebar:
           benötigt (round-trip).
         iconType: 'REPEATER'
       defaultLabelColor: 'LIGHT_BLUE'
+      defaultValueColor: 'WHITE'
       defaultEnabled: true
       render: |
         <color [label_color]>
@@ -1284,6 +1291,7 @@ sidebar:
         description: 'Das heutige Datum.'
         iconType: 'PAPER'
       defaultLabelColor: 'MAGENTA'
+      defaultValueColor: 'WHITE'
       defaultEnabled: true
       render: |
         <color [label_color]>
@@ -1298,6 +1306,7 @@ sidebar:
         description: 'Die aktuelle Uhrzeit.'
         iconType: 'CLOCK'
       defaultLabelColor: 'MAGENTA'
+      defaultValueColor: 'WHITE'
       defaultEnabled: true
       render: |
         <color [label_color]>
@@ -1312,6 +1321,7 @@ sidebar:
         description: 'Deine aktuellen Koordinaten.'
         iconType: 'COMPASS'
       defaultLabelColor: 'BLUE'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1326,6 +1336,7 @@ sidebar:
         description: 'Das Biom, in dem du dich aktuell aufhältst.'
         iconType: 'CACTUS'
       defaultLabelColor: 'BROWN'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1340,6 +1351,7 @@ sidebar:
         description: 'Die Himmelsrichtung, in die du aktuell blickst.'
         iconType: 'SPYGLASS'
       defaultLabelColor: 'PINK'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1356,6 +1368,7 @@ sidebar:
           du dich aktuell aufhältst.
         iconType: 'CLOCK'
       defaultLabelColor: 'PURPLE'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1372,6 +1385,7 @@ sidebar:
           ersten Jobs (/jobs).
         iconType: 'CHEST'
       defaultLabelColor: 'ORANGE'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <container *if="progression">
@@ -1391,6 +1405,7 @@ sidebar:
           zweiten Jobs (/jobs).
         iconType: 'CHEST'
       defaultLabelColor: 'ORANGE'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <container *if="progression">
@@ -1410,6 +1425,7 @@ sidebar:
           Gesamtlevel bekannt (/mcmmo).
         iconType: 'DIAMOND_PICKAXE'
       defaultLabelColor: 'PURPLE'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1424,6 +1440,7 @@ sidebar:
         description: 'Der Name deines Accounts.'
         iconType: 'NAME_TAG'
       defaultLabelColor: 'LIGHT_BLUE'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1444,6 +1461,7 @@ sidebar:
           Niedrigere Werte signalisieren eine Überlastung.
         iconType: 'REDSTONE'
       defaultLabelColor: 'LIGHT_RED'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1463,6 +1481,7 @@ sidebar:
           Wert: \<Lichtlevel> (\<Himmelslicht>H, \<Blocklicht>B)
         iconType: 'LIGHT'
       defaultLabelColor: 'YELLOW'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1485,6 +1504,7 @@ sidebar:
           Wert: \<An/Aus> (S\<Einstellungsslot>)
         iconType: 'NETHERITE_PICKAXE'
       defaultLabelColor: 'LIGHT_GRAY'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1504,6 +1524,7 @@ sidebar:
           Wert: \<An/Aus> (R\<Radius>)
         iconType: 'WIND_CHARGE'
       defaultLabelColor: 'LIGHT_GRAY'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1520,6 +1541,7 @@ sidebar:
           Inventarfilters (/invfilter).
         iconType: 'HOPPER'
       defaultLabelColor: 'LIGHT_GRAY'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1536,6 +1558,7 @@ sidebar:
           automatischen Werkzeugauswahl (/autotool).
         iconType: 'GOLD_AXE'
       defaultLabelColor: 'LIGHT_GRAY'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1553,6 +1576,7 @@ sidebar:
           ausgeblendet, wenn du aktiv spielst</>.
         iconType: 'RECOVERY_COMPASS'
       defaultLabelColor: 'LIGHT_RED'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <container *if="time">
@@ -1573,6 +1597,7 @@ sidebar:
           erlangbaren Rang erreicht hast.
         iconType: 'FIREWORK_ROCKET'
       defaultLabelColor: 'LIGHT_GREEN'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1593,6 +1618,7 @@ sidebar:
           noch keine besitzt.
         iconType: 'PAPER'
       defaultLabelColor: 'LIGHT_BLUE'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1613,6 +1639,7 @@ sidebar:
           dass du aktuell noch keines besitzt.
         iconType: 'PAPER'
       defaultLabelColor: 'LIGHT_BLUE'
+      defaultValueColor: 'WHITE'
       defaultEnabled: false
       render: |
         <color [label_color]>
@@ -1625,13 +1652,54 @@ sidebar:
           <$lut.sidebar.playtime_format *let-time="time / 1000.0 * 20.0" *else>
         </color>
   colorDisplay:
-    title: '<&8>Farbauswahl'
-    rows: 4
+    title: |
+      <&8>Farbauswahl<space/>
+      <container *if="statistic" [statistic] />
+      <container *else>aller Statistikwerte</>
+    rows: 6
     items:
       filler:
         type: BLACK_STAINED_GLASS_PANE
         name: ' '
         slots: '(last_slot - 8)..last_slot'
+      labelColorMode:
+        slots: 'last_slot - 8'
+        type: '{is_label_color then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&6 *use="is_label_color">Farbe des Statistiknamens <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Wähle die Farbe des Textes vor dem<br/>
+            Wert der aktuellen Statistik.<br/>
+            {lut.spacer}<br/>
+              <container *if="not is_label_color">
+                <&8>➥ <&e>Linksklick <&7>In den Modus wechseln<br/>
+              </container>
+              <container *else>
+                <&8>➥ <&a>Du befindest dich bereits in diesem Modus.<br/>
+              </container>
+            {lut.spacer}
+      valueColorMode:
+        slots: 'last_slot - 7'
+        type: '{not is_label_color then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&6 *use="not is_label_color">Farbe des Statistikwertes <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Wähle die Farbe des Wertes der<br/>
+            aktuellen Statistik.<br/>
+            {lut.spacer}<br/>
+              <container *if="is_label_color">
+                <&8>➥ <&e>Linksklick <&7>In den Modus wechseln<br/>
+              </container>
+              <container *else>
+                <&8>➥ <&a>Du befindest dich bereits in diesem Modus.<br/>
+              </container>
+            {lut.spacer}
       backButton:
         slots: 'last_slot - 4'
         type: PLAYER_HEAD
@@ -1653,7 +1721,12 @@ sidebar:
         lore: |
           <reset>
             {lut.spacer}<br/>
-            <&8>➥ <&e>Linksklick <&7>Wähle diese Farbe<br/>
+            <container *if="selected">
+              <&8>➥ <&a>Die Farbe ist bereits ausgewählt.<br/>
+            </container>
+            <container *else>
+              <&8>➥ <&e>Linksklick <&7>Wähle diese Farbe<br/>
+            </container>
             {lut.spacer}
   settingsDisplay:
     title: '<&8>Sidebar-Einstellungen'
@@ -1731,19 +1804,18 @@ sidebar:
             {lut.spacer}
         slots: 'last_slot - 6'
       valueColor:
-        type: '{value_color.icon_type}'
+        type: 'GHAST_TEAR'
         name: |
           <reset>
-            <&8>» <&6>Farbe der Werte <&8>«
+            <&8>» <&6>Farbe aller Werte <&8>«
         lore: |
           <reset>
             <br/>
-            <&7>Die Farbe, mit welcher die individuellen<br/>
-            Werte aller Statistiken angezeigt werden.<br/>
+            <&7>Mit diesem Shortcut können die Farben aller<br/>
+            individuellen Statistikwerte auf dieselbe<br/>
+            Auswahl gesetzt werden.<br/>
             {lut.spacer}<br/>
-            <&8>♦ <&e>Aktuelle Farbe: {value_color.display_name}<br/>
-            {lut.spacer}<br/>
-            <&8>➥ <&e>Linksklick <&7>Neue Farbe auswählen<br/>
+            <&8>➥ <&e>Linksklick <&7>Farbe auswählen<br/>
             {lut.spacer}
         slots: 'last_slot - 5'
       openSorting:
@@ -1786,10 +1858,10 @@ sidebar:
             <br/>
             <&7>{description}<br/>
             {lut.spacer}<br/>
-            <&8>♦ <&e>Aktuelle Farbe: {label_color.display_name}<br/>
+            <&8>♦ <&e>Aktuelle Farben: <&7>Name {label_color.display_name}, Wert {value_color.display_name}<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Statistik {enabled then "deaktivieren" else "aktivieren"}<br/>
-            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Neue Farbe auswählen<br/>
+            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Neue Farben auswählen<br/>
             {lut.spacer}
   sortingDisplay:
     title: '<&8>Sidebar-Sortierung'

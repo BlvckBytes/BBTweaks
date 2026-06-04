@@ -22,8 +22,6 @@ public class SidebarPreferences {
   public final Player player;
   private final ConfigKeeper<MainSection> config;
 
-  public NamedColor valueColor;
-
   public boolean enabled;
   public boolean showTitle;
   public DelimitersMode delimitersMode;
@@ -31,6 +29,7 @@ public class SidebarPreferences {
 
   public final EnumSet<SidebarStatistic> enabledStatistics;
   public final EnumMap<SidebarStatistic, NamedColor> labelColorByStatistic;
+  public final EnumMap<SidebarStatistic, NamedColor> valueColorByStatistic;
   public final List<SidebarStatistic> statisticsInOrder;
 
   public SidebarPreferences(Player player, ConfigKeeper<MainSection> config) {
@@ -42,6 +41,7 @@ public class SidebarPreferences {
 
     this.enabledStatistics = EnumSet.noneOf(SidebarStatistic.class);
     this.labelColorByStatistic = new EnumMap<>(SidebarStatistic.class);
+    this.valueColorByStatistic = new EnumMap<>(SidebarStatistic.class);
     this.statisticsInOrder = new ArrayList<>();
 
     this.resetToDefaults();
@@ -57,9 +57,6 @@ public class SidebarPreferences {
     if (delimitersMode != DelimitersMode.DEFAULT_VALUE)
       return true;
 
-    if (this.valueColor != config.rootSection.sidebar._defaultValueColor)
-      return true;
-
     for (var statistic : SidebarStatistic.ALL_VALUES) {
       if (statisticsInOrder.get(statistic.ordinal()) != statistic)
         return true;
@@ -67,6 +64,9 @@ public class SidebarPreferences {
       var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
 
       if (labelColorByStatistic.get(statistic) != statisticSection._defaultLabelColor)
+        return true;
+
+      if (valueColorByStatistic.get(statistic) != statisticSection._defaultValueColor)
         return true;
 
       if (enabledStatistics.contains(statistic) != statisticSection.defaultEnabled)
@@ -81,8 +81,6 @@ public class SidebarPreferences {
     this.sneakMode = SneakMode.DEFAULT_VALUE;
     this.delimitersMode = DelimitersMode.DEFAULT_VALUE;
 
-    this.valueColor = config.rootSection.sidebar._defaultValueColor;
-
     this.enabledStatistics.clear();
     this.statisticsInOrder.clear();
 
@@ -93,6 +91,8 @@ public class SidebarPreferences {
         enabledStatistics.add(statistic);
 
       labelColorByStatistic.put(statistic, statisticSection._defaultLabelColor);
+      valueColorByStatistic.put(statistic, statisticSection._defaultValueColor);
+
       statisticsInOrder.add(statistic);
     }
   }
@@ -107,9 +107,10 @@ public class SidebarPreferences {
   }
 
   public void onConfigReload() {
-    this.valueColor = config.rootSection.sidebar.tryGetCurrentColorWithEqualName(valueColor);
-
     for (var entry : labelColorByStatistic.entrySet())
+      entry.setValue(config.rootSection.sidebar.tryGetCurrentColorWithEqualName(entry.getValue()));
+
+    for (var entry : valueColorByStatistic.entrySet())
       entry.setValue(config.rootSection.sidebar.tryGetCurrentColorWithEqualName(entry.getValue()));
   }
 

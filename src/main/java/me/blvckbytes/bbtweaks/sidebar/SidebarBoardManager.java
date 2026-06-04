@@ -228,6 +228,8 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
       default -> throw new IllegalStateException("Unaccounted-for delimiters-mode: " + preferences.delimitersMode);
     }
 
+    // TODO: Delimiters should not be scrolled but remain fixed in place.
+
     var lines = new ArrayList<Component>(totalLineCount);
 
     if (preferences.delimitersMode != DelimitersMode.NONE)

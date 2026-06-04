@@ -29,7 +29,28 @@ public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDispl
   @Override
   protected void handleClick(Player player, SidebarColorDisplay display, ClickType clickType, int slot) {
     if (config.rootSection.sidebar.colorDisplay.items.backButton.getDisplaySlots().contains(slot)) {
-      display.onColorSelection(null);
+      if (clickType != ClickType.LEFT)
+        return;
+
+      display.displayData.backHandler().run();
+      return;
+    }
+
+    if (config.rootSection.sidebar.colorDisplay.items.labelColorMode.getDisplaySlots().contains(slot)) {
+      if (clickType != ClickType.LEFT)
+        return;
+
+      display.selectingLabelColor = true;
+      display.renderItems();
+      return;
+    }
+
+    if (config.rootSection.sidebar.colorDisplay.items.valueColorMode.getDisplaySlots().contains(slot)) {
+      if (clickType != ClickType.LEFT)
+        return;
+
+      display.selectingLabelColor = false;
+      display.renderItems();
       return;
     }
 

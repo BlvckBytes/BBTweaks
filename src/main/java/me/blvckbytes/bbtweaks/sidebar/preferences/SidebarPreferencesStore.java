@@ -5,6 +5,7 @@ import at.blvckbytes.cm_mapper.ReloadPriority;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
+import me.blvckbytes.bbtweaks.sidebar.config.NamedColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -12,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -19,8 +21,8 @@ public class SidebarPreferencesStore implements Listener {
 
   private final ConfigKeeper<MainSection> config;
 
-  private final NamespacedKey keyEnabled, keyShowTitle, keyDelimitersMode, keySneakMode, keyValueColor,
-    keyEnabledStatistics, keyStatisticsOrder, keyStatisticsColors;
+  private final NamespacedKey keyEnabled, keyShowTitle, keyDelimitersMode, keySneakMode,
+    keyEnabledStatistics, keyStatisticsOrder, keyStatisticsLabelColors, keyStatisticsValueColors;
 
   private final Map<UUID, SidebarPreferences> preferencesByPlayerId;
 
@@ -34,10 +36,12 @@ public class SidebarPreferencesStore implements Listener {
     this.keyShowTitle = new NamespacedKey(plugin, "sidebar-show-title");
     this.keyDelimitersMode = new NamespacedKey(plugin, "sidebar-delimiters-mode");
     this.keySneakMode = new NamespacedKey(plugin, "sidebar-sneak-mode");
-    this.keyValueColor= new NamespacedKey(plugin, "sidebar-value-color");
     this.keyEnabledStatistics = new NamespacedKey(plugin, "sidebar-enabled-statistics");
     this.keyStatisticsOrder = new NamespacedKey(plugin, "sidebar-statistics-order");
-    this.keyStatisticsColors = new NamespacedKey(plugin, "sidebar-statistics-colors");
+
+    // Due to backwards compatibility, the first key has to stay that way...
+    this.keyStatisticsLabelColors = new NamespacedKey(plugin, "sidebar-statistics-colors");
+    this.keyStatisticsValueColors = new NamespacedKey(plugin, "sidebar-statistics-value-colors");
 
     this.preferencesByPlayerId = new HashMap<>();
 
@@ -89,15 +93,6 @@ public class SidebarPreferencesStore implements Listener {
     if (sneakModeValue != null)
       result.sneakMode = SneakMode.byOrdinalOrDefault(sneakModeValue);
 
-    var valueColorValue = pdc.get(keyValueColor, PersistentDataType.STRING);
-
-    if (valueColorValue != null) {
-      var color = config.rootSection.sidebar._colorByNameLower.get(valueColorValue.toLowerCase());
-
-      if (color != null)
-        result.valueColor = color;
-    }
-
     var enabledStatisticsValue = pdc.get(keyEnabledStatistics, PersistentDataType.INTEGER_ARRAY);
 
     if (enabledStatisticsValue != null) {
@@ -129,27 +124,31 @@ public class SidebarPreferencesStore implements Listener {
       }
     }
 
-    var statisticsColorsValue = pdc.get(keyStatisticsColors, PersistentDataType.STRING);
-
-    if (statisticsColorsValue != null) {
-      var colorNames = statisticsColorsValue.split(";");
-
-      for (var statistic : SidebarStatistic.ALL_VALUES) {
-        var ordinal = statistic.ordinal();
-
-        if (ordinal >= colorNames.length)
-          break;
-
-        var color = config.rootSection.sidebar._colorByNameLower.get(colorNames[ordinal].toLowerCase());
-
-        if (color == null)
-          continue;
-
-        result.labelColorByStatistic.put(statistic, color);
-      }
-    }
+    loadStatisticColors(pdc.get(keyStatisticsLabelColors, PersistentDataType.STRING), result.labelColorByStatistic);
+    loadStatisticColors(pdc.get(keyStatisticsValueColors, PersistentDataType.STRING), result.valueColorByStatistic);
 
     return result;
+  }
+
+  private void loadStatisticColors(@Nullable String colorsValue, Map<SidebarStatistic, NamedColor> output) {
+    if (colorsValue == null)
+      return;
+
+    var colorNames = colorsValue.split(";");
+
+    for (var statistic : SidebarStatistic.ALL_VALUES) {
+      var ordinal = statistic.ordinal();
+
+      if (ordinal >= colorNames.length)
+        break;
+
+      var color = config.rootSection.sidebar._colorByNameLower.get(colorNames[ordinal].toLowerCase());
+
+      if (color == null)
+        continue;
+
+      output.put(statistic, color);
+    }
   }
 
   private void savePreferences(SidebarPreferences preferences) {
@@ -159,22 +158,18 @@ public class SidebarPreferencesStore implements Listener {
     pdc.set(keyShowTitle, PersistentDataType.BOOLEAN, preferences.showTitle);
     pdc.set(keyDelimitersMode, PersistentDataType.INTEGER, preferences.delimitersMode.ordinal());
     pdc.set(keySneakMode, PersistentDataType.INTEGER, preferences.sneakMode.ordinal());
-    pdc.set(keyValueColor, PersistentDataType.STRING, preferences.valueColor.name());
 
     var enabledStatistics = new IntArrayList();
-    var colorsJoiner = new StringJoiner(";");
 
     for (var statistic : SidebarStatistic.ALL_VALUES) {
       if (preferences.enabledStatistics.contains(statistic))
         enabledStatistics.add(statistic.ordinal());
-
-      var color = preferences.labelColorByStatistic.get(statistic);
-
-      colorsJoiner.add(color.name());
     }
 
     pdc.set(keyEnabledStatistics, PersistentDataType.INTEGER_ARRAY, enabledStatistics.toIntArray());
-    pdc.set(keyStatisticsColors, PersistentDataType.STRING, colorsJoiner.toString());
+
+    pdc.set(keyStatisticsLabelColors, PersistentDataType.STRING, serializeStatisticColors(preferences.labelColorByStatistic));
+    pdc.set(keyStatisticsValueColors, PersistentDataType.STRING, serializeStatisticColors(preferences.valueColorByStatistic));
 
     var statisticsOrder = new IntArrayList();
 
@@ -182,5 +177,14 @@ public class SidebarPreferencesStore implements Listener {
       statisticsOrder.add(statistic.ordinal());
 
     pdc.set(keyStatisticsOrder, PersistentDataType.INTEGER_ARRAY, statisticsOrder.toIntArray());
+  }
+
+  private String serializeStatisticColors(Map<SidebarStatistic, NamedColor> input) {
+    var colorsJoiner = new StringJoiner(";");
+
+    for (var statistic : SidebarStatistic.ALL_VALUES)
+      colorsJoiner.add(input.get(statistic).name());
+
+    return colorsJoiner.toString();
   }
 }

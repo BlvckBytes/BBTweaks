@@ -4,7 +4,6 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.color_display.ColorDisplayData;
 import me.blvckbytes.bbtweaks.sidebar.color_display.SidebarColorDisplayHandler;
-import me.blvckbytes.bbtweaks.sidebar.config.NamedColor;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
 import me.blvckbytes.bbtweaks.sidebar.sorting_display.SidebarSortingDisplayHandler;
 import me.blvckbytes.bbtweaks.sidebar.sorting_display.SortingDisplayData;
@@ -14,8 +13,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;
-
-import java.util.function.Consumer;
 
 public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSettingsDisplay, SidebarPreferences> {
 
@@ -105,12 +102,12 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
       if (clickType != ClickType.LEFT)
         return;
 
-      switchToColorDisplay(
-        display,
-        display.displayData.valueColor,
-        color -> display.displayData.valueColor = color
+      var displayData = new ColorDisplayData(
+        display.displayData, null,
+        () -> Bukkit.getScheduler().runTaskLater(plugin, () -> reopen(display), 1L)
       );
 
+      sidebarColorDisplayHandler.show(player, displayData);
       return;
     }
 
@@ -142,27 +139,12 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
     }
 
     if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
-      switchToColorDisplay(
-        display,
-        display.displayData.labelColorByStatistic.get(statistic._sidebarStatistic),
-        color -> display.displayData.labelColorByStatistic.put(statistic._sidebarStatistic, color)
+      var displayData = new ColorDisplayData(
+        display.displayData, statistic,
+        () -> Bukkit.getScheduler().runTaskLater(plugin, () -> reopen(display), 1L)
       );
+
+      sidebarColorDisplayHandler.show(player, displayData);
     }
-  }
-
-  private void switchToColorDisplay(SidebarSettingsDisplay settingsDisplay, NamedColor initialSelection, Consumer<NamedColor> selectionHandler) {
-    var displayData = new ColorDisplayData(
-      initialSelection,
-      color -> {
-        if (color == null) {
-          Bukkit.getScheduler().runTaskLater(plugin, () -> reopen(settingsDisplay), 1L);
-          return;
-        }
-
-        selectionHandler.accept(color);
-      }
-    );
-
-    sidebarColorDisplayHandler.show(settingsDisplay.player, displayData);
   }
 }
