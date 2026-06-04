@@ -13,7 +13,7 @@ public class SettingsDisplayItemsSection extends ConfigSection {
   public GuiItemStackSection showTitle;
   public GuiItemStackSection delimitersMode;
   public GuiItemStackSection nextSneakMode;
-  public GuiItemStackSection valueColor;
+  public GuiItemStackSection allColors;
   public GuiItemStackSection openSorting;
   public GuiItemStackSection resetToDefaults;
   public ItemStackSection statisticIcon;

@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.sidebar.color_display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.sidebar.preferences.Format;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import org.bukkit.entity.Player;
@@ -40,7 +41,7 @@ public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDispl
       if (clickType != ClickType.LEFT)
         return;
 
-      display.selectingLabelColor = true;
+      display.setSelectingLabelColor(true);
       display.renderItems();
       return;
     }
@@ -49,14 +50,44 @@ public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDispl
       if (clickType != ClickType.LEFT)
         return;
 
-      display.selectingLabelColor = false;
+      display.setSelectingLabelColor(false);
+      display.renderItems();
+      return;
+    }
+
+    if (config.rootSection.sidebar.colorDisplay.items.toggleBold.getDisplaySlots().contains(slot)) {
+      if (clickType != ClickType.LEFT)
+        return;
+
+      display.toggleFormat(Format.BOLD);
+      display.renderItems();
+      return;
+    }
+
+    if (config.rootSection.sidebar.colorDisplay.items.toggleItalic.getDisplaySlots().contains(slot)) {
+      if (clickType != ClickType.LEFT)
+        return;
+
+      display.toggleFormat(Format.ITALIC);
+      display.renderItems();
+      return;
+    }
+
+    if (config.rootSection.sidebar.colorDisplay.items.toggleUnderlined.getDisplaySlots().contains(slot)) {
+      if (clickType != ClickType.LEFT)
+        return;
+
+      display.toggleFormat(Format.UNDERLINED);
       display.renderItems();
       return;
     }
 
     var color = display.getColorBySlotIndex(slot);
 
-    if (color != null)
-      display.onColorSelection(color);
+    if (color == null)
+      return;
+
+    display.onColorSelection(color);
+    display.renderItems();
   }
 }

@@ -22,6 +22,24 @@ public class ColorAndFormats implements DirectFieldAccess {
     this.formats = EnumSet.copyOf(other.formats);
   }
 
+  public void setFormat(Format format, boolean value) {
+    if (value) {
+      formats.add(format);
+      return;
+    }
+
+    formats.remove(format);
+  }
+
+  public void toggleFormat(Format format) {
+    if (this.formats.contains(format)) {
+      this.formats.remove(format);
+      return;
+    }
+
+    this.formats.add(format);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (!(o instanceof ColorAndFormats other))

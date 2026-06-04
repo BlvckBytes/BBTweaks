@@ -1757,6 +1757,48 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Gelange zu den Einstellungen<br/>
             {lut.spacer}
+      toggleBold:
+        slots: 'last_slot - 2'
+        type: '{is_bold then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&6 *use="is_bold">Fett formatiert <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Schalte um, ob der Text fett<br/>
+            formatiert werden soll.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Format umschalten<br/>
+            {lut.spacer}
+      toggleItalic:
+        slots: 'last_slot - 1'
+        type: '{is_italic then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&6 *use="is_italic">Kursiv formatiert <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Schalte um, ob der Text kursiv<br/>
+            formatiert werden soll.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Format umschalten<br/>
+            {lut.spacer}
+      toggleUnderlined:
+        slots: 'last_slot'
+        type: '{is_underlined then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&6 *use="is_underlined">Unterstrichen formatiert <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Schalte um, ob der Text unterstrichen<br/>
+            formatiert werden soll.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Format umschalten<br/>
+            {lut.spacer}
       colorIcon:
         type: '{icon_type}'
         glint: 'selected'
@@ -1848,19 +1890,19 @@ sidebar:
             <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
             {lut.spacer}
         slots: 'last_slot - 6'
-      valueColor:
+      allColors:
         type: 'GHAST_TEAR'
         name: |
           <reset>
-            <&8>» <&6>Farbe aller Werte <&8>«
+            <&8>» <&6>Farben aller Einträge <&8>«
         lore: |
           <reset>
             <br/>
             <&7>Mit diesem Shortcut können die Farben aller<br/>
-            individuellen Statistikwerte auf dieselbe<br/>
+            individuellen Statistiken auf dieselbe<br/>
             Auswahl gesetzt werden.<br/>
             {lut.spacer}<br/>
-            <&8>➥ <&e>Linksklick <&7>Farbe auswählen<br/>
+            <&8>➥ <&e>Linksklick <&7>Farben auswählen<br/>
             {lut.spacer}
         slots: 'last_slot - 5'
       openSorting:
@@ -1903,7 +1945,9 @@ sidebar:
             <br/>
             <&7>{description}<br/>
             {lut.spacer}<br/>
-            <&8>♦ <&e>Aktuelle Farben: <&7>Name {label_style.color.display_name}, Wert {value_style.color.display_name}<br/>
+            <&8>♦ <&e>Farben: <&7>
+            Name <style [label_style.bold] [label_style.italic] [label_style.underlined]>{label_style.color.display_name}</>,<space/>
+            Wert <style [value_style.bold] [value_style.italic] [value_style.underlined]>{value_style.color.display_name}</><br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Statistik {enabled then "deaktivieren" else "aktivieren"}<br/>
             <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Neue Farben auswählen<br/>

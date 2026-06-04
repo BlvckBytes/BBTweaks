@@ -98,7 +98,7 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
       return;
     }
 
-    if (config.rootSection.sidebar.settingsDisplay.items.valueColor.getDisplaySlots().contains(slot)) {
+    if (config.rootSection.sidebar.settingsDisplay.items.allColors.getDisplaySlots().contains(slot)) {
       if (clickType != ClickType.LEFT)
         return;
 

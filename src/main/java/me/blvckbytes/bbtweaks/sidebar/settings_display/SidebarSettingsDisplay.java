@@ -46,7 +46,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
     config.rootSection.sidebar.settingsDisplay.items.enabled.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.showTitle.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.delimitersMode.renderInto(inventory, environment);
-    config.rootSection.sidebar.settingsDisplay.items.valueColor.renderInto(inventory, environment);
+    config.rootSection.sidebar.settingsDisplay.items.allColors.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.nextSneakMode.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.openSorting.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.resetToDefaults.renderInto(inventory, environment);

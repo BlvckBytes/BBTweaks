@@ -5,8 +5,10 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
 import me.blvckbytes.bbtweaks.sidebar.config.NamedColor;
 import me.blvckbytes.bbtweaks.sidebar.preferences.ColorAndFormats;
+import me.blvckbytes.bbtweaks.sidebar.preferences.Format;
 import me.blvckbytes.bbtweaks.util.Display;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import org.bukkit.entity.Player;
@@ -14,15 +16,18 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-public class SidebarColorDisplay extends Display<ColorDisplayData> {
+import java.util.Map;
 
-  // TODO: Allow to select formats like bold, italic, etc. and display them in the statistic-lore also
+public class SidebarColorDisplay extends Display<ColorDisplayData> {
 
   public final boolean isFloodgate;
 
-  public boolean selectingLabelColor = true;
+  private boolean selectingLabelColor;
 
   private final Int2ObjectMap<NamedColor> colorBySlotIndex;
+
+  private @Nullable NamedColor commonColor;
+  private final boolean[] commonFormatStates;
 
   public SidebarColorDisplay(
     Player player,
@@ -37,7 +42,47 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
 
     this.colorBySlotIndex = new Int2ObjectOpenHashMap<>();
 
+    this.commonFormatStates = new boolean[Format.ALL_VALUES.size()];
+
+    setSelectingLabelColor(true);
+
     show();
+  }
+
+  public void setSelectingLabelColor(boolean value) {
+    this.selectingLabelColor = value;
+
+    if (displayData.statistic() != null)
+      return;
+
+    NamedColor commonColor = null;
+    var commonColorMismatched = false;
+
+    Boolean[] commonFormatStates = new Boolean[Format.ALL_VALUES.size()];
+
+    for (var style : getSelectedStyleMap().values()) {
+      if (commonColor == null)
+        commonColor = style.color;
+      else if (style.color != commonColor)
+        commonColorMismatched = true;
+
+      for (var format : Format.ALL_VALUES) {
+        var commonValue = commonFormatStates[format.ordinal()];
+        var formatValue = style.formats.contains(format);
+
+        if (commonValue == null)
+          commonFormatStates[format.ordinal()] = formatValue;
+        else if (formatValue != commonValue)
+          commonFormatStates[format.ordinal()] = false;
+      }
+    }
+
+    this.commonColor = commonColorMismatched ? null : commonColor;
+
+    for (var format : Format.ALL_VALUES) {
+      var commonValue = commonFormatStates[format.ordinal()];
+      this.commonFormatStates[format.ordinal()] = commonValue != null && commonValue;
+    }
   }
 
   @Override
@@ -49,10 +94,12 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
     config.rootSection.sidebar.colorDisplay.items.filler.renderInto(inventory, environment);
     config.rootSection.sidebar.colorDisplay.items.backButton.renderInto(inventory, environment);
 
-    if (displayData.statistic() != null) {
-      config.rootSection.sidebar.colorDisplay.items.labelColorMode.renderInto(inventory, environment);
-      config.rootSection.sidebar.colorDisplay.items.valueColorMode.renderInto(inventory, environment);
-    }
+    config.rootSection.sidebar.colorDisplay.items.labelColorMode.renderInto(inventory, environment);
+    config.rootSection.sidebar.colorDisplay.items.valueColorMode.renderInto(inventory, environment);
+
+    config.rootSection.sidebar.colorDisplay.items.toggleBold.renderInto(inventory, environment);
+    config.rootSection.sidebar.colorDisplay.items.toggleUnderlined.renderInto(inventory, environment);
+    config.rootSection.sidebar.colorDisplay.items.toggleItalic.renderInto(inventory, environment);
 
     var colors = config.rootSection.sidebar._colors;
     var nextColorIndex = 0;
@@ -70,11 +117,16 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
 
       colorBySlotIndex.put(index, color);
 
-      var selectedStyle = accessCurrentStyle();
+      var activeColor = commonColor;
+
+      var statisticStyle = accessSelectedStatisticStyle();
+
+      if (statisticStyle != null)
+        activeColor = statisticStyle.color;
 
       environment
         .withVariable("color", color.hexColor())
-        .withVariable("selected", selectedStyle != null && color == selectedStyle.color)
+        .withVariable("selected", color == activeColor)
         .withVariable("name", color.name())
         .withVariable("display_name", color.displayName())
         .withVariable("icon_type", color.iconType());
@@ -87,19 +139,34 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
     return colorBySlotIndex.get(slotIndex);
   }
 
-  public void onColorSelection(NamedColor color) {
-    var currentStyle = accessCurrentStyle();
+  public void toggleFormat(Format format) {
+    var currentStyle = accessSelectedStatisticStyle();
 
     if (currentStyle == null) {
-      for (var valueStyle : displayData.preferences().valueStyleByStatistic.values())
+      var value = commonFormatStates[format.ordinal()] ^= true;
+
+      for (var valueStyle : getSelectedStyleMap().values())
+        valueStyle.setFormat(format, value);
+
+      return;
+    }
+
+    currentStyle.toggleFormat(format);
+  }
+
+  public void onColorSelection(NamedColor color) {
+    var currentStyle = accessSelectedStatisticStyle();
+
+    if (currentStyle == null) {
+      this.commonColor = color;
+
+      for (var valueStyle : getSelectedStyleMap().values())
         valueStyle.color = color;
 
       return;
     }
 
     currentStyle.color = color;
-
-    renderItems();
   }
 
   @Override
@@ -113,21 +180,30 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
   }
 
   private InterpretationEnvironment makeEnvironment() {
+    var statisticStyle = accessSelectedStatisticStyle();
+
     return new InterpretationEnvironment()
       .withVariable("is_floodgate", isFloodgate)
       .withVariable("is_label_color", selectingLabelColor)
-      .withVariable("statistic", displayData.statistic() == null ? null : displayData.statistic().iconData.name.markupNode);
+      .withVariable("statistic", displayData.statistic() == null ? null : displayData.statistic().iconData.name.markupNode)
+      .withVariable("is_bold", statisticStyle == null ? commonFormatStates[Format.BOLD.ordinal()] : statisticStyle.formats.contains(Format.BOLD))
+      .withVariable("is_underlined", statisticStyle == null ? commonFormatStates[Format.UNDERLINED.ordinal()] : statisticStyle.formats.contains(Format.UNDERLINED))
+      .withVariable("is_italic", statisticStyle == null ? commonFormatStates[Format.ITALIC.ordinal()] : statisticStyle.formats.contains(Format.ITALIC));
   }
 
-  private @Nullable ColorAndFormats accessCurrentStyle() {
+  private @Nullable ColorAndFormats accessSelectedStatisticStyle() {
     if (displayData.statistic() == null)
       return null;
 
     var statistic = displayData.statistic()._sidebarStatistic;
 
-    if (selectingLabelColor)
-      return displayData.preferences().labelStyleByStatistic.get(statistic);
+    return getSelectedStyleMap().get(statistic);
+  }
 
-    return displayData.preferences().valueStyleByStatistic.get(statistic);
+  private Map<SidebarStatistic, ColorAndFormats> getSelectedStyleMap() {
+    if (selectingLabelColor)
+      return displayData.preferences().labelStyleByStatistic;
+
+    return displayData.preferences().valueStyleByStatistic;
   }
 }
