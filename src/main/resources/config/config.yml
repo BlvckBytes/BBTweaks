@@ -1560,11 +1560,11 @@ sidebar:
           Die verbleibende, aktive Spielzeit die du<br/>
           benötigst, um ein Rank-Up (nächster Rang) zu<br/>
           erreichen (/rewards); ein / bedeutet, dass du<br/>
-          bereits den höchsten durch Spielzeit erlangbaren<br/>
-          Rang erreicht hast.
+          bereits den höchsten durch Spielzeit<br/>
+          erlangbaren Rang erreicht hast.
         iconType: 'FIREWORK_ROCKET'
       defaultLabelColor: 'LIGHT_GREEN'
-      defaultEnabled: true
+      defaultEnabled: false
       render: |
         <color [label_color]>
           ⌛ Rank-Up:<space/>
@@ -1727,6 +1727,7 @@ sidebar:
       statisticIcon:
         type: '{icon_type}'
         glint: 'enabled'
+        hideAdditionalTooltips: true
         name: |
           <reset>
             <&8>» <&6>{name}</> <&7>(<&a *if="enabled">aktiviert</><&c *else>deaktiviert</>)</> «
