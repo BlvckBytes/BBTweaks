@@ -8,7 +8,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;
 
-public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDisplay, ColorDisplayCallback> {
+public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDisplay, ColorDisplayData> {
 
   private final FloodgateIntegration floodgateIntegration;
 
@@ -22,20 +22,20 @@ public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDispl
     this.floodgateIntegration = floodgateIntegration;
   }
 
-  public SidebarColorDisplay instantiateDisplay(Player player, ColorDisplayCallback displayData) {
+  public SidebarColorDisplay instantiateDisplay(Player player, ColorDisplayData displayData) {
     return new SidebarColorDisplay(player, displayData, config, floodgateIntegration, plugin);
   }
 
   @Override
   protected void handleClick(Player player, SidebarColorDisplay display, ClickType clickType, int slot) {
     if (config.rootSection.sidebar.colorDisplay.items.backButton.getDisplaySlots().contains(slot)) {
-      display.displayData.onColorSelect(null);
+      display.onColorSelection(null);
       return;
     }
 
     var color = display.getColorBySlotIndex(slot);
 
     if (color != null)
-      display.displayData.onColorSelect(color);
+      display.onColorSelection(color);
   }
 }

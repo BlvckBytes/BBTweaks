@@ -1646,6 +1646,7 @@ sidebar:
             {lut.spacer}
       colorIcon:
         type: '{icon_type}'
+        glint: 'selected'
         name:
           <reset>
             <&8>» {display_name} «

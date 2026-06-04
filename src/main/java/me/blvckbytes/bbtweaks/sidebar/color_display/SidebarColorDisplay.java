@@ -13,15 +13,16 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-public class SidebarColorDisplay extends Display<ColorDisplayCallback> {
+public class SidebarColorDisplay extends Display<ColorDisplayData> {
 
   public final boolean isFloodgate;
+  private NamedColor selectedColor;
 
   private final Int2ObjectMap<NamedColor> colorBySlotIndex;
 
   public SidebarColorDisplay(
     Player player,
-    ColorDisplayCallback displayData,
+    ColorDisplayData displayData,
     ConfigKeeper<MainSection> config,
     FloodgateIntegration floodgateIntegration,
     Plugin plugin
@@ -29,6 +30,7 @@ public class SidebarColorDisplay extends Display<ColorDisplayCallback> {
     super(player, displayData, config, plugin);
 
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
+    this.selectedColor = displayData.initialSelection();
 
     this.colorBySlotIndex = new Int2ObjectOpenHashMap<>();
 
@@ -62,6 +64,7 @@ public class SidebarColorDisplay extends Display<ColorDisplayCallback> {
 
       environment
         .withVariable("color", color.hexColor())
+        .withVariable("selected", color == selectedColor)
         .withVariable("name", color.name())
         .withVariable("display_name", color.displayName())
         .withVariable("icon_type", color.iconType());
@@ -72,6 +75,16 @@ public class SidebarColorDisplay extends Display<ColorDisplayCallback> {
 
   public @Nullable NamedColor getColorBySlotIndex(int slotIndex) {
     return colorBySlotIndex.get(slotIndex);
+  }
+
+  public void onColorSelection(@Nullable NamedColor color) {
+    displayData.callback().onColorSelect(color);
+
+    if (color == null)
+      return;
+
+    this.selectedColor = color;
+    renderItems();
   }
 
   @Override

@@ -9,7 +9,7 @@ import org.bukkit.plugin.Plugin;
 
 public abstract class Display<DisplayDataType> {
 
-  protected final Player player;
+  public final Player player;
   protected final ConfigKeeper<MainSection> config;
   protected final Plugin plugin;
   public final DisplayDataType displayData;
