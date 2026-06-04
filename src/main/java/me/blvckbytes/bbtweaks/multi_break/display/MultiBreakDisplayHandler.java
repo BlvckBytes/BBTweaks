@@ -106,22 +106,7 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
       var parametersSlotIndex = (int) slotsSlotIndices.stream().filter(it -> it < slot).count();
 
       if (clickType == ClickType.LEFT) {
-        if (parametersSlots.getSelectedSlotIndex() == parametersSlotIndex) {
-          config.rootSection.multiBreak.slotAlreadySelected.sendMessage(
-            player,
-            parametersSlots.getSelectedParameters().makeEnvironment()
-          );
-
-          return false;
-        }
-
-        parametersSlots.setSelectedSlotIndex(parametersSlotIndex);
-
-        config.rootSection.multiBreak.slotSelected.sendMessage(
-          player,
-          parametersSlots.getSelectedParameters().makeEnvironment()
-        );
-
+        parametersSlots.setSelectedSlotIndex(parametersSlotIndex, true);
         return true;
       }
 

@@ -54,7 +54,13 @@ public class MultiBreakParametersSlots {
     return parametersBySlotIndex.get(selectedSlotIndex);
   }
 
-  public void setSelectedSlotIndex(int selectedSlotIndex) {
+  public void setSelectedSlotIndex(int selectedSlotIndex, boolean sendMessages) {
+    if (getSelectedSlotIndex() == selectedSlotIndex) {
+      if (sendMessages)
+        config.rootSection.multiBreak.slotAlreadySelected.sendMessage(player, getSelectedParameters().makeEnvironment());
+      return;
+    }
+
     if (selectedSlotIndex < 0)
       selectedSlotIndex = 0;
 
@@ -62,6 +68,9 @@ public class MultiBreakParametersSlots {
       selectedSlotIndex = parametersBySlotIndex.size() - 1;
 
     this.selectedSlotIndex = selectedSlotIndex;
+
+    if (sendMessages)
+      config.rootSection.multiBreak.slotSelected.sendMessage(player, getSelectedParameters().makeEnvironment());
   }
 
   public int getSelectedSlotIndex() {

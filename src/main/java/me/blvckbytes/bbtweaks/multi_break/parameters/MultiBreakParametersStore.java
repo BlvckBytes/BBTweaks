@@ -149,7 +149,7 @@ public class MultiBreakParametersStore implements Listener {
     var selectedIndexValue = pdc.get(keySelectedSlotIndex, PersistentDataType.INTEGER);
 
     if (selectedIndexValue != null)
-      slots.setSelectedSlotIndex(selectedIndexValue);
+      slots.setSelectedSlotIndex(selectedIndexValue, false);
 
     var enabledValue = pdc.get(keyEnabled, PersistentDataType.BOOLEAN);
 

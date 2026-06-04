@@ -305,24 +305,7 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
           return true;
         }
 
-        if (parametersSlots.getSelectedSlotIndex() == slot - 1) {
-          config.rootSection.multiBreak.slotAlreadySelected.sendMessage(
-            player,
-            new InterpretationEnvironment()
-              .withVariable("slot", slot)
-          );
-
-          return true;
-        }
-
-        parametersSlots.setSelectedSlotIndex(slot - 1);
-
-        config.rootSection.multiBreak.slotSelected.sendMessage(
-          player,
-          new InterpretationEnvironment()
-            .withVariable("slot", parametersSlots.getSelectedSlotIndex() + 1)
-        );
-
+        parametersSlots.setSelectedSlotIndex(slot - 1, true);
         return true;
       }
     }
