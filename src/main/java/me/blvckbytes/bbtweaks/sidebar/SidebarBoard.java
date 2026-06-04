@@ -4,6 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import io.papermc.paper.scoreboard.numbers.NumberFormat;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
 import net.kyori.adventure.text.Component;
@@ -11,6 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scoreboard.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -43,7 +45,19 @@ public class SidebarBoard {
     this.cachedScoreAndTeamByIndex = new Int2ObjectOpenHashMap<>();
   }
 
-  private List<? extends Component> paginate(long relativeTime, List<? extends Component> lines) {
+  private List<? extends Component> paginate(
+    long relativeTime,
+    List<? extends Component> lines,
+    IntSet staticLineIndices
+  ) {
+    if (staticLineIndices.size() >= MAX_SCORE_COUNT)
+      throw new IllegalStateException("Cannot keep more lines static than there is size on the board");
+
+    for (var staticIndex : staticLineIndices) {
+      if (staticIndex < 0 || staticIndex >= lines.size())
+        throw new IllegalStateException("Encountered static-index " + staticIndex + " outside of [0;" + lines.size() + "[");
+    }
+
     var excessLineCount = lines.size() - MAX_SCORE_COUNT;
 
     if (excessLineCount <= 0) {
@@ -62,10 +76,39 @@ public class SidebarBoard {
         currentScrollOffset = 0;
     }
 
-    return lines.subList(currentScrollOffset, currentScrollOffset + MAX_SCORE_COUNT);
+    var result = new ArrayList<Component>(MAX_SCORE_COUNT);
+
+    var scrollableLineCount = MAX_SCORE_COUNT - staticLineIndices.size();
+
+    var encounteredScrollableLines = 0;
+    var addedScrollableLines = 0;
+
+    for (var lineIndex = 0; lineIndex < lines.size(); ++lineIndex) {
+      if (staticLineIndices.contains(lineIndex)) {
+        result.add(lines.get(lineIndex));
+        continue;
+      }
+
+      ++encounteredScrollableLines;
+
+      if (addedScrollableLines >= scrollableLineCount)
+        continue;
+
+      if (encounteredScrollableLines > currentScrollOffset) {
+        result.add(lines.get(lineIndex));
+        ++addedScrollableLines;
+      }
+    }
+
+    return result;
   }
 
-  public void advanceScrollingAndSetLines(long relativeTime, List<? extends Component> lines, SidebarPreferences preferences) {
+  public void advanceScrollingAndSetLines(
+    long relativeTime,
+    List<? extends Component> lines,
+    IntSet staticLineIndices,
+    SidebarPreferences preferences
+  ) {
     var scoreboard = holder.bukkitPlayer().getScoreboard();
 
     // By default, everyone shares the same scoreboard - overwrite with a custom new board only if
@@ -98,7 +141,7 @@ public class SidebarBoard {
       return;
     }
 
-    lines = paginate(relativeTime, lines);
+    lines = paginate(relativeTime, lines, staticLineIndices);
 
     // Note: Calling into set-/reset-/prefix-methods marks the board/team as dirty and creates
     //       update packets; let's diff-check locally beforehand, as it's cheap enough.

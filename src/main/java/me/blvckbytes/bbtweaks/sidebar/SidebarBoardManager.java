@@ -9,6 +9,8 @@ import at.blvckbytes.playtime_rewards.store.TopListDirection;
 import at.blvckbytes.playtime_rewards.store.TopListType;
 import com.gamingmesh.jobs.Jobs;
 import com.gmail.nossr50.util.player.UserManager;
+import it.unimi.dsi.fastutil.ints.IntArraySet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_tool.AutoToolCommand;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
@@ -220,20 +222,27 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
 
   private void renderAndUpdateLinesForBoard(SidebarBoard board, SidebarPreferences preferences) {
     var totalLineCount = preferences.enabledStatistics.size();
+    var staticLineIndices = IntSet.of();
 
     switch (preferences.delimitersMode) {
       case NONE -> {}
-      case TOP_ONLY -> ++totalLineCount;
-      case TOP_AND_BOTTOM -> totalLineCount += 2;
+      case TOP_ONLY -> {
+        ++totalLineCount;
+        staticLineIndices = new IntArraySet(1);
+      }
+      case TOP_AND_BOTTOM -> {
+        totalLineCount += 2;
+        staticLineIndices = new IntArraySet(2);
+      }
       default -> throw new IllegalStateException("Unaccounted-for delimiters-mode: " + preferences.delimitersMode);
     }
 
-    // TODO: Delimiters should not be scrolled but remain fixed in place.
-
     var lines = new ArrayList<Component>(totalLineCount);
 
-    if (preferences.delimitersMode != DelimitersMode.NONE)
+    if (preferences.delimitersMode != DelimitersMode.NONE) {
+      staticLineIndices.add(0);
       lines.add(Component.empty());
+    }
 
     var lengthBuffer = new MutableInt();
     var maxLineLength = 0;
@@ -268,11 +277,13 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
 
       lines.set(0, delimiter);
 
-      if (preferences.delimitersMode == DelimitersMode.TOP_AND_BOTTOM)
+      if (preferences.delimitersMode == DelimitersMode.TOP_AND_BOTTOM) {
+        staticLineIndices.add(lines.size());
         lines.add(delimiter);
+      }
     }
 
-    board.advanceScrollingAndSetLines(relativeTime, lines, preferences);
+    board.advanceScrollingAndSetLines(relativeTime, lines, staticLineIndices, preferences);
   }
 
   @Override
