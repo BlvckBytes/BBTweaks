@@ -1046,6 +1046,8 @@ durabilityWarnings:
 sidebar:
   command:
     name: 'sidebar'
+    aliases:
+      - 'sb'
     usage: '{lut.sidebar_prefix} <&c>Benutzung: /{label} [<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>]'
   armIntegration:
     shopRegion:
@@ -1094,7 +1096,7 @@ sidebar:
       iconType: 'BROWN_CONCRETE_POWDER'
     RED:
       color: '#992222'
-      displayName: '<color [color]>Braun'
+      displayName: '<color [color]>Rot'
       iconType: 'RED_CONCRETE'
     LIGHT_RED:
       color: '#D93636'
