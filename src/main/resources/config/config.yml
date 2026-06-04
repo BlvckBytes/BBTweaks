@@ -1139,7 +1139,7 @@ sidebar:
       displayName: '<color [color]>Dunkelblau'
       iconType: 'BLUE_CONCRETE'
     PURPLE:
-      color: '#711DB8'
+      color: '&5'
       displayName: '<color [color]>Lila'
       iconType: 'PURPLE_CONCRETE'
     MAGENTA:
