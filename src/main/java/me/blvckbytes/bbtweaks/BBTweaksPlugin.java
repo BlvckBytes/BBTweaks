@@ -55,6 +55,8 @@ import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
 import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.InventoryChangeDetector;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
 import me.blvckbytes.bbtweaks.sidebar.SidebarBoardManager;
+import me.blvckbytes.bbtweaks.sidebar.arm_integration.ArmIntegration;
+import me.blvckbytes.bbtweaks.sidebar.arm_integration.ArmIntegrationImpl;
 import me.blvckbytes.bbtweaks.sidebar.color_display.SidebarColorDisplayHandler;
 import me.blvckbytes.bbtweaks.sidebar.command.SidebarCommand;
 import me.blvckbytes.bbtweaks.sidebar.command.SidebarCommandSection;
@@ -324,7 +326,14 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       getServer().getPluginManager().registerEvents(new CommandItemListener(config), this);
 
-      getServer().getPluginManager().registerEvents(new SidebarBoardManager(this, multiBreakParametersStore, invMagnetParametersStore, invFilterCommandExecutor, autoToolCommandExecutor, floodgateIntegration, sidebarPreferencesStore, config), this);
+      ArmIntegration armIntegration = null;
+
+      if (Bukkit.getPluginManager().isPluginEnabled("AdvancedRegionMarket")) {
+        armIntegration = new ArmIntegrationImpl(config);
+        getLogger().info("Loaded sidebar-related ARMIntegration");
+      }
+
+      getServer().getPluginManager().registerEvents(new SidebarBoardManager(this, multiBreakParametersStore, invMagnetParametersStore, invFilterCommandExecutor, autoToolCommandExecutor, armIntegration, floodgateIntegration, sidebarPreferencesStore, config), this);
 
       var signEditCommand = Objects.requireNonNull(getCommand("signedit"));
       var signCopyCommand = Objects.requireNonNull(getCommand("signcopy"));

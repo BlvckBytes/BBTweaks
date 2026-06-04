@@ -1047,6 +1047,13 @@ sidebar:
   command:
     name: 'sidebar'
     usage: '{lut.sidebar_prefix} <&c>Benutzung: /{label} [<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>]'
+  armIntegration:
+    shopRegion:
+      regionWorld: 'world'
+      regionNamePattern: '^shop[0-9]+$'
+    creativeRegion:
+      regionWorld: 'creative'
+      regionNamePattern: '^c[0-9]+$'
   allDeactivatedItemsAlreadyAtEnd: '{lut.sidebar_prefix} <&c>Alle deaktivierten Einträge befinden sich bereits am Ende der Liste!'
   movedAllDeactivatedItemsToEnd: '{lut.sidebar_prefix} <&7>Alle <&a>deaktivierten Einträge</> wurden an das <&a>Ende</> der Liste bewegt.'
   entryAlreadyAtTheVeryBeginning: '{lut.sidebar_prefix} <&c>Der Eintrag <&4>{name}</> befindet sich bereits ganz am Anfang der Liste!'
@@ -1574,6 +1581,46 @@ sidebar:
             /
           </container>
           <$lut.sidebar.playtime_format *else>
+        </color>
+    REMAINING_SHOP_REGION_RENT_DURATION:
+      iconData:
+        name: 'Mietzeit Shopregion'
+        description: |
+          Die verbleibende Mietzeit deiner aktiven<br/>
+          Shopregion; ein / bedeutet, dass du aktuell<br/>
+          noch keine besitzt.
+        iconType: 'PAPER'
+      defaultLabelColor: 'LIGHT_BLUE'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          ⌛ Shopregion:<space/>
+        </color>
+        <color [value_color]>
+          <container *if="time <= 0">
+            /
+          </container>
+          <$lut.sidebar.playtime_format *let-time="time / 1000.0 * 20.0" *else>
+        </color>
+    REMAINING_CREATIVE_REGION_RENT_DURATION:
+      iconData:
+        name: 'Mietzeit Kreativ-Grundstück'
+        description: |
+          Die verbleibende Mietzeit deines aktiven<br/>
+          Grundstücks in der Kreativwelt; ein / bedeutet,<br/>
+          dass du aktuell noch keines besitzt.
+        iconType: 'PAPER'
+      defaultLabelColor: 'LIGHT_BLUE'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          ⌛ Kreativ-Plot:<space/>
+        </color>
+        <color [value_color]>
+          <container *if="time <= 0">
+            /
+          </container>
+          <$lut.sidebar.playtime_format *let-time="time / 1000.0 * 20.0" *else>
         </color>
   colorDisplay:
     title: '<&8>Farbauswahl'

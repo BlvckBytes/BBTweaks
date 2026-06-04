@@ -15,6 +15,7 @@ import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import me.blvckbytes.bbtweaks.multi_break.BlockDirections;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
+import me.blvckbytes.bbtweaks.sidebar.arm_integration.ArmIntegration;
 import me.blvckbytes.bbtweaks.sidebar.preferences.DelimitersMode;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferencesStore;
@@ -38,6 +39,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -54,6 +56,7 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
   private final InvMagnetParametersStore invMagnetParametersStore;
   private final InvFilterCommand invFilterCommand;
   private final AutoToolCommand autoToolCommand;
+  private final @Nullable ArmIntegration armIntegration;
   private final FloodgateIntegration floodgateIntegration;
   private final SidebarPreferencesStore sidebarPreferencesStore;
   private final PlaytimeRewardsAPI playtimeRewards;
@@ -74,6 +77,7 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
     InvMagnetParametersStore invMagnetParametersStore,
     InvFilterCommand invFilterCommand,
     AutoToolCommand autoToolCommand,
+    @Nullable ArmIntegration armIntegration,
     FloodgateIntegration floodgateIntegration,
     SidebarPreferencesStore sidebarPreferencesStore,
     ConfigKeeper<MainSection> config
@@ -82,6 +86,7 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
     this.invMagnetParametersStore = invMagnetParametersStore;
     this.invFilterCommand = invFilterCommand;
     this.autoToolCommand = autoToolCommand;
+    this.armIntegration = armIntegration;
     this.floodgateIntegration = floodgateIntegration;
     this.sidebarPreferencesStore = sidebarPreferencesStore;
 
@@ -492,6 +497,16 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
       case REMAINING_PLAYTIME_UNTIL_NEXT_RANK -> {
         return environment
           .withVariable("time", playtimeRewards.getRemainingTimeUntilNextRank(player));
+      }
+
+      case REMAINING_SHOP_REGION_RENT_DURATION -> {
+        return environment
+          .withVariable("time", armIntegration == null ? 0 : armIntegration.getRemainingShopRegionTime(player));
+      }
+
+      case REMAINING_CREATIVE_REGION_RENT_DURATION -> {
+        return environment
+          .withVariable("time", armIntegration == null ? 0 : armIntegration.getRemainingCreativeRegionTime(player));
       }
     }
 

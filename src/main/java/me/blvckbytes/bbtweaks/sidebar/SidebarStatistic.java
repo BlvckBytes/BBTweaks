@@ -36,6 +36,8 @@ public enum SidebarStatistic {
   AUTOTOOL_STATUS,
   CURRENT_AFK_DURATION,
   REMAINING_PLAYTIME_UNTIL_NEXT_RANK,
+  REMAINING_SHOP_REGION_RENT_DURATION,
+  REMAINING_CREATIVE_REGION_RENT_DURATION,
   ;
 
   public static final List<SidebarStatistic> ALL_VALUES = List.of(values());
