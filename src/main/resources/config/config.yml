@@ -2251,7 +2251,7 @@ cLut:
       NONE: '<&7>Keine Funktion'
       DOUBLE_SNEAK_TOGGLES: '<&a>Doppel-Sneak schaltet an/aus'
       ENABLE_DURING_SNEAK: '<&3>Während sneaken anzeigen'
-      DISABLE_DURING_SNEAK: '<&3>Während sneaken nicht anzeigen'
+      DISABLE_DURING_SNEAK: '<&3>Während sneaken ausblenden'
     delimiters_mode:
       NONE: '<&7>Keine Linien'
       TOP_AND_BOTTOM: '<&a>Oberhalb und unterhalb'
