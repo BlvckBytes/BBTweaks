@@ -1549,8 +1549,8 @@ sidebar:
         name: 'Aktuelle AFK-Dauer'
         description: |
           Die Dauer deiner aktuellen AFK-Phase seit<br/>
-          Beginn; diese Zeile wird automatisch<br/>
-          ausgeblendet, wenn du aktiv spielst.
+          Beginn; <&e>diese Zeile wird automatisch<br/>
+          ausgeblendet, wenn du aktiv spielst</>.
         iconType: 'RECOVERY_COMPASS'
       defaultLabelColor: 'LIGHT_RED'
       defaultEnabled: false
