@@ -53,6 +53,7 @@ public enum SidebarStatistic {
       environmentResolver.resolve(holder, this)
         .withVariable("label_style", preferences.labelStyleByStatistic.get(statistic._sidebarStatistic))
         .withVariable("value_style", preferences.valueStyleByStatistic.get(statistic._sidebarStatistic))
+        .withVariable("show_icons", preferences.showIcons)
     ).getFirst();
 
     // Empty results are not rendered at all, which enables renderers to conditionally display themselves.

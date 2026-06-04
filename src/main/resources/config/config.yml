@@ -1874,6 +1874,23 @@ sidebar:
             <&8>➥ <&e>Linksklick <&7>Board-Titel {show_title then "ausblenden" else "anzeigen"}<br/>
             {lut.spacer}
         slots: 'last_slot - 7'
+      showIcons:
+        type: '{show_icons then "GREEN_CONCRETE" else "RED_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>»<space/>
+            <&a *if="show_icons">Icons angezeigt</>
+            <&c *else>Icons ausgeblendet</>
+            <space/>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Ermöglicht, die Icons vor jedem<br/>
+            Statistiknamen zu verstecken.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Icons {show_icons then "ausblenden" else "anzeigen"}<br/>
+            {lut.spacer}
+        slots: 'last_slot - 6'
       delimitersMode:
         type: 'OAK_FENCE'
         name: |
@@ -1889,7 +1906,7 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
             {lut.spacer}
-        slots: 'last_slot - 6'
+        slots: 'last_slot - 5'
       allColors:
         type: 'GHAST_TEAR'
         name: |
@@ -1904,7 +1921,7 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Farben auswählen<br/>
             {lut.spacer}
-        slots: 'last_slot - 5'
+        slots: 'last_slot - 4'
       openSorting:
         type: 'COMPARATOR'
         name: |
@@ -2198,7 +2215,10 @@ cLut:
       TOP_ONLY: '<&3>Nur oberhalb'
     statistic_renderer: |
       <color [label_style.color.hex]>
-        {icon} <style [label_style.bold] [label_style.italic] [label_style.underlined]>{label}:</><space/>
+        <container *if="show_icons">
+          {icon}<space/>
+        </container>
+        <style [label_style.bold] [label_style.italic] [label_style.underlined]>{label}:</><space/>
       </color>
       <color [value_style.color.hex]>
         <style [value_style.bold] [value_style.italic] [value_style.underlined]>

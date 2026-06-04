@@ -22,7 +22,7 @@ public class SidebarPreferencesStore implements Listener {
 
   private final ConfigKeeper<MainSection> config;
 
-  private final NamespacedKey keyEnabled, keyShowTitle, keyDelimitersMode, keySneakMode,
+  private final NamespacedKey keyEnabled, keyShowTitle, keyShowIcons, keyDelimitersMode, keySneakMode,
     keyEnabledStatistics, keyStatisticsOrder, keyStatisticsLabelStyles, keyStatisticsValueStyles;
 
   private final Map<UUID, SidebarPreferences> preferencesByPlayerId;
@@ -35,6 +35,7 @@ public class SidebarPreferencesStore implements Listener {
 
     this.keyEnabled = new NamespacedKey(plugin, "sidebar-enabled");
     this.keyShowTitle = new NamespacedKey(plugin, "sidebar-show-title");
+    this.keyShowIcons = new NamespacedKey(plugin, "sidebar-show-icons");
     this.keyDelimitersMode = new NamespacedKey(plugin, "sidebar-delimiters-mode");
     this.keySneakMode = new NamespacedKey(plugin, "sidebar-sneak-mode");
     this.keyEnabledStatistics = new NamespacedKey(plugin, "sidebar-enabled-statistics");
@@ -83,6 +84,11 @@ public class SidebarPreferencesStore implements Listener {
 
     if (showTitleValue != null)
       result.showTitle = showTitleValue;
+
+    var showIconsValue = pdc.get(keyShowIcons, PersistentDataType.BOOLEAN);
+
+    if (showIconsValue != null)
+      result.showIcons = showIconsValue;
 
     var delimitersModeValue = pdc.get(keyDelimitersMode, PersistentDataType.INTEGER);
 
@@ -174,6 +180,7 @@ public class SidebarPreferencesStore implements Listener {
 
     pdc.set(keyEnabled, PersistentDataType.BOOLEAN, preferences.enabled);
     pdc.set(keyShowTitle, PersistentDataType.BOOLEAN, preferences.showTitle);
+    pdc.set(keyShowIcons, PersistentDataType.BOOLEAN, preferences.showIcons);
     pdc.set(keyDelimitersMode, PersistentDataType.INTEGER, preferences.delimitersMode.ordinal());
     pdc.set(keySneakMode, PersistentDataType.INTEGER, preferences.sneakMode.ordinal());
 

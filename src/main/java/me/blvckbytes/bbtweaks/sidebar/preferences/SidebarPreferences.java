@@ -15,16 +15,16 @@ import java.util.List;
 
 public class SidebarPreferences {
 
-  // TODO: idea - toggleable icons
-
   private static final boolean DEFAULT_ENABLED = false;
   private static final boolean DEFAULT_SHOW_TITLE = true;
+  private static final boolean DEFAULT_SHOW_ICONS = true;
 
   public final Player player;
   private final ConfigKeeper<MainSection> config;
 
   public boolean enabled;
   public boolean showTitle;
+  public boolean showIcons;
   public DelimitersMode delimitersMode;
   public SneakMode sneakMode;
 
@@ -50,6 +50,9 @@ public class SidebarPreferences {
 
   public boolean divergesFromDefaults() {
     if (showTitle != DEFAULT_SHOW_TITLE)
+      return true;
+
+    if (showIcons != DEFAULT_SHOW_ICONS)
       return true;
 
     if (sneakMode != SneakMode.DEFAULT_VALUE)
@@ -79,6 +82,7 @@ public class SidebarPreferences {
 
   public void resetToDefaults() {
     this.showTitle = DEFAULT_SHOW_TITLE;
+    this.showIcons = DEFAULT_SHOW_ICONS;
     this.sneakMode = SneakMode.DEFAULT_VALUE;
     this.delimitersMode = DelimitersMode.DEFAULT_VALUE;
 
