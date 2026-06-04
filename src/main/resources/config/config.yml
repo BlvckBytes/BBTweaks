@@ -1696,6 +1696,33 @@ sidebar:
             <container *else>/</>
           }
         />
+    SPACER_NUMBER_ONE:
+      iconData:
+        name: 'Leerzeile #1'
+        description: |
+          Eine leere Zeile, die du aktivieren- und<br/>
+          zur visuellen Einteilung nutzen kannst.
+        iconType: 'GLASS'
+      defaultEnabled: false
+      render: '<space/>'
+    SPACER_NUMBER_TWO:
+      iconData:
+        name: 'Leerzeile #2'
+        description: |
+          Eine leere Zeile, die du aktivieren- und<br/>
+          zur visuellen Einteilung nutzen kannst.
+        iconType: 'GLASS'
+      defaultEnabled: false
+      render: '<space/>'
+    SPACER_NUMBER_THREE:
+      iconData:
+        name: 'Leerzeile #3'
+        description: |
+          Eine leere Zeile, die du aktivieren- und<br/>
+          zur visuellen Einteilung nutzen kannst.
+        iconType: 'GLASS'
+      defaultEnabled: false
+      render: '<space/>'
   colorDisplay:
     title: |
       <&8>Farbauswahl<space/>
@@ -1967,13 +1994,17 @@ sidebar:
           <reset>
             <br/>
             <&7>{description}<br/>
-            {lut.spacer}<br/>
-            <&8>♦ <&e>Farben: <&7>
-            Name <style [label_style.bold] [label_style.italic] [label_style.underlined]>{label_style.color.display_name}</>,<space/>
-            Wert <style [value_style.bold] [value_style.italic] [value_style.underlined]>{value_style.color.display_name}</><br/>
+            <container *if="not is_spacer">
+              {lut.spacer}<br/>
+              <&8>♦ <&e>Farben: <&7>
+              Name <style [label_style.bold] [label_style.italic] [label_style.underlined]>{label_style.color.display_name}</>,<space/>
+              Wert <style [value_style.bold] [value_style.italic] [value_style.underlined]>{value_style.color.display_name}</><br/>
+            </container>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Anzeigemodus umschalten<br/>
-            <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Neue Farben auswählen<br/>
+            <container *if="not is_spacer">
+              <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Neue Farben auswählen<br/>
+            </container>
             {lut.spacer}
   sortingDisplay:
     title: '<&8>Sidebar-Sortierung'

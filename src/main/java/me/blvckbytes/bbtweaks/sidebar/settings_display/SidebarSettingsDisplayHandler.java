@@ -139,12 +139,19 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
       return;
 
     if (clickType == ClickType.LEFT) {
-      display.displayData.enableModeByStatistic.computeIfPresent(statistic._sidebarStatistic, (k, currentMode) -> currentMode.next());
+      display.displayData.enableModeByStatistic.computeIfPresent(
+        statistic._sidebarStatistic,
+        (sidebarStatistic, currentMode) -> currentMode.next(sidebarStatistic)
+      );
+
       display.renderItems();
       return;
     }
 
     if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
+      if (statistic._sidebarStatistic.isSpacer)
+        return;
+
       var displayData = new ColorDisplayData(
         display.displayData, statistic,
         () -> Bukkit.getScheduler().runTaskLater(plugin, () -> reopen(display), 1L)

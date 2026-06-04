@@ -39,9 +39,22 @@ public enum SidebarStatistic {
   REMAINING_PLAYTIME_UNTIL_NEXT_RANK,
   REMAINING_SHOP_REGION_RENT_DURATION,
   REMAINING_CREATIVE_REGION_RENT_DURATION,
+  SPACER_NUMBER_ONE(true),
+  SPACER_NUMBER_TWO(true),
+  SPACER_NUMBER_THREE(true),
   ;
 
+  public final boolean isSpacer;
+
   public static final List<SidebarStatistic> ALL_VALUES = List.of(values());
+
+  SidebarStatistic() {
+    this(false);
+  }
+
+  SidebarStatistic(boolean isSpacer) {
+    this.isSpacer = isSpacer;
+  }
 
   public @Nullable Component renderFor(
     BoardHolder holder,

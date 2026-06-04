@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.sidebar.preferences;
 
+import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -20,7 +21,14 @@ public enum StatisticEnableMode {
     this.showLabel = showLabel;
   }
 
-  public StatisticEnableMode next() {
+  private StatisticEnableMode nextBinary() {
+    return this == ON ? OFF : ON;
+  }
+
+  public StatisticEnableMode next(SidebarStatistic statistic) {
+    if (statistic.isSpacer)
+      return nextBinary();
+
     return ALL_VALUES.get((ordinal() + 1) % ALL_VALUES.size());
   }
 

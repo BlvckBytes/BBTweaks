@@ -60,7 +60,12 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
 
     Boolean[] commonFormatStates = new Boolean[Format.ALL_VALUES.size()];
 
-    for (var style : getSelectedStyleMap().values()) {
+    for (var styleEntry : getSelectedStyleMap().entrySet()) {
+      if (styleEntry.getKey().isSpacer)
+        continue;
+
+      var style = styleEntry.getValue();
+
       if (commonColor == null)
         commonColor = style.color;
       else if (style.color != commonColor)

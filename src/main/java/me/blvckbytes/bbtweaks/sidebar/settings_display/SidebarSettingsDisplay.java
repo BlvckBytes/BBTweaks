@@ -77,7 +77,8 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
         .withVariable("label_style", displayData.labelStyleByStatistic.get(statistic))
         .withVariable("value_style", displayData.valueStyleByStatistic.get(statistic))
         .withVariable("enabled", enableMode.enabled)
-        .withVariable("show_label", enableMode.showLabel);
+        .withVariable("show_label", enableMode.showLabel)
+        .withVariable("is_spacer", statistic.isSpacer);
 
       inventory.setItem(index, config.rootSection.sidebar.settingsDisplay.items.statisticIcon.build(environment));
     }

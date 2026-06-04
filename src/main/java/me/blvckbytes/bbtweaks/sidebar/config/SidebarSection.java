@@ -13,6 +13,8 @@ import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
 import me.blvckbytes.bbtweaks.sidebar.arm_integration.ArmIntegrationSection;
 import me.blvckbytes.bbtweaks.sidebar.color_display.ColorDisplaySection;
 import me.blvckbytes.bbtweaks.sidebar.command.SidebarCommandSection;
+import me.blvckbytes.bbtweaks.sidebar.preferences.ColorAndFormats;
+import me.blvckbytes.bbtweaks.sidebar.preferences.Format;
 import me.blvckbytes.bbtweaks.sidebar.settings_display.SettingsDisplaySection;
 import me.blvckbytes.bbtweaks.sidebar.sorting_display.SidebarSortingDisplaySection;
 
@@ -94,6 +96,8 @@ public class SidebarSection extends ConfigSection {
       _colorByNameLower.put(name.toLowerCase(), color);
     }
 
+    var plainWhiteStyle = new ColorAndFormats(_colorByNameLower.get("white"), EnumSet.noneOf(Format.class));
+
     for (var entry : statistics.entrySet()) {
       var statisticName = entry.getKey().toUpperCase().trim();
 
@@ -109,8 +113,13 @@ public class SidebarSection extends ConfigSection {
 
       statisticSection._sidebarStatistic = statistic;
 
-      statisticSection._defaultLabelStyle = statisticSection.defaultLabelStyle.toModel(statistic, _colorByNameLower);
-      statisticSection._defaultValueStyle = statisticSection.defaultValueStyle.toModel(statistic, _colorByNameLower);
+      if (statistic.isSpacer) {
+        statisticSection._defaultLabelStyle = new ColorAndFormats(plainWhiteStyle);
+        statisticSection._defaultValueStyle = new ColorAndFormats(plainWhiteStyle);
+      } else {
+        statisticSection._defaultLabelStyle = statisticSection.defaultLabelStyle.toModel(statistic, _colorByNameLower);
+        statisticSection._defaultValueStyle = statisticSection.defaultValueStyle.toModel(statistic, _colorByNameLower);
+      }
 
       _statisticsMap.put(statistic, statisticSection);
       _statistics.add(statisticSection);
