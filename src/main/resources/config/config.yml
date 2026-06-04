@@ -1443,6 +1443,138 @@ sidebar:
         <color [value_color]>
           <number *for-value="tps" *for-separator={<space/>} [value] format='#.#' locale="de_DE" />
         </color>
+    LIGHT_LEVEL:
+      iconData:
+        name: 'Lichtlevel'
+        description: |
+          Das berechnete Lichtlevel des Blockes,<br/>
+          den du gerade ansiehst; ein ? bedeutet,<br/>
+          dass das Fadenkreuz auf keinem Block liegt.<br/>
+          <br/>
+          Wert: \<Lichtlevel> (\<Himmelslicht>H, \<Blocklicht>B)
+        iconType: 'LIGHT'
+      defaultLabelColor: 'YELLOW'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          💡 Lichtlevel:<space/>
+        </color>
+        <color [value_color]>
+          <container *if="has_block">
+            {max(light_sky, light_blocks)} ({light_sky}H, {light_blocks}B)
+          </container>
+          <container *else>?</container>
+        </color>
+    MULTIBREAK_STATUS:
+      iconData:
+        name: 'MultiBreak Status'
+        description: |
+          Der aktuelle Aktivierungszustand sowie<br/>
+          der gewählte Einstellungsslot von<br/>
+          MultiBreak (/mb).<br/>
+          <br/>
+          Wert: \<An/Aus> (S\<Einstellungsslot>)
+        iconType: 'NETHERITE_PICKAXE'
+      defaultLabelColor: 'LIGHT_GRAY'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          ⛏ MultiBreak:<space/>
+        </color>
+        <color [value_color]>
+          {enabled then `An (S{slot_index + 1})` else "Aus"}
+        </color>
+    INV_MAGNET_STATUS:
+      iconData:
+        name: 'InvMagnet Status'
+        description: |
+          Der aktuelle Aktivierungszustand sowie<br/>
+          der gewählte Radius des Inventarmagneten<br/>
+          (/invmagnet).<br/>
+          <br/>
+          Wert: \<An/Aus> (R\<Radius>)
+        iconType: 'WIND_CHARGE'
+      defaultLabelColor: 'LIGHT_GRAY'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          🧲 InvMagnet:<space/>
+        </color>
+        <color [value_color]>
+          {enabled then `An (R{radius})` else "Aus"}
+        </color>
+    INV_FILTER_STATUS:
+      iconData:
+        name: 'InvFilter Status'
+        description: |
+          Der aktuelle Aktivierungszustand des<br/>
+          Inventarfilters (/invfilter).
+        iconType: 'HOPPER'
+      defaultLabelColor: 'LIGHT_GRAY'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          ✔ InvFilter:<space/>
+        </color>
+        <color [value_color]>
+          {enabled then "An" else "Aus"}
+        </color>
+    AUTOTOOL_STATUS:
+      iconData:
+        name: 'AutoTool Status'
+        description: |
+          Der aktuelle Aktivierungszustand der<br/>
+          automatischen Werkzeugauswahl (/autotool).
+        iconType: 'GOLD_AXE'
+      defaultLabelColor: 'LIGHT_GRAY'
+      defaultEnabled: false
+      render: |
+        <color [label_color]>
+          🪓 AutoTool:<space/>
+        </color>
+        <color [value_color]>
+          {enabled then "An" else "Aus"}
+        </color>
+    CURRENT_AFK_DURATION:
+      iconData:
+        name: 'Aktuelle AFK-Dauer'
+        description: |
+          Die Dauer deiner aktuellen AFK-Phase seit<br/>
+          Beginn; diese Zeile wird automatisch<br/>
+          ausgeblendet, wenn du aktiv spielst.
+        iconType: 'RECOVERY_COMPASS'
+      defaultLabelColor: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <container *if="time">
+          <color [label_color]>
+            ⌛ AFK-Dauer:<space/>
+          </color>
+          <color [value_color]>
+            <duration [value]="time" units="sm" [zeroes]="time < 1000 * 60 then 's'" />
+          </color>
+    REMAINING_PLAYTIME_UNTIL_NEXT_RANK:
+      iconData:
+        name: 'Verbleibende Zeit zum Rank-Up'
+        description: |
+          Die verbleibende, aktive Spielzeit die du<br/>
+          benötigst, um ein Rank-Up (nächster Rang) zu<br/>
+          erreichen (/rewards); ein / bedeutet, dass du<br/>
+          bereits den höchsten durch Spielzeit erlangbaren<br/>
+          Rang erreicht hast.
+        iconType: 'FIREWORK_ROCKET'
+      defaultLabelColor: 'LIGHT_GREEN'
+      defaultEnabled: true
+      render: |
+        <color [label_color]>
+          ⌛ Rank-Up:<space/>
+        </color>
+        <color [value_color]>
+          <container *if="time <= 0">
+            /
+          </container>
+          <$lut.sidebar.playtime_format *else>
+        </color>
   colorDisplay:
     title: '<&8>Farbauswahl'
     rows: 4
@@ -1820,7 +1952,14 @@ cLut:
     subtitle: '<&c><translate [type_key] /></> bei <&4>{remaining_durability_percentage}%'
   sidebar:
     playtime_format: |
-      <duration [value]="time / 20.0 * 1000.0" units="hd" [zeroes]="time < 20 * 60 then 'h'" />
+      <container *let-time_s="time / 20.0">
+        <duration
+          *if="time_s < 60 * 60 * 24"
+          [value]="time_s * 1000"
+          units="mh"
+          [zeroes]="time_s < 60 then 'm'"
+        />
+        <duration *else [value]="time_s * 1000" units="hd" />
     job_progression_format: |
       {progression.level},<space/>
       <container *if="progression.current_experience < 1000">

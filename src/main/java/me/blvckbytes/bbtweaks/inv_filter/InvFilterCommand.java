@@ -325,7 +325,7 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
     filterByPlayerId.remove(event.getPlayer().getUniqueId());
   }
 
-  private InventoryFilter getOrLoadFilter(Player player) {
+  public InventoryFilter getOrLoadFilter(Player player) {
     var playerId = player.getUniqueId();
 
     var filter = filterByPlayerId.get(playerId);

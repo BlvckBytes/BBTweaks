@@ -29,22 +29,35 @@ public enum SidebarStatistic {
   MCMMO_POWER_LEVEL,
   PLAYER_NAME,
   TPS,
+  LIGHT_LEVEL,
+  MULTIBREAK_STATUS,
+  INV_MAGNET_STATUS,
+  INV_FILTER_STATUS,
+  AUTOTOOL_STATUS,
+  CURRENT_AFK_DURATION,
+  REMAINING_PLAYTIME_UNTIL_NEXT_RANK,
   ;
 
   public static final List<SidebarStatistic> ALL_VALUES = List.of(values());
 
-  public Component renderFor(
+  public @Nullable Component renderFor(
     BoardHolder holder,
     StatisticSection statistic,
     SidebarPreferences preferences,
     StatisticEnvironmentResolver environmentResolver
   ) {
-    return statistic.render.interpret(
+    var result = statistic.render.interpret(
       SlotType.SINGLE_LINE_CHAT,
       environmentResolver.resolve(holder, this)
         .withVariable("label_color", preferences.labelColorByStatistic.get(statistic._sidebarStatistic).hexColor())
         .withVariable("value_color", preferences.valueColor.hexColor())
     ).getFirst();
+
+    // Empty results are not rendered at all, which enables renderers to conditionally display themselves.
+    if (result.equals(Component.empty()))
+      return null;
+
+    return result;
   }
 
   public static @Nullable SidebarStatistic byOrdinalOrNull(int ordinal) {

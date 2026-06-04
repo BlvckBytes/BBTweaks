@@ -10,7 +10,11 @@ import at.blvckbytes.playtime_rewards.store.TopListType;
 import com.gamingmesh.jobs.Jobs;
 import com.gmail.nossr50.util.player.UserManager;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_tool.AutoToolCommand;
+import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
+import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import me.blvckbytes.bbtweaks.multi_break.BlockDirections;
+import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
 import me.blvckbytes.bbtweaks.sidebar.preferences.DelimitersMode;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferencesStore;
@@ -25,6 +29,8 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -44,6 +50,10 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
   private static final double TICKS_PER_SECOND = TICKS_PER_MINUTE / 60d;
 
   private final Plugin plugin;
+  private final MultiBreakParametersStore multiBreakParametersStore;
+  private final InvMagnetParametersStore invMagnetParametersStore;
+  private final InvFilterCommand invFilterCommand;
+  private final AutoToolCommand autoToolCommand;
   private final FloodgateIntegration floodgateIntegration;
   private final SidebarPreferencesStore sidebarPreferencesStore;
   private final PlaytimeRewardsAPI playtimeRewards;
@@ -60,10 +70,18 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
 
   public SidebarBoardManager(
     Plugin plugin,
+    MultiBreakParametersStore multiBreakParametersStore,
+    InvMagnetParametersStore invMagnetParametersStore,
+    InvFilterCommand invFilterCommand,
+    AutoToolCommand autoToolCommand,
     FloodgateIntegration floodgateIntegration,
     SidebarPreferencesStore sidebarPreferencesStore,
     ConfigKeeper<MainSection> config
   ) {
+    this.multiBreakParametersStore = multiBreakParametersStore;
+    this.invMagnetParametersStore = invMagnetParametersStore;
+    this.invFilterCommand = invFilterCommand;
+    this.autoToolCommand = autoToolCommand;
     this.floodgateIntegration = floodgateIntegration;
     this.sidebarPreferencesStore = sidebarPreferencesStore;
 
@@ -219,6 +237,9 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
 
       var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
       var line = statistic.renderFor(board.holder, statisticSection, preferences, this);
+
+      if (line == null)
+        continue;
 
       lengthBuffer.value = 0;
 
@@ -411,6 +432,66 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
       case TPS -> {
         return environment
           .withVariable("tps", Bukkit.getServer().getTPS());
+      }
+
+      case LIGHT_LEVEL -> {
+        var result = player.rayTraceBlocks(5);
+
+        Block block;
+        BlockFace face;
+
+        if (result == null || (block = result.getHitBlock()) == null || (face = result.getHitBlockFace()) == null)
+          return environment.withVariable("has_block", false);
+
+        if (block.getType().isOccluding())
+          block = block.getRelative(face);
+
+        return environment
+          .withVariable("has_block", true)
+          .withVariable("light_sky", block.getLightFromSky())
+          .withVariable("light_blocks", block.getLightFromBlocks());
+      }
+
+      case MULTIBREAK_STATUS -> {
+        var parametersSlots = multiBreakParametersStore.accessParametersSlots(player);
+
+        return environment
+          .withVariable("enabled", parametersSlots.enabled)
+          .withVariable("slot_index", parametersSlots.getSelectedSlotIndex());
+      }
+
+      case INV_MAGNET_STATUS -> {
+        var parameters = invMagnetParametersStore.accessParameters(player);
+
+        return environment
+          .withVariable("enabled", parameters.enabled)
+          .withVariable("radius", parameters.getRadius())
+          .withVariable("max_radius", parameters.getLimits().maxRadius());
+      }
+
+      case INV_FILTER_STATUS -> {
+        return environment
+          .withVariable("enabled", invFilterCommand.getOrLoadFilter(player).enabled);
+      }
+
+      case AUTOTOOL_STATUS -> {
+        return environment
+          .withVariable("enabled", autoToolCommand.isEnabled(player));
+      }
+
+      case CURRENT_AFK_DURATION -> {
+        return environment
+          .withVariable(
+            "time",
+            holder.essentialsUser().isAfk()
+              ? System.currentTimeMillis() - holder.essentialsUser().getAfkSince()
+              : null
+          );
+      }
+
+      case REMAINING_PLAYTIME_UNTIL_NEXT_RANK -> {
+        return environment
+          .withVariable("time", playtimeRewards.getRemainingTimeUntilNextRank(player));
       }
     }
 

@@ -66,6 +66,10 @@ public class AutoToolCommand implements CommandExecutor, TabCompleter, Listener 
     return List.of();
   }
 
+  public boolean isEnabled(Player player) {
+    return enabledStateByPlayerId.getOrDefault(player.getUniqueId(), false);
+  }
+
   @EventHandler
   public void onJoin(PlayerJoinEvent event) {
     var player = event.getPlayer();
@@ -87,7 +91,7 @@ public class AutoToolCommand implements CommandExecutor, TabCompleter, Listener 
 
   @EventHandler
   public void onBlockDamage(BlockDamageEvent event) {
-    if (!enabledStateByPlayerId.getOrDefault(event.getPlayer().getUniqueId(), false))
+    if (!isEnabled(event.getPlayer()))
       return;
 
     var playerInventory = event.getPlayer().getInventory();

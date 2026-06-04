@@ -324,7 +324,7 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       getServer().getPluginManager().registerEvents(new CommandItemListener(config), this);
 
-      getServer().getPluginManager().registerEvents(new SidebarBoardManager(this, floodgateIntegration, sidebarPreferencesStore, config), this);
+      getServer().getPluginManager().registerEvents(new SidebarBoardManager(this, multiBreakParametersStore, invMagnetParametersStore, invFilterCommandExecutor, autoToolCommandExecutor, floodgateIntegration, sidebarPreferencesStore, config), this);
 
       var signEditCommand = Objects.requireNonNull(getCommand("signedit"));
       var signCopyCommand = Objects.requireNonNull(getCommand("signcopy"));
