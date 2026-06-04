@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.config.NamedColor;
+import me.blvckbytes.bbtweaks.sidebar.preferences.ColorAndFormats;
 import me.blvckbytes.bbtweaks.util.Display;
 import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import org.bukkit.entity.Player;
@@ -69,16 +70,11 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
 
       colorBySlotIndex.put(index, color);
 
-      NamedColor selectedColor = null;
-
-      if (displayData.statistic() != null) {
-        var colorMap = selectingLabelColor ? displayData.preferences().labelColorByStatistic : displayData.preferences().valueColorByStatistic;
-        selectedColor = colorMap.get(displayData.statistic()._sidebarStatistic);
-      }
+      var selectedStyle = accessCurrentStyle();
 
       environment
         .withVariable("color", color.hexColor())
-        .withVariable("selected", color == selectedColor)
+        .withVariable("selected", selectedStyle != null && color == selectedStyle.color)
         .withVariable("name", color.name())
         .withVariable("display_name", color.displayName())
         .withVariable("icon_type", color.iconType());
@@ -92,16 +88,16 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
   }
 
   public void onColorSelection(NamedColor color) {
-    if (displayData.statistic() == null) {
-      for (var valueColorEntry : displayData.preferences().valueColorByStatistic.entrySet())
-        valueColorEntry.setValue(color);
+    var currentStyle = accessCurrentStyle();
+
+    if (currentStyle == null) {
+      for (var valueStyle : displayData.preferences().valueStyleByStatistic.values())
+        valueStyle.color = color;
 
       return;
     }
 
-    var colorMap = selectingLabelColor ? displayData.preferences().labelColorByStatistic : displayData.preferences().valueColorByStatistic;
-
-    colorMap.put(displayData.statistic()._sidebarStatistic, color);
+    currentStyle.color = color;
 
     renderItems();
   }
@@ -121,5 +117,17 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
       .withVariable("is_floodgate", isFloodgate)
       .withVariable("is_label_color", selectingLabelColor)
       .withVariable("statistic", displayData.statistic() == null ? null : displayData.statistic().iconData.name.markupNode);
+  }
+
+  private @Nullable ColorAndFormats accessCurrentStyle() {
+    if (displayData.statistic() == null)
+      return null;
+
+    var statistic = displayData.statistic()._sidebarStatistic;
+
+    if (selectingLabelColor)
+      return displayData.preferences().labelStyleByStatistic.get(statistic);
+
+    return displayData.preferences().valueStyleByStatistic.get(statistic);
   }
 }

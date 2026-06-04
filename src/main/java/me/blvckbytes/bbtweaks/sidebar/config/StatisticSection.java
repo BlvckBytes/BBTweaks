@@ -7,16 +7,17 @@ import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
+import me.blvckbytes.bbtweaks.sidebar.preferences.ColorAndFormats;
 
 public class StatisticSection extends ConfigSection {
 
   public ComponentMarkup render;
 
-  public ComponentMarkup defaultLabelColor;
-  public @CSIgnore NamedColor _defaultLabelColor;
+  public @CSAlways ColorAndFormatsSection defaultLabelStyle;
+  public ColorAndFormats _defaultLabelStyle;
 
-  public ComponentMarkup defaultValueColor;
-  public @CSIgnore NamedColor _defaultValueColor;
+  public @CSAlways ColorAndFormatsSection defaultValueStyle;
+  public ColorAndFormats _defaultValueStyle;
 
   public boolean defaultEnabled;
 

@@ -51,8 +51,8 @@ public enum SidebarStatistic {
     var result = statistic.render.interpret(
       SlotType.SINGLE_LINE_CHAT,
       environmentResolver.resolve(holder, this)
-        .withVariable("label_color", preferences.labelColorByStatistic.get(statistic._sidebarStatistic).hexColor())
-        .withVariable("value_color", preferences.valueColorByStatistic.get(statistic._sidebarStatistic).hexColor())
+        .withVariable("label_style", preferences.labelStyleByStatistic.get(statistic._sidebarStatistic))
+        .withVariable("value_style", preferences.valueStyleByStatistic.get(statistic._sidebarStatistic))
     ).getFirst();
 
     // Empty results are not rendered at all, which enables renderers to conditionally display themselves.

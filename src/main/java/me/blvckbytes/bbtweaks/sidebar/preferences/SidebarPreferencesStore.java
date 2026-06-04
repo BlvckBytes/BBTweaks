@@ -5,7 +5,6 @@ import at.blvckbytes.cm_mapper.ReloadPriority;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
-import me.blvckbytes.bbtweaks.sidebar.config.NamedColor;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,13 +15,15 @@ import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 
 public class SidebarPreferencesStore implements Listener {
 
   private final ConfigKeeper<MainSection> config;
 
   private final NamespacedKey keyEnabled, keyShowTitle, keyDelimitersMode, keySneakMode,
-    keyEnabledStatistics, keyStatisticsOrder, keyStatisticsLabelColors, keyStatisticsValueColors;
+    keyEnabledStatistics, keyStatisticsOrder, keyStatisticsLabelStyles, keyStatisticsValueStyles;
 
   private final Map<UUID, SidebarPreferences> preferencesByPlayerId;
 
@@ -39,9 +40,9 @@ public class SidebarPreferencesStore implements Listener {
     this.keyEnabledStatistics = new NamespacedKey(plugin, "sidebar-enabled-statistics");
     this.keyStatisticsOrder = new NamespacedKey(plugin, "sidebar-statistics-order");
 
-    // Due to backwards compatibility, the first key has to stay that way...
-    this.keyStatisticsLabelColors = new NamespacedKey(plugin, "sidebar-statistics-colors");
-    this.keyStatisticsValueColors = new NamespacedKey(plugin, "sidebar-statistics-value-colors");
+    // Due to backwards compatibility, the naming will be a bit off...
+    this.keyStatisticsLabelStyles = new NamespacedKey(plugin, "sidebar-statistics-colors");
+    this.keyStatisticsValueStyles = new NamespacedKey(plugin, "sidebar-statistics-value-colors");
 
     this.preferencesByPlayerId = new HashMap<>();
 
@@ -124,30 +125,47 @@ public class SidebarPreferencesStore implements Listener {
       }
     }
 
-    loadStatisticColors(pdc.get(keyStatisticsLabelColors, PersistentDataType.STRING), result.labelColorByStatistic);
-    loadStatisticColors(pdc.get(keyStatisticsValueColors, PersistentDataType.STRING), result.valueColorByStatistic);
+    loadStatisticStyles(pdc.get(keyStatisticsLabelStyles, PersistentDataType.STRING), result.labelStyleByStatistic::put);
+    loadStatisticStyles(pdc.get(keyStatisticsValueStyles, PersistentDataType.STRING), result.valueStyleByStatistic::put);
 
     return result;
   }
 
-  private void loadStatisticColors(@Nullable String colorsValue, Map<SidebarStatistic, NamedColor> output) {
-    if (colorsValue == null)
+  private void loadStatisticStyles(@Nullable String stylesValue, BiConsumer<SidebarStatistic, ColorAndFormats> setter) {
+    if (stylesValue == null)
       return;
 
-    var colorNames = colorsValue.split(";");
+    var styleValues = stylesValue.split(";");
 
     for (var statistic : SidebarStatistic.ALL_VALUES) {
       var ordinal = statistic.ordinal();
 
-      if (ordinal >= colorNames.length)
+      if (ordinal >= styleValues.length)
         break;
 
-      var color = config.rootSection.sidebar._colorByNameLower.get(colorNames[ordinal].toLowerCase());
+      var styleParts = styleValues[ordinal].split("\\|");
+
+      var color = config.rootSection.sidebar._colorByNameLower.get(styleParts[0].toLowerCase());
 
       if (color == null)
         continue;
 
-      output.put(statistic, color);
+      var formats = EnumSet.noneOf(Format.class);
+
+      if (styleParts.length > 1) {
+        var formatsMask = 0;
+
+        try {
+          formatsMask = Integer.parseInt(styleParts[1]);
+        } catch (Throwable ignored) {}
+
+        for (var format : Format.ALL_VALUES) {
+          if ((formatsMask & (1 << format.ordinal())) != 0)
+            formats.add(format);
+        }
+      }
+
+      setter.accept(statistic, new ColorAndFormats(color, formats));
     }
   }
 
@@ -168,8 +186,8 @@ public class SidebarPreferencesStore implements Listener {
 
     pdc.set(keyEnabledStatistics, PersistentDataType.INTEGER_ARRAY, enabledStatistics.toIntArray());
 
-    pdc.set(keyStatisticsLabelColors, PersistentDataType.STRING, serializeStatisticColors(preferences.labelColorByStatistic));
-    pdc.set(keyStatisticsValueColors, PersistentDataType.STRING, serializeStatisticColors(preferences.valueColorByStatistic));
+    pdc.set(keyStatisticsLabelStyles, PersistentDataType.STRING, serializeStatisticStyles(preferences.labelStyleByStatistic::get));
+    pdc.set(keyStatisticsValueStyles, PersistentDataType.STRING, serializeStatisticStyles(preferences.valueStyleByStatistic::get));
 
     var statisticsOrder = new IntArrayList();
 
@@ -179,11 +197,21 @@ public class SidebarPreferencesStore implements Listener {
     pdc.set(keyStatisticsOrder, PersistentDataType.INTEGER_ARRAY, statisticsOrder.toIntArray());
   }
 
-  private String serializeStatisticColors(Map<SidebarStatistic, NamedColor> input) {
+  private String serializeStatisticStyles(Function<SidebarStatistic, ColorAndFormats> getter) {
     var colorsJoiner = new StringJoiner(";");
 
-    for (var statistic : SidebarStatistic.ALL_VALUES)
-      colorsJoiner.add(input.get(statistic).name());
+    for (var statistic : SidebarStatistic.ALL_VALUES) {
+      var style = getter.apply(statistic);
+
+      var formatMask = 0;
+
+      for (var format : Format.ALL_VALUES) {
+        if (style.formats.contains(format))
+          formatMask |= 1 << format.ordinal();
+      }
+
+      colorsJoiner.add(style.color.name() + "|" + formatMask);
+    }
 
     return colorsJoiner.toString();
   }

@@ -107,19 +107,10 @@ public class SidebarSection extends ConfigSection {
 
       var statisticSection = entry.getValue();
 
-      var defaultLabelColorName = statisticSection.defaultLabelColor.asPlainString(null);
-      statisticSection._defaultLabelColor = _colorByNameLower.get(defaultLabelColorName.toLowerCase());
-
-      if (statisticSection._defaultLabelColor == null)
-        throw new MappingError("Could not find a named color of \"" + defaultLabelColorName + "\" for the defaultLabelColor of statistic " + statisticName);
-
-      var defaultValueColorName = statisticSection.defaultValueColor.asPlainString(null);
-      statisticSection._defaultValueColor = _colorByNameLower.get(defaultValueColorName.toLowerCase());
-
-      if (statisticSection._defaultValueColor == null)
-        throw new MappingError("Could not find a named color of \"" + defaultValueColorName + "\" for the defaultValueColor of statistic " + statisticName);
-
       statisticSection._sidebarStatistic = statistic;
+
+      statisticSection._defaultLabelStyle = statisticSection.defaultLabelStyle.toModel(statistic, _colorByNameLower);
+      statisticSection._defaultValueStyle = statisticSection.defaultValueStyle.toModel(statistic, _colorByNameLower);
 
       _statisticsMap.put(statistic, statisticSection);
       _statistics.add(statisticSection);

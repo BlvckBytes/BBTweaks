@@ -399,12 +399,12 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
 
       case FIRST_JOB_PROGRESSION -> {
         if (!hasJobs)
-          return environment.withVariable("progression", null);
+          return environment.withVariable("name", null).withVariable("progression", null);
 
         var progressions = Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression();
 
         if (progressions.isEmpty())
-          return environment.withVariable("progression", null);
+          return environment.withVariable("name", null).withVariable("progression", null);
 
         var progression = progressions.getFirst();
 

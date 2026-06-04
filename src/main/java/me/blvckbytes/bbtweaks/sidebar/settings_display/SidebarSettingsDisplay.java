@@ -71,8 +71,8 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
         .withVariable("name", statisticSection.iconData.name.markupNode)
         .withVariable("description", statisticSection.iconData.description.markupNode)
         .withVariable("icon_type", statisticSection.iconData._iconType)
-        .withVariable("label_color", displayData.labelColorByStatistic.get(statistic))
-        .withVariable("value_color", displayData.valueColorByStatistic.get(statistic))
+        .withVariable("label_style", displayData.labelStyleByStatistic.get(statistic))
+        .withVariable("value_style", displayData.valueStyleByStatistic.get(statistic))
         .withVariable("enabled", displayData.enabledStatistics.contains(statistic));
 
       inventory.setItem(index, config.rootSection.sidebar.settingsDisplay.items.statisticIcon.build(environment));

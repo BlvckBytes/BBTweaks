@@ -18,13 +18,14 @@ public record NamedColor(
     return switch (rawIdentifier) {
       case "icon_type" -> iconType;
       case "display_name" -> displayName;
+      case "hex" -> hexColor;
       default -> DirectFieldAccess.UNKNOWN_FIELD_SENTINEL;
     };
   }
 
   @Override
   public Set<String> getAvailableFields() {
-    return Set.of("icon_type", "display_name");
+    return Set.of("icon_type", "display_name", "hex");
   }
 }
 

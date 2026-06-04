@@ -5,7 +5,6 @@ import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
-import me.blvckbytes.bbtweaks.sidebar.config.NamedColor;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 
@@ -15,6 +14,8 @@ import java.util.EnumSet;
 import java.util.List;
 
 public class SidebarPreferences {
+
+  // TODO: idea - toggleable icons
 
   private static final boolean DEFAULT_ENABLED = false;
   private static final boolean DEFAULT_SHOW_TITLE = true;
@@ -28,8 +29,8 @@ public class SidebarPreferences {
   public SneakMode sneakMode;
 
   public final EnumSet<SidebarStatistic> enabledStatistics;
-  public final EnumMap<SidebarStatistic, NamedColor> labelColorByStatistic;
-  public final EnumMap<SidebarStatistic, NamedColor> valueColorByStatistic;
+  public final EnumMap<SidebarStatistic, ColorAndFormats> labelStyleByStatistic;
+  public final EnumMap<SidebarStatistic, ColorAndFormats> valueStyleByStatistic;
   public final List<SidebarStatistic> statisticsInOrder;
 
   public SidebarPreferences(Player player, ConfigKeeper<MainSection> config) {
@@ -40,8 +41,8 @@ public class SidebarPreferences {
     this.enabled = DEFAULT_ENABLED;
 
     this.enabledStatistics = EnumSet.noneOf(SidebarStatistic.class);
-    this.labelColorByStatistic = new EnumMap<>(SidebarStatistic.class);
-    this.valueColorByStatistic = new EnumMap<>(SidebarStatistic.class);
+    this.labelStyleByStatistic = new EnumMap<>(SidebarStatistic.class);
+    this.valueStyleByStatistic = new EnumMap<>(SidebarStatistic.class);
     this.statisticsInOrder = new ArrayList<>();
 
     this.resetToDefaults();
@@ -63,10 +64,10 @@ public class SidebarPreferences {
 
       var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
 
-      if (labelColorByStatistic.get(statistic) != statisticSection._defaultLabelColor)
+      if (!labelStyleByStatistic.get(statistic).equals(statisticSection._defaultLabelStyle))
         return true;
 
-      if (valueColorByStatistic.get(statistic) != statisticSection._defaultValueColor)
+      if (!valueStyleByStatistic.get(statistic).equals(statisticSection._defaultValueStyle))
         return true;
 
       if (enabledStatistics.contains(statistic) != statisticSection.defaultEnabled)
@@ -90,8 +91,10 @@ public class SidebarPreferences {
       if (statisticSection.defaultEnabled)
         enabledStatistics.add(statistic);
 
-      labelColorByStatistic.put(statistic, statisticSection._defaultLabelColor);
-      valueColorByStatistic.put(statistic, statisticSection._defaultValueColor);
+      // We're modifying styles in place, so cloning before setting is crucial as
+      // to not mess up the stored defaults by editing them by reference.
+      labelStyleByStatistic.put(statistic, new ColorAndFormats(statisticSection._defaultLabelStyle));
+      valueStyleByStatistic.put(statistic, new ColorAndFormats(statisticSection._defaultValueStyle));
 
       statisticsInOrder.add(statistic);
     }
@@ -107,11 +110,11 @@ public class SidebarPreferences {
   }
 
   public void onConfigReload() {
-    for (var entry : labelColorByStatistic.entrySet())
-      entry.setValue(config.rootSection.sidebar.tryGetCurrentColorWithEqualName(entry.getValue()));
+    for (var value : labelStyleByStatistic.values())
+      value.color = config.rootSection.sidebar.tryGetCurrentColorWithEqualName(value.color);
 
-    for (var entry : valueColorByStatistic.entrySet())
-      entry.setValue(config.rootSection.sidebar.tryGetCurrentColorWithEqualName(entry.getValue()));
+    for (var value : valueStyleByStatistic.values())
+      value.color = config.rootSection.sidebar.tryGetCurrentColorWithEqualName(value.color);
   }
 
   public Component getBoardTitle() {

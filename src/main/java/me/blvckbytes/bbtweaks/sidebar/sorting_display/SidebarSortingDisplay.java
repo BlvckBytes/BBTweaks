@@ -59,7 +59,6 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
         .withVariable("name", statisticSection.iconData.name.markupNode)
         .withVariable("description", statisticSection.iconData.description.markupNode)
         .withVariable("icon_type", statisticSection.iconData._iconType)
-        .withVariable("label_color", displayData.preferences().labelColorByStatistic.get(statistic))
         .withVariable("enabled", displayData.preferences().enabledStatistics.contains(statistic));
 
       inventory.setItem(index, config.rootSection.sidebar.sortingDisplay.items.statisticIcon.build(environment));

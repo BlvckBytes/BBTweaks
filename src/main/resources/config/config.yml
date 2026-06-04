@@ -1156,31 +1156,35 @@ sidebar:
         name: 'Rang'
         description: 'Dein aktueller Rang.'
         iconType: 'NETHER_STAR'
-      defaultLabelColor: 'ORANGE'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'ORANGE'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: true
       render: |
-        <color [label_color]>
-          ⯪ Rang:<space/>
-        </color>
-        <color [value_color]>
-          {prefix}
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="⯪" label="Rang"
+          value={
+            {prefix}
+          }
+        />
     MONEY:
       iconData:
         name: 'Kontostand'
         description: 'Dein aktueller Kontostand.'
         iconType: 'DIAMOND'
-      defaultLabelColor: 'YELLOW'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'YELLOW'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: true
       render: |
-        <color [label_color]>
-          ⛁ Geld:<space/>
-        </color>
-        <color [value_color]>
-          <number [balance] format="###,###" locale="de_DE" /> BT
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="⛁" label="Geld"
+          value={
+            <number [balance] format="###,###" locale="de_DE" /> BT
+          }
+        />
     TOTAL_PLAYTIME:
       iconData:
         name: 'Spielzeit Gesamt'
@@ -1188,16 +1192,18 @@ sidebar:
           Die gesamte, aktive Zeit, die du auf dem<br/>
           Server verbracht hast.
         iconType: 'LEATHER_BOOTS'
-      defaultLabelColor: 'LIGHT_GREEN'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: true
       render: |
-        <color [label_color]>
-          ⌛ Spielzeit:<space/>
-        </color>
-        <color [value_color]>
-          <$lut.sidebar.playtime_format>
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="⌛" label="Spielzeit"
+          value={
+            <$lut.sidebar.playtime_format />
+          }
+        />
     TOTAL_PLAYTIME_TOP_PLACE:
       iconData:
         name: 'Top-Platz Spielzeit Gesamt'
@@ -1205,16 +1211,18 @@ sidebar:
           Deine Platzierung in der Topliste aller<br/>
           aktiven Spielzeiten.
         iconType: 'LADDER'
-      defaultLabelColor: 'LIGHT_GREEN'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          🠙 Top Spielzeit:<space/>
-        </color>
-        <color [value_color]>
-          #{place}
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="🠙" label="Top Spielzeit"
+          value={
+            #{place}
+          }
+        />
     TOTAL_AFKTIME:
       iconData:
         name: 'Afk-Zeit Gesamt'
@@ -1222,16 +1230,18 @@ sidebar:
           Die gesamte, inaktive Zeit, die du auf dem<br/>
           Server verbracht hast.
         iconType: 'BUCKET'
-      defaultLabelColor: 'LIGHT_GRAY'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_GRAY'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          ⌛ Afk-Zeit:<space/>
-        </color>
-        <color [value_color]>
-          <$lut.sidebar.playtime_format>
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="⌛" label="Afk-Zeit"
+          value={
+            <$lut.sidebar.playtime_format />
+          }
+        />
     TOTAL_AFKTIME_TOP_PLACE:
       iconData:
         name: 'Top-Platz Afk-Zeit Gesamt'
@@ -1239,16 +1249,18 @@ sidebar:
           Deine Platzierung in der Topliste aller<br/>
           inaktiven (AFK) Spielzeiten.
         iconType: 'LADDER'
-      defaultLabelColor: 'LIGHT_GRAY'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_GRAY'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          🠙 Top Afk-Zeit:<space/>
-        </color>
-        <color [value_color]>
-          #{place}
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="🠙" label="Top Afk-Zeit"
+          value={
+            #{place}
+          }
+        />
     HOME_COUNT:
       iconData:
         name: 'Anzahl Homepunkte'
@@ -1256,16 +1268,18 @@ sidebar:
           Die Anzahl deiner genutzten- sowie<br/>
           verbleibenden Homepunkte.
         iconType: 'RED_BED'
-      defaultLabelColor: 'GREEN'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'GREEN'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: true
       render: |
-        <color [label_color]>
-          🏛 Homepunkte:<space/>
-        </color>
-        <color [value_color]>
-          {current_home_count}/{total_home_count}
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="🏛" label="Homepunkte"
+          value={
+            {current_home_count}/{total_home_count}
+          }
+        />
     PING:
       iconData:
         name: 'Ping'
@@ -1275,91 +1289,103 @@ sidebar:
           Server zu deinem Client und wieder zurück<br/>
           benötigt (round-trip).
         iconType: 'REPEATER'
-      defaultLabelColor: 'LIGHT_BLUE'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_BLUE'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: true
       render: |
-        <color [label_color]>
-          📶 Ping:<space/>
-        </color>
-        <color [value_color]>
-          {ping}ms
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="📶" label="Ping"
+          value={
+            {ping}ms
+          }
+        />
     DATE:
       iconData:
         name: 'Aktuelles Datum'
         description: 'Das heutige Datum.'
         iconType: 'PAPER'
-      defaultLabelColor: 'MAGENTA'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'MAGENTA'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: true
       render: |
-        <color [label_color]>
-          🗓 Datum:<space/>
-        </color>
-        <color [value_color]>
-          <date [millis] format="EEE dd.MM.yyyy" zone="Europe/Berlin" locale="de_DE" />
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="🗓" label="Datum"
+          value={
+            <date [millis] format="EEE dd.MM.yyyy" zone="Europe/Berlin" locale="de_DE" />
+          }
+        />
     REAL_TIME:
       iconData:
         name: 'Aktuelle Uhrzeit'
         description: 'Die aktuelle Uhrzeit.'
         iconType: 'CLOCK'
-      defaultLabelColor: 'MAGENTA'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'MAGENTA'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: true
       render: |
-        <color [label_color]>
-          🕓 Uhrzeit:<space/>
-        </color>
-        <color [value_color]>
-          <date [millis] format="HH:mm" zone="Europe/Berlin" locale="de_DE" />
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="🕓" label="Uhrzeit"
+          value={
+            <date [millis] format="HH:mm" zone="Europe/Berlin" locale="de_DE" />
+          }
+        />
     COORDINATES:
       iconData:
         name: 'Koordinaten'
         description: 'Deine aktuellen Koordinaten.'
         iconType: 'COMPASS'
-      defaultLabelColor: 'BLUE'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'BLUE'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          🖈 Position:<space/>
-        </color>
-        <color [value_color]>
-          {x} {y} {z}
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="🖈" label="Position"
+          value={
+            {x} {y} {z}
+          }
+        />
     BIOME:
       iconData:
         name: 'Biom'
         description: 'Das Biom, in dem du dich aktuell aufhältst.'
         iconType: 'CACTUS'
-      defaultLabelColor: 'BROWN'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'BROWN'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          🌵 Biom:<space/>
-        </color>
-        <color [value_color]>
-          <translate [biome_key] />
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="🌵" label="Biom"
+          value={
+            <translate [biome_key] />
+          }
+        />
     LOOKING_DIRECTION:
       iconData:
         name: 'Blickrichtung'
         description: 'Die Himmelsrichtung, in die du aktuell blickst.'
         iconType: 'SPYGLASS'
-      defaultLabelColor: 'PINK'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'PINK'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          👁 Richtung:<space/>
-        </color>
-        <color [value_color]>
-          {direction}
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="👁" label="Richtung"
+          value={
+            {direction}
+          }
+        />
     GAME_TIME:
       iconData:
         name: 'InGame-Uhrzeit'
@@ -1367,16 +1393,18 @@ sidebar:
           Die InGame-Uhrzeit der Welt, in der<br/>
           du dich aktuell aufhältst.
         iconType: 'CLOCK'
-      defaultLabelColor: 'PURPLE'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'PURPLE'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          🕓 Weltzeit:<space/>
-        </color>
-        <color [value_color]>
-          <number [hours] format="00" />:<number [minutes] format="00" />
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="🕓" label="Weltzeit"
+          value={
+            <number [hours] format="00" />:<number [minutes] format="00" />
+          }
+        />
     FIRST_JOB_PROGRESSION:
       iconData:
         name: 'Fortschritt erster Job'
@@ -1384,19 +1412,19 @@ sidebar:
           Der aktuelle Fortschritt innerhalb deines<br/>
           ersten Jobs (/jobs).
         iconType: 'CHEST'
-      defaultLabelColor: 'ORANGE'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'ORANGE'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <container *if="progression">
-          <color [label_color]>
-            💼 {name}-Job:<space/>
-          </color>
-          <color [value_color]>
-            <$lut.sidebar.job_progression_format />
-          </color>
-        </container>
-        <&c *else>💼 Job 1: Kein Job
+        <$lut.sidebar.statistic_renderer
+          icon="💼" label={{name neq null then `{name}-Job` else "Job 1"}}
+          value={
+            <$lut.sidebar.job_progression_format *if="progression" />
+            <container *else>Kein Job</>
+          }
+        />
     SECOND_JOB_PROGRESSION:
       iconData:
         name: 'Fortschritt zweiter Job'
@@ -1404,19 +1432,19 @@ sidebar:
           Der aktuelle Fortschritt innerhalb deines<br/>
           zweiten Jobs (/jobs).
         iconType: 'CHEST'
-      defaultLabelColor: 'ORANGE'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'ORANGE'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <container *if="progression">
-          <color [label_color]>
-            💼 {name}-Job:<space/>
-          </color>
-          <color [value_color]>
-            <$lut.sidebar.job_progression_format />
-          </color>
-        </container>
-        <&c *else>💼 Job 2: Kein Job
+        <$lut.sidebar.statistic_renderer
+          icon="💼" label={{name neq null then `{name}-Job` else "Job 2"}}
+          value={
+            <$lut.sidebar.job_progression_format *if="progression" />
+            <container *else>Kein Job</>
+          }
+        />
     MCMMO_POWER_LEVEL:
       iconData:
         name: 'McMMO Powerlevel'
@@ -1424,31 +1452,35 @@ sidebar:
           Dein aktuelles McMMO-Powerlevel, auch als<br/>
           Gesamtlevel bekannt (/mcmmo).
         iconType: 'DIAMOND_PICKAXE'
-      defaultLabelColor: 'PURPLE'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'PURPLE'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          ⛏ Powerlevel:<space/>
-        </color>
-        <color [value_color]>
-          {power_level}
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" label="Powerlevel"
+          value={
+            {power_level}
+          }
+        />
     PLAYER_NAME:
       iconData:
         name: 'Spielername'
         description: 'Der Name deines Accounts.'
         iconType: 'NAME_TAG'
-      defaultLabelColor: 'LIGHT_BLUE'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_BLUE'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          👤 Name:<space/>
-        </color>
-        <color [value_color]>
-          {name}
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="👤" label="Name"
+          value={
+            {name}
+          }
+        />
     TPS:
       iconData:
         name: 'Ticks Per Second'
@@ -1460,16 +1492,18 @@ sidebar:
           Um flüssig zu laufen, benötigt Minecraft 20 TPS.<br/>
           Niedrigere Werte signalisieren eine Überlastung.
         iconType: 'REDSTONE'
-      defaultLabelColor: 'LIGHT_RED'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_RED'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          ⚡ TPS:<space/>
-        </color>
-        <color [value_color]>
-          <number *for-value="tps" *for-separator={<space/>} [value] format='#.#' locale="de_DE" />
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="⚡" label="TPS"
+          value={
+            <number *for-value="tps" *for-separator={<space/>} [value] format='#.#' locale="de_DE" />
+          }
+        />
     LIGHT_LEVEL:
       iconData:
         name: 'Lichtlevel'
@@ -1480,19 +1514,21 @@ sidebar:
           <br/>
           Wert: \<Lichtlevel> (\<Himmelslicht>H, \<Blocklicht>B)
         iconType: 'LIGHT'
-      defaultLabelColor: 'YELLOW'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'YELLOW'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          💡 Lichtlevel:<space/>
-        </color>
-        <color [value_color]>
-          <container *if="has_block">
-            {max(light_sky, light_blocks)} ({light_sky}H, {light_blocks}B)
-          </container>
-          <container *else>?</container>
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="💡" label="Lichtlevel"
+          value={
+            <container *if="has_block">
+              {max(light_sky, light_blocks)} ({light_sky}H, {light_blocks}B)
+            </container>
+            <container *else>?</container>
+          }
+        />
     MULTIBREAK_STATUS:
       iconData:
         name: 'MultiBreak Status'
@@ -1503,16 +1539,18 @@ sidebar:
           <br/>
           Wert: \<An/Aus> (S\<Einstellungsslot>)
         iconType: 'NETHERITE_PICKAXE'
-      defaultLabelColor: 'LIGHT_GRAY'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_GRAY'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          ⛏ MultiBreak:<space/>
-        </color>
-        <color [value_color]>
-          {enabled then `An (S{slot_index + 1})` else "Aus"}
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" label="MultiBreak"
+          value={
+            {enabled then `An (S{slot_index + 1})` else "Aus"}
+          }
+        />
     INV_MAGNET_STATUS:
       iconData:
         name: 'InvMagnet Status'
@@ -1523,16 +1561,18 @@ sidebar:
           <br/>
           Wert: \<An/Aus> (R\<Radius>)
         iconType: 'WIND_CHARGE'
-      defaultLabelColor: 'LIGHT_GRAY'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_GRAY'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          🧲 InvMagnet:<space/>
-        </color>
-        <color [value_color]>
-          {enabled then `An (R{radius})` else "Aus"}
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="🧲" label="InvMagnet"
+          value={
+            {enabled then `An (R{radius})` else "Aus"}
+          }
+        />
     INV_FILTER_STATUS:
       iconData:
         name: 'InvFilter Status'
@@ -1540,16 +1580,18 @@ sidebar:
           Der aktuelle Aktivierungszustand des<br/>
           Inventarfilters (/invfilter).
         iconType: 'HOPPER'
-      defaultLabelColor: 'LIGHT_GRAY'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_GRAY'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          ✔ InvFilter:<space/>
-        </color>
-        <color [value_color]>
-          {enabled then "An" else "Aus"}
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="✔" label="InvFilter"
+          value={
+            {enabled then "An" else "Aus"}
+          }
+        />
     AUTOTOOL_STATUS:
       iconData:
         name: 'AutoTool Status'
@@ -1557,16 +1599,18 @@ sidebar:
           Der aktuelle Aktivierungszustand der<br/>
           automatischen Werkzeugauswahl (/autotool).
         iconType: 'GOLD_AXE'
-      defaultLabelColor: 'LIGHT_GRAY'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_GRAY'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          🪓 AutoTool:<space/>
-        </color>
-        <color [value_color]>
-          {enabled then "An" else "Aus"}
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="🪓" label="AutoTool"
+          value={
+            {enabled then "An" else "Aus"}
+          }
+        />
     CURRENT_AFK_DURATION:
       iconData:
         name: 'Aktuelle AFK-Dauer'
@@ -1575,17 +1619,18 @@ sidebar:
           Beginn; <&e>diese Zeile wird automatisch<br/>
           ausgeblendet, wenn du aktiv spielst</>.
         iconType: 'RECOVERY_COMPASS'
-      defaultLabelColor: 'LIGHT_RED'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_RED'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <container *if="time">
-          <color [label_color]>
-            ⌛ AFK-Dauer:<space/>
-          </color>
-          <color [value_color]>
+        <$lut.sidebar.statistic_renderer
+          icon="⌛" label="Afk-Dauer"
+          value={
             <duration [value]="time" units="sm" [zeroes]="time < 1000 * 60 then 's'" />
-          </color>
+          }
+        />
     REMAINING_PLAYTIME_UNTIL_NEXT_RANK:
       iconData:
         name: 'Verbleibende Zeit zum Rank-Up'
@@ -1596,19 +1641,19 @@ sidebar:
           bereits den höchsten durch Spielzeit<br/>
           erlangbaren Rang erreicht hast.
         iconType: 'FIREWORK_ROCKET'
-      defaultLabelColor: 'LIGHT_GREEN'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          ⌛ Rank-Up:<space/>
-        </color>
-        <color [value_color]>
-          <container *if="time <= 0">
-            /
-          </container>
-          <$lut.sidebar.playtime_format *else>
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="⌛" label="Rank-Up"
+          value={
+            <$lut.sidebar.playtime_format *if="time > 0" />
+            <container *else>/</>
+          }
+        />
     REMAINING_SHOP_REGION_RENT_DURATION:
       iconData:
         name: 'Mietzeit Shopregion'
@@ -1617,19 +1662,19 @@ sidebar:
           Shopregion; ein / bedeutet, dass du aktuell<br/>
           noch keine besitzt.
         iconType: 'PAPER'
-      defaultLabelColor: 'LIGHT_BLUE'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_BLUE'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          ⌛ Shopregion:<space/>
-        </color>
-        <color [value_color]>
-          <container *if="time <= 0">
-            /
-          </container>
-          <$lut.sidebar.playtime_format *let-time="time / 1000.0 * 20.0" *else>
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="⌛" label="Shopregion"
+          value={
+            <$lut.sidebar.playtime_format *if="time > 0" />
+            <container *else>/</>
+          }
+        />
     REMAINING_CREATIVE_REGION_RENT_DURATION:
       iconData:
         name: 'Mietzeit Kreativ-Grundstück'
@@ -1638,19 +1683,19 @@ sidebar:
           Grundstücks in der Kreativwelt; ein / bedeutet,<br/>
           dass du aktuell noch keines besitzt.
         iconType: 'PAPER'
-      defaultLabelColor: 'LIGHT_BLUE'
-      defaultValueColor: 'WHITE'
+      defaultLabelStyle:
+        color: 'LIGHT_BLUE'
+      defaultValueStyle:
+        color: 'WHITE'
       defaultEnabled: false
       render: |
-        <color [label_color]>
-          ⌛ Kreativ-Plot:<space/>
-        </color>
-        <color [value_color]>
-          <container *if="time <= 0">
-            /
-          </container>
-          <$lut.sidebar.playtime_format *let-time="time / 1000.0 * 20.0" *else>
-        </color>
+        <$lut.sidebar.statistic_renderer
+          icon="⌛" label="Kreativ-Plot"
+          value={
+            <$lut.sidebar.playtime_format *if="time > 0" />
+            <container *else>/</>
+          }
+        />
   colorDisplay:
     title: |
       <&8>Farbauswahl<space/>
@@ -1858,7 +1903,7 @@ sidebar:
             <br/>
             <&7>{description}<br/>
             {lut.spacer}<br/>
-            <&8>♦ <&e>Aktuelle Farben: <&7>Name {label_color.display_name}, Wert {value_color.display_name}<br/>
+            <&8>♦ <&e>Aktuelle Farben: <&7>Name {label_style.color.display_name}, Wert {value_style.color.display_name}<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Statistik {enabled then "deaktivieren" else "aktivieren"}<br/>
             <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Neue Farben auswählen<br/>
@@ -2107,3 +2152,11 @@ cLut:
       NONE: '<&7>Keine Linien'
       TOP_AND_BOTTOM: '<&a>Oberhalb und unterhalb'
       TOP_ONLY: '<&3>Nur oberhalb'
+    statistic_renderer: |
+      <color [label_style.color.hex]>
+        {icon} <style [label_style.bold] [label_style.italic] [label_style.underlined]>{label}:</><space/>
+      </color>
+      <color [value_style.color.hex]>
+        <style [value_style.bold] [value_style.italic] [value_style.underlined]>
+          {value}
+      </color>
