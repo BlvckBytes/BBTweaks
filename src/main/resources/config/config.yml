@@ -2285,10 +2285,11 @@ cLut:
       </color>
       <color [value_style.color.hex]>
         <style
-          [color]="has(value_color_override) then value_color_override"
-          [value_style.bold]
-          [value_style.italic]
-          [value_style.underlined]
+          *let-color_override="has(value_color_override) then value_color_override"
+          [color]="color_override"
+          [bold]="color_override eq null then value_style.bold"
+          [italic]="color_override eq null then value_style.italic"
+          [underlined]="color_override eq null then value_style.underlined"
         >
           {value}
       </color>
