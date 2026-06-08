@@ -46,7 +46,8 @@ public class LocationHistoryStore {
   }
 
   public LocationHistory accessHistory(Player player) {
-    return historyByPlayerId.computeIfAbsent(player.getUniqueId(), k -> new LocationHistory());
+    var playerId = player.getUniqueId();
+    return historyByPlayerId.computeIfAbsent(playerId, k -> new LocationHistory(playerId));
   }
 
   private void loadAsync() {
@@ -71,10 +72,10 @@ public class LocationHistoryStore {
           if (!(entry.getValue() instanceof JsonObject object))
             continue;
 
-          var history = LocationHistory.fromJson(object);
+          var history = LocationHistory.fromJson(playerId, object);
 
           if (history == null) {
-            history = new LocationHistory();
+            history = new LocationHistory(playerId);
             plugin.getLogger().log(Level.WARNING, "Could not load location-history for " + playerId + "; starting over from a blank slate");
           }
 
@@ -88,11 +89,22 @@ public class LocationHistoryStore {
     });
   }
 
-  public void save() {
+  public void save(boolean async) {
+    var histories = new ArrayList<>(historyByPlayerId.values());
+
+    if (!async) {
+      saveHistories(histories);
+      return;
+    }
+
+    Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> saveHistories(histories));
+  }
+
+  private void saveHistories(List<LocationHistory> histories) {
     var locationMap = new JsonObject();
 
-    for (var entry : historyByPlayerId.entrySet())
-      locationMap.add(entry.getKey().toString(), entry.getValue().toJson());
+    for (var history : histories)
+      locationMap.add(history.playerId.toString(), history.toJson());
 
     try (var writer = new FileWriter(storageFile)) {
       GSON_INSTANCE.toJson(locationMap, writer);

@@ -49,6 +49,8 @@ furnaceLevel:
   levelsStored: '<&6>[XP] {old_level} → {new_level} <&7>({next_level_progress}% ↑)'
 
 getUuid:
+  command:
+    name: 'getuuid'
   noPermission: '{lut.main_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
   commandUsage: '{lut.main_prefix} <&c>Benutzung: /{command_label} \<Name>'
   unknownName: '{lut.main_prefix} <&c>Konnte zum Namen <&4>{name} <&c>keine UUID finden!'

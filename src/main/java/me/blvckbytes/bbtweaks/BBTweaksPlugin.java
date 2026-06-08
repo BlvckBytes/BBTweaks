@@ -25,6 +25,7 @@ import me.blvckbytes.bbtweaks.furnace_level_display.McMMOIntegration;
 import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
 import me.blvckbytes.bbtweaks.get_exp.GetExpCommandSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
+import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommandSection;
 import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegrationSingleton;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegration;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
@@ -123,15 +124,16 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       getServer().getPluginManager().registerEvents(new LavaSponge(), this);
 
-      var getUuidCommand = new GetUuidCommand(config);
+      var getUuidCommandExecutor = new GetUuidCommand(config);
+      getServer().getPluginManager().registerEvents(getUuidCommandExecutor, this);
 
-      setExecutorAndCompleter(Objects.requireNonNull(getCommand("getuuid")), getUuidCommand);
+      var getUuidCommand = Objects.requireNonNull(getCommand(GetUuidCommandSection.INITIAL_NAME));
 
-      getServer().getPluginManager().registerEvents(getUuidCommand, this);
+      setExecutorAndCompleter(getUuidCommand, getUuidCommandExecutor);
 
       locationHistoryStore = new LocationHistoryStore(this);
 
-      Bukkit.getScheduler().runTaskTimerAsynchronously(this, locationHistoryStore::save, 20L * 60, 20L * 60);
+      Bukkit.getScheduler().runTaskTimer(this, () -> locationHistoryStore.save(true), 20L * 60, 20L * 60);
 
       var backtrackCommandExecutor = new BacktrackCommand(this, locationHistoryStore, config);
       var backtrackCommand = Objects.requireNonNull(getCommand(BacktrackCommandSection.INITIAL_NAME));
@@ -292,6 +294,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         config.rootSection.getExp.command.apply(getExpCommand, commandUpdater);
         config.rootSection.durabilityWarnings.command.apply(durabilityWarningCommand, commandUpdater);
         config.rootSection.sidebar.command.apply(sidebarCommand, commandUpdater);
+        config.rootSection.getUuid.command.apply(getUuidCommand, commandUpdater);
       };
 
       updateCommands.run();
@@ -356,7 +359,7 @@ public class BBTweaksPlugin extends JavaPlugin {
     }
 
     if (locationHistoryStore != null) {
-      catchAll(locationHistoryStore::save);
+      catchAll(() -> locationHistoryStore.save(false));
       locationHistoryStore = null;
     }
 

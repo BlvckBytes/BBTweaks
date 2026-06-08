@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
+import java.util.UUID;
 
 public class LocationHistory {
 
@@ -19,10 +20,12 @@ public class LocationHistory {
   private static final DecimalFormatSymbols DECIMAL_SYMBOLS = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
   private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##", DECIMAL_SYMBOLS);
 
+  public final UUID playerId;
   private final Location[] historyRingbuffer;
   private int nextWriteIndex;
 
-  public LocationHistory() {
+  public LocationHistory(UUID playerId) {
+    this.playerId = playerId;
     this.historyRingbuffer = new Location[HISTORY_SIZE];
   }
 
@@ -97,11 +100,11 @@ public class LocationHistory {
     return builder.append(']').toString();
   }
 
-  public static @Nullable LocationHistory fromJson(JsonObject json) {
+  public static @Nullable LocationHistory fromJson(UUID playerId, JsonObject json) {
     if (!(json.get("history") instanceof JsonArray history))
       return null;
 
-    var result = new LocationHistory();
+    var result = new LocationHistory(playerId);
 
     for (var historyIndex = 0; historyIndex < history.size(); ++historyIndex) {
       if (historyIndex >= result.historyRingbuffer.length)
