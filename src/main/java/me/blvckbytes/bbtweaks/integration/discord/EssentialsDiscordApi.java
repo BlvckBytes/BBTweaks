@@ -8,26 +8,22 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.logging.Logger;
-
 public class EssentialsDiscordApi implements DiscordApi {
 
   private final Plugin plugin;
-  private final Logger logger;
   private final ConfigKeeper<MainSection> config;
 
   private final DiscordService discordService;
 
   private @Nullable MessageType messageType;
 
-  public EssentialsDiscordApi(Plugin plugin, Logger logger, ConfigKeeper<MainSection> config) {
+  public EssentialsDiscordApi(Plugin plugin, ConfigKeeper<MainSection> config) {
     this.discordService = Bukkit.getServicesManager().load(DiscordService.class);
 
     if (this.discordService == null)
       throw new IllegalStateException("Could not get a reference to EssentialsX's discord-service!");
 
     this.plugin = plugin;
-    this.logger = logger;
     this.config = config;
 
     this.setupMessageType();
@@ -36,7 +32,7 @@ public class EssentialsDiscordApi implements DiscordApi {
   @Override
   public void sendMessage(String message) {
     if (messageType == null) {
-      logger.warning("Expected a message-type to be set up at the time of calling EssentialsDiscordApi#sendMessage!");
+      plugin.getLogger().warning("Expected a message-type to be set up at the time of calling EssentialsDiscordApi#sendMessage!");
       return;
     }
 
@@ -56,7 +52,7 @@ public class EssentialsDiscordApi implements DiscordApi {
     this.messageType = tryLocateDefaultType(key);
 
     if (this.messageType != null) {
-      logger.info("Using a default EssentialsDiscord message-type called \"" + key + "\"!");
+      plugin.getLogger().info("Using a default EssentialsDiscord message-type called \"" + key + "\"!");
       return;
     }
 
@@ -64,11 +60,11 @@ public class EssentialsDiscordApi implements DiscordApi {
 
     if (!discordService.isRegistered(key)) {
       discordService.registerMessageType(plugin, this.messageType);
-      logger.info("Registered custom EssentialsDiscord message-type called \"" + key + "\"!");
+      plugin.getLogger().info("Registered custom EssentialsDiscord message-type called \"" + key + "\"!");
     }
 
     else
-      logger.info("Using already registered EssentialsDiscord message-type called \"" + key + "\"!");
+      plugin.getLogger().info("Using already registered EssentialsDiscord message-type called \"" + key + "\"!");
   }
 
   private @Nullable MessageType tryLocateDefaultType(String key) {

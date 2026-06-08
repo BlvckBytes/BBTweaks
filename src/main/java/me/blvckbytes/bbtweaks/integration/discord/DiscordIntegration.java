@@ -6,24 +6,20 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.logging.Logger;
-
 public class DiscordIntegration {
-
-  private static @Nullable DiscordIntegration instance;
 
   private final @Nullable DiscordApi discordApi;
 
-  private DiscordIntegration(Plugin plugin, Logger logger, ConfigKeeper<MainSection> config) {
+  public DiscordIntegration(Plugin plugin, ConfigKeeper<MainSection> config) {
     Plugin dependency;
 
     if ((dependency = Bukkit.getPluginManager().getPlugin("EssentialsDiscord")) == null || !dependency.isEnabled()) {
-      logger.info("Could not locate a loaded instance of the EssentialsDiscord-plugin; not hooking into Discord!");
+      plugin.getLogger().info("Could not locate a loaded instance of the EssentialsDiscord-plugin; not hooking into Discord!");
       discordApi = null;
       return;
     }
 
-    var discordApi = new EssentialsDiscordApi(plugin, logger, config);
+    var discordApi = new EssentialsDiscordApi(plugin, config);
 
     config.registerReloadListener(discordApi::onConfigReload);
 
@@ -32,12 +28,5 @@ public class DiscordIntegration {
 
   public @Nullable DiscordApi getDiscordApi() {
     return discordApi;
-  }
-
-  public static DiscordIntegration getOrLoadInstance(Plugin plugin, Logger logger, ConfigKeeper<MainSection> config) {
-    if (instance == null)
-      instance = new DiscordIntegration(plugin, logger, config);
-
-    return instance;
   }
 }

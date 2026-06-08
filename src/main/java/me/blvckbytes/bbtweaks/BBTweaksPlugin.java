@@ -75,7 +75,6 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
 import java.util.Objects;
 import java.util.logging.Level;
 
@@ -111,10 +110,9 @@ public class BBTweaksPlugin extends JavaPlugin {
     try {
       var configHandler = new ConfigHandler(this, "config");
       var config = new ConfigKeeper<>(configHandler, "config.yml", MainSection.class);
+      var discordIntegration = new DiscordIntegration(this, config);
 
-      DiscordIntegration.getOrLoadInstance(this, getLogger(), config);
-
-      preferencesStore = new NameScopedKeyValueStore(getFileAndEnsureExistence("user-preferences.json"), getLogger());
+      preferencesStore = new NameScopedKeyValueStore(this, "user-preferences.json");
       Bukkit.getScheduler().runTaskTimerAsynchronously(this, preferencesStore::saveToDisk, 20 * 60L, 20 * 60L);
 
       new ActionBarSleepMessage(this, config);
@@ -304,7 +302,7 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       CraftBookIntegrationSingleton.initializeInstance(this);
 
-      getServer().getPluginManager().registerEvents(new NewbieAnnounceHandler(this, config), this);
+      getServer().getPluginManager().registerEvents(new NewbieAnnounceHandler(discordIntegration, this, config), this);
 
       var autoToolCommandExecutor = new AutoToolCommand(config, this);
       getServer().getPluginManager().registerEvents(autoToolCommandExecutor, this);
@@ -426,21 +424,6 @@ public class BBTweaksPlugin extends JavaPlugin {
     }
   }
 
-  private File getFileAndEnsureExistence(String name) throws Exception {
-    var file = new File(getDataFolder(), name);
-
-    if (!file.exists()) {
-      var parentDirectory = file.getParentFile();
-
-      if (!parentDirectory.exists() && !parentDirectory.mkdirs())
-        throw new IllegalStateException("Could not create parent-directories of the file " + file);
-
-      if (!file.createNewFile())
-        throw new IllegalStateException("Could not create the file " + file);
-    }
-
-    return file;
-  }
 
   private void setExecutorAndCompleter(PluginCommand command, CommandExecutor executor) {
     command.setExecutor(executor);

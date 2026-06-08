@@ -14,10 +14,16 @@ import org.bukkit.plugin.Plugin;
 
 public class NewbieAnnounceHandler implements Listener {
 
+  private final DiscordIntegration discordIntegration;
   private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
 
-  public NewbieAnnounceHandler(Plugin plugin, ConfigKeeper<MainSection> config) {
+  public NewbieAnnounceHandler(
+    DiscordIntegration discordIntegration,
+    Plugin plugin,
+    ConfigKeeper<MainSection> config
+  ) {
+    this.discordIntegration = discordIntegration;
     this.plugin = plugin;
     this.config = config;
   }
@@ -39,7 +45,7 @@ public class NewbieAnnounceHandler implements Listener {
       .withVariable("name", newbie.getName());
 
     if (config.rootSection.newbieAnnounce.enableDiscord) {
-      var discordApi = DiscordIntegration.getOrLoadInstance(plugin, plugin.getLogger(), config).getDiscordApi();
+      var discordApi = discordIntegration.getDiscordApi();
 
       if (discordApi != null)
         discordApi.sendMessage(config.rootSection.newbieAnnounce.discordMessage.asPlainString(environment));

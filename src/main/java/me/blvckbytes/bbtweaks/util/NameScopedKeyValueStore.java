@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.stream.JsonWriter;
+import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -14,21 +15,20 @@ import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class NameScopedKeyValueStore {
 
   private static final Gson GSON_INSTANCE = new GsonBuilder().setPrettyPrinting().create();
 
+  private final Plugin plugin;
   private final File dataFile;
-  private final Logger logger;
 
   private final Map<String, Map<String, String>> valueByKeyByName;
   private boolean isDataDirty;
 
-  public NameScopedKeyValueStore(File dataFile, Logger logger) {
-    this.dataFile = dataFile;
-    this.logger = logger;
+  public NameScopedKeyValueStore(Plugin plugin, String fileName) throws Exception {
+    this.plugin = plugin;
+    this.dataFile = getFileAndEnsureExistence(plugin, fileName);
     this.valueByKeyByName = new HashMap<>();
 
     loadFromDisk();
@@ -70,7 +70,7 @@ public class NameScopedKeyValueStore {
         var name = jsonEntry.getKey();
 
         if (!(jsonEntry.getValue() instanceof JsonObject valueByKeyObject)) {
-          logger.warning("Value at \"" + name + "\" of store-file at " + dataFile + " was not a map");
+          plugin.getLogger().warning("Value at \"" + name + "\" of store-file at " + dataFile + " was not a map");
           continue;
         }
 
@@ -80,7 +80,7 @@ public class NameScopedKeyValueStore {
           var key = stampEntry.getKey();
 
           if (!(stampEntry.getValue() instanceof JsonPrimitive valuePrimitive)) {
-            logger.warning("Value at \"" + name + "\" and key \"" + name + "\" of store-file at " + dataFile + " was not a primitive");
+            plugin.getLogger().warning("Value at \"" + name + "\" and key \"" + name + "\" of store-file at " + dataFile + " was not a primitive");
             continue;
           }
 
@@ -90,7 +90,7 @@ public class NameScopedKeyValueStore {
         valueByKeyByName.put(name, valueByKey);
       }
     } catch (Exception e) {
-      logger.log(Level.SEVERE, "Could not read state-file at " + dataFile, e);
+      plugin.getLogger().log(Level.SEVERE, "Could not read state-file at " + dataFile, e);
     }
   }
 
@@ -106,14 +106,23 @@ public class NameScopedKeyValueStore {
     ) {
       GSON_INSTANCE.toJson(this.valueByKeyByName, Map.class, jsonWriter);
     } catch (Exception e) {
-      logger.log(Level.SEVERE, "Could not write state-file to " + dataFile, e);
+      plugin.getLogger().log(Level.SEVERE, "Could not write state-file to " + dataFile, e);
     }
   }
 
-  // We're "scoping" these artificially under the owner's name, because of two reasons:
-  // - If somebody else takes over the same shop-region, they should not get the preference of the previous owner.
-  // - Shops (the actual entity that's to be hidden or shown) only have an owner-name on the sign.
-  public static String makeRegionVisibilityKey(String region) {
-    return "region-visibility__" + region;
+  private static File getFileAndEnsureExistence(Plugin plugin, String name) throws Exception {
+    var file = new File(plugin.getDataFolder(), name);
+
+    if (!file.exists()) {
+      var parentDirectory = file.getParentFile();
+
+      if (!parentDirectory.exists() && !parentDirectory.mkdirs())
+        throw new IllegalStateException("Could not create parent-directories of the file " + file);
+
+      if (!file.createNewFile())
+        throw new IllegalStateException("Could not create the file " + file);
+    }
+
+    return file;
   }
 }
