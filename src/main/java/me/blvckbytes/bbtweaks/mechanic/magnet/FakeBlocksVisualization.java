@@ -7,9 +7,13 @@ import me.blvckbytes.bbtweaks.mechanic.util.PositionOfBlock;
 import me.blvckbytes.bbtweaks.util.MutableInt;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
+import org.bukkit.Tag;
+import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class FakeBlocksVisualization {
@@ -87,11 +91,25 @@ public class FakeBlocksVisualization {
   }
 
   public void undo() {
-    for (var entry : fakeBlocks.entrySet())
-      entry.setValue(entry.getKey().block.getBlockData());
+    var signBlocks = new ArrayList<Block>();
+
+    for (var entry : fakeBlocks.entrySet()) {
+      var block = entry.getKey().block;
+      var blockData = block.getBlockData();
+
+      if (Tag.ALL_SIGNS.isTagged(blockData.getMaterial()))
+        signBlocks.add(block);
+
+      entry.setValue(blockData);
+    }
 
     //noinspection UnstableApiUsage
     player.sendMultiBlockChange(fakeBlocks);
+
+    for (var signBlock : signBlocks) {
+      if (signBlock.getState() instanceof Sign sign)
+        sign.update(true, false);
+    }
 
     fakeBlocks.clear();
   }
