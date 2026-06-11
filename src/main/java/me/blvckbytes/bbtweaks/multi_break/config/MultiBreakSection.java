@@ -6,7 +6,7 @@ import at.blvckbytes.cm_mapper.mapper.section.CSIgnore;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
-import me.blvckbytes.bbtweaks.un_craft.config.TypeRule;
+import me.blvckbytes.bbtweaks.un_craft.config.TypeRuleSection;
 import org.bukkit.Material;
 
 import java.lang.reflect.Field;
@@ -24,7 +24,7 @@ public class MultiBreakSection extends ConfigSection {
 
   public int customPickupDelay;
 
-  public List<TypeRule> blockExclusions = new ArrayList<>();
+  public List<TypeRuleSection> blockExclusions = new ArrayList<>();
 
   public ComponentMarkup missingPermission;
   public ComponentMarkup unallowedWorld;

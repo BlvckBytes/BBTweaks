@@ -6,7 +6,7 @@ import org.bukkit.Material;
 
 import java.util.List;
 
-public class PreferredMaterial extends TypeRule {
+public class PreferredMaterial extends TypeRuleSection {
 
   public Material preferredMaterial;
 

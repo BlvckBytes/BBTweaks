@@ -20,7 +20,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public class TypeRule extends ConfigSection {
+public class TypeRuleSection extends ConfigSection {
 
   public Set<Material> materials = new HashSet<>();
 
@@ -33,7 +33,7 @@ public class TypeRule extends ConfigSection {
   @CSIgnore
   public Set<Tag<Material>> _tags = new HashSet<>();
 
-  public TypeRule(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
+  public TypeRuleSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
   }
 

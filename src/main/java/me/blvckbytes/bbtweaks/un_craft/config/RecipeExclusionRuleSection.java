@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class RecipeExclusionRule extends ConfigSection {
+public class RecipeExclusionRuleSection extends ConfigSection {
 
   public List<String> recipes;
 
@@ -23,7 +23,7 @@ public class RecipeExclusionRule extends ConfigSection {
 
   public String reason;
 
-  public RecipeExclusionRule(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
+  public RecipeExclusionRuleSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
   }
 

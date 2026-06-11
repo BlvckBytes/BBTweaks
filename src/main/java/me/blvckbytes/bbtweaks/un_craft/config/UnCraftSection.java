@@ -30,10 +30,10 @@ public class UnCraftSection extends ConfigSection {
   public @CSAlways AdditionalReasonsSection additionalReasons;
 
   public List<TypeExclusionRule> typeExclusionRules = new ArrayList<>();
-  public List<IOTypeRule> typeInclusionRules = new ArrayList<>();
-  public List<ResultSubtractionRule> resultSubtractionRules = new ArrayList<>();
-  public List<RecipeExclusionRule> recipeExclusionRules = new ArrayList<>();
-  public List<AdditionalRecipe> additionalRecipes = new ArrayList<>();
+  public List<IOTypeRuleSection> typeInclusionRules = new ArrayList<>();
+  public List<ResultSubtractionRuleSection> resultSubtractionRules = new ArrayList<>();
+  public List<RecipeExclusionRuleSection> recipeExclusionRules = new ArrayList<>();
+  public List<AdditionalRecipeSection> additionalRecipes = new ArrayList<>();
   public List<PreferredMaterial> preferredMaterials = new ArrayList<>();
 
   public UnCraftSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {

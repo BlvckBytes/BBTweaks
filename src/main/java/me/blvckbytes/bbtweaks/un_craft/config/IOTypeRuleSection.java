@@ -10,7 +10,7 @@ import org.bukkit.Material;
 import java.lang.reflect.Field;
 import java.util.List;
 
-public class IOTypeRule extends TypeRule {
+public class IOTypeRuleSection extends TypeRuleSection {
 
   public ComponentExpression onUnCraftedItem;
 
@@ -22,7 +22,7 @@ public class IOTypeRule extends TypeRule {
   @CSIgnore
   public boolean _onUnCraftResult;
 
-  public IOTypeRule(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
+  public IOTypeRuleSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
   }
 

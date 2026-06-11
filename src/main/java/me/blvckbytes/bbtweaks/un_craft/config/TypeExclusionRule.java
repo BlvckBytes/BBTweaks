@@ -3,7 +3,7 @@ package me.blvckbytes.bbtweaks.un_craft.config;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 
-public class TypeExclusionRule extends IOTypeRule {
+public class TypeExclusionRule extends IOTypeRuleSection {
 
   public String reason;
 

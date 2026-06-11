@@ -6,11 +6,11 @@ import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ResultSubtractionRule extends TypeRule {
+public class ResultSubtractionRuleSection extends TypeRuleSection {
 
-  public List<TypeRule> subtractedMaterials = new ArrayList<>();
+  public List<TypeRuleSection> subtractedMaterials = new ArrayList<>();
 
-  public ResultSubtractionRule(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
+  public ResultSubtractionRuleSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
   }
 }
