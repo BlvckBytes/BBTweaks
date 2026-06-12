@@ -475,15 +475,16 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
         var parametersSlots = multiBreakParametersStore.accessParametersSlots(player);
 
         return environment
-          .withVariable("enabled", parametersSlots.enabled)
+          .withVariable("enabled", parametersSlots.isEnabledAndInAllowedWorld())
           .withVariable("slot_index", parametersSlots.getSelectedSlotIndex());
       }
 
       case INV_MAGNET_STATUS -> {
         var parameters = invMagnetParametersStore.accessParameters(player);
+        var isInAllowedWorld = invMagnetParametersStore.getAllowedWorlds().contains(player.getWorld());
 
         return environment
-          .withVariable("enabled", parameters.enabled)
+          .withVariable("enabled", isInAllowedWorld && parameters.enabled)
           .withVariable("radius", parameters.getRadius())
           .withVariable("max_radius", parameters.getLimits().maxRadius());
       }
