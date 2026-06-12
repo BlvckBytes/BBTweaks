@@ -1,9 +1,12 @@
 package me.blvckbytes.bbtweaks.inv_magnet.parameters;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -12,23 +15,42 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class InvMagnetParametersStore implements Disableable, Listener {
 
   private final NamespacedKey keyEnabled, keyRadius;
+  private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
 
   private final Map<UUID, InvMagnetParameters> parametersByPlayerId;
 
-  public InvMagnetParametersStore(Plugin plugin, ConfigKeeper<MainSection> config) {
+  private final List<World> worlds;
+
+  public InvMagnetParametersStore(
+    Plugin plugin,
+    ConfigKeeper<MainSection> config
+  ) {
     keyEnabled = new NamespacedKey(plugin, "inv-magnet-enabled");
     keyRadius = new NamespacedKey(plugin, "inv-magnet-radius");
 
+    this.plugin = plugin;
     this.config = config;
     this.parametersByPlayerId = new HashMap<>();
+
+    this.worlds = new ArrayList<>();
+
+    loadWorldsFromConfig();
+  }
+
+  public List<World> getAllowedWorlds() {
+    return Collections.unmodifiableList(worlds);
+  }
+
+  @EventHandler
+  public void onConfigReload(ConfigKeeperReloadEvent event) {
+    if (event.configKeeper == config)
+      loadWorldsFromConfig();
   }
 
   @EventHandler
@@ -75,5 +97,20 @@ public class InvMagnetParametersStore implements Disableable, Listener {
 
     pdc.set(keyEnabled, PersistentDataType.BOOLEAN, parameters.enabled);
     pdc.set(keyRadius, PersistentDataType.INTEGER, parameters.getRadius());
+  }
+
+  private void loadWorldsFromConfig() {
+    worlds.clear();
+
+    for (var worldName : config.rootSection.invMagnet.worlds) {
+      var world = Bukkit.getWorld(worldName);
+
+      if (world == null) {
+        plugin.getLogger().warning("Could not find world for item-magnet called \"" + worldName + "\"");
+        continue;
+      }
+
+      worlds.add(world);
+    }
   }
 }

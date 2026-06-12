@@ -1,7 +1,6 @@
 package me.blvckbytes.bbtweaks.inv_magnet;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
-import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
 import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
@@ -13,7 +12,6 @@ import me.blvckbytes.bbtweaks.inv_magnet.config.InvMagnetCommandSection;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.World;
 import org.bukkit.command.*;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
@@ -21,7 +19,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,13 +27,11 @@ import java.util.*;
 
 public class InvMagnetCommand implements CommandHandler, Tickable, Listener {
 
-  private final Plugin plugin;
   private final PluginCommand command;
   private final InvMagnetParametersStore parametersStore;
   private final ConfigKeeper<MainSection> config;
 
   private final Int2ObjectMap<EntityAttractionSession> perTickAttractionSessionByEntityId;
-  private final List<World> worlds;
 
   public InvMagnetCommand(
     JavaPlugin plugin,
@@ -47,18 +42,8 @@ public class InvMagnetCommand implements CommandHandler, Tickable, Listener {
 
     this.parametersStore = parametersStore;
     this.config = config;
-    this.plugin = plugin;
 
     this.perTickAttractionSessionByEntityId = new Int2ObjectArrayMap<>();
-    this.worlds = new ArrayList<>();
-
-    loadWorldsFromConfig();
-  }
-
-  @EventHandler
-  public void onConfigReload(ConfigKeeperReloadEvent event) {
-    if (event.configKeeper == config)
-      loadWorldsFromConfig();
   }
 
   @Override
@@ -71,7 +56,7 @@ public class InvMagnetCommand implements CommandHandler, Tickable, Listener {
       return true;
     }
 
-    if (!worlds.contains(player.getWorld())) {
+    if (!parametersStore.getAllowedWorlds().contains(player.getWorld())) {
       config.rootSection.invMagnet.unallowedWorld.sendMessage(player);
       return true;
     }
@@ -171,7 +156,7 @@ public class InvMagnetCommand implements CommandHandler, Tickable, Listener {
   }
 
   private void attractNearbyItemsAndOrbs() {
-    for (var world : worlds) {
+    for (var world : parametersStore.getAllowedWorlds()) {
       perTickAttractionSessionByEntityId.clear();
 
       for (var player : world.getPlayers()) {
@@ -237,21 +222,6 @@ public class InvMagnetCommand implements CommandHandler, Tickable, Listener {
 
       event.markCanHoldSome();
       return;
-    }
-  }
-
-  private void loadWorldsFromConfig() {
-    worlds.clear();
-
-    for (var worldName : config.rootSection.invMagnet.worlds) {
-      var world = Bukkit.getWorld(worldName);
-
-      if (world == null) {
-        plugin.getLogger().warning("Could not find world for item-magnet called \"" + worldName + "\"");
-        continue;
-      }
-
-      worlds.add(world);
     }
   }
 }
