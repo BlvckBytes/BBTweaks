@@ -1,44 +1,48 @@
 package me.blvckbytes.bbtweaks.auto_fly;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.util.NameScopedKeyValueStore;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.NamespacedKey;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.Vector;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
-public class AutoFlyCommand implements CommandExecutor, TabCompleter, Listener {
+public class AutoFlyCommand implements CommandHandler, Listener {
 
   private static final String ESSENTIALS_FLY_PERMISSION = "essentials.fly";
-  private static final String KEY_AUTO_FLY = "auto-fly";
+
+  private final PluginCommand command;
+  private final NamespacedKey keyMode;
 
   private final Plugin plugin;
-  private final NameScopedKeyValueStore preferencesStore;
   private final ConfigKeeper<MainSection> config;
 
   public AutoFlyCommand(
-    Plugin plugin,
-    NameScopedKeyValueStore preferencesStore,
+    JavaPlugin plugin,
     ConfigKeeper<MainSection> config
   ) {
+    this.command = Objects.requireNonNull(plugin.getCommand(AutoFlyCommandSection.INITIAL_NAME));
+    this.keyMode = new NamespacedKey(plugin, "auto-fly-mode");
+
     this.plugin = plugin;
-    this.preferencesStore = preferencesStore;
     this.config = config;
   }
 
@@ -82,7 +86,7 @@ public class AutoFlyCommand implements CommandExecutor, TabCompleter, Listener {
       return true;
     }
 
-    preferencesStore.write(player.getUniqueId().toString(), KEY_AUTO_FLY, normalizedMode.constant.name());
+    player.getPersistentDataContainer().set(keyMode, PersistentDataType.STRING, normalizedMode.constant.name());
 
     handleAutoFly(player);
 
@@ -172,7 +176,7 @@ public class AutoFlyCommand implements CommandExecutor, TabCompleter, Listener {
   }
 
   private AutoMode readModeFor(Player player) {
-    var modeValue = preferencesStore.read(player.getUniqueId().toString(), KEY_AUTO_FLY);
+    var modeValue = player.getPersistentDataContainer().get(keyMode, PersistentDataType.STRING);
     var result = AutoMode.OFF;
 
     if (modeValue != null) {
@@ -182,5 +186,15 @@ public class AutoFlyCommand implements CommandExecutor, TabCompleter, Listener {
     }
 
     return result;
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.autoFly.command;
   }
 }

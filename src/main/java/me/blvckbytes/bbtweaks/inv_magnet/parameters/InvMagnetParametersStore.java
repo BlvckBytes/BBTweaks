@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.inv_magnet.parameters;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class InvMagnetParametersStore implements Listener {
+public class InvMagnetParametersStore implements Disableable, Listener {
 
   private final NamespacedKey keyEnabled, keyRadius;
   private final ConfigKeeper<MainSection> config;
@@ -45,7 +46,8 @@ public class InvMagnetParametersStore implements Listener {
       save(parameters);
   }
 
-  public void onShutdown() {
+  @Override
+  public void disable() {
     parametersByPlayerId.values().forEach(this::save);
     parametersByPlayerId.clear();
   }

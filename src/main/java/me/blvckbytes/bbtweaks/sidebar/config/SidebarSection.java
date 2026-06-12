@@ -10,7 +10,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.util.color.PackedColor;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
-import me.blvckbytes.bbtweaks.sidebar.arm_integration.ArmIntegrationSection;
+import me.blvckbytes.bbtweaks.integration.arm.ArmIntegrationSection;
 import me.blvckbytes.bbtweaks.sidebar.color_display.ColorDisplaySection;
 import me.blvckbytes.bbtweaks.sidebar.command.SidebarCommandSection;
 import me.blvckbytes.bbtweaks.sidebar.preferences.ColorAndFormats;

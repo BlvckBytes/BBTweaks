@@ -1,8 +1,11 @@
 package me.blvckbytes.bbtweaks.sign_copier;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
+import me.blvckbytes.bbtweaks.auto_wirer.LateWired;
 import me.blvckbytes.bbtweaks.util.AmpersandNotationTranslator;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
 import net.kyori.adventure.text.Component;
@@ -23,32 +26,35 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.stream.IntStream;
 
-public class SignCopyCommand implements CommandExecutor, TabCompleter, Listener {
+public class SignCopyCommand implements CommandHandler, Listener {
 
   public static final int NUMBER_OF_LINES = 4;
 
-  private final PluginCommand signEditCommand;
+  private final PluginCommand command;
   private final ConfigKeeper<MainSection> config;
 
   private final NamespacedKey[] keysLineContents;
   private final NamespacedKey[] keysLineIsPlain;
 
+  private @LateWired SignEditCommand signEditCommand;
+
   public SignCopyCommand(
-    Plugin plugin,
-    PluginCommand signEditCommand,
+    JavaPlugin plugin,
     ConfigKeeper<MainSection> config
   ) {
+    this.command = Objects.requireNonNull(plugin.getCommand(SignCopyCommandSection.INITIAL_NAME));
+
     this.config = config;
-    this.signEditCommand = signEditCommand;
 
     this.keysLineContents = new NamespacedKey[NUMBER_OF_LINES];
     this.keysLineIsPlain = new NamespacedKey[NUMBER_OF_LINES];
@@ -57,6 +63,16 @@ public class SignCopyCommand implements CommandExecutor, TabCompleter, Listener 
       this.keysLineContents[lineIndex] = new NamespacedKey(plugin, "sign-copier-line-contents-" + lineIndex);
       this.keysLineIsPlain[lineIndex] = new NamespacedKey(plugin, "sign-copier-line-is-plain-" + lineIndex);
     }
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.signCopier.signCopyCommand;
   }
 
   @Override
@@ -73,7 +89,7 @@ public class SignCopyCommand implements CommandExecutor, TabCompleter, Listener 
         sender,
         new InterpretationEnvironment()
           .withVariable("label", label)
-          .withVariable("sign_edit_command", signEditCommand.getName())
+          .withVariable("sign_edit_command", signEditCommand.getCommand().getName())
           .withVariable("actions", CommandAction.matcher.createCompletions(null))
       );
 

@@ -22,9 +22,6 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
   }
 
   @Override
-  protected void onConfigReload() {}
-
-  @Override
   public boolean onInstanceClick(Player player, ClockInstance instance, boolean wasLeftClick) {
     var sign = instance.getSign();
 

@@ -1,12 +1,11 @@
 package me.blvckbytes.bbtweaks.back;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,17 +14,25 @@ import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
-public class BackOverrideCommand implements CommandExecutor, TabCompleter, Listener {
+public class BackOverrideCommand implements CommandHandler, Listener {
 
+  private final PluginCommand command;
   private final LocationHistoryStore locationHistoryStore;
   private final ConfigKeeper<MainSection> config;
 
-  public BackOverrideCommand(LocationHistoryStore locationHistoryStore, ConfigKeeper<MainSection> config) {
+  public BackOverrideCommand(
+    JavaPlugin plugin,
+    LocationHistoryStore locationHistoryStore,
+    ConfigKeeper<MainSection> config
+  ) {
+    this.command = Objects.requireNonNull(plugin.getCommand("back"));
     this.locationHistoryStore = locationHistoryStore;
     this.config = config;
   }
@@ -112,5 +119,15 @@ public class BackOverrideCommand implements CommandExecutor, TabCompleter, Liste
       return;
 
     locationHistoryStore.accessHistory(player).add(player.getLocation());
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return null;
   }
 }

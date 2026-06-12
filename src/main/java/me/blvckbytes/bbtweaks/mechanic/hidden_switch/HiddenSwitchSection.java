@@ -13,11 +13,14 @@ import java.util.List;
 
 public class HiddenSwitchSection extends ConfigSection implements OffsetSelectingSection {
 
+  public @CSAlways HiddenSwitchCommandSection command;
   public @CSAlways PasswordCommandSection passwordCommand;
+
   public int onTimeDurationTicks;
   public int maximumAxisOffset;
   public int offsetSelectingTimeoutSeconds;
   public int passwordPromptTimeoutSeconds;
+
   public ComponentMarkup noPermission;
   public ComponentMarkup commandPlayerOnly;
   public ComponentMarkup commandUsage;

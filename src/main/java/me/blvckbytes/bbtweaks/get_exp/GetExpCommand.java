@@ -1,11 +1,14 @@
 package me.blvckbytes.bbtweaks.get_exp;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
+import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
@@ -13,10 +16,7 @@ import net.kyori.adventure.title.TitlePart;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.Furnace;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -29,17 +29,21 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.*;
 
-public class GetExpCommand implements CommandExecutor, TabCompleter, Listener {
+public class GetExpCommand implements CommandHandler, Tickable, Listener {
+
+  private static final int MULTI_MODE_ACTION_BAR_UPDATE_PERIOD_T = 5;
 
   // The interaction session-logic below is pretty much a fork of that within ItemPredicateParser.
   // We could extract that into a utility one day, but so far, that'd be overkill.
 
+  private final PluginCommand command;
   private final FurnaceLevelDisplay furnaceLevelDisplay;
   private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
@@ -50,18 +54,61 @@ public class GetExpCommand implements CommandExecutor, TabCompleter, Listener {
   private long relativeTime;
 
   public GetExpCommand(
+    JavaPlugin plugin,
     FurnaceLevelDisplay furnaceLevelDisplay,
-    Plugin plugin,
     ConfigKeeper<MainSection> config
   ) {
+    this.command = Objects.requireNonNull(plugin.getCommand(GetExpCommandSection.INITIAL_NAME));
+
     this.furnaceLevelDisplay = furnaceLevelDisplay;
     this.plugin = plugin;
     this.config = config;
 
-    Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 0, 1);
-
     this.interactionSessionByPlayerId = new HashMap<>();
     this.lastEventCancelTimeByPlayerId = new Object2LongOpenHashMap<>();
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.getExp.command;
+  }
+
+  @Override
+  public void tick(long relativeTime) {
+    this.relativeTime = relativeTime;
+
+    if (relativeTime % MULTI_MODE_ACTION_BAR_UPDATE_PERIOD_T != 0)
+      return;
+
+    var actionBarSignal = config.rootSection.getExp.interactionMultiModeActionBarSignal;
+
+    for (var iterator = interactionSessionByPlayerId.values().iterator(); iterator.hasNext();) {
+      var session = iterator.next();
+      var expirySeconds = config.rootSection.getExp.interactionExpirySeconds;
+
+      if (session.isExpired(expirySeconds)) {
+        iterator.remove();
+
+        config.rootSection.getExp.interactionExpired.sendMessage(
+          session.player,
+          new InterpretationEnvironment()
+            .withVariable("expiry_seconds", expirySeconds)
+        );
+
+        if (session.allowMultiUse && actionBarSignal != null)
+          session.player.sendActionBar(Component.empty()); // Immediately clear action-bar signal
+
+        continue;
+      }
+
+      if (session.allowMultiUse && actionBarSignal != null)
+        actionBarSignal.sendActionBar(session.player);
+    }
   }
 
   @Override
@@ -160,38 +207,6 @@ public class GetExpCommand implements CommandExecutor, TabCompleter, Listener {
       return List.of("orb");
 
     return List.of();
-  }
-
-  public void tick() {
-    ++relativeTime;
-
-    if (relativeTime % 10 != 0)
-      return;
-
-    var actionBarSignal = config.rootSection.getExp.interactionMultiModeActionBarSignal;
-
-    for (var iterator = interactionSessionByPlayerId.values().iterator(); iterator.hasNext();) {
-      var session = iterator.next();
-      var expirySeconds = config.rootSection.getExp.interactionExpirySeconds;
-
-      if (session.isExpired(expirySeconds)) {
-        iterator.remove();
-
-        config.rootSection.getExp.interactionExpired.sendMessage(
-          session.player,
-          new InterpretationEnvironment()
-            .withVariable("expiry_seconds", expirySeconds)
-        );
-
-        if (session.allowMultiUse && actionBarSignal != null)
-          session.player.sendActionBar(Component.empty()); // Immediately clear action-bar signal
-
-        continue;
-      }
-
-      if (session.allowMultiUse && actionBarSignal != null)
-        actionBarSignal.sendActionBar(session.player);
-    }
   }
 
   @EventHandler

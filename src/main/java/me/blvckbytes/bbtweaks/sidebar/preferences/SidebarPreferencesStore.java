@@ -1,9 +1,10 @@
 package me.blvckbytes.bbtweaks.sidebar.preferences;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
-import at.blvckbytes.cm_mapper.ReloadPriority;
+import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
 import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -19,7 +20,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-public class SidebarPreferencesStore implements Listener {
+public class SidebarPreferencesStore implements Disableable, Listener {
 
   private final ConfigKeeper<MainSection> config;
 
@@ -48,20 +49,25 @@ public class SidebarPreferencesStore implements Listener {
     this.keyStatisticsValueStyles = new NamespacedKey(plugin, "sidebar-statistics-value-colors");
 
     this.preferencesByPlayerId = new HashMap<>();
-
-    config.registerReloadListener(() -> {
-      for (var preference : preferencesByPlayerId.values())
-        preference.onConfigReload();
-    }, ReloadPriority.LOW);
   }
 
   public SidebarPreferences accessPreferences(Player player) {
     return preferencesByPlayerId.computeIfAbsent(player.getUniqueId(), k -> loadPreferences(player));
   }
 
-  public void onShutdown() {
+  @Override
+  public void disable() {
     preferencesByPlayerId.values().forEach(this::savePreferences);
     preferencesByPlayerId.clear();
+  }
+
+  @EventHandler
+  public void onConfigReload(ConfigKeeperReloadEvent event) {
+    if (event.configKeeper != config)
+      return;
+
+    for (var preference : preferencesByPlayerId.values())
+      preference.onConfigReload();
   }
 
   @EventHandler

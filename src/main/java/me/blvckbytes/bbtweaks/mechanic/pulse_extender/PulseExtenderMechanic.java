@@ -22,9 +22,6 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
   }
 
   @Override
-  protected void onConfigReload() {}
-
-  @Override
   public boolean onInstanceClick(Player player, PulseExtenderInstance instance, boolean wasLeftClick) {
     var sign = instance.getSign();
 

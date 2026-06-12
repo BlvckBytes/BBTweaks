@@ -48,9 +48,6 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
   }
 
   @Override
-  protected void onConfigReload() {}
-
-  @Override
   public boolean onInstanceClick(Player player, QuickUnloadInstance instance, boolean wasLeftClick) {
     var sign = instance.getSign();
 

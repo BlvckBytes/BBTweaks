@@ -1,0 +1,14 @@
+package me.blvckbytes.bbtweaks.inv_filter;
+
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
+
+public class InvFilterCommandSection extends CommandSection {
+
+  public static final String INITIAL_NAME = "invfilter";
+
+  public InvFilterCommandSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
+    super(INITIAL_NAME, baseEnvironment, interpreterLogger);
+  }
+}

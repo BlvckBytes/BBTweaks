@@ -8,11 +8,11 @@ import java.util.Map;
 public record InstanceSession<InstanceType extends MechanicInstance>(
   Player player,
   InstanceType instance,
-  int creationTime
+  long creationTime
 ) {
   public static <InstanceType extends MechanicInstance> void handleSessionTimeouts(
     Map<?, InstanceSession<InstanceType>> sessionMap,
-    int time, int timeoutSeconds,
+    long time, long timeoutSeconds,
     TimeoutHandler<InstanceType> timeoutHandler
   ) {
     for (var iterator = sessionMap.values().iterator(); iterator.hasNext();) {

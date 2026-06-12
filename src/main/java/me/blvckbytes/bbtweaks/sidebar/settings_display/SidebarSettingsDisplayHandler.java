@@ -8,7 +8,7 @@ import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
 import me.blvckbytes.bbtweaks.sidebar.sorting_display.SidebarSortingDisplayHandler;
 import me.blvckbytes.bbtweaks.sidebar.sorting_display.SortingDisplayData;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
-import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;

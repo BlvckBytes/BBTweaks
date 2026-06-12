@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.mechanic.transmitter_receiver;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.LateWired;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.util.BooleanConsumer;
 import me.blvckbytes.bbtweaks.util.SignUtil;
@@ -23,8 +24,7 @@ public class ReceiverMechanic extends BaseMechanic<ReceiverInstance> {
 
   private final Map<String, ReceiverBucket> bucketByFinalName;
 
-  // "Late-init" dependency injection, seeing how it would be circular otherwise
-  public @Nullable TransmitterMechanic transmitterMechanic;
+  public @LateWired TransmitterMechanic transmitterMechanic;
 
   public ReceiverMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
     super(plugin, config);
@@ -33,11 +33,8 @@ public class ReceiverMechanic extends BaseMechanic<ReceiverInstance> {
   }
 
   @Override
-  protected void onConfigReload() {}
-
-  @Override
   public boolean onInstanceClick(Player player, ReceiverInstance instance, boolean wasLeftClick) {
-    if (!player.isSneaking() || wasLeftClick || transmitterMechanic == null)
+    if (!player.isSneaking() || wasLeftClick)
       return false;
 
     var loadedReceivers = getLoadedCountForFinalName(instance.finalName);

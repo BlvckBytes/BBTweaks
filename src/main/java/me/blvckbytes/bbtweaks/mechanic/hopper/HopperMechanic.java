@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.mechanic.hopper;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegration;
 import me.blvckbytes.bbtweaks.mechanic.PredicateMechanic;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import me.blvckbytes.bbtweaks.util.ReflectUtil;
@@ -37,6 +38,8 @@ public class HopperMechanic extends PredicateMechanic<HopperInstance> implements
     BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
   };
 
+  private final CraftBookIntegration craftBookIntegration;
+
   private final CacheByPosition<HopperInstance> instanceByHopperPosition;
 
   private final EnumSet<Material> smokerInputTypes;
@@ -45,12 +48,19 @@ public class HopperMechanic extends PredicateMechanic<HopperInstance> implements
   private final EnumSet<Material> furnaceFuelTypes;
   private final EnumSet<Material> potionIngredientTypes;
 
-  public HopperMechanic(JavaPlugin plugin, ConfigKeeper<MainSection> config, PredicateHelper predicateHelper) {
+  public HopperMechanic(
+    JavaPlugin plugin,
+    ConfigKeeper<MainSection> config,
+    PredicateHelper predicateHelper,
+    CraftBookIntegration craftBookIntegration
+  ) {
     super(
       plugin, config, predicateHelper,
       new NamespacedKey(plugin, "hopper-predicate"),
       new NamespacedKey(plugin, "hopper-predicate-language")
     );
+
+    this.craftBookIntegration = craftBookIntegration;
 
     instanceByHopperPosition = new CacheByPosition<>();
 
@@ -110,9 +120,6 @@ public class HopperMechanic extends PredicateMechanic<HopperInstance> implements
     if (recipeChoice instanceof RecipeChoice.MaterialChoice materialChoice)
       output.addAll(materialChoice.getChoices());
   }
-
-  @Override
-  protected void onConfigReload() {}
 
   @Override
   public boolean onInstanceClick(Player player, HopperInstance instance, boolean wasLeftClick) {
@@ -177,7 +184,7 @@ public class HopperMechanic extends PredicateMechanic<HopperInstance> implements
       }
     }
 
-    var instance = new HopperInstance(sign, predicate, this, config);
+    var instance = new HopperInstance(sign, predicate, this, craftBookIntegration, config);
     var world = sign.getWorld();
 
     instanceBySignPosition.put(world, sign.getX(), sign.getY(), sign.getZ(), instance);

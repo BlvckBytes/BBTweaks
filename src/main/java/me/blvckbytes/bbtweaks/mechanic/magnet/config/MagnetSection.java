@@ -6,11 +6,14 @@ import at.blvckbytes.cm_mapper.mapper.section.CSAlways;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
+import me.blvckbytes.bbtweaks.mechanic.magnet.command.MagnetVisualizeCommandSection;
 
 import java.lang.reflect.Field;
 import java.util.List;
 
 public class MagnetSection extends ConfigSection {
+
+  public @CSAlways MagnetVisualizeCommandSection visualizeCommand;
 
   public ComponentMarkup noPermission;
   public ComponentMarkup noContainer;

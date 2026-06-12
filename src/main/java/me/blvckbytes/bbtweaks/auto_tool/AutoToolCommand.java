@@ -1,15 +1,14 @@
 package me.blvckbytes.bbtweaks.auto_tool;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.multi_break.DamageableHotbarItem;
 import org.bukkit.NamespacedKey;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -17,20 +16,26 @@ import org.bukkit.event.block.BlockDamageEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
-public class AutoToolCommand implements CommandExecutor, TabCompleter, Listener {
+public class AutoToolCommand implements CommandHandler, Listener {
 
+  private final PluginCommand command;
   private final ConfigKeeper<MainSection> config;
   private final NamespacedKey keyEnabled;
   private final Object2BooleanMap<UUID> enabledStateByPlayerId;
 
-  public AutoToolCommand(ConfigKeeper<MainSection> config, Plugin plugin) {
+  public AutoToolCommand(
+    JavaPlugin plugin,
+    ConfigKeeper<MainSection> config
+  ) {
+    this.command = Objects.requireNonNull(plugin.getCommand(AutoToolCommandSection.INITIAL_NAME));
     this.config = config;
     this.keyEnabled = new NamespacedKey(plugin, "auto-tool-enabled");
     this.enabledStateByPlayerId = new Object2BooleanOpenHashMap<>();
@@ -41,7 +46,7 @@ public class AutoToolCommand implements CommandExecutor, TabCompleter, Listener 
     if (!(sender instanceof Player player))
       return false;
 
-    if (!(player.hasPermission("bbtweaks.autotool"))) {
+    if (!command.testPermission(player)) {
       config.rootSection.autoTool.noPermission.sendMessage(player);
       return true;
     }
@@ -117,5 +122,15 @@ public class AutoToolCommand implements CommandExecutor, TabCompleter, Listener 
       playerInventory.setHeldItemSlot(slotIndex);
       break;
     }
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.autoTool.command;
   }
 }

@@ -1,11 +1,13 @@
 package me.blvckbytes.bbtweaks.newbie_teleport;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -14,20 +16,27 @@ import org.bukkit.block.Block;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
-public class NewbieTeleportCommand implements CommandExecutor, TabCompleter {
+public class NewbieTeleportCommand implements CommandHandler {
 
+  private final PluginCommand command;
   private final ConfigKeeper<MainSection> config;
 
   public final NamespacedKey useCountKey;
 
-  public NewbieTeleportCommand(Plugin plugin, ConfigKeeper<MainSection> config) {
+  public NewbieTeleportCommand(
+    JavaPlugin plugin,
+    ConfigKeeper<MainSection> config
+  ) {
+    this.command = Objects.requireNonNull(plugin.getCommand(NewbieTeleportCommandSection.INITIAL_NAME));
     this.config = config;
+
     this.useCountKey = new NamespacedKey(plugin, "newbie-teleport-use-count");
   }
 
@@ -241,5 +250,15 @@ public class NewbieTeleportCommand implements CommandExecutor, TabCompleter {
     var type = block.getType();
 
     return type == Material.LAVA || type == Material.WATER;
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.newbieTeleport.mainCommand;
   }
 }

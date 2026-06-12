@@ -4,7 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.preferences.Format;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
-import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;

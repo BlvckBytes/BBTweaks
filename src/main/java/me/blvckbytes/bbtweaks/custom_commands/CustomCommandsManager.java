@@ -1,10 +1,10 @@
 package me.blvckbytes.bbtweaks.custom_commands;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
 import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.cm_mapper.section.command.CommandUpdater;
 import me.blvckbytes.bbtweaks.MainSection;
-import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -38,8 +38,13 @@ public class CustomCommandsManager implements Listener {
     this.pluginCommandConstructor = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
     this.pluginCommandConstructor.setAccessible(true);
 
-    config.registerReloadListener(this::updateCommands);
     updateCommands();
+  }
+
+  @EventHandler
+  public void onConfigReload(ConfigKeeperReloadEvent event) {
+    if (event.configKeeper == config)
+      updateCommands();
   }
 
   @EventHandler
@@ -72,10 +77,11 @@ public class CustomCommandsManager implements Listener {
       registeredCommands.add(command);
     }
 
-    for (var player : Bukkit.getOnlinePlayers())
-      player.updateCommands();
+    // Note: We do not sync commands at this point, as to avoid triggering a rebuild before
+    //       the wirer had a chance to finish handling registering/updating the commands it
+    //       handles, which would otherwise cause a CME.
 
-    plugin.getLogger().info("Registered " + registeredCommands.size() + " custom-commands!");
+    plugin.getLogger().info("Registered " + registeredCommands.size() + " custom-commands");
   }
 
   private @Nullable PluginCommand makeCommand(CommandSection commandSection) {

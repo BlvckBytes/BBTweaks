@@ -44,12 +44,8 @@ public class NewbieAnnounceHandler implements Listener {
     var environment = new InterpretationEnvironment()
       .withVariable("name", newbie.getName());
 
-    if (config.rootSection.newbieAnnounce.enableDiscord) {
-      var discordApi = discordIntegration.getDiscordApi();
-
-      if (discordApi != null)
-        discordApi.sendMessage(config.rootSection.newbieAnnounce.discordMessage.asPlainString(environment));
-    }
+    if (config.rootSection.newbieAnnounce.enableDiscord)
+      discordIntegration.sendMessage(config.rootSection.newbieAnnounce.discordMessage.asPlainString(environment));
 
     if (config.rootSection.newbieAnnounce.enableInGame) {
       var components = config.rootSection.newbieAnnounce.inGameMessage.interpret(SlotType.CHAT, environment);

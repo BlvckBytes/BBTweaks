@@ -7,7 +7,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
 import me.blvckbytes.bbtweaks.util.Display;
-import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;

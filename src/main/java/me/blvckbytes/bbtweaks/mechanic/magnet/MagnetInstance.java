@@ -111,7 +111,7 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
   }
 
   @Override
-  public boolean tick(int time) {
+  public boolean tick(long time) {
     isReferenceUpToDate = false;
 
     if (wasMissingContainer)

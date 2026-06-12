@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.durability_warnings;
 
+import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -13,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class WarningsProfileStore implements Listener {
+public class WarningsProfileStore implements Disableable, Listener {
 
   private final NamespacedKey playSoundKey;
   private final NamespacedKey enabledKey;
@@ -54,13 +55,6 @@ public class WarningsProfileStore implements Listener {
     pdc.set(enabledKey, PersistentDataType.BOOLEAN, profile.enabled);
   }
 
-  public void onShutdown() {
-    for (var profile : profileByPlayerId.values())
-      saveProfile(profile);
-
-    profileByPlayerId.clear();
-  }
-
   @EventHandler
   public void onJoin(PlayerJoinEvent event) {
     loadProfile(event.getPlayer());
@@ -72,5 +66,13 @@ public class WarningsProfileStore implements Listener {
 
     if (profile != null)
       saveProfile(profile);
+  }
+
+  @Override
+  public void disable() {
+    for (var profile : profileByPlayerId.values())
+      saveProfile(profile);
+
+    profileByPlayerId.clear();
   }
 }

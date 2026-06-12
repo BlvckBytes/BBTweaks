@@ -16,17 +16,14 @@ import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class RDBreakTool implements Listener {
 
   private final NamespacedKey rdBreakerKey;
-  private final Logger logger;
   private final Plugin plugin;
 
   public RDBreakTool(Plugin plugin) {
     this.rdBreakerKey = new NamespacedKey(plugin, "rd_breaker");
-    this.logger = plugin.getLogger();
     this.plugin = plugin;
   }
 
@@ -78,7 +75,7 @@ public class RDBreakTool implements Listener {
       return;
 
     if (!block.getDrops().isEmpty() || !block.getDrops(toolUsed).isEmpty()) {
-      logger.log(Level.WARNING, "Refrained from responding to the break-event of a reinforced deepslate, since the drop-list was not empty");
+      plugin.getLogger().log(Level.WARNING, "Refrained from responding to the break-event of a reinforced deepslate, since the drop-list was not empty");
       return;
     }
 

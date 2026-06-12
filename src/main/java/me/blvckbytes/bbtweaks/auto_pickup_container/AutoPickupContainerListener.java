@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.util.color.PackedColor;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.inv_magnet.PreAttractItemEvent;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorWriteEvent;
@@ -40,9 +41,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class AutoPickupContainerListener implements Listener, FilterPredicateAccessor {
+public class AutoPickupContainerListener implements Listener, Tickable, FilterPredicateAccessor {
 
-  private record ShulkerCapture(Block block, ShulkerBox state, long time) {}
+  private static final int FILTER_PREDICATE_CACHE_CLEAR_PERIOD_T = 20 * 60 * 5;
+
+  private record ShulkerCapture(Block block, ShulkerBox state) {}
 
   private static final List<TransmuteRecipe> shulkerRecolorRecipes;
   private static final Map<Material, DyeColor> dyeColorByShulkerMaterial;
@@ -112,8 +115,6 @@ public class AutoPickupContainerListener implements Listener, FilterPredicateAcc
   private final List<ShulkerCapture> markedShulkerCaptures;
   private final Map<String, PredicateAndLanguage> filterPredicateAccessorCache;
 
-  private long relativeTime;
-
   public AutoPickupContainerListener(
     Plugin plugin,
     ShulkerAccessorListener shulkerAccessor,
@@ -131,13 +132,12 @@ public class AutoPickupContainerListener implements Listener, FilterPredicateAcc
 
     this.markedShulkerCaptures = new ArrayList<>();
     this.filterPredicateAccessorCache = new HashMap<>();
+  }
 
-    Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-      ++relativeTime;
-
-      if (relativeTime % (20 * 60 * 5) == 0)
-        filterPredicateAccessorCache.clear();
-    }, 0L, 0L);
+  @Override
+  public void tick(long relativeTime) {
+    if (relativeTime % FILTER_PREDICATE_CACHE_CLEAR_PERIOD_T == 0)
+      filterPredicateAccessorCache.clear();
   }
 
   @Override
@@ -230,7 +230,7 @@ public class AutoPickupContainerListener implements Listener, FilterPredicateAcc
     if (!doesContainMarker(shulkerBox.getPersistentDataContainer()))
       return;
 
-    var capture = new ShulkerCapture(block, shulkerBox, relativeTime);
+    var capture = new ShulkerCapture(block, shulkerBox);
 
     markedShulkerCaptures.add(capture);
 

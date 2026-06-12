@@ -1,31 +1,35 @@
 package me.blvckbytes.bbtweaks.sidebar.command;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferencesStore;
 import me.blvckbytes.bbtweaks.sidebar.settings_display.SidebarSettingsDisplayHandler;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
-public class SidebarCommand implements CommandExecutor, TabCompleter {
+public class SidebarCommand implements CommandHandler {
 
+  private final PluginCommand command;
   private final SidebarPreferencesStore sidebarPreferencesStore;
   private final SidebarSettingsDisplayHandler sidebarSettingsDisplayHandler;
   private final ConfigKeeper<MainSection> config;
 
   public SidebarCommand(
+    JavaPlugin plugin,
     SidebarPreferencesStore sidebarPreferencesStore,
     SidebarSettingsDisplayHandler sidebarSettingsDisplayHandler,
     ConfigKeeper<MainSection> config
   ) {
+    this.command = Objects.requireNonNull(plugin.getCommand(SidebarCommandSection.INITIAL_NAME));
     this.sidebarPreferencesStore = sidebarPreferencesStore;
     this.sidebarSettingsDisplayHandler = sidebarSettingsDisplayHandler;
     this.config = config;
@@ -73,5 +77,15 @@ public class SidebarCommand implements CommandExecutor, TabCompleter {
       return CommandAction.matcher.createCompletions(args[0]);
 
     return List.of();
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.sidebar.command;
   }
 }

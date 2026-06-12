@@ -6,17 +6,15 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.markers_menu.CategorySection;
 import me.blvckbytes.bbtweaks.markers_menu.MarkerSection;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
-import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;
 
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class MarkerDisplayHandler extends DisplayHandler<MarkerDisplay, MarkerDisplayData> {
 
-  private final Logger logger;
   private final FloodgateIntegration floodgateIntegration;
 
   public MarkerDisplayHandler(
@@ -26,7 +24,6 @@ public class MarkerDisplayHandler extends DisplayHandler<MarkerDisplay, MarkerDi
   ) {
     super(config, plugin);
 
-    this.logger = plugin.getLogger();
     this.floodgateIntegration = floodgateIntegration;
   }
 
@@ -53,7 +50,7 @@ public class MarkerDisplayHandler extends DisplayHandler<MarkerDisplay, MarkerDi
         return;
       }
 
-      logger.log(Level.WARNING, "Don't know how to handle a MarkerDisplayItem of type " + displayItem.getClass());
+      plugin.getLogger().log(Level.WARNING, "Don't know how to handle a MarkerDisplayItem of type " + displayItem.getClass());
       return;
     }
 

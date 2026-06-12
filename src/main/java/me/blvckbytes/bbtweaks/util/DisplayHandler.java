@@ -1,7 +1,9 @@
 package me.blvckbytes.bbtweaks.util;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -14,7 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType>, DisplayDataType> implements Listener {
+public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType>, DisplayDataType> implements Listener, Disableable {
 
   // If players move to their own inventory and close the UI quickly enough, the server will send back a packet
   // undoing that slot which assumed the top-inventory to still be open, and thus the undo won't work. For survival,
@@ -37,11 +39,6 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
     this.lastMoveToOwnInventoryStampByPlayerId = new HashMap<>();
     this.config = config;
     this.plugin = plugin;
-
-    config.registerReloadListener(() -> {
-      for (var display : displayByPlayerId.values())
-        display.onConfigReload();
-    });
   }
 
   public abstract DisplayType instantiateDisplay(Player player, DisplayDataType displayData);
@@ -59,16 +56,26 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
     var display = displayByPlayerId.remove(player.getUniqueId());
 
     if (display != null)
-      display.onShutdown();
+      display.disable();
   }
 
   protected abstract void handleClick(Player player, DisplayType display, ClickType clickType, int slot);
 
-  public void onShutdown() {
+  @Override
+  public void disable() {
     for (var displayIterator = displayByPlayerId.entrySet().iterator(); displayIterator.hasNext();) {
-      displayIterator.next().getValue().onShutdown();
+      displayIterator.next().getValue().disable();
       displayIterator.remove();
     }
+  }
+
+  @EventHandler
+  public void onConfigReload(ConfigKeeperReloadEvent event) {
+    if (event.configKeeper != config)
+      return;
+
+    for (var display : displayByPlayerId.values())
+      display.onConfigReload();
   }
 
   @EventHandler

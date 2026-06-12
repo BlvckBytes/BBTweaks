@@ -35,9 +35,6 @@ public class TransmitterMechanic extends BaseMechanic<TransmitterInstance> imple
   }
 
   @Override
-  protected void onConfigReload() {}
-
-  @Override
   public boolean onInstanceClick(Player player, TransmitterInstance instance, boolean wasLeftClick) {
     if (!player.isSneaking() || wasLeftClick)
       return false;
@@ -75,7 +72,7 @@ public class TransmitterMechanic extends BaseMechanic<TransmitterInstance> imple
   }
 
   @Override
-  public void tick(int time) {
+  public void tick(long time) {
     super.tick(time);
 
     for (var bucket : bucketByFinalName.values()) {

@@ -1,11 +1,13 @@
 package me.blvckbytes.bbtweaks.main_command;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import com.google.gson.*;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.RDBreakTool;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.syllables_matcher.EnumMatcher;
 import me.blvckbytes.syllables_matcher.MatchableEnum;
@@ -15,25 +17,20 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabExecutor;
+import org.bukkit.command.*;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 
-public class MainCommand implements CommandExecutor, TabExecutor {
+public class MainCommand implements CommandHandler {
 
   private enum Action implements MatchableEnum {
     RELOAD,
@@ -46,21 +43,33 @@ public class MainCommand implements CommandExecutor, TabExecutor {
     static final EnumMatcher<Action> matcher = new EnumMatcher<>(values());
   }
 
+  private final PluginCommand command;
   private final ConfigKeeper<MainSection> config;
   private final RDBreakTool rdBreakTool;
   private final AutoPickupContainerListener autoPickupContainer;
   private final Plugin plugin;
 
   public MainCommand(
-    ConfigKeeper<MainSection> config,
+    JavaPlugin plugin,
     RDBreakTool rdBreakTool,
     AutoPickupContainerListener autoPickupContainer,
-    Plugin plugin
+    ConfigKeeper<MainSection> config
   ) {
+    this.command = Objects.requireNonNull(plugin.getCommand("bbtweaks"));
     this.config = config;
     this.rdBreakTool = rdBreakTool;
     this.autoPickupContainer = autoPickupContainer;
     this.plugin = plugin;
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return null;
   }
 
   @Override

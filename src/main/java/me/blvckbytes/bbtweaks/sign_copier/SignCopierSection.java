@@ -1,11 +1,15 @@
 package me.blvckbytes.bbtweaks.sign_copier;
 
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
+import at.blvckbytes.cm_mapper.mapper.section.CSAlways;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 
 public class SignCopierSection extends ConfigSection {
+
+  public @CSAlways SignCopyCommandSection signCopyCommand;
+  public @CSAlways SignEditCommandSection signEditCommand;
 
   public boolean alsoHandleCancelledInteractions;
 

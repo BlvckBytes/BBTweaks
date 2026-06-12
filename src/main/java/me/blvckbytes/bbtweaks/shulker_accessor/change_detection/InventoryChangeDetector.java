@@ -1,12 +1,13 @@
 package me.blvckbytes.bbtweaks.shulker_accessor.change_detection;
 
+import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
+import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
-import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,31 +15,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.BiConsumer;
 
-public class InventoryChangeDetector implements Listener {
+public class InventoryChangeDetector implements Listener, Disableable, Tickable {
 
   private final List<ChangeDetectionHolder> observedHolders;
 
-  public InventoryChangeDetector(Plugin plugin) {
+  public InventoryChangeDetector() {
     this.observedHolders = new ArrayList<>();
+  }
 
-    Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> {
-      for (var iterator = observedHolders.iterator(); iterator.hasNext();) {
-        var observedHolder = iterator.next();
-
-        if (!observedHolder.isValid()) {
-          Bukkit.getPluginManager().callEvent(new InventoryInvalidatedEvent(observedHolder));
-          iterator.remove();
-          continue;
-        }
-
-        if (!observedHolder.isDirty())
-          continue;
-
-        observedHolder.clearDirty();
-
-        Bukkit.getPluginManager().callEvent(new InventoryChangedEvent(observedHolder));
-      }
-    }, 0, 0);
+  @Override
+  public void tick(long relativeTime) {
+    tickObservedHolders();
   }
 
   public void manuallyRegisterHolder(ChangeDetectionHolder holder) {
@@ -50,7 +37,8 @@ public class InventoryChangeDetector implements Listener {
     return Collections.unmodifiableCollection(observedHolders);
   }
 
-  public void onShutdown() {
+  @Override
+  public void disable() {
     new ArrayList<>(observedHolders).forEach(ChangeDetectionHolder::closeAll);
     observedHolders.clear();
   }
@@ -140,5 +128,24 @@ public class InventoryChangeDetector implements Listener {
       return;
 
     handler.accept(player, holder);
+  }
+
+  private void tickObservedHolders() {
+    for (var iterator = observedHolders.iterator(); iterator.hasNext();) {
+      var observedHolder = iterator.next();
+
+      if (!observedHolder.isValid()) {
+        Bukkit.getPluginManager().callEvent(new InventoryInvalidatedEvent(observedHolder));
+        iterator.remove();
+        continue;
+      }
+
+      if (!observedHolder.isDirty())
+        continue;
+
+      observedHolder.clearDirty();
+
+      Bukkit.getPluginManager().callEvent(new InventoryChangedEvent(observedHolder));
+    }
   }
 }

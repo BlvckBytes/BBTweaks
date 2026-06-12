@@ -30,7 +30,7 @@ public class ReceiverInstance extends SISOInstance {
   }
 
   @Override
-  public boolean tick(int time) {
+  public boolean tick(long time) {
     tryWriteOutputState(state);
     return true;
   }

@@ -4,6 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
@@ -29,7 +30,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class MultiBreakParametersStore implements Listener {
+public class MultiBreakParametersStore implements Disableable, Listener {
 
   public static final int PARAMETERS_SLOTS_COUNT = 5;
 
@@ -125,11 +126,6 @@ public class MultiBreakParametersStore implements Listener {
 
     if (parametersSlots != null)
       saveParametersSlots(parametersSlots);
-  }
-
-  public void onShutdown() {
-    parametersSlotsByPlayerId.values().forEach(this::saveParametersSlots);
-    parametersSlotsByPlayerId.clear();
   }
 
   public MultiBreakParametersSlots accessParametersSlots(Player player) {
@@ -260,5 +256,11 @@ public class MultiBreakParametersStore implements Listener {
     pdc.set(keysFilterEnabled[parameters.slotIndex], PersistentDataType.BOOLEAN, parameters.filterEnabled);
 
     pdc.set(keysLocked[parameters.slotIndex], PersistentDataType.BOOLEAN, parameters.locked);
+  }
+
+  @Override
+  public void disable() {
+    parametersSlotsByPlayerId.values().forEach(this::saveParametersSlots);
+    parametersSlotsByPlayerId.clear();
   }
 }

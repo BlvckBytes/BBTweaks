@@ -2,7 +2,6 @@ package me.blvckbytes.bbtweaks.mechanic.hidden_switch;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
-import at.blvckbytes.cm_mapper.section.command.CommandUpdater;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
@@ -10,6 +9,7 @@ import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.util.InputView;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.LateWired;
 import me.blvckbytes.bbtweaks.mechanic.common.InstanceSession;
 import me.blvckbytes.bbtweaks.mechanic.common.OffsetSelectingMechanic;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
@@ -17,7 +17,6 @@ import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -53,24 +52,13 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
   private final Map<UUID, HiddenSwitchInstance> openKeysInstanceByPlayerId;
   private final Map<UUID, InstanceSession<HiddenSwitchInstance>> passwordPromptByPlayerId;
 
-  private final PluginCommand passwordCommand;
+  private @LateWired PasswordCommand passwordCommand;
 
-  public HiddenSwitchMechanic(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
+  public HiddenSwitchMechanic(
+    JavaPlugin plugin,
+    ConfigKeeper<MainSection> config
+  ) {
     super(plugin, config, OFFSET_VALUES_LINE_ID, () -> config.rootSection.mechanic.hiddenSwitch);
-
-    Objects.requireNonNull(plugin.getCommand("hiddenswitch")).setExecutor(new HiddenSwitchCommand(this, config));
-
-    this.passwordCommand = Objects.requireNonNull(plugin.getCommand(PasswordCommandSection.INITIAL_NAME));
-    passwordCommand.setExecutor(new PasswordCommand(this, config));
-
-    var commandUpdater = new CommandUpdater(plugin);
-
-    Runnable updateCommands = () -> {
-      config.rootSection.mechanic.hiddenSwitch.passwordCommand.apply(passwordCommand, commandUpdater);
-    };
-
-    updateCommands.run();
-    config.registerReloadListener(updateCommands);
 
     this.instanceByInteractionPosition = new CacheByPosition<>();
 
@@ -154,9 +142,6 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
 
     return PasswordResult.SUCCESS;
   }
-
-  @Override
-  protected void onConfigReload() {}
 
   @Override
   public boolean onInstanceClick(Player player, HiddenSwitchInstance instance, boolean wasLeftClick) {
@@ -327,7 +312,7 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
   }
 
   @Override
-  public void tick(int time) {
+  public void tick(long time) {
     super.tick(time);
 
     InstanceSession.handleSessionTimeouts(
@@ -466,14 +451,16 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
   private void promptForPassword(Player player, HiddenSwitchInstance instance) {
     passwordPromptByPlayerId.put(player.getUniqueId(), new InstanceSession<>(player, instance, getCurrentTime()));
 
-    var labels = new ArrayList<>(passwordCommand.getAliases());
-    labels.add(passwordCommand.getName());
+    var command = passwordCommand.getCommand();
+
+    var labels = new ArrayList<>(command.getAliases());
+    labels.add(command.getName());
 
     config.rootSection.mechanic.hiddenSwitch.passwordPrompt.sendMessage(
       player,
       new InterpretationEnvironment()
-        .withVariable("command", passwordCommand.getName())
-        .withVariable("aliases", passwordCommand.getAliases())
+        .withVariable("command", command.getName())
+        .withVariable("aliases", command.getAliases())
         .withVariable("labels", labels)
         .withVariable("timeout", config.rootSection.mechanic.hiddenSwitch.passwordPromptTimeoutSeconds)
     );

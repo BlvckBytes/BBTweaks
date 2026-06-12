@@ -1,35 +1,37 @@
 package me.blvckbytes.bbtweaks.get_uuid;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import me.blvckbytes.bbtweaks.BBTweaksPlugin;
 import me.blvckbytes.bbtweaks.MainSection;
-import net.md_5.bungee.api.chat.ClickEvent;
-import net.md_5.bungee.api.chat.ComponentBuilder;
-import net.md_5.bungee.api.chat.HoverEvent;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class GetUuidCommand implements CommandExecutor, TabCompleter, Listener {
+public class GetUuidCommand implements CommandHandler, Listener {
 
+  private final PluginCommand command;
   private final ConfigKeeper<MainSection> config;
 
   private final Set<String> knownNames;
   private final Map<String, UUID> idByNameLower;
 
-  public GetUuidCommand(ConfigKeeper<MainSection> config) {
+  public GetUuidCommand(
+    JavaPlugin plugin,
+    ConfigKeeper<MainSection> config
+  ) {
+    this.command = Objects.requireNonNull(plugin.getCommand(GetUuidCommandSection.INITIAL_NAME));
+
     this.config = config;
     this.knownNames = new HashSet<>();
     this.idByNameLower = new HashMap<>();
@@ -104,5 +106,15 @@ public class GetUuidCommand implements CommandExecutor, TabCompleter, Listener {
 
     knownNames.add(name);
     idByNameLower.put(name.toLowerCase(), player.getUniqueId());
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.getUuid.command;
   }
 }

@@ -12,7 +12,7 @@ public interface MechanicInstance {
   /**
    * @return Whether the tick was successful; unsuccessful ticks will result in self-destruction.
    */
-  boolean tick(int time);
+  boolean tick(long time);
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   default boolean isBlockLoaded(Block block) {

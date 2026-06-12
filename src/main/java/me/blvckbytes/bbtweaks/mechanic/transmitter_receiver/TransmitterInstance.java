@@ -30,7 +30,7 @@ public class TransmitterInstance extends SISOInstance {
   }
 
   @Override
-  public boolean tick(int time) {
+  public boolean tick(long time) {
     var inputPower = tryReadInputPower();
 
     if (inputPower == null) {

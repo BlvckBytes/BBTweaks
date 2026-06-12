@@ -1,14 +1,13 @@
 package me.blvckbytes.bbtweaks.ping;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -16,17 +15,20 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.TabCompleteEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
-public class PingCommand implements CommandExecutor, TabCompleter, Listener {
+public class PingCommand implements CommandHandler, Listener {
 
-  private final Command command;
+  private final PluginCommand command;
   private final ConfigKeeper<MainSection> config;
 
-  public PingCommand(Command command, ConfigKeeper<MainSection> config) {
-    this.command = command;
+  public PingCommand(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
+    this.command = Objects.requireNonNull(plugin.getCommand(PingCommandSection.INITIAL_NAME));
     this.config = config;
   }
 
@@ -143,5 +145,15 @@ public class PingCommand implements CommandExecutor, TabCompleter, Listener {
       return redirect + command.substring(firstSpaceIndex);
 
     return command;
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.ping.command;
   }
 }

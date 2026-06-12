@@ -7,8 +7,8 @@ public class ClockInstance extends SISOInstance {
 
   private final int toggleDuration;
 
-  private int lastTickTime = -1;
-  private int initTickTime = -1;
+  private long lastTickTime = -1;
+  private long initTickTime = -1;
 
   public ClockInstance(int periodDuration, Sign sign) {
     super(sign);
@@ -17,7 +17,7 @@ public class ClockInstance extends SISOInstance {
   }
 
   @Override
-  public boolean tick(int time) {
+  public boolean tick(long time) {
     lastTickTime = time;
 
     // Do not return here - begin with a high-cycle immediately, if applicable.
@@ -44,7 +44,7 @@ public class ClockInstance extends SISOInstance {
     return true;
   }
 
-  public int getRemainingTimeUntilNextToggle() {
+  public long getRemainingTimeUntilNextToggle() {
     if (lastTickTime < 0 || initTickTime < 0)
       return -1;
 

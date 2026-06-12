@@ -2,47 +2,45 @@ package me.blvckbytes.bbtweaks.back;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
+import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import net.kyori.adventure.title.Title;
 import net.kyori.adventure.title.TitlePart;
-import org.bukkit.Bukkit;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.*;
 
-public class BacktrackCommand implements CommandExecutor, TabCompleter, Listener {
+public class BacktrackCommand implements CommandHandler, Tickable, Listener {
 
-  private static final int TITLE_UPDATE_T = 5;
+  private static final int TITLE_UPDATE_PERIOD_T = 5;
+
+  private final PluginCommand command;
 
   private final LocationHistoryStore locationHistoryStore;
   private final ConfigKeeper<MainSection> config;
   private final Plugin plugin;
-  private int relativeTime;
 
   private final Map<UUID, BacktrackSession> sessionByPlayerId;
 
-  public BacktrackCommand(Plugin plugin, LocationHistoryStore locationHistoryStore, ConfigKeeper<MainSection> config) {
+  public BacktrackCommand(JavaPlugin plugin, LocationHistoryStore locationHistoryStore, ConfigKeeper<MainSection> config) {
+    this.command = Objects.requireNonNull(plugin.getCommand(BacktrackCommandSection.INITIAL_NAME));
+
     this.locationHistoryStore = locationHistoryStore;
     this.config = config;
     this.plugin = plugin;
     this.sessionByPlayerId = new HashMap<>();
-
-    Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-      ++relativeTime;
-      tickSessions();
-    }, 1L, 1L);
   }
 
   @Override
@@ -138,13 +136,13 @@ public class BacktrackCommand implements CommandExecutor, TabCompleter, Listener
     }
   }
 
-  private void tickSessions() {
+  private void tickSessions(long relativeTime) {
     ComponentMarkup markup;
 
     for (var session : sessionByPlayerId.values()) {
       var environment = session.makeEnvironment();
 
-      if (relativeTime % TITLE_UPDATE_T == 0) {
+      if (relativeTime % TITLE_UPDATE_PERIOD_T == 0) {
         var hasTitleOrSubtitle = false;
 
         if ((markup = config.rootSection.backOverride.backtrackTitle) != null) {
@@ -166,7 +164,7 @@ public class BacktrackCommand implements CommandExecutor, TabCompleter, Listener
         if (hasTitleOrSubtitle) {
           session.player.sendTitlePart(
             TitlePart.TIMES,
-            Title.Times.times(Duration.ZERO, Duration.ofMillis(2 * TITLE_UPDATE_T * 50), Duration.ZERO)
+            Title.Times.times(Duration.ZERO, Duration.ofMillis(2 * TITLE_UPDATE_PERIOD_T * 50), Duration.ZERO)
           );
         }
       }
@@ -175,5 +173,20 @@ public class BacktrackCommand implements CommandExecutor, TabCompleter, Listener
       if ((markup = config.rootSection.backOverride.backtrackActionBar) != null)
         markup.sendActionBar(session.player);
     }
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.backOverride.backtrackCommand;
+  }
+
+  @Override
+  public void tick(long relativeTime) {
+    tickSessions(relativeTime);
   }
 }

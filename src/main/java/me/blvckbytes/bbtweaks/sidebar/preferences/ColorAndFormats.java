@@ -10,7 +10,7 @@ import java.util.Set;
 public class ColorAndFormats implements DirectFieldAccess {
 
   public NamedColor color;
-  public EnumSet<Format> formats;
+  public final EnumSet<Format> formats;
 
   public ColorAndFormats(NamedColor color, EnumSet<Format> formats) {
     this.color = color;

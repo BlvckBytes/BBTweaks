@@ -1,8 +1,11 @@
 package me.blvckbytes.bbtweaks.multi_break.command;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
+import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakCommandSection;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakDimension;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParameters;
@@ -16,34 +19,36 @@ import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import me.blvckbytes.item_predicate_parser.syllables_matcher.NormalizedConstant;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.IntStream;
 
-public class MultiBreakCommand implements CommandExecutor, TabCompleter {
+public class MultiBreakCommand implements CommandHandler {
 
   private record SizeValues(int width, int height, int depth) {}
 
+  private final PluginCommand command;
   private final MultiBreakParametersStore parametersStore;
   private final MultiBreakDisplayHandler displayHandler;
   private final PredicateHelper predicateHelper;
   private final ConfigKeeper<MainSection> config;
 
   public MultiBreakCommand(
+    JavaPlugin plugin,
     MultiBreakParametersStore parametersStore,
     MultiBreakDisplayHandler displayHandler,
     PredicateHelper predicateHelper,
     ConfigKeeper<MainSection> config
-    ) {
+  ) {
+    this.command = Objects.requireNonNull(plugin.getCommand(MultiBreakCommandSection.INITIAL_NAME));
     this.parametersStore = parametersStore;
     this.displayHandler = displayHandler;
     this.predicateHelper = predicateHelper;
@@ -360,6 +365,16 @@ public class MultiBreakCommand implements CommandExecutor, TabCompleter {
     }
 
     return List.of();
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.multiBreak.command;
   }
 
   private @Nullable SizeValues tryParseSizeValues(String input) {

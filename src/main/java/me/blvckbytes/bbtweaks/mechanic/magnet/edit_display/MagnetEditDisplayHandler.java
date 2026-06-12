@@ -5,17 +5,17 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.EditSession;
 import me.blvckbytes.bbtweaks.mechanic.magnet.MagnetParameter;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
-import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-public class EditDisplayHandler extends DisplayHandler<EditDisplay, EditSession> {
+public class MagnetEditDisplayHandler extends DisplayHandler<MagnetEditDisplay, EditSession> {
 
   private final FloodgateIntegration floodgateIntegration;
 
-  public EditDisplayHandler(
+  public MagnetEditDisplayHandler(
     FloodgateIntegration floodgateIntegration,
     ConfigKeeper<MainSection> config,
     Plugin plugin
@@ -26,12 +26,12 @@ public class EditDisplayHandler extends DisplayHandler<EditDisplay, EditSession>
   }
 
   @Override
-  public EditDisplay instantiateDisplay(Player player, EditSession displayData) {
-    return new EditDisplay(player, displayData, config, floodgateIntegration, plugin);
+  public MagnetEditDisplay instantiateDisplay(Player player, EditSession displayData) {
+    return new MagnetEditDisplay(player, displayData, config, floodgateIntegration, plugin);
   }
 
   @Override
-  protected void handleClick(Player player, EditDisplay display, ClickType clickType, int slot) {
+  protected void handleClick(Player player, MagnetEditDisplay display, ClickType clickType, int slot) {
     if (config.rootSection.mechanic.magnet.editDisplay.items.save.getDisplaySlots().contains(slot)) {
       player.closeInventory();
       display.displayData.save();
@@ -78,7 +78,7 @@ public class EditDisplayHandler extends DisplayHandler<EditDisplay, EditSession>
     }
   }
 
-  private @Nullable MagnetParameter decideMagnetParameter(EditDisplay display, int slot) {
+  private @Nullable MagnetParameter decideMagnetParameter(MagnetEditDisplay display, int slot) {
     if (config.rootSection.mechanic.magnet.editDisplay.items.selectParameterExtentX.getDisplaySlots().contains(slot))
       return display.displayData.parameters.extentX;
 

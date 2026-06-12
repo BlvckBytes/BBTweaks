@@ -2,7 +2,7 @@ package me.blvckbytes.bbtweaks.mechanic.hopper;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegrationSingleton;
+import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegration;
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.Material;
@@ -24,23 +24,26 @@ public class HopperInstance extends SISOInstance {
   private @Nullable Inventory hopperInventory;
   private final @Nullable ItemPredicate predicate;
   private final ItemCompatibilities itemCompatibilities;
+  private final CraftBookIntegration craftBookIntegration;
   private final ConfigKeeper<MainSection> config;
 
   public HopperInstance(
     Sign sign,
     @Nullable ItemPredicate predicate,
     ItemCompatibilities itemCompatibilities,
+    CraftBookIntegration craftBookIntegration,
     ConfigKeeper<MainSection> config
   ) {
     super(sign);
 
     this.predicate = predicate;
     this.itemCompatibilities = itemCompatibilities;
+    this.craftBookIntegration = craftBookIntegration;
     this.config = config;
   }
 
   @Override
-  public boolean tick(int time) {
+  public boolean tick(long time) {
     if (time % config.rootSection.mechanic.hopper.transportCycleTicks != 0)
       return true;
 
@@ -109,15 +112,10 @@ public class HopperInstance extends SISOInstance {
       remainingAmount = tryTransportItemAndGetRemainder(destinationInventoryHolder, destinationBlock.getType(), sourceItem, hopperFacing);
 
     else if (destinationBlock.getType() == Material.STICKY_PISTON) {
-      var integration = CraftBookIntegrationSingleton.getInstance();
-
-      if (integration == null)
-        return true;
-
       var transportedItems = new ArrayList<ItemStack>(1);
       transportedItems.add(sourceItem);
 
-      var leftovers = integration.requestPipeAndGetLeftovers(destinationBlock, transportedItems);
+      var leftovers = craftBookIntegration.requestPipeAndGetLeftovers(destinationBlock, transportedItems);
 
       remainingAmount = 0;
 

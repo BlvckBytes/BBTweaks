@@ -1,34 +1,42 @@
 package me.blvckbytes.bbtweaks.additional_recipes;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
 import me.blvckbytes.bbtweaks.MainSection;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Logger;
 
-public class AdditionalRecipes {
+public class AdditionalRecipes implements Listener {
 
-  private final Logger logger;
+  private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
   private final List<NamespacedKey> recipeKeys;
 
-  public AdditionalRecipes(Logger logger, ConfigKeeper<MainSection> config) {
-    this.logger = logger;
+  public AdditionalRecipes(Plugin plugin, ConfigKeeper<MainSection> config) {
+    this.plugin = plugin;
     this.config = config;
     this.recipeKeys = new ArrayList<>();
 
-    config.registerReloadListener(this::updateRecipesFromConfig);
     updateRecipesFromConfig();
+  }
+
+  @EventHandler
+  public void onConfigReload(ConfigKeeperReloadEvent event) {
+    if (event.configKeeper == config)
+      updateRecipesFromConfig();
   }
 
   private void updateRecipesFromConfig() {
     removeRegisteredRecipes();
     addRecipesFromConfig();
 
-    logger.info("Loaded " + recipeKeys.size() + " custom recipes");
+    plugin.getLogger().info("Loaded " + recipeKeys.size() + " custom recipes");
   }
 
   private void addRecipesFromConfig() {

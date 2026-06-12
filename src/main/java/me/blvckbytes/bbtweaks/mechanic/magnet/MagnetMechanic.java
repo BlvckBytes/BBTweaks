@@ -3,13 +3,11 @@ package me.blvckbytes.bbtweaks.mechanic.magnet;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.mechanic.MVisualizeCommand;
 import me.blvckbytes.bbtweaks.mechanic.PredicateMechanic;
-import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.EditDisplayHandler;
+import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.MagnetEditDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicRegistry;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
-import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
@@ -22,7 +20,6 @@ import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -39,34 +36,31 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
   // TODO: Select param in the UI with any button
   // TODO: Stop visualization on destroy
 
+  private final MagnetEditDisplayHandler magnetEditDisplayHandler;
+
   protected final CacheByPosition<MagnetInstance> instanceByMountBlockPosition;
   private final CuboidMechanicRegistry<MagnetInstance> instanceCuboidRegistry;
   private final Map<UUID, VisualizationsBucket> visualizationsByPlayerId;
   private final Map<UUID, EditSession> editSessionByPlayerId;
 
-  private final EditDisplayHandler displayHandler;
-
-  private int lastTime;
-
-  public MagnetMechanic(JavaPlugin plugin, ConfigKeeper<MainSection> config, PredicateHelper predicateHelper) {
+  public MagnetMechanic(
+    JavaPlugin plugin,
+    ConfigKeeper<MainSection> config,
+    PredicateHelper predicateHelper,
+    MagnetEditDisplayHandler magnetEditDisplayHandler
+  ) {
     super(
       plugin, config, predicateHelper,
       new NamespacedKey(plugin, "magnet-filter-predicate"),
       new NamespacedKey(plugin, "magnet-filter-language")
     );
 
+    this.magnetEditDisplayHandler = magnetEditDisplayHandler;
+
     this.instanceByMountBlockPosition = new CacheByPosition<>();
     this.instanceCuboidRegistry = new CuboidMechanicRegistry<>();
     this.visualizationsByPlayerId = new HashMap<>();
     this.editSessionByPlayerId = new HashMap<>();
-
-    this.displayHandler = new EditDisplayHandler(FloodgateIntegration.load(plugin.getLogger()), config, plugin);
-
-    var visualizeCommandExecutor = new MVisualizeCommand(this, config);
-
-    Objects.requireNonNull(plugin.getCommand("mvisualize")).setExecutor(visualizeCommandExecutor);
-
-    Bukkit.getServer().getPluginManager().registerEvents(displayHandler, plugin);
   }
 
   public List<MagnetInstance> getMagnetsInChunk(World world, int chunkX, int chunkZ) {
@@ -74,18 +68,14 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
   }
 
   @Override
-  public void onMechanicUnload() {
-    super.onMechanicUnload();
+  public void disable() {
+    super.disable();
     instanceCuboidRegistry.clear();
-    this.displayHandler.onShutdown();
-    HandlerList.unregisterAll(this.displayHandler);
   }
 
   @Override
-  public void tick(int time) {
+  public void tick(long time) {
     super.tick(time);
-
-    this.lastTime = time;
 
     if (time % config.rootSection.mechanic.magnet.visualization.periodTicks == 0) {
       // TODO: The edit-session should also use this new way of visualization, if it pans out long-term.
@@ -232,9 +222,6 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
   }
 
   @Override
-  protected void onConfigReload() {}
-
-  @Override
   public List<String> getDiscriminators() {
     return List.of("Magnet");
   }
@@ -249,7 +236,7 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
     if (session == null)
       return;
 
-    displayHandler.show(event.getPlayer(), session);
+    magnetEditDisplayHandler.show(event.getPlayer(), session);
   }
 
   @EventHandler
@@ -371,7 +358,7 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
     var sign = instance.getSign();
     var visualizations = visualizationsByPlayerId.computeIfAbsent(player.getUniqueId(), k -> new VisualizationsBucket(player, config));
 
-    visualizations.add(instance, lastTime);
+    visualizations.add(instance, getCurrentTime());
 
     if (!displayMessage)
       return;
@@ -436,7 +423,7 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
       },
       () -> {
         // Seeing how we're also using this branch if the mechanic is destroyed; make sure the UI is getting closed also.
-        displayHandler.close(player);
+        magnetEditDisplayHandler.close(player);
         config.rootSection.mechanic.magnet.editModeCancelled.sendMessage(player, environment);
       }
     ));

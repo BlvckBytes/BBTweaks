@@ -55,7 +55,7 @@ public abstract class Display<DisplayDataType> {
       this.inventory.clear();
   }
 
-  public void onShutdown() {
+  public void disable() {
     if (inventory != null)
       inventory.clear();
 

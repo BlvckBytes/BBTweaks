@@ -7,8 +7,8 @@ public class PulseExtenderInstance extends SISOInstance {
 
   private final int signalLength;
 
-  private int lastSignalTime = -1;
-  private int lastTickTime = -1;
+  private long lastSignalTime = -1;
+  private long lastTickTime = -1;
 
   public PulseExtenderInstance(int signalLength, Sign sign) {
     super(sign);
@@ -17,7 +17,7 @@ public class PulseExtenderInstance extends SISOInstance {
   }
 
   @Override
-  public boolean tick(int time) {
+  public boolean tick(long time) {
     lastTickTime = time;
 
     var inputPower = tryReadInputPower();
@@ -37,7 +37,7 @@ public class PulseExtenderInstance extends SISOInstance {
     return true;
   }
 
-  public int getRemainingHighTime() {
+  public long getRemainingHighTime() {
     if (lastTickTime < 0 || lastSignalTime < 0)
       return -1;
 

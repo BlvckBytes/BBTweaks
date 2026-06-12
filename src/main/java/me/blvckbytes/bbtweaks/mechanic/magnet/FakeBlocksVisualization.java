@@ -20,11 +20,11 @@ public class FakeBlocksVisualization {
 
   private final Player player;
   private final MagnetInstance magnetInstance;
-  public final int createdAt;
+  public final long createdAt;
   private final ComparableMap<PositionOfBlock, BlockData> fakeBlocks;
   private final BlockData fakeBlockData;
 
-  public FakeBlocksVisualization(Player player, MagnetInstance magnetInstance, int createdAt) {
+  public FakeBlocksVisualization(Player player, MagnetInstance magnetInstance, long createdAt) {
     this.player = player;
     this.magnetInstance = magnetInstance;
     this.createdAt = createdAt;

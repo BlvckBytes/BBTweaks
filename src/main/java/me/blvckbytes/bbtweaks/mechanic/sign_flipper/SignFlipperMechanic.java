@@ -20,9 +20,6 @@ public class SignFlipperMechanic extends BaseMechanic<SignFlipperInstance> {
   }
 
   @Override
-  protected void onConfigReload() {}
-
-  @Override
   public boolean onInstanceClick(Player player, SignFlipperInstance instance, boolean wasLeftClick) {
     if (!player.isSneaking() || wasLeftClick)
       return false;

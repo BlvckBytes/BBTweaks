@@ -3,6 +3,8 @@ package me.blvckbytes.bbtweaks.furnace_level_display;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
+import me.blvckbytes.bbtweaks.integration.mc_mmo.McMMOIntegration;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
@@ -13,12 +15,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.CookingRecipe;
 import org.bukkit.inventory.RecipeChoice;
-import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class FurnaceLevelDisplay implements Listener {
+public class FurnaceLevelDisplay implements Listener, Tickable {
 
   private static class PlayerData {
     long lastSendStamp;
@@ -36,22 +36,24 @@ public class FurnaceLevelDisplay implements Listener {
     Tag.ITEMS_REDSTONE_ORES
   );
 
-  private final @Nullable McMMOIntegration mcMMOIntegration;
+  private final McMMOIntegration mcMMOIntegration;
   private final ConfigKeeper<MainSection> config;
 
   private final Map<UUID, PlayerData> dataByPlayerId;
 
   public FurnaceLevelDisplay(
-    Plugin plugin,
-    @Nullable McMMOIntegration mcMMOIntegration,
+    McMMOIntegration mcMMOIntegration,
     ConfigKeeper<MainSection> config
   ) {
     this.mcMMOIntegration = mcMMOIntegration;
     this.config = config;
 
     this.dataByPlayerId = new HashMap<>();
+  }
 
-    Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, this::handleDisplays, 0L, 1L);
+  @Override
+  public void tick(long relativeTime) {
+    handleDisplays();
   }
 
   @EventHandler
@@ -120,7 +122,7 @@ public class FurnaceLevelDisplay implements Listener {
       var totalRecipeSmeltCount = recipeEntry.getValue();
       var totalRecipeExperience = recipeExperience * totalRecipeSmeltCount;
 
-      if (mcMMOIntegration != null && isOreRecipe(recipeEntry.getKey())) {
+      if (isOreRecipe(recipeEntry.getKey())) {
         var wholePart = (int) Math.floor(totalRecipeExperience);
         var fractionalPart = totalRecipeExperience - wholePart;
         totalRecipeExperience = mcMMOIntegration.applySmeltingRecipeExpBoost(player, wholePart) + fractionalPart;

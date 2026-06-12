@@ -25,7 +25,7 @@ public class AutoDisposeInstance extends SISOInstance {
   }
 
   @Override
-  public boolean tick(int time) {
+  public boolean tick(long time) {
     if (time % config.rootSection.mechanic.autoDispose.clearIntervalTicks != 0)
       return true;
 

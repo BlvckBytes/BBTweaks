@@ -8,7 +8,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.config.StatisticSection;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
 import me.blvckbytes.bbtweaks.util.Display;
-import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;

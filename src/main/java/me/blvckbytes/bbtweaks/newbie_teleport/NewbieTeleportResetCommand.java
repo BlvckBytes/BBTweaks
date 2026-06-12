@@ -1,27 +1,34 @@
 package me.blvckbytes.bbtweaks.newbie_teleport;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.*;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
-public class NewbieTeleportResetCommand implements CommandExecutor, TabCompleter {
+public class NewbieTeleportResetCommand implements CommandHandler {
 
+  private final PluginCommand command;
   private final ConfigKeeper<MainSection> config;
   private final NamespacedKey useCountKey;
 
-  public NewbieTeleportResetCommand(NewbieTeleportCommand newbieTeleportCommand, ConfigKeeper<MainSection> config) {
+  public NewbieTeleportResetCommand(
+    JavaPlugin plugin,
+    NewbieTeleportCommand newbieTeleportCommand,
+    ConfigKeeper<MainSection> config
+  ) {
+    this.command = Objects.requireNonNull(plugin.getCommand(NewbieTeleportResetCommandSection.INITIAL_NAME));
     this.config = config;
     this.useCountKey = newbieTeleportCommand.useCountKey;
   }
@@ -91,5 +98,15 @@ public class NewbieTeleportResetCommand implements CommandExecutor, TabCompleter
     }
 
     return List.of();
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.newbieTeleport.resetCommand;
   }
 }

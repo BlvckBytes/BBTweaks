@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.sidebar.arm_integration;
+package me.blvckbytes.bbtweaks.integration.arm;
 
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;

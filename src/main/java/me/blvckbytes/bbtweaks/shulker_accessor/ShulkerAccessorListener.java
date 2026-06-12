@@ -4,6 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.InventoryChangeDetector;
 import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.InventoryChangedEvent;
 import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.InventoryInvalidatedEvent;
@@ -26,7 +27,7 @@ import org.bukkit.plugin.Plugin;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-public class ShulkerAccessorListener implements Listener {
+public class ShulkerAccessorListener implements Tickable, Listener {
 
   private final Plugin plugin;
   private final InventoryChangeDetector changeDetector;
@@ -51,8 +52,6 @@ public class ShulkerAccessorListener implements Listener {
 
     this.lastInventoryDropStampByPlayerId = new Object2LongOpenHashMap<>();
     this.lastInventoryDropStampByPlayerId.defaultReturnValue(0);
-
-    Bukkit.getScheduler().scheduleSyncRepeatingTask(plugin, () -> ++relativeTime, 0, 0);
   }
 
   @EventHandler
@@ -226,5 +225,10 @@ public class ShulkerAccessorListener implements Listener {
     }
 
     return false;
+  }
+
+  @Override
+  public void tick(long relativeTime) {
+    this.relativeTime = relativeTime;
   }
 }

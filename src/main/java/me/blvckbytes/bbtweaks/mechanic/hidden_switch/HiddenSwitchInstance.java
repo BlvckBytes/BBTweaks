@@ -27,8 +27,8 @@ public class HiddenSwitchInstance extends SISOInstance {
   private final ConfigKeeper<MainSection> config;
   private final boolean hasKeys;
 
-  private int lastSuccessfulInteractTime = -1;
-  private int lastInteractTime;
+  private long lastSuccessfulInteractTime = -1;
+  private long lastInteractTime;
 
   public HiddenSwitchInstance(
     Sign sign,
@@ -59,7 +59,7 @@ public class HiddenSwitchInstance extends SISOInstance {
   }
 
   @Override
-  public boolean tick(int time) {
+  public boolean tick(long time) {
     if (lastSuccessfulInteractTime < 0) {
       tryWriteOutputState(false);
       return true;
@@ -104,7 +104,7 @@ public class HiddenSwitchInstance extends SISOInstance {
     return true;
   }
 
-  public void interactAndSendMessage(Player player, int time) {
+  public void interactAndSendMessage(Player player, long time) {
     if (lastInteractTime > 0 && time - lastInteractTime < 5)
       return;
 

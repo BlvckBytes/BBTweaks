@@ -1,27 +1,35 @@
 package me.blvckbytes.bbtweaks.seed;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
-public class SeedOverrideCommand implements CommandExecutor, TabCompleter, Listener {
+public class SeedOverrideCommand implements CommandHandler, Listener {
+
+  private final PluginCommand command;
 
   private final ConfigKeeper<MainSection> config;
 
-  public SeedOverrideCommand(ConfigKeeper<MainSection> config) {
+  public SeedOverrideCommand(
+    JavaPlugin plugin,
+    ConfigKeeper<MainSection> config
+  ) {
+    this.command = Objects.requireNonNull(plugin.getCommand("seed"));
+
     this.config = config;
   }
 
@@ -71,5 +79,15 @@ public class SeedOverrideCommand implements CommandExecutor, TabCompleter, Liste
 
     if (commandToken.equals("/seed"))
       event.setMessage("/bbtweaks:seed" + message.substring(firstSpaceIndex));
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return null;
   }
 }

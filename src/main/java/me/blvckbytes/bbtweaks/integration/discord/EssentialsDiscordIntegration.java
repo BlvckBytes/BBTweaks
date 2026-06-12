@@ -1,14 +1,17 @@
 package me.blvckbytes.bbtweaks.integration.discord;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
 import me.blvckbytes.bbtweaks.MainSection;
 import net.essentialsx.api.v2.services.discord.DiscordService;
 import net.essentialsx.api.v2.services.discord.MessageType;
 import org.bukkit.Bukkit;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-public class EssentialsDiscordApi implements DiscordApi {
+public class EssentialsDiscordIntegration implements DiscordIntegration, Listener {
 
   private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
@@ -17,7 +20,7 @@ public class EssentialsDiscordApi implements DiscordApi {
 
   private @Nullable MessageType messageType;
 
-  public EssentialsDiscordApi(Plugin plugin, ConfigKeeper<MainSection> config) {
+  public EssentialsDiscordIntegration(Plugin plugin, ConfigKeeper<MainSection> config) {
     this.discordService = Bukkit.getServicesManager().load(DiscordService.class);
 
     if (this.discordService == null)
@@ -42,8 +45,10 @@ public class EssentialsDiscordApi implements DiscordApi {
     this.discordService.sendMessage(messageType, message, false);
   }
 
-  public void onConfigReload() {
-    this.setupMessageType();
+  @EventHandler
+  public void onConfigReload(ConfigKeeperReloadEvent event) {
+    if (event.configKeeper == config)
+      setupMessageType();
   }
 
   private void setupMessageType() {

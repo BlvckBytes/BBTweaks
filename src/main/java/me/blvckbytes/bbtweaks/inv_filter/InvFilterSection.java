@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.inv_filter;
 
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
+import at.blvckbytes.cm_mapper.mapper.section.CSAlways;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
@@ -9,6 +10,8 @@ import java.lang.reflect.Field;
 import java.util.List;
 
 public class InvFilterSection extends ConfigSection {
+
+  public @CSAlways InvFilterCommandSection command;
 
   public ComponentMarkup playersOnly;
   public ComponentMarkup noPermission;

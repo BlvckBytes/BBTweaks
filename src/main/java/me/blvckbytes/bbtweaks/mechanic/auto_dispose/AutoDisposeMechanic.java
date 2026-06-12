@@ -24,8 +24,8 @@ public class AutoDisposeMechanic extends PredicateMechanic<AutoDisposeInstance> 
 
   public AutoDisposeMechanic(
     JavaPlugin plugin,
-    PredicateHelper predicateHelper,
-    ConfigKeeper<MainSection> config
+    ConfigKeeper<MainSection> config,
+    PredicateHelper predicateHelper
   ) {
     super(
       plugin, config, predicateHelper,
@@ -33,9 +33,6 @@ public class AutoDisposeMechanic extends PredicateMechanic<AutoDisposeInstance> 
       new NamespacedKey(plugin, "auto-dispose-filter-language")
     );
   }
-
-  @Override
-  protected void onConfigReload() {}
 
   @Override
   public boolean onInstanceClick(Player player, AutoDisposeInstance instance, boolean wasLeftClick) {

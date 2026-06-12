@@ -1,29 +1,35 @@
 package me.blvckbytes.bbtweaks.markers_menu;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
-public class SetMarkerCommand implements CommandExecutor, TabCompleter {
+public class SetMarkerCommand implements CommandHandler {
 
+  private final Plugin plugin;
+  private final PluginCommand command;
   private final ConfigKeeper<MainSection> config;
-  private final Logger logger;
 
-  public SetMarkerCommand(ConfigKeeper<MainSection> config, Logger logger) {
+  public SetMarkerCommand(
+    JavaPlugin plugin,
+    ConfigKeeper<MainSection> config
+  ) {
+    this.plugin = plugin;
+    this.command = Objects.requireNonNull(plugin.getCommand(SetMarkerCommandSection.INITIAL_NAME));
     this.config = config;
-    this.logger = logger;
   }
 
   @Override
@@ -74,7 +80,7 @@ public class SetMarkerCommand implements CommandExecutor, TabCompleter {
           .withVariable("name", marker.getDisplayNameOrName())
       );
 
-      logger.log(Level.SEVERE, "An error occurred while trying to write a marker-location to the config", e);
+      plugin.getLogger().log(Level.SEVERE, "An error occurred while trying to write a marker-location to the config", e);
       return true;
     }
 
@@ -118,5 +124,15 @@ public class SetMarkerCommand implements CommandExecutor, TabCompleter {
       .filter(category -> StringUtils.startsWithIgnoreCase(category, args[0]))
       .limit(10)
       .toList();
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.markersMenu.setMarkerCommand;
   }
 }

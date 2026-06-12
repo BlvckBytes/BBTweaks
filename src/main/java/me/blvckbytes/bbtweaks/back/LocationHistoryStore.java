@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.back;
 
 import com.google.gson.*;
+import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
+import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -8,14 +10,14 @@ import org.bukkit.plugin.Plugin;
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
-public class LocationHistoryStore {
+public class LocationHistoryStore implements Tickable, Disableable {
 
   private static final Gson GSON_INSTANCE = new GsonBuilder().setPrettyPrinting().create();
+
+  private static final long SAVE_PERIOD_T = 20 * 60L;
 
   private final Plugin plugin;
   private final File storageFile;
@@ -43,6 +45,17 @@ public class LocationHistoryStore {
 
     this.historyByPlayerId = new HashMap<>();
     this.loadAsync();
+  }
+
+  @Override
+  public void tick(long relativeTime) {
+    if (relativeTime % SAVE_PERIOD_T == 0)
+      save(true);
+  }
+
+  @Override
+  public void disable() {
+    save(false);
   }
 
   public LocationHistory accessHistory(Player player) {
@@ -89,7 +102,7 @@ public class LocationHistoryStore {
     });
   }
 
-  public void save(boolean async) {
+  private void save(boolean async) {
     var histories = new ArrayList<>(historyByPlayerId.values());
 
     if (!async) {

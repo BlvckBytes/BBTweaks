@@ -44,9 +44,6 @@ public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implemen
   }
 
   @Override
-  protected void onConfigReload() {}
-
-  @Override
   public boolean onInstanceClick(Player player, InvMoveInstance instance, boolean wasLeftClick) {
     if (!canEditSign(player, instance.getSign()))
       return true;

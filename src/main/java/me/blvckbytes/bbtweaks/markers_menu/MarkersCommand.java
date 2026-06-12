@@ -1,30 +1,36 @@
 package me.blvckbytes.bbtweaks.markers_menu;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.markers_menu.display.MarkerDisplayData;
 import me.blvckbytes.bbtweaks.markers_menu.display.MarkerDisplayHandler;
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
-public class MarkersCommand implements CommandExecutor, TabCompleter {
+public class MarkersCommand implements CommandHandler {
+
+  private final PluginCommand command;
 
   private final MarkerDisplayHandler markerDisplayHandler;
   private final ConfigKeeper<MainSection> config;
 
   public MarkersCommand(
+    JavaPlugin plugin,
     MarkerDisplayHandler markerDisplayHandler,
     ConfigKeeper<MainSection> config
   ) {
+    this.command = Objects.requireNonNull(plugin.getCommand(MarkersCommandSection.INITIAL_NAME));
+
     this.markerDisplayHandler = markerDisplayHandler;
     this.config = config;
   }
@@ -85,5 +91,15 @@ public class MarkersCommand implements CommandExecutor, TabCompleter {
       .filter(category -> StringUtils.startsWithIgnoreCase(category, args[0]))
       .limit(10)
       .toList();
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.markersMenu.markersCommand;
   }
 }

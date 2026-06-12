@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.sidebar;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.playtime_rewards.PlaytimeRewardsAPI;
@@ -13,19 +14,18 @@ import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_tool.AutoToolCommand;
+import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
+import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import me.blvckbytes.bbtweaks.multi_break.BlockDirections;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
-import me.blvckbytes.bbtweaks.sidebar.arm_integration.ArmIntegration;
+import me.blvckbytes.bbtweaks.integration.arm.ArmIntegration;
 import me.blvckbytes.bbtweaks.sidebar.preferences.DelimitersMode;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferencesStore;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SneakMode;
-import me.blvckbytes.bbtweaks.util.ComponentUtil;
-import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
-import me.blvckbytes.bbtweaks.util.LegacyColorUtil;
-import me.blvckbytes.bbtweaks.util.MutableInt;
+import me.blvckbytes.bbtweaks.util.*;
 import net.ess3.api.IEssentials;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -41,11 +41,10 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.plugin.Plugin;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class SidebarBoardManager implements Listener, StatisticEnvironmentResolver {
+public class SidebarBoardManager implements Listener, Tickable, StatisticEnvironmentResolver {
 
   private static final long TICKS_AT_MIDNIGHT = 18000;
   private static final long TICKS_PER_DAY = 24000;
@@ -58,7 +57,7 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
   private final InvMagnetParametersStore invMagnetParametersStore;
   private final InvFilterCommand invFilterCommand;
   private final AutoToolCommand autoToolCommand;
-  private final @Nullable ArmIntegration armIntegration;
+  private final ArmIntegration armIntegration;
   private final FloodgateIntegration floodgateIntegration;
   private final SidebarPreferencesStore sidebarPreferencesStore;
   private final PlaytimeRewardsAPI playtimeRewards;
@@ -79,7 +78,7 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
     InvMagnetParametersStore invMagnetParametersStore,
     InvFilterCommand invFilterCommand,
     AutoToolCommand autoToolCommand,
-    @Nullable ArmIntegration armIntegration,
+    ArmIntegration armIntegration,
     FloodgateIntegration floodgateIntegration,
     SidebarPreferencesStore sidebarPreferencesStore,
     ConfigKeeper<MainSection> config
@@ -119,35 +118,40 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
 
     this.boardByPlayerId = new HashMap<>();
     this.lastSneakStampByPlayerId = new HashMap<>();
+  }
+
+  @Override
+  public void tick(long relativeTime) {
+    this.relativeTime = relativeTime;
+
+    if (relativeTime % config.rootSection.sidebar.updateIntervalTicks != 0)
+      return;
+
+    for (var board : boardByPlayerId.values()) {
+      var preferences = sidebarPreferencesStore.accessPreferences(board.holder.bukkitPlayer());
+      var isSneaking = board.holder.bukkitPlayer().isSneaking();
+
+      if (
+        !preferences.enabled
+          || (isSneaking && preferences.sneakMode == SneakMode.DISABLE_DURING_SNEAK)
+          || (!isSneaking && preferences.sneakMode == SneakMode.ENABLE_DURING_SNEAK)
+      ) {
+        board.unregisterIfShown();
+        continue;
+      }
+
+      renderAndUpdateLinesForBoard(board, preferences);
+    }
+  }
+
+  @EventHandler
+  public void onConfigReload(ConfigKeeperReloadEvent event) {
+    if (event.configKeeper != config)
+      return;
 
     // Cause a re-build by unregistering, such that it re-registers on next update.
-    config.registerReloadListener(() -> {
-      for (var board : boardByPlayerId.values())
-        board.unregisterIfShown();
-    });
-
-    Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-      ++relativeTime;
-
-      if (relativeTime % config.rootSection.sidebar.updateIntervalTicks != 0)
-        return;
-
-      for (var board : boardByPlayerId.values()) {
-        var preferences = sidebarPreferencesStore.accessPreferences(board.holder.bukkitPlayer());
-        var isSneaking = board.holder.bukkitPlayer().isSneaking();
-
-        if (
-          !preferences.enabled
-            || (isSneaking && preferences.sneakMode == SneakMode.DISABLE_DURING_SNEAK)
-            || (!isSneaking && preferences.sneakMode == SneakMode.ENABLE_DURING_SNEAK)
-        ) {
-          board.unregisterIfShown();
-          continue;
-        }
-
-        renderAndUpdateLinesForBoard(board, preferences);
-      }
-    }, 0, 0);
+    for (var board : boardByPlayerId.values())
+      board.unregisterIfShown();
   }
 
   @EventHandler
@@ -511,12 +515,12 @@ public class SidebarBoardManager implements Listener, StatisticEnvironmentResolv
 
       case REMAINING_SHOP_REGION_RENT_DURATION -> {
         return environment
-          .withVariable("time", armIntegration == null ? 0 : armIntegration.getRemainingShopRegionTime(player));
+          .withVariable("time", armIntegration.getRemainingShopRegionTime(player));
       }
 
       case REMAINING_CREATIVE_REGION_RENT_DURATION -> {
         return environment
-          .withVariable("time", armIntegration == null ? 0 : armIntegration.getRemainingCreativeRegionTime(player));
+          .withVariable("time", armIntegration.getRemainingCreativeRegionTime(player));
       }
     }
 

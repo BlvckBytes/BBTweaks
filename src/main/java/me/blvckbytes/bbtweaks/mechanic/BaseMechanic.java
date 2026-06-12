@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.mechanic;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
@@ -10,8 +11,8 @@ import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
 import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
-import it.unimi.dsi.fastutil.longs.Long2IntMap;
-import it.unimi.dsi.fastutil.longs.Long2IntOpenHashMap;
+import it.unimi.dsi.fastutil.longs.Long2LongMap;
+import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.util.*;
 import org.bukkit.block.Sign;
@@ -36,13 +37,13 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
 
   protected final CacheByPosition<InstanceType> instanceBySignPosition;
 
-  private record LastInteraction(int time, boolean result) {}
+  private record LastInteraction(long time, boolean result) {}
 
   private final Map<UUID, LastInteraction> lastInteractionByPlayerId;
 
-  private final Map<UUID, Long2IntMap> debounceTimeByBlockIdByPlayerId;
+  private final Map<UUID, Long2LongMap> debounceTimeByBlockIdByPlayerId;
 
-  private int currentTime;
+  private long currentTime;
 
   public BaseMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
     this.plugin = plugin;
@@ -51,14 +52,12 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     this.instanceBySignPosition = new CacheByPosition<>();
     this.lastInteractionByPlayerId = new HashMap<>();
     this.debounceTimeByBlockIdByPlayerId = new HashMap<>();
-
-    config.registerReloadListener(this::_onConfigReload);
   }
 
   protected boolean shouldDebounceInteraction(Player player, InstanceType instance) {
     var sign = instance.getSign();
 
-    var bucket = debounceTimeByBlockIdByPlayerId.computeIfAbsent(player.getUniqueId(), k -> new Long2IntOpenHashMap());
+    var bucket = debounceTimeByBlockIdByPlayerId.computeIfAbsent(player.getUniqueId(), k -> new Long2LongOpenHashMap());
     var blockId = CacheByPosition.computeWorldlessBlockId(sign.getX(), sign.getY(), sign.getZ());
 
     var previousInvocationTime = bucket.get(blockId);
@@ -69,17 +68,21 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     return now - previousInvocationTime <= 1;
   }
 
-  protected int getCurrentTime() {
+  protected long getCurrentTime() {
     return currentTime;
   }
-
-  protected abstract void onConfigReload();
 
   protected InterpretationEnvironment getSignEnvironment(Sign sign) {
     return new InterpretationEnvironment()
       .withVariable("x", sign.getX())
       .withVariable("y", sign.getY())
       .withVariable("z", sign.getZ());
+  }
+
+  @EventHandler
+  public void onConfigReload(ConfigKeeperReloadEvent event) {
+    if (event.configKeeper == config)
+      reloadAllInstances();
   }
 
   @Override
@@ -139,15 +142,12 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
   public abstract boolean onInstanceClick(Player player, InstanceType instance, boolean wasLeftClick);
 
   @Override
-  public void onMechanicLoad() {}
-
-  @Override
-  public void onMechanicUnload() {
+  public void disable() {
     instanceBySignPosition.clear();
   }
 
   @Override
-  public void tick(int time) {
+  public void tick(long time) {
     currentTime = time;
 
     instanceBySignPosition.forEachValue(instance -> {
@@ -158,7 +158,7 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     });
   }
 
-  private void _onConfigReload() {
+  private void reloadAllInstances() {
     var mechanicSigns = new ArrayList<Sign>();
 
     instanceBySignPosition.forEachValue(instance -> mechanicSigns.add(instance.getSign()));
@@ -175,8 +175,6 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
       if (onSignLoad(newSign) == null)
         signBlock.breakNaturally();
     }
-
-    onConfigReload();
   }
 
   protected <T> Optional<T> parseExpression(String expression, InterpretationEnvironment environment, BiFunction<ValueInterpreter, Object, T> resultMapper) {

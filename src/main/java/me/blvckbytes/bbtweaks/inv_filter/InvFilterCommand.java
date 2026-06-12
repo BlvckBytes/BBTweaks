@@ -1,8 +1,10 @@
 package me.blvckbytes.bbtweaks.inv_filter;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.inv_magnet.PreAttractItemEvent;
 import me.blvckbytes.bbtweaks.util.PredicateUtils;
 import me.blvckbytes.item_predicate_parser.PredicateHelper;
@@ -12,10 +14,7 @@ import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -25,14 +24,15 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener {
+public class InvFilterCommand implements CommandHandler, Listener {
 
-  private final Command command;
+  private final PluginCommand command;
   private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
   private final PredicateHelper predicateHelper;
@@ -44,12 +44,12 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
   private final Map<UUID, InventoryFilter> filterByPlayerId;
 
   public InvFilterCommand(
+    JavaPlugin plugin,
     PredicateHelper predicateHelper,
-    Command command,
-    Plugin plugin,
     ConfigKeeper<MainSection> config
   ) {
-    this.command = command;
+    this.command = Objects.requireNonNull(plugin.getCommand(InvFilterCommandSection.INITIAL_NAME));
+
     this.plugin = plugin;
     this.config = config;
 
@@ -379,5 +379,15 @@ public class InvFilterCommand implements CommandExecutor, TabCompleter, Listener
       return null;
 
     return new PredicateAndLanguage(predicate, language);
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.invFilter.command;
   }
 }

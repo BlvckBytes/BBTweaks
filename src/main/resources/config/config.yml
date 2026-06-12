@@ -62,6 +62,8 @@ getUuid:
     </u><&7>!
 
 ping:
+  command:
+    name: 'ping'
   noOtherPermission: '{lut.ping_prefix} <&c>Dir fehlen die Zugriffsrechte, um den Ping anderer Spieler einzusehen!'
   noTargetConsoleSender: '{lut.ping_prefix} <&c>Dieser Befehl ist ohne explizitem Namen nur für Spieler verfügbar!'
   targetNotOnline: '{lut.ping_prefix} <&c>Der Spieler <&4>{name} <&c>ist nicht online!'
@@ -159,6 +161,8 @@ mechanic:
         <&a *let-tick_duration="remaining_time">{lut.tick_duration_display}</&a>
       <&7>)
   magnet:
+    visualizeCommand:
+      name: 'mvisualize'
     noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen Magneten zu erstellen!'
     noContainer: '{lut.mechanic_prefix} <&c>Ein Magnet kann nur an einem Behälterblock angebracht werden!'
     allowMultipleSignsPerContainer: true
@@ -333,6 +337,8 @@ mechanic:
     multipleHoppers: '{lut.mechanic_prefix} <&c>Auf dem Trichter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein Hopper-Schild!'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Hopper <&7>bei <&a>{x} {y} {z} <&7>wurde erfolgreich erstellt!'
   hiddenSwitch:
+    command:
+      name: hiddenswitch
     passwordCommand:
       name: password
       aliases:
@@ -437,6 +443,8 @@ customCommands:
   commands:
 
 invFilter:
+  command:
+    name: 'invfilter'
   playersOnly: '{lut.inv_filter_prefix} <&c>Dieser Befehl ist nur für Spieler zugänglich!'
   noPermission: '{lut.inv_filter_prefix} <&c>Du hast nicht die nötigen Zugriffsrechte, um diesen Befehl zu nutzen!'
   usageAction: |
@@ -926,6 +934,8 @@ multiBreak:
         slots: '0..last_slot'
 
 autoTool:
+  command:
+    name: 'autotool'
   noPermission: '{lut.auto_tool_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
   nowEnabled: '{lut.auto_tool_prefix} <&7>Die automatische Werkzeugauswahl wurde <&a>aktiviert<&7>.'
   nowDisabled: '{lut.auto_tool_prefix} <&7>Die automatische Werkzeugauswahl wurde <&c>deaktiviert<&7>.'
@@ -2085,6 +2095,10 @@ sidebar:
             {lut.spacer}
 
 signCopier:
+  signCopyCommand:
+    name: 'signcopy'
+  signEditCommand:
+    name: 'signedit'
   alsoHandleCancelledInteractions: true
   playersOnly: '{lut.sign_copier_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
   helpScreen: |

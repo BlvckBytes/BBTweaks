@@ -4,7 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.util.Display;
-import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
@@ -24,7 +24,7 @@ public class MarkerDisplay extends Display<MarkerDisplayData> {
 
   private int currentPage = 1;
 
-  protected MarkerDisplay(
+  public MarkerDisplay(
     Player player,
     MarkerDisplayData displayData,
     ConfigKeeper<MainSection> config,
@@ -104,7 +104,9 @@ public class MarkerDisplay extends Display<MarkerDisplayData> {
   }
 
   @Override
-  public void onConfigReload() {}
+  public void onConfigReload() {
+    show();
+  }
 
   private InterpretationEnvironment getEnvironment() {
     return new InterpretationEnvironment()

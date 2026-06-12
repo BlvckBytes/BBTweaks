@@ -5,16 +5,16 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.EditSession;
 import me.blvckbytes.bbtweaks.util.Display;
-import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
-public class EditDisplay extends Display<EditSession> {
+public class MagnetEditDisplay extends Display<EditSession> {
 
   public final boolean isFloodgate;
 
-  public EditDisplay(
+  public MagnetEditDisplay(
     Player player,
     EditSession displayData,
     ConfigKeeper<MainSection> config,
@@ -54,7 +54,9 @@ public class EditDisplay extends Display<EditSession> {
   }
 
   @Override
-  public void onConfigReload() {}
+  public void onConfigReload() {
+    show();
+  }
 
   private InterpretationEnvironment createEnvironment() {
     return displayData.makeEnvironment()

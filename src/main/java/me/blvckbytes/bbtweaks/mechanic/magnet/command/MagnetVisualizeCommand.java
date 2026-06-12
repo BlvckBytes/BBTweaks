@@ -1,26 +1,27 @@
-package me.blvckbytes.bbtweaks.mechanic;
+package me.blvckbytes.bbtweaks.mechanic.magnet.command;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.mechanic.magnet.MagnetInstance;
 import me.blvckbytes.bbtweaks.mechanic.magnet.MagnetMechanic;
 import me.blvckbytes.bbtweaks.mechanic.util.IntTuple;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
-public class MVisualizeCommand implements CommandExecutor, TabCompleter {
+public class MagnetVisualizeCommand implements CommandHandler {
 
   private static final class MagnetCollectionOutput {
     final List<MagnetInstance> instances;
@@ -43,13 +44,16 @@ public class MVisualizeCommand implements CommandExecutor, TabCompleter {
     }
   }
 
+  private final PluginCommand command;
   private final MagnetMechanic magnetMechanic;
   private final ConfigKeeper<MainSection> config;
 
-  public MVisualizeCommand(
+  public MagnetVisualizeCommand(
+    JavaPlugin plugin,
     MagnetMechanic magnetMechanic,
     ConfigKeeper<MainSection> config
   ) {
+    this.command = Objects.requireNonNull(plugin.getCommand(MagnetVisualizeCommandSection.INITIAL_NAME));
     this.magnetMechanic = magnetMechanic;
     this.config = config;
   }
@@ -124,5 +128,15 @@ public class MVisualizeCommand implements CommandExecutor, TabCompleter {
   @Override
   public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
     return List.of();
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.mechanic.magnet.visualizeCommand;
   }
 }

@@ -2,11 +2,16 @@ package me.blvckbytes.bbtweaks.mechanic;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.AutoWirer;
+import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
 import me.blvckbytes.bbtweaks.mechanic.clock.ClockMechanic;
 import me.blvckbytes.bbtweaks.mechanic.auto_dispose.AutoDisposeMechanic;
+import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchCommand;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchMechanic;
+import me.blvckbytes.bbtweaks.mechanic.hidden_switch.PasswordCommand;
 import me.blvckbytes.bbtweaks.mechanic.hopper.HopperMechanic;
 import me.blvckbytes.bbtweaks.mechanic.inv_move.InvMoveMechanic;
+import me.blvckbytes.bbtweaks.mechanic.magnet.command.MagnetVisualizeCommand;
 import me.blvckbytes.bbtweaks.mechanic.magnet.MagnetMechanic;
 import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderMechanic;
 import me.blvckbytes.bbtweaks.mechanic.quick_unload.QuickUnloadMechanic;
@@ -15,14 +20,12 @@ import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.ReceiverMechanic;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.TransmitterMechanic;
 import me.blvckbytes.bbtweaks.util.BooleanConsumer;
 import me.blvckbytes.bbtweaks.util.SignUtil;
-import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Sign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -30,74 +33,47 @@ import org.bukkit.event.world.ChunkLoadEvent;
 import org.bukkit.event.world.ChunkUnloadEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitTask;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class SignMechanicManager implements Listener {
+public class SignMechanicManager implements Disableable, Listener {
 
   private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
 
   private final Map<String, SignMechanic<?>> signMechanicByDiscriminatorLower;
 
-  private @Nullable BukkitTask tickerTask;
-
-  private int time;
-
-  public SignMechanicManager(JavaPlugin plugin, ConfigKeeper<MainSection> config, PredicateHelper predicateHelper) {
+  public SignMechanicManager(
+    JavaPlugin plugin,
+    ConfigKeeper<MainSection> config,
+    AutoWirer autoWirer
+  ) throws Exception {
     this.plugin = plugin;
     this.config = config;
 
     this.signMechanicByDiscriminatorLower = new HashMap<>();
 
-    registerMechanic(new ClockMechanic(plugin, config));
-    registerMechanic(new PulseExtenderMechanic(plugin, config));
-    registerMechanic(new MagnetMechanic(plugin, config, predicateHelper));
-
-    var receiverMechanic = new ReceiverMechanic(plugin, config);
-    var transmitterMechanic = new TransmitterMechanic(receiverMechanic, plugin, config);
-    receiverMechanic.transmitterMechanic = transmitterMechanic;
-
-    registerMechanic(transmitterMechanic);
-    registerMechanic(receiverMechanic);
-
-    registerMechanic(new AutoDisposeMechanic(plugin, predicateHelper, config));
-    registerMechanic(new SignFlipperMechanic(plugin, config));
-    registerMechanic(new HopperMechanic(plugin, config, predicateHelper));
-    registerMechanic(new HiddenSwitchMechanic(plugin, config));
-    registerMechanic(new QuickUnloadMechanic(plugin, config, predicateHelper));
-    registerMechanic(new InvMoveMechanic(plugin, config, predicateHelper));
-
-    tickerTask = Bukkit.getScheduler().runTaskTimer(plugin, this::tick, 0, 1);
-
-    Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
+    registerMechanic(autoWirer.withSingletonAndGet(ClockMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(PulseExtenderMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(MagnetMechanic.class));
+    autoWirer.withSingleton(MagnetVisualizeCommand.class);
+    registerMechanic(autoWirer.withSingletonAndGet(ReceiverMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(TransmitterMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(AutoDisposeMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(SignFlipperMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(HopperMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(HiddenSwitchMechanic.class));
+    autoWirer.withSingleton(HiddenSwitchCommand.class);
+    autoWirer.withSingleton(PasswordCommand.class);
+    registerMechanic(autoWirer.withSingletonAndGet(QuickUnloadMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(InvMoveMechanic.class));
   }
 
-  public void shutdown() {
-    HandlerList.unregisterAll(this);
-
-    if (tickerTask != null) {
-      tickerTask.cancel();
-      tickerTask = null;
-    }
-
-    signMechanicByDiscriminatorLower.values().forEach(mechanic -> {
-      mechanic.onMechanicUnload();
-
-      if (mechanic instanceof Listener listener)
-        HandlerList.unregisterAll(listener);
-    });
-
+  @Override
+  public void disable() {
     signMechanicByDiscriminatorLower.clear();
-  }
-
-  private void tick() {
-    ++time;
-    signMechanicByDiscriminatorLower.values().forEach(mechanic -> mechanic.tick(time));
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -277,10 +253,5 @@ public class SignMechanicManager implements Listener {
       if (existingHandler != null)
         throw new IllegalArgumentException("Duplicate sign-mechanic for discriminator \"" + discriminator + "\" detected: " + existingHandler.getClass());
     }
-
-    if (mechanic instanceof Listener listener)
-      Bukkit.getServer().getPluginManager().registerEvents(listener, plugin);
-
-    mechanic.onMechanicLoad();
   }
 }

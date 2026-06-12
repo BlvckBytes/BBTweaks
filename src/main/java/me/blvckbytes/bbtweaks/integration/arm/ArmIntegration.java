@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.sidebar.arm_integration;
+package me.blvckbytes.bbtweaks.integration.arm;
 
 import org.bukkit.entity.Player;
 

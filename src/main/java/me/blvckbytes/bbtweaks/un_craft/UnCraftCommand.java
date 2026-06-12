@@ -1,10 +1,12 @@
 package me.blvckbytes.bbtweaks.un_craft;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import me.blvckbytes.bbtweaks.BBTweaksPlugin;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.un_craft.config.ChoiceEntry;
 import me.blvckbytes.bbtweaks.un_craft.config.OverviewItem;
 import me.blvckbytes.bbtweaks.un_craft.config.TypeExclusionRule;
@@ -15,17 +17,17 @@ import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Container;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.bukkit.inventory.meta.BundleMeta;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,7 +38,6 @@ import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.ToIntFunction;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 // There are so many items that defining all un-craft recipes from a blank slate is near
 // impossible, at least with my level of patience. The way we go about it is to loop all
@@ -53,7 +54,7 @@ import java.util.logging.Logger;
 // I can think about a better solution in the future, but for now, I take care of the few
 // entries manually.
 
-public class UnCraftCommand implements CommandExecutor, TabCompleter {
+public class UnCraftCommand implements CommandHandler, Listener {
 
   record MaterialExtractionResult(@Nullable Material material, String absenceReason) {}
   record ItemAndSlot(ItemStack item, int slot) {}
@@ -61,7 +62,9 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   private static final String REASON_MARKER = "Reason:";
   private static final String REASON_SEPARATOR = "; ";
 
-  private final Logger logger;
+  private final PluginCommand command;
+
+  private final Plugin plugin;
   private final UnCraftRecipeMap recipeMap;
 
   private final ConfigKeeper<MainSection> config;
@@ -69,9 +72,11 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
   private final File unCraftRecipesTemplateFile;
   private final File unCraftRecipesFile;
 
-  public UnCraftCommand(BBTweaksPlugin plugin, ConfigKeeper<MainSection> config) {
+  public UnCraftCommand(JavaPlugin plugin, ConfigKeeper<MainSection> config) {
+    this.plugin = plugin;
+    this.command = Objects.requireNonNull(plugin.getCommand("uncraft"));
+
     this.config = config;
-    this.logger = plugin.getLogger();
 
     this.unCraftRecipesTemplateFile = createFileIfAbsent(plugin, "uncraft_recipes_template.txt");
     this.unCraftRecipesFile = createFileIfAbsent(plugin, "uncraft_recipes.txt");
@@ -83,11 +88,25 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       discoverRecipesAndCreateTemplateFile();
       loadRecipesFromFile();
     }, 10);
+  }
 
-    config.registerReloadListener(() -> {
-      discoverRecipesAndCreateTemplateFile();
-      loadRecipesFromFile();
-    });
+  @EventHandler
+  public void onConfigReload(ConfigKeeperReloadEvent event) {
+    if (event.configKeeper != config)
+      return;
+
+    discoverRecipesAndCreateTemplateFile();
+    loadRecipesFromFile();
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return null;
   }
 
   @Override
@@ -669,14 +688,14 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
 
            ++loadedCounter;
         } catch (Throwable e) {
-          logger.log(Level.WARNING, "Could not load line " + lineNumber + " of file " + unCraftRecipesFile, e);
+          plugin.getLogger().log(Level.WARNING, "Could not load line " + lineNumber + " of file " + unCraftRecipesFile, e);
         }
       }
     } catch (Throwable e) {
-      logger.log(Level.SEVERE, "An error occurred while trying to load " + unCraftRecipesFile, e);
+      plugin.getLogger().log(Level.SEVERE, "An error occurred while trying to load " + unCraftRecipesFile, e);
     }
 
-    logger.info("Loaded " + loadedCounter + " uncraft-recipes, of which " + excludedCounter + " were excluded (making for " + (loadedCounter - excludedCounter) + " active recipes)");
+    plugin.getLogger().info("Loaded " + loadedCounter + " uncraft-recipes, of which " + excludedCounter + " were excluded (making for " + (loadedCounter - excludedCounter) + " active recipes)");
   }
 
   private void handleDiscoveredRecipe(@NotNull Recipe recipe, UnCraftRecipeMap unCraftRecipeMap, UnCraftRecipeMap stonecutterMap) {
@@ -814,7 +833,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
       try {
         handleDiscoveredRecipe(recipe, localUnCraftRecipeMap, localStoneCutterRecipeMap);
       } catch (InvalidRecipeException e) {
-        logger.warning("Skipping invalid recipe, reason: " + e.reason + ", recipe: " + recipe);
+        plugin.getLogger().warning("Skipping invalid recipe, reason: " + e.reason + ", recipe: " + recipe);
       } catch (SkipRecipeException ignored) {}
     }
 
@@ -834,7 +853,7 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         for (var index = 0; index < workbenchRecipes.size(); ++index) {
           if (stoneCutterRecipe.matchesResultTypes(workbenchRecipes.get(index))) {
             if (foundMatch)
-              logger.warning("A stonecutter-recipe matched on more than one workbench recipes; investigate!");
+              plugin.getLogger().warning("A stonecutter-recipe matched on more than one workbench recipes; investigate!");
 
             foundMatch = true;
             workbenchRecipes.set(index, stoneCutterRecipe);
@@ -902,10 +921,10 @@ public class UnCraftCommand implements CommandExecutor, TabCompleter {
         }
       }
     } catch (Throwable e) {
-      logger.log(Level.SEVERE, "Could not generate the uncraft-recipes template-file", e);
+      plugin.getLogger().log(Level.SEVERE, "Could not generate the uncraft-recipes template-file", e);
     }
 
-    logger.info("Created uncraft-recipes template-file");
+    plugin.getLogger().info("Created uncraft-recipes template-file");
   }
 
   private MaterialExtractionResult tryExtractMaterialFromItem(ItemStack item) {

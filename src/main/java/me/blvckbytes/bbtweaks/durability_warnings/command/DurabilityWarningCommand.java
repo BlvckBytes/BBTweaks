@@ -1,29 +1,34 @@
 package me.blvckbytes.bbtweaks.durability_warnings.command;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.durability_warnings.WarningsProfileStore;
+import me.blvckbytes.bbtweaks.durability_warnings.config.DurabilityWarningCommandSection;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.Objects;
 
-public class DurabilityWarningCommand implements CommandExecutor, TabCompleter {
+public class DurabilityWarningCommand implements CommandHandler {
 
+  private final PluginCommand command;
   private final WarningsProfileStore profileStore;
   private final ConfigKeeper<MainSection> config;
 
   public DurabilityWarningCommand(
+    JavaPlugin plugin,
     WarningsProfileStore profileStore,
     ConfigKeeper<MainSection> config
   ) {
+    this.command = Objects.requireNonNull(plugin.getCommand(DurabilityWarningCommandSection.INITIAL_NAME));
     this.profileStore = profileStore;
     this.config = config;
   }
@@ -86,5 +91,15 @@ public class DurabilityWarningCommand implements CommandExecutor, TabCompleter {
       return List.of();
 
     return CommandAction.matcher.createCompletions(args[0]);
+  }
+
+  @Override
+  public PluginCommand getCommand() {
+    return command;
+  }
+
+  @Override
+  public @Nullable CommandSection getCommandSection() {
+    return config.rootSection.durabilityWarnings.command;
   }
 }

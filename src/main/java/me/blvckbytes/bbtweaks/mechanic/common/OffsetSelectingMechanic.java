@@ -46,7 +46,7 @@ public abstract class OffsetSelectingMechanic<InstanceType extends MechanicInsta
     offsetSelectingByPlayerId.remove(player.getUniqueId());
   }
 
-  protected void handleOffsetSelectingSessionTimeouts(int time) {
+  protected void handleOffsetSelectingSessionTimeouts(long time) {
     InstanceSession.handleSessionTimeouts(
       offsetSelectingByPlayerId, time,
       sectionAccessor.get().offsetSelectingTimeoutSeconds(),

@@ -10,7 +10,7 @@ import me.blvckbytes.bbtweaks.sidebar.config.NamedColor;
 import me.blvckbytes.bbtweaks.sidebar.preferences.ColorAndFormats;
 import me.blvckbytes.bbtweaks.sidebar.preferences.Format;
 import me.blvckbytes.bbtweaks.util.Display;
-import me.blvckbytes.bbtweaks.util.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;

@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.sidebar.arm_integration;
+package me.blvckbytes.bbtweaks.integration.arm;
 
 import at.blvckbytes.cm_mapper.mapper.MappingError;
 import at.blvckbytes.cm_mapper.mapper.section.CSIgnore;

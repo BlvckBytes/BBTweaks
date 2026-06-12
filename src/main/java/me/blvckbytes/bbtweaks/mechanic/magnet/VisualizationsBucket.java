@@ -19,7 +19,7 @@ public class VisualizationsBucket {
     this.fakeBlocksBySignBlockId = new Long2ObjectOpenHashMap<>();
   }
 
-  public void update(int time) {
+  public void update(long time) {
     var maxAgeTicks = config.rootSection.mechanic.magnet.visualization.durationMs / 50;
 
     for (var fakeBlocksIterator = fakeBlocksBySignBlockId.values().iterator(); fakeBlocksIterator.hasNext();) {
@@ -36,7 +36,7 @@ public class VisualizationsBucket {
     }
   }
 
-  public void add(MagnetInstance instance, int time) {
+  public void add(MagnetInstance instance, long time) {
     var sign = instance.getSign();
     var blockId = CacheByPosition.computeWorldlessBlockId(sign.getX(), sign.getY(), sign.getZ());
     fakeBlocksBySignBlockId.put(blockId, new FakeBlocksVisualization(player, instance, time));

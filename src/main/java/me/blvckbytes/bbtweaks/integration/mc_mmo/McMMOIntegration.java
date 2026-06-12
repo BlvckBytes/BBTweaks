@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.furnace_level_display;
+package me.blvckbytes.bbtweaks.integration.mc_mmo;
 
 import org.bukkit.entity.Player;
 
