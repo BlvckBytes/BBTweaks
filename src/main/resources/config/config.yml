@@ -2100,6 +2100,8 @@ signCopier:
   signEditCommand:
     name: 'signedit'
   alsoHandleCancelledInteractions: true
+  skippedChangeEventHandlers:
+    - 'com.earth2me.essentials.signs.SignBlockListener'
   playersOnly: '{lut.sign_copier_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
   helpScreen: |
     <&8><&m>{" " ** 25}</> <&6>SignCopier <&8><&m>{" " ** 25}</><br/>

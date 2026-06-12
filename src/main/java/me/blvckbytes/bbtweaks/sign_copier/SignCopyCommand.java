@@ -10,7 +10,7 @@ import me.blvckbytes.bbtweaks.util.AmpersandNotationTranslator;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Bukkit;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
@@ -26,6 +26,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,12 +35,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.logging.Level;
 import java.util.stream.IntStream;
 
 public class SignCopyCommand implements CommandHandler, Listener {
 
   public static final int NUMBER_OF_LINES = 4;
 
+  private final Plugin plugin;
   private final PluginCommand command;
   private final ConfigKeeper<MainSection> config;
 
@@ -52,6 +55,7 @@ public class SignCopyCommand implements CommandHandler, Listener {
     JavaPlugin plugin,
     ConfigKeeper<MainSection> config
   ) {
+    this.plugin = plugin;
     this.command = Objects.requireNonNull(plugin.getCommand(SignCopyCommandSection.INITIAL_NAME));
 
     this.config = config;
@@ -314,7 +318,7 @@ public class SignCopyCommand implements CommandHandler, Listener {
     //noinspection UnstableApiUsage
     var changeEvent = new SignChangeEvent(sign.getBlock(), player, lines, side);
 
-    Bukkit.getPluginManager().callEvent(changeEvent);
+    callChangeEventWithExclusions(changeEvent);
 
     if (changeEvent.isCancelled())
       return PasteSignError.CHANGE_WAS_CANCELLED;
@@ -325,6 +329,23 @@ public class SignCopyCommand implements CommandHandler, Listener {
       signSide.line(lineIndex, lines.get(lineIndex));
 
     return null;
+  }
+
+  private void callChangeEventWithExclusions(SignChangeEvent event) {
+    var skippedHandlers = config.rootSection.signCopier.skippedChangeEventHandlers;
+
+    for (var listener : event.getHandlers().getRegisteredListeners()) {
+      var className = listener.getListener().getClass().getName();
+
+      if (skippedHandlers.stream().anyMatch(it -> StringUtils.equalsIgnoreCase(it, className)))
+        continue;
+
+      try {
+        listener.callEvent(event);
+      } catch (Exception e) {
+        plugin.getLogger().log(Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + listener.getPlugin().getName(), e);
+      }
+    }
   }
 
   // NOTE: These do not account for \& by design, as to give the player a way to escape whenever needed.

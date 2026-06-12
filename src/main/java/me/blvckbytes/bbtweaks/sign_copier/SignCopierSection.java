@@ -6,12 +6,17 @@ import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class SignCopierSection extends ConfigSection {
 
   public @CSAlways SignCopyCommandSection signCopyCommand;
   public @CSAlways SignEditCommandSection signEditCommand;
 
   public boolean alsoHandleCancelledInteractions;
+
+  public List<String> skippedChangeEventHandlers = new ArrayList<>();
 
   public ComponentMarkup playersOnly;
   public ComponentMarkup helpScreen;
