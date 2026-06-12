@@ -34,6 +34,13 @@ public class MultiBreakParametersSlots {
     updateLimits();
   }
 
+  public boolean isEnabledAndInAllowedWorld() {
+    if (!enabled)
+      return false;
+
+    return config.rootSection.multiBreak.allowedWorlds.contains(player.getWorld().getName());
+  }
+
   public MultiBreakLimits getLimits() {
     return limits;
   }

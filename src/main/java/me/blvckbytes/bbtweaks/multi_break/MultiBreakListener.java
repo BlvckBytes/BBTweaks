@@ -92,7 +92,7 @@ public class MultiBreakListener implements Listener {
     if (parametersSlots == null)
       return;
 
-    if (!parametersSlots.enabled)
+    if (!parametersSlots.isEnabledAndInAllowedWorld())
       return;
 
     // In case they've been revoked permissions and are still having the extents of their prior tier set.
@@ -105,9 +105,6 @@ public class MultiBreakListener implements Listener {
     var selectedParameters = parametersSlots.getSelectedParameters();
 
     if (!selectedParameters.sneakMode.doesMatch(player.isSneaking()))
-      return;
-
-    if (!config.rootSection.multiBreak.allowedWorlds.contains(player.getWorld().getName()))
       return;
 
     var originBlock = event.getBlock();
