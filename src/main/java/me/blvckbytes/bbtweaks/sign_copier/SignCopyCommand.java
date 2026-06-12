@@ -146,9 +146,9 @@ public class SignCopyCommand implements CommandHandler, Listener {
   }
 
   public void handlePreviewAction(Player player) {
-    var lines = renderLines(player.getPersistentDataContainer());
+    var copiedLines = getCopiedLines(player.getPersistentDataContainer());
 
-    if (lines == null) {
+    if (copiedLines == null) {
       config.rootSection.signCopier.noSignCopied.sendMessage(player);
       return;
     }
@@ -156,7 +156,7 @@ public class SignCopyCommand implements CommandHandler, Listener {
     config.rootSection.signCopier.previewScreen.sendMessage(
       player,
       new InterpretationEnvironment()
-        .withVariable("lines", lines)
+        .withVariable("lines", copiedLines)
     );
   }
 
@@ -304,10 +304,15 @@ public class SignCopyCommand implements CommandHandler, Listener {
   private @Nullable PasteSignError pasteSign(Player player, Sign sign) {
     var pdc = player.getPersistentDataContainer();
 
-    var lines = renderLines(pdc);
+    var copiedLines = getCopiedLines(pdc);
 
-    if (lines == null)
+    if (copiedLines == null)
       return PasteSignError.NO_LINES_AVAILABLE;
+
+    var renderedLines = new ArrayList<Component>(copiedLines.size());
+
+    for (var copiedLine : copiedLines)
+      renderedLines.add(copiedLine.renderedLine());
 
     var signSide = sign.getTargetSide(player);
 
@@ -316,17 +321,17 @@ public class SignCopyCommand implements CommandHandler, Listener {
     var side = signSide == sign.getSide(Side.FRONT) ? Side.FRONT : Side.BACK;
 
     //noinspection UnstableApiUsage
-    var changeEvent = new SignChangeEvent(sign.getBlock(), player, lines, side);
+    var changeEvent = new SignChangeEvent(sign.getBlock(), player, renderedLines, side);
 
     callChangeEventWithExclusions(changeEvent);
 
     if (changeEvent.isCancelled())
       return PasteSignError.CHANGE_WAS_CANCELLED;
 
-    lines = changeEvent.lines();
+    var finalLines = changeEvent.lines();
 
-    for (var lineIndex = 0; lineIndex < lines.size(); ++lineIndex)
-      signSide.line(lineIndex, lines.get(lineIndex));
+    for (var lineIndex = 0; lineIndex < finalLines.size(); ++lineIndex)
+      signSide.line(lineIndex, finalLines.get(lineIndex));
 
     return null;
   }
@@ -380,11 +385,11 @@ public class SignCopyCommand implements CommandHandler, Listener {
     return MiniMessage.miniMessage().deserialize(contents);
   }
 
-  private @Nullable List<Component> renderLines(PersistentDataContainer pdc) {
+  private @Nullable List<CopiedLine> getCopiedLines(PersistentDataContainer pdc) {
     if (!pdc.has(keysLineContents[0]))
       return null;
 
-    var lines = new ArrayList<Component>(NUMBER_OF_LINES);
+    var copiedLines = new ArrayList<CopiedLine>(NUMBER_OF_LINES);
 
     for (var lineIndex = 0; lineIndex < NUMBER_OF_LINES; ++lineIndex) {
       var lineContents = pdc.get(keysLineContents[lineIndex], PersistentDataType.STRING);
@@ -394,14 +399,25 @@ public class SignCopyCommand implements CommandHandler, Listener {
 
       var lineIsPlain = pdc.get(keysLineIsPlain[lineIndex], PersistentDataType.BOOLEAN);
 
+      Component render;
+      CommandAction editAction;
+
       if (lineIsPlain != null && lineIsPlain) {
-        lines.add(Component.text(lineContents));
-        continue;
+        render = Component.text(lineContents);
+        editAction = CommandAction.EDIT_PLAIN;
+      } else {
+        render = renderLine(lineContents);
+        editAction = CommandAction.EDIT;
       }
 
-      lines.add(renderLine(lineContents));
+      var editCommand = "/" + command.getName()
+        + " " + CommandAction.matcher.getNormalizedName(editAction) +
+        " " + (lineIndex + 1) +
+        " " + lineContents;
+
+      copiedLines.add(new CopiedLine(render, editCommand));
     }
 
-    return lines;
+    return copiedLines;
   }
 }

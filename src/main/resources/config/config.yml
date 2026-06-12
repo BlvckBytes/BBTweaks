@@ -2120,7 +2120,9 @@ signCopier:
   previewScreen: |
     <&8><&m>{" " ** 25}</> <&6>Bearbeitungsspeicher <&8><&m>{" " ** 25}</><br/>
     <container *for-line="lines" *for-separator={<br/>}>
-      <&7>Zeile {loop.index + 1}: {line}
+      <suggest-command value=`{line.edit_command}`>
+        <hover-text value={<&a>Klicke, um einen Editierungsbefehl vorgeschlagen zu bekommen}>
+          <&7><u>Zeile {loop.index + 1}:</u> {line.render}
     </container>
   signCopied: '{lut.sign_copier_prefix} <&7>Der Inhalt des Schildes bei <&a>{x} {y} {z}</> wurde in deinen Bearbeitungsspeichers kopiert.'
   signPasted: '{lut.sign_copier_prefix} <&7>Der Inhalt deines Bearbeitungsspeichers wurde am Schild bei <&a>{x} {y} {z}</> eingefügt.'
