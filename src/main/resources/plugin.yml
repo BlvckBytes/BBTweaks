@@ -74,6 +74,9 @@ commands:
   signedit:
     description: 'Shortcut command to edit lines in the buffer'
     permission: bbtweaks.sign-copier
+  bottlexp:
+    description: 'Fills your experience into bottles'
+    permission: bbtweaks.bottlexp
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

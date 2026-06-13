@@ -8,6 +8,7 @@ import me.blvckbytes.bbtweaks.auto_wirer.AutoWirer;
 import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
 import me.blvckbytes.bbtweaks.back.BacktrackCommand;
 import me.blvckbytes.bbtweaks.back.LocationHistoryStore;
+import me.blvckbytes.bbtweaks.bottlexp.BottleXpCommand;
 import me.blvckbytes.bbtweaks.command_items.CommandItemListener;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.durability_warnings.DurabilityWarningsListener;
@@ -143,6 +144,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(CommandItemListener.class)
         .withSingleton(SignCopyCommand.class)
         .withSingleton(SignEditCommand.class)
+        .withSingleton(BottleXpCommand.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);

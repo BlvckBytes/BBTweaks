@@ -2128,6 +2128,42 @@ signCopier:
   signPasted: '{lut.sign_copier_prefix} <&7>Der Inhalt deines Bearbeitungsspeichers wurde am Schild bei <&a>{x} {y} {z}</> eingefügt.'
   signPasteWasCancelled: '{lut.sign_copier_prefix} <&c>Das Einfügen des Schildes bei <&4>{x} {y} {z}</> wurde verweigert; bestehen Baurechte?'
 
+bottleXp:
+  command:
+    name: 'bottlexp'
+  experiencePerBottle: 16
+  playersOnly: "{lut.bottlexp_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!"
+  noPermission: "{lut.bottlexp_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!"
+  experienceOverview: |
+    <&8><&m>{" " ** 30}</> <&6>BottleXp <&8><&m>{" " ** 30}</><br/>
+    <&7>Verfügbare Erfahrung: <&d>{available_experience}exp</> (<&d>{available_level} Level</>)<br/>
+    <&7>Umrechnungskurs: <&d>{experience_per_bottle}exp/Flasche</><br/>
+    <&7>Benutzung: /{label}</> \<<&d>Erfahrungspunkte</> | <&d>Prozentzahl%</>><br/>
+    <br/>
+    <container *for-suggestion="suggestions" *for-separator={<br/>}>
+      <&7>- /{label} <&d>{suggestion.percentage}%</>: <&c>-{suggestion.experience}exp</> (→ <&d>Level {suggestion.level_after}</>) für<space/>
+      <&a><$lut.bottle_xp.count_display [count]="suggestion.bottle_count"/></>
+    </container>
+    <br/>
+  invalidMaximumValue: "{lut.bottle_xp.prefix} <&c>Der Maximalwert <&4>{input}</> muss eine positive Ganzzahl größer Null sein!"
+  maximumPercentageTooHigh: "{lut.bottle_xp.prefix} <&c>Die Prozentzahl <&4>{percentage}</> darf nicht größer als <&4>100</> sein!"
+  maximumValueExceedsAvailable: "{lut.bottle_xp.prefix} <&c>Der Maximalwert von <&4>{maximum_experience}exp</> überschreitet deine verfügbare Erfahrung von <&4>{available_experience}exp</>."
+  maximumValueBelowExpPerBottle: "{lut.bottle_xp.prefix} <&c>Der Maximalwert von <&4>{maximum_experience}exp</> unterschreitet den Umrechnungskurs von <&4>{experience_per_bottle}exp/Flasche</>."
+  hasNoExperienceToBottle: "{lut.bottle_xp.prefix} <&c>Du besitzt nicht genug Erfahrung, um sie in Flaschen füllen zu können!"
+  cannotHoldAnyBottles: "{lut.bottle_xp.prefix} <&c>Du hast nicht genug Platz im Inventar, um Erfahrungsflaschen aufzunehmen!"
+  afterBottling: |
+    {lut.bottle_xp.prefix} <&7>Es wurden <&c>{bottled_experience}exp</>/<&d>{available_experience}exp</> (<&d>Level {level_before}</> → <&d>Level {level_after}</>) in<space/>
+    <&a><$lut.bottle_xp.count_display [count]="bottle_count"/></> abgefüllt
+    <container *if="maximum_experience < available_experience">
+      ; Maximalwert: <&d>{maximum_experience}exp</>
+      <container *if="maximum_percentage"><space/>(<&d>{maximum_percentage}%</>)</>
+    </container>
+    .
+    <container *if="inventory_full">
+      <br/>
+      {lut.bottle_xp.prefix} <&e>Dein Inventar konnte nicht alle Flaschen fassen, weshalb das Abfüllen vor erreichen des Maximalwertes abgebrochen wurde.
+    </container>
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -2313,3 +2349,21 @@ cLut:
         >
           {value}
       </color>
+  bottle_xp:
+    prefix: '<&7>[<&6>BottleXp<&7>]'
+    count_display: |
+      <separate
+        separator={<space/>und<space/>}
+        value={
+          <container
+            *let-stack_count="count / stack_size"
+            *if="stack_count > 0"
+          >{stack_count} {stack_count eq 1 then "Stack" else "Stacks"}
+        }
+        value={
+          <container
+            *let-bottle_count="count % stack_size"
+            *if="bottle_count > 0"
+          >{bottle_count} {bottle_count eq 1 then "Flasche" else "Flaschen"}
+        }
+      />
