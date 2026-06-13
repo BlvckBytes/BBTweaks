@@ -5,6 +5,7 @@ import at.blvckbytes.cm_mapper.mapper.section.CSAlways;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
+import me.blvckbytes.bbtweaks.sign_copier.settings_display.SignCopierSettingsDisplaySection;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,8 @@ public class SignCopierSection extends ConfigSection {
   public ComponentMarkup signCopied;
   public ComponentMarkup signPasted;
   public ComponentMarkup signPasteWasCancelled;
+
+  public @CSAlways SignCopierSettingsDisplaySection settingsDisplay;
 
   public SignCopierSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

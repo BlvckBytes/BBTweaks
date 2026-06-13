@@ -6,11 +6,16 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.auto_wirer.LateWired;
+import me.blvckbytes.bbtweaks.sign_copier.settings.SettingFlag;
+import me.blvckbytes.bbtweaks.sign_copier.settings.SignCopierSettings;
+import me.blvckbytes.bbtweaks.sign_copier.settings.SignCopierSettingsStore;
+import me.blvckbytes.bbtweaks.sign_copier.settings_display.SignCopierSettingsDisplayHandler;
 import me.blvckbytes.bbtweaks.util.AmpersandNotationTranslator;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.apache.commons.lang3.StringUtils;
+import org.bukkit.DyeColor;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
@@ -42,19 +47,25 @@ public class SignCopyCommand implements CommandHandler, Listener {
 
   public static final int NUMBER_OF_LINES = 4;
 
+  private final SignCopierSettingsStore settingsStore;
+  private final SignCopierSettingsDisplayHandler settingsDisplayHandler;
   private final Plugin plugin;
   private final PluginCommand command;
   private final ConfigKeeper<MainSection> config;
 
-  private final NamespacedKey[] keysLineContents;
-  private final NamespacedKey[] keysLineIsPlain;
+  private final NamespacedKey[] keysLineContents, keysLineIsPlain;
+  private final NamespacedKey keyIsGlowing, keySignColor;
 
   private @LateWired SignEditCommand signEditCommand;
 
   public SignCopyCommand(
+    SignCopierSettingsStore settingsStore,
+    SignCopierSettingsDisplayHandler settingsDisplayHandler,
     JavaPlugin plugin,
     ConfigKeeper<MainSection> config
   ) {
+    this.settingsStore = settingsStore;
+    this.settingsDisplayHandler = settingsDisplayHandler;
     this.plugin = plugin;
     this.command = Objects.requireNonNull(plugin.getCommand(SignCopyCommandSection.INITIAL_NAME));
 
@@ -67,6 +78,9 @@ public class SignCopyCommand implements CommandHandler, Listener {
       this.keysLineContents[lineIndex] = new NamespacedKey(plugin, "sign-copier-line-contents-" + lineIndex);
       this.keysLineIsPlain[lineIndex] = new NamespacedKey(plugin, "sign-copier-line-is-plain-" + lineIndex);
     }
+
+    this.keyIsGlowing = new NamespacedKey(plugin, "sign-copier-is-glowing");
+    this.keySignColor = new NamespacedKey(plugin, "sign-copier-sign-color");
   }
 
   @Override
@@ -142,7 +156,12 @@ public class SignCopyCommand implements CommandHandler, Listener {
       return true;
     }
 
-    return true;
+    if (normalizedAction.constant == CommandAction.SETTINGS) {
+      settingsDisplayHandler.show(player, settingsStore.accessSettings(player));
+      return true;
+    }
+
+    throw new IllegalArgumentException("Unimplemented action: " + normalizedAction.constant);
   }
 
   public void handlePreviewAction(Player player) {
@@ -275,6 +294,7 @@ public class SignCopyCommand implements CommandHandler, Listener {
     event.setCancelled(true);
 
     var player = event.getPlayer();
+    var settings = settingsStore.accessSettings(player);
 
     var environment = new InterpretationEnvironment()
       .withVariable("x", sign.getX())
@@ -283,15 +303,21 @@ public class SignCopyCommand implements CommandHandler, Listener {
 
     if (event.getAction().isRightClick()) {
       copySign(player, sign);
-      config.rootSection.signCopier.signCopied.sendMessage(player, environment);
+
+      if (settings.flags.contains(SettingFlag.SEND_COPIED_MESSAGE))
+        config.rootSection.signCopier.signCopied.sendMessage(player, environment);
+
       return;
     }
 
-    var pasteError = pasteSign(player, sign);
+    var pasteError = pasteSign(player, settings, sign);
 
     if (pasteError == null) {
       sign.update(true, false);
-      config.rootSection.signCopier.signPasted.sendMessage(player, environment);
+
+      if (settings.flags.contains(SettingFlag.SEND_PASTED_MESSAGE))
+        config.rootSection.signCopier.signPasted.sendMessage(player, environment);
+
       return;
     }
 
@@ -301,7 +327,7 @@ public class SignCopyCommand implements CommandHandler, Listener {
     }).sendMessage(player, environment);
   }
 
-  private @Nullable PasteSignError pasteSign(Player player, Sign sign) {
+  private @Nullable PasteSignError pasteSign(Player player, SignCopierSettings settings, Sign sign) {
     var pdc = player.getPersistentDataContainer();
 
     var copiedLines = getCopiedLines(pdc);
@@ -333,7 +359,30 @@ public class SignCopyCommand implements CommandHandler, Listener {
     for (var lineIndex = 0; lineIndex < finalLines.size(); ++lineIndex)
       signSide.line(lineIndex, finalLines.get(lineIndex));
 
+    if (settings.flags.contains(SettingFlag.PASTE_SIGN_GLOWING)) {
+      var isGlowingValue = pdc.get(keyIsGlowing, PersistentDataType.BOOLEAN);
+
+      if (isGlowingValue != null)
+        signSide.setGlowingText(isGlowingValue);
+    }
+
+    if (settings.flags.contains(SettingFlag.PASTE_SIGN_COLOR))
+      signSide.setColor(getDyeColor(pdc));
+
     return null;
+  }
+
+  private @Nullable DyeColor getDyeColor(PersistentDataContainer pdc) {
+    var signColorValue = pdc.get(keySignColor, PersistentDataType.STRING);
+
+    if (signColorValue == null)
+      return null;
+
+    try {
+      return DyeColor.valueOf(signColorValue);
+    } catch (Throwable e) {
+      return null;
+    }
   }
 
   private void callChangeEventWithExclusions(SignChangeEvent event) {
@@ -366,7 +415,8 @@ public class SignCopyCommand implements CommandHandler, Listener {
   private void copySign(Player player, Sign sign) {
     var pdc = player.getPersistentDataContainer();
 
-    var lines = sign.getTargetSide(player).lines();
+    var signSide = sign.getTargetSide(player);
+    var lines = signSide.lines();
 
     for (var lineIndex = 0; lineIndex < NUMBER_OF_LINES; ++lineIndex) {
       if (lineIndex >= lines.size())
@@ -377,6 +427,15 @@ public class SignCopyCommand implements CommandHandler, Listener {
       pdc.set(keysLineContents[lineIndex], PersistentDataType.STRING, contents);
       pdc.set(keysLineIsPlain[lineIndex], PersistentDataType.BOOLEAN, false);
     }
+
+    pdc.set(keyIsGlowing, PersistentDataType.BOOLEAN, signSide.isGlowingText());
+
+    var signColor = signSide.getColor();
+
+    if (signColor == null)
+      pdc.remove(keySignColor);
+    else
+      pdc.set(keySignColor, PersistentDataType.STRING, signColor.name());
   }
 
   private Component renderLine(String contents) {

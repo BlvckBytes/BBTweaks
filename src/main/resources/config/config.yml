@@ -2110,6 +2110,7 @@ signCopier:
     <&7>- <&6>/{label}</> <&e>Edit-Plain</> \<<&e>Zeile</>> [<&e>Inhalt</>] - Editiere eine Zeile, ohne Farbcodes auszuführen<br/>
     <&7>- <&6>/{label}</> <&e>Preview</> - Zeigt den Inhalt deines Bearbeitungsspeichers (Kurzform: <&6>/{sign_edit_command}</> <&e>Preview</>)<br/>
     <&7>- <&6>/{label}</> <&e>Clear</> - Leert deinen Bearbeitungsspeicher<br/>
+    <&7>- <&6>/{label}</> <&e>Settings</> - Öffne das Einstellungsmenü<br/>
   noSignCopied: '{lut.sign_copier_prefix} <&c>Du hast noch kein Schild durch Rechtsklick mit einem Tintenbeutel kopiert!'
   copiedSignRemoved: '{lut.sign_copier_prefix} <&7>Dein Bearbeitungsspeicher wurde <&a>gelöscht</>.'
   actionEditUsage: '{lut.sign_copier_prefix} <&c>Benutzung: /{label} {action} \<Zeile> [Inhalt]'
@@ -2128,6 +2129,72 @@ signCopier:
   signCopied: '{lut.sign_copier_prefix} <&7>Der Inhalt des Schildes bei <&a>{x} {y} {z}</> wurde in deinen Bearbeitungsspeichers kopiert.'
   signPasted: '{lut.sign_copier_prefix} <&7>Der Inhalt deines Bearbeitungsspeichers wurde am Schild bei <&a>{x} {y} {z}</> eingefügt.'
   signPasteWasCancelled: '{lut.sign_copier_prefix} <&c>Das Einfügen des Schildes bei <&4>{x} {y} {z}</> wurde verweigert; bestehen Baurechte?'
+  settingsDisplay:
+    title: '<&8>SignCopier-Einstellungen'
+    rows: 3
+    items:
+      filler:
+        type: BLACK_STAINED_GLASS_PANE
+        name: ' '
+        slots: '0..last_slot'
+      pasteSignColor:
+        slots: 10
+        type: '{paste_sign_color then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="paste_sign_color">Schildfarbe einfügen</> <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob der Farbstoff, welcher am<br/>
+            kopierten Schild benutzt wurde, eingefügt<br/>
+            werden soll.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Funktion {paste_sign_color then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      pasteSignGlowing:
+        slots: 11
+        type: '{paste_sign_glowing then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="paste_sign_glowing">Leuchten einfügen</> <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob das Leuchten, welches durch<br/>
+            einen Leuchttintenbeutel am kopierten Schild<br/>
+            gesetzt wurde, eingefügt werden soll.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Funktion {paste_sign_glowing then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      sendCopiedMessage:
+        slots: 12
+        type: '{send_copied_message then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="send_copied_message">Empfang von Kopiernachrichten</> <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob du Bestätigungsnachrichten<br/>
+            beim Kopieren eines Schildes erhältst.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Funktion {send_copied_message then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      sendPastedMessage:
+        slots: 13
+        type: '{send_pasted_message then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="send_pasted_message">Empfang von Einfügenachrichten</> <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob du Bestätigungsnachrichten<br/>
+            beim Einfügen eines Schildes erhältst.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Funktion {send_pasted_message then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
 
 bottleXp:
   command:

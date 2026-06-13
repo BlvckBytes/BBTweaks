@@ -8,6 +8,7 @@ public enum CommandAction implements MatchableEnum {
   EDIT_PLAIN,
   PREVIEW,
   CLEAR,
+  SETTINGS,
   ;
 
   public static final EnumMatcher<CommandAction> matcher = new EnumMatcher<>(values());
