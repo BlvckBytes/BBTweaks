@@ -3,7 +3,6 @@ package me.blvckbytes.bbtweaks.un_craft;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
 
@@ -14,7 +13,7 @@ public class SpaceSimulator {
 
   private boolean didDropItems;
 
-  public SpaceSimulator(Inventory inventory, Function<ItemStack, @Nullable Material> materialExtractor) {
+  public SpaceSimulator(Inventory inventory, Function<ItemStack, Material> materialExtractor) {
     var storageContents = inventory.getStorageContents();
 
     this.slotAmounts = new int[storageContents.length];
