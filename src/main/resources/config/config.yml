@@ -23,6 +23,17 @@ abSleep:
   thresholdNotYetReached: '<&a>Es sind <&2>{sleeping_count}<&a>/<&2>{threshold_count} <&a>benötigen Spielern im Bett'
   thresholdReached: '<&a>Die Nacht wird durchgeschlafen'
 
+rdBreaker:
+  itemName: |
+    <reset>
+      <#FCD097>Antik-Brecher
+  itemLore: |
+    <reset>
+      <br/>
+      <&5>Baut verstärkten Tiefenschiefer (reinforced<br/>
+      deepslate) schnell ab und erlaubt es, den<br/>
+      Block im Anschluss aufzusammeln.
+
 backOverride:
   playersOnly: '{lut.back_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
   noPermission: '{lut.back_prefix} <&c>Dir fehlen die nötigen Rechte, um diesen Befehl benutzen zu können!'

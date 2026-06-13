@@ -5,7 +5,7 @@ import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import com.google.gson.*;
 import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.RDBreakTool;
+import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerListener;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.util.SignUtil;
@@ -45,19 +45,19 @@ public class MainCommand implements CommandHandler {
 
   private final PluginCommand command;
   private final ConfigKeeper<MainSection> config;
-  private final RDBreakTool rdBreakTool;
+  private final RDBreakerListener rdBreakerListener;
   private final AutoPickupContainerListener autoPickupContainer;
   private final Plugin plugin;
 
   public MainCommand(
     JavaPlugin plugin,
-    RDBreakTool rdBreakTool,
+    RDBreakerListener rdBreakerListener,
     AutoPickupContainerListener autoPickupContainer,
     ConfigKeeper<MainSection> config
   ) {
     this.command = Objects.requireNonNull(plugin.getCommand("bbtweaks"));
     this.config = config;
-    this.rdBreakTool = rdBreakTool;
+    this.rdBreakerListener = rdBreakerListener;
     this.autoPickupContainer = autoPickupContainer;
     this.plugin = plugin;
   }
@@ -117,7 +117,7 @@ public class MainCommand implements CommandHandler {
           return true;
         }
 
-        rdBreakTool.modifyItemToBecomeRdBreaker(heldItem);
+        rdBreakerListener.modifyItemToBecomeRdBreaker(heldItem);
 
         config.rootSection.mainCommand.setRdBreakerMetadata.sendMessage(sender);
         return true;

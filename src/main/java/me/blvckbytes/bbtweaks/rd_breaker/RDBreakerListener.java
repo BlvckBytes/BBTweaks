@@ -1,12 +1,16 @@
-package me.blvckbytes.bbtweaks;
+package me.blvckbytes.bbtweaks.rd_breaker;
 
+import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.constructor.SlotType;
 import io.papermc.paper.datacomponent.DataComponentTypes;
 import io.papermc.paper.datacomponent.item.Tool;
 import io.papermc.paper.registry.RegistryKey;
 import io.papermc.paper.registry.keys.BlockTypeKeys;
 import io.papermc.paper.registry.set.RegistrySet;
+import me.blvckbytes.bbtweaks.MainSection;
 import net.kyori.adventure.util.TriState;
 import org.bukkit.*;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -17,20 +21,36 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.logging.Level;
 
-public class RDBreakTool implements Listener {
+public class RDBreakerListener implements Listener {
 
   private final NamespacedKey rdBreakerKey;
-  private final Plugin plugin;
 
-  public RDBreakTool(Plugin plugin) {
+  private final Plugin plugin;
+  private final ConfigKeeper<MainSection> config;
+
+  public RDBreakerListener(
+    Plugin plugin,
+    ConfigKeeper<MainSection> config
+  ) {
     this.rdBreakerKey = new NamespacedKey(plugin, "rd_breaker");
+
     this.plugin = plugin;
+    this.config = config;
   }
 
   @SuppressWarnings("UnstableApiUsage")
   public void modifyItemToBecomeRdBreaker(ItemStack item) {
     var meta = item.getItemMeta();
+
+    meta.displayName(config.rootSection.rdBreaker.itemName.interpret(SlotType.ITEM_NAME, null).getFirst());
+    meta.lore(config.rootSection.rdBreaker.itemLore.interpret(SlotType.ITEM_LORE, null));
+
+    meta.removeEnchantments();
+    meta.addEnchant(Enchantment.UNBREAKING, 3, false);
+    meta.addEnchant(Enchantment.MENDING, 1, false);
+
     meta.getPersistentDataContainer().set(rdBreakerKey, PersistentDataType.BYTE, (byte) 1);
+
     item.setItemMeta(meta);
 
     var blocks = RegistrySet.keySet(

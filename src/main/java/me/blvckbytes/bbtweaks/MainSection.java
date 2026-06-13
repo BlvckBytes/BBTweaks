@@ -27,6 +27,7 @@ import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakSection;
 import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceSection;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportSection;
 import me.blvckbytes.bbtweaks.ping.PingSection;
+import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerSection;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideSection;
 import me.blvckbytes.bbtweaks.shulker_accessor.config.ShulkerAccessorSection;
 import me.blvckbytes.bbtweaks.sidebar.config.SidebarSection;
@@ -38,6 +39,7 @@ public class MainSection extends ConfigSection {
 
   public MainCommandSection mainCommand;
   public ABSleepSection abSleep;
+  public RDBreakerSection rdBreaker;
   public BackOverrideSection backOverride;
   public FurnaceLevelSection furnaceLevel;
   public GetUuidSection getUuid;

@@ -40,6 +40,7 @@ import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportCommand;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommand;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
+import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerListener;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
 import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.InventoryChangeDetector;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
@@ -100,7 +101,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(DiscordIntegrationLoader.class)
         .withSingleton(CraftBookIntegrationLoader.class)
         .withSingleton(ActionBarSleepMessage.class)
-        .withSingleton(RDBreakTool.class)
+        .withSingleton(RDBreakerListener.class)
         .withSingleton(LavaSponge.class)
         .withSingleton(GetUuidCommand.class)
         .withSingleton(LocationHistoryStore.class)
