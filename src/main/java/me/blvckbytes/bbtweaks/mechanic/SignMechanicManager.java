@@ -49,7 +49,7 @@ public class SignMechanicManager implements Disableable, Listener {
     JavaPlugin plugin,
     ConfigKeeper<MainSection> config,
     AutoWirer autoWirer
-  ) throws Exception {
+  ) throws Throwable {
     this.plugin = plugin;
     this.config = config;
 

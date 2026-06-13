@@ -79,12 +79,12 @@ public class AutoWirer implements Listener {
     plugin.getLogger().info("Wired " + instantiatedDependencies.size() + " instances");
   }
 
-  public AutoWirer withSingleton(Class<?> singletonClass) throws Exception {
+  public AutoWirer withSingleton(Class<?> singletonClass) throws Throwable {
     withSingletonAndGet(singletonClass);
     return this;
   }
 
-  public <T> T withSingletonAndGet(Class<T> singletonClass) throws Exception {
+  public <T> T withSingletonAndGet(Class<T> singletonClass) throws Throwable {
     if (didComplete)
       throw new IllegalStateException("Cannot register a new singleton after having completed already");
 
@@ -129,7 +129,7 @@ public class AutoWirer implements Listener {
     }
   }
 
-  private <T> @NotNull T instantiateClass(Class<T> singletonClass) throws Exception {
+  private <T> @NotNull T instantiateClass(Class<T> singletonClass) throws Throwable {
     var declaredConstructors = singletonClass.getDeclaredConstructors();
 
     Constructor<?> constructor;
@@ -149,7 +149,18 @@ public class AutoWirer implements Listener {
       parameterValues[parameterIndex] = dependencyInstance;
     }
 
-    return singletonClass.cast(constructor.newInstance(parameterValues));
+    Object instance;
+
+    try {
+      instance = constructor.newInstance(parameterValues);
+    }
+
+    // Unwrap errors the constructor threw, as to increase readability on stack-traces.
+    catch (InvocationTargetException e) {
+      throw e.getCause();
+    }
+
+    return singletonClass.cast(instance);
   }
 
   private @Nullable DependencyInstance findMatchingDependencyInstance(Field field) {
