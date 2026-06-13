@@ -1655,6 +1655,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
+          *if="time > 0"
           icon="⌛" label="Afk-Dauer"
           value={
             <duration [value]="time" units="sm" [zeroes]="time < 1000 * 60 then 's'" />
@@ -1721,7 +1722,7 @@ sidebar:
         <$lut.sidebar.statistic_renderer
           icon="⌛" label="Kreativ-Plot"
           value={
-            <$lut.sidebar.playtime_format *if="time > 0" />
+            <$lut.sidebar.playtime_format [time]="time / 1000.0 * 20.0" *if="time > 0" />
             <container *else>/</>
           }
         />
