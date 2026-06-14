@@ -3,6 +3,8 @@ package me.blvckbytes.bbtweaks;
 import me.blvckbytes.bbtweaks.ab_sleep.ActionBarSleepMessage;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipesSection;
 import me.blvckbytes.bbtweaks.auto_fly.AutoFlyCommand;
+import me.blvckbytes.bbtweaks.auto_pickup_container.command.AutoPickupContainerCommand;
+import me.blvckbytes.bbtweaks.auto_pickup_container.settings.AutoPickupContainerSettingsStore;
 import me.blvckbytes.bbtweaks.auto_tool.AutoToolCommand;
 import me.blvckbytes.bbtweaks.auto_wirer.AutoWirer;
 import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
@@ -142,6 +144,8 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(NewbieAnnounceHandler.class)
         .withSingleton(InventoryChangeDetector.class)
         .withSingleton(ShulkerAccessorListener.class)
+        .withSingleton(AutoPickupContainerSettingsStore.class)
+        .withSingleton(AutoPickupContainerCommand.class)
         .withSingleton(AutoPickupContainerListener.class)
         .withSingleton(MainCommand.class)
         .withSingleton(CommandItemListener.class)

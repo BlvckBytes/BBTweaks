@@ -974,6 +974,14 @@ shulkerAccessor:
     - '^⚡ .+''s Privater Tresor #[0-9]+ ⚡$'
 
 autoPickupContainer:
+  command:
+    name: 'sammelbox'
+    playersOnly: '{lut.auto_pickup_container_prefix} <&c>Der Befehl ist nur Spielern zugänglich!'
+    commandUsage: '{lut.auto_pickup_container_prefix} <&c>Benutzung: /{label} \<<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>>'
+    functionalityNowEnabled: '{lut.auto_pickup_container_prefix} <&7>Aufgehobene Items <&a>werden nun</> in Sammelboxen hineinbewegt.'
+    functionalityAlreadyEnabled: '{lut.auto_pickup_container_prefix} <&c>Die Funktion ist bereits aktiviert!'
+    functionalityNowDisabled: '{lut.auto_pickup_container_prefix} <&7>Aufgehobene Items <&c>werden nicht mehr</> in Sammelboxen hineinbewegt.'
+    functionalityAlreadyDisabled: '{lut.auto_pickup_container_prefix} <&c>Die Funktion ist bereits deaktiviert!'
   loreToSetOnUpdate: |
     <reset>
       <br/>
@@ -985,7 +993,7 @@ autoPickupContainer:
         <br/><br/>
         <&a><word-wrap [filter_predicate] width=50 prefix={<&8>➥ <&7>Filter:<space/>} />
       </container>
-  filterErrorNotification: '<&7>[<&5>Sammelbox<&7>] <&c>Der Filter <&4>{predicate} <&c>einer Box in deinem Inventar konnte nicht geladen werden: <&4>{error}.'
+  filterErrorNotification: '{lut.auto_pickup_container_prefix} <&c>Der Filter <&4>{predicate} <&c>einer Box in deinem Inventar konnte nicht geladen werden: <&4>{error}.'
 
 getExp:
   command:
@@ -2268,6 +2276,7 @@ cLut:
   getexp_prefix: '<&7>[<&6>GetExp<&7>]'
   sidebar_prefix: '<&7>[<&6>Sidebar<&7>]'
   sign_copier_prefix: '<&7>[<&6>SignCopier<&7>]'
+  auto_pickup_container_prefix: '<&7>[<&6>Sammelbox<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

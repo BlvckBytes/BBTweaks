@@ -77,6 +77,8 @@ commands:
   bottlexp:
     description: 'Fills your experience into bottles'
     permission: bbtweaks.bottlexp
+  autopickupcontainer:
+    description: 'Manage settings regarding autopickup-containers'
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

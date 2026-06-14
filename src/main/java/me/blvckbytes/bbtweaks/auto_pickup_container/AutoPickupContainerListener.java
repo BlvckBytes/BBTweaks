@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.util.color.PackedColor;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_pickup_container.settings.AutoPickupContainerSettingsStore;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.inv_magnet.PreAttractItemEvent;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
@@ -104,6 +105,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   }
 
   private final Plugin plugin;
+  private final AutoPickupContainerSettingsStore settingsStore;
   private final ShulkerAccessorListener shulkerAccessor;
   private final PredicateHelper predicateHelper;
   private final ConfigKeeper<MainSection> config;
@@ -117,11 +119,13 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
   public AutoPickupContainerListener(
     Plugin plugin,
+    AutoPickupContainerSettingsStore settingsStore,
     ShulkerAccessorListener shulkerAccessor,
     PredicateHelper predicateHelper,
     ConfigKeeper<MainSection> config
   ) {
     this.plugin = plugin;
+    this.settingsStore = settingsStore;
     this.shulkerAccessor = shulkerAccessor;
     this.predicateHelper = predicateHelper;
     this.config = config;
@@ -396,10 +400,16 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
   public void onPickupAttempt(PlayerAttemptPickupItemEvent event) {
+    var player = event.getPlayer();
+    var settings = settingsStore.accessSettings(event.getPlayer());
+
+    if (!settings.enabled)
+      return;
+
     var itemEntity = event.getItem();
     var pickedUpStack = itemEntity.getItemStack();
 
-    var session = makePickupSession(event.getPlayer());
+    var session = makePickupSession(player);
 
     var availableAmount = pickedUpStack.getAmount();
     var addedAmount = session.tryAddItemToContainersAndGetAddedAmount(pickedUpStack);
