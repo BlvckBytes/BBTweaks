@@ -657,6 +657,13 @@ multiBreak:
     -
       tags:
         - LOGS
+        - CRIMSON_STEMS
+        - WARPED_STEMS
+      materials:
+        - BAMBOO
+        - MUSHROOM_STEM
+        - BROWN_MUSHROOM_BLOCK
+        - RED_MUSHROOM_BLOCK
   perAdditionalBlockDurabilityDecreaseChance: 50
   customPickupDelay: 5
   missingPermission: '{lut.multi_break_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
