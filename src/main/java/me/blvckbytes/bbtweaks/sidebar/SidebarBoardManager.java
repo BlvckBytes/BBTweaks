@@ -416,12 +416,12 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
 
       case SECOND_JOB_PROGRESSION -> {
         if (!hasJobs)
-          return environment.withVariable("progression", null);
+          return environment.withVariable("name", null).withVariable("progression", null);
 
         var progressions = Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression();
 
         if (progressions.size() < 2)
-          return environment.withVariable("progression", null);
+          return environment.withVariable("name", null).withVariable("progression", null);
 
         var progression = progressions.get(1);
 

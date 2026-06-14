@@ -1194,7 +1194,7 @@ sidebar:
       defaultEnabled: true
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="⯪" label="Rang"
+          icon="⯪" floodgate-icon="★" label="Rang"
           value={
             {prefix}
           }
@@ -1249,7 +1249,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="🠙" label="Top Spielzeit"
+          icon="🠙" floodgate-icon="⌛" label="Top Spielzeit"
           value={
             #{place}
           }
@@ -1287,7 +1287,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="🠙" label="Top Afk-Zeit"
+          icon="🠙" floodgate-icon="⌛" label="Top Afk-Zeit"
           value={
             #{place}
           }
@@ -1306,7 +1306,7 @@ sidebar:
       defaultEnabled: true
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="🏛" label="Homepunkte"
+          icon="🏛" floodgate-icon="☎" label="Homepunkte"
           value={
             {current_home_count}/{total_home_count}
           }
@@ -1327,7 +1327,7 @@ sidebar:
       defaultEnabled: true
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="📶" label="Ping"
+          icon="📶" floodgate-icon="✈" label="Ping"
           value={
             {ping}ms
           }
@@ -1344,7 +1344,7 @@ sidebar:
       defaultEnabled: true
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="🗓" label="Datum"
+          icon="🗓" floodgate-icon="◷" label="Datum"
           value={
             <date [millis] format="EEE dd.MM.yyyy" zone="Europe/Berlin" locale="de_DE" />
           }
@@ -1361,7 +1361,7 @@ sidebar:
       defaultEnabled: true
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="🕓" label="Uhrzeit"
+          icon="🕓" floodgate-icon="◷" label="Uhrzeit"
           value={
             <date [millis] format="HH:mm" zone="Europe/Berlin" locale="de_DE" />
           }
@@ -1378,7 +1378,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="🖈" label="Position"
+          icon="🖈" floodgate-icon="⚓" label="Position"
           value={
             {x} {y} {z}
           }
@@ -1395,7 +1395,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="🌵" label="Biom"
+          icon="🌵" floodgate-icon="❄" label="Biom"
           value={
             <translate [biome_key] />
           }
@@ -1412,7 +1412,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="👁" label="Richtung"
+          icon="👁" floodgate-icon="➜" label="Richtung"
           value={
             {direction}
           }
@@ -1431,7 +1431,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="🕓" label="Weltzeit"
+          icon="🕓" floodgate-icon="◷" label="Weltzeit"
           value={
             <number [hours] format="00" />:<number [minutes] format="00" />
           }
@@ -1450,7 +1450,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="💼" label={{name neq null then `{name}-Job` else "Job 1"}}
+          icon="💼" floodgate-icon="⚒" label={{name neq null then `{name}-Job` else "Job 1"}}
           value={
             <$lut.sidebar.job_progression_format *if="progression" />
             <container *else>Kein Job</>
@@ -1470,7 +1470,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="💼" label={{name neq null then `{name}-Job` else "Job 2"}}
+          icon="💼" floodgate-icon="⚒" label={{name neq null then `{name}-Job` else "Job 2"}}
           value={
             <$lut.sidebar.job_progression_format *if="progression" />
             <container *else>Kein Job</>
@@ -1490,7 +1490,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="⛏" label="Powerlevel"
+          icon="⛏" floodgate-icon="↯" label="Powerlevel"
           value={
             {power_level}
           }
@@ -1507,7 +1507,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="👤" label="Name"
+          icon="👤" floodgate-icon="✍" label="Name"
           value={
             {name}
           }
@@ -1552,7 +1552,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="💡" label="Lichtlevel"
+          icon="💡" floodgate-icon="☀" label="Lichtlevel"
           value={
             <container *if="has_block">
               {max(light_sky, light_blocks)} ({light_sky}H, {light_blocks}B)
@@ -1581,7 +1581,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="⛏" label="MultiBreak" [value-color-override]="not enabled then '&7'"
+          icon="⛏" floodgate-icon="⚒" label="MultiBreak" [value-color-override]="not enabled then '&7'"
           value={
             {enabled then `An (S{slot_index + 1})` else "Aus"}
           }
@@ -1607,7 +1607,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="🧲" label="InvMagnet" [value-color-override]="not enabled then '&7'"
+          icon="🧲" floodgate-icon="⍧" label="InvMagnet" [value-color-override]="not enabled then '&7'"
           value={
             {enabled then `An (R{radius})` else "Aus"}
           }
@@ -1653,7 +1653,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="🪓" label="AutoTool" [value-color-override]="not enabled then '&7'"
+          icon="🪓" floodgate-icon="⇄" label="AutoTool" [value-color-override]="not enabled then '&7'"
           value={
             {enabled then "An" else "Aus"}
           }
@@ -2423,7 +2423,9 @@ cLut:
     statistic_renderer: |
       <color [label_style.color.hex] *if="show_label">
         <container *if="show_icon">
-          {icon}<space/>
+          <container *if="is_floodgate and has(floodgate_icon)" [floodgate_icon] />
+          <container *else [icon] />
+          <space/>
         </container>
         <style [label_style.bold] [label_style.italic] [label_style.underlined]>{label}:</><space/>
       </color>
