@@ -1782,6 +1782,46 @@ sidebar:
         iconType: 'GLASS'
       defaultEnabled: false
       render: '<space/>'
+    AUTO_PICKUP_CONTAINER_USAGE_ABSOLUTE:
+      iconData:
+        name: 'Sammelboxen Füllstand Slotzahlen'
+        description: |
+          Der gesamte Füllstand aller sich in deinem<br/>
+          Inventar befindlichen Sammelboxen, angezeigt<br/>
+          als \<Benutzte Slotanzahl>/\<Gesamte Slotanzahl>.
+        iconType: 'PURPLE_SHULKER_BOX'
+      defaultLabelStyle:
+        color: 'PURPLE'
+      defaultValueStyle:
+        color: 'WHITE'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="🥃" label="Sammelboxen"
+          value={
+            {used_slots}/{used_slots + vacant_slots}
+          }
+        />
+    AUTO_PICKUP_CONTAINER_USAGE_RELATIVE:
+      iconData:
+        name: 'Sammelboxen Füllstand Prozentwert'
+        description: |
+          Der gesamte Füllstand aller sich in deinem<br/>
+          Inventar befindlichen Sammelboxen, angezeigt<br/>
+          als Prozentwert (0-100%).
+        iconType: 'PURPLE_SHULKER_BOX'
+      defaultLabelStyle:
+        color: 'PURPLE'
+      defaultValueStyle:
+        color: 'WHITE'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="🥃" label="Sammelboxen"
+          value={
+            <number [value]="(used_slots / double(used_slots + vacant_slots))*100" format="#" />%
+          }
+        />
   colorDisplay:
     title: |
       <&8>Farbauswahl<space/>

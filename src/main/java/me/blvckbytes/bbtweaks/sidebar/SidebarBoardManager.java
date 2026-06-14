@@ -13,6 +13,7 @@ import com.gmail.nossr50.util.player.UserManager;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.auto_tool.AutoToolCommand;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
@@ -60,6 +61,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
   private final ArmIntegration armIntegration;
   private final FloodgateIntegration floodgateIntegration;
   private final SidebarPreferencesStore sidebarPreferencesStore;
+  private final AutoPickupContainerListener autoPickupContainerListener;
   private final PlaytimeRewardsAPI playtimeRewards;
   private final LuckPerms luckPerms;
   private final IEssentials essentials;
@@ -81,6 +83,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     ArmIntegration armIntegration,
     FloodgateIntegration floodgateIntegration,
     SidebarPreferencesStore sidebarPreferencesStore,
+    AutoPickupContainerListener autoPickupContainerListener,
     ConfigKeeper<MainSection> config
   ) {
     this.multiBreakParametersStore = multiBreakParametersStore;
@@ -90,6 +93,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     this.armIntegration = armIntegration;
     this.floodgateIntegration = floodgateIntegration;
     this.sidebarPreferencesStore = sidebarPreferencesStore;
+    this.autoPickupContainerListener = autoPickupContainerListener;
 
     var playtimeRegistration = Bukkit.getServicesManager().getRegistration(PlaytimeRewardsAPI.class);
 
@@ -522,6 +526,14 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       case REMAINING_CREATIVE_REGION_RENT_DURATION -> {
         return environment
           .withVariable("time", armIntegration.getRemainingCreativeRegionTime(player));
+      }
+
+      case AUTO_PICKUP_CONTAINER_USAGE_ABSOLUTE, AUTO_PICKUP_CONTAINER_USAGE_RELATIVE -> {
+        var usageCounts = autoPickupContainerListener.getLastKnownUsageCounts(player);
+
+        return environment
+          .withVariable("used_slots", usageCounts.usedSlots())
+          .withVariable("vacant_slots", usageCounts.vacantSlots());
       }
     }
 

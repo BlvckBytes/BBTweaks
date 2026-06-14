@@ -42,6 +42,8 @@ public enum SidebarStatistic {
   SPACER_NUMBER_ONE(true),
   SPACER_NUMBER_TWO(true),
   SPACER_NUMBER_THREE(true),
+  AUTO_PICKUP_CONTAINER_USAGE_ABSOLUTE,
+  AUTO_PICKUP_CONTAINER_USAGE_RELATIVE,
   ;
 
   public final boolean isSpacer;
