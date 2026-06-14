@@ -470,6 +470,115 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     }, true);
   }
 
+  @EventHandler
+  public void onPredicateHandGet(PredicateHandGetEvent event) {
+    checkStackIsMarkedAndAcknowledge(event, targetItem -> {
+      var pdc = targetItem.getPersistentDataContainer();
+      var predicate = loadFilterFromPdc(pdc, null, ((p, l, exception) -> event.setError(exception)));
+
+      if (predicate != null)
+        event.setResult(predicate);
+    });
+  }
+
+  @EventHandler
+  public void onPredicateHandSet(PredicateHandSetEvent event) {
+    checkStackIsMarkedAndAcknowledge(event, targetItem -> {
+      event.setEncounteredStacks(1);
+
+      tryUpdateFilterOnItem(targetItem, event.getValue());
+
+      if (!event.isAll())
+        return;
+
+      forEachHandAllCandidate(event.getPlayer(), event.getHeldSlot(), item -> {
+        if (tryUpdateFilterOnItem(item, event.getValue()))
+          event.setEncounteredStacks(event.getEncounteredStacks() + 1);
+      });
+    });
+  }
+
+  @EventHandler
+  public void onPredicateHandRemove(PredicateHandRemoveEvent event) {
+    checkStackIsMarkedAndAcknowledge(event, targetItem -> {
+      event.setEncounteredStacks(1);
+
+      var removedPredicates = new ArrayList<PredicateAndLanguage>();
+      event.setRemovedPredicates(removedPredicates);
+
+      var removedTargetPredicate = loadFilterFromPdc(targetItem.getPersistentDataContainer(), null, null);
+
+      if (removedTargetPredicate != null) {
+        removedPredicates.add(removedTargetPredicate);
+        tryUpdateFilterOnItem(targetItem, null);
+      }
+
+      if (!event.isAll())
+        return;
+
+      forEachHandAllCandidate(event.getPlayer(), event.getHeldSlot(), item -> {
+        var removedPredicate = loadFilterFromPdc(item.getPersistentDataContainer(), null, null);
+
+        if (tryUpdateFilterOnItem(item, null)) {
+          if (removedPredicate != null)
+            removedPredicates.add(removedPredicate);
+
+          event.setEncounteredStacks(event.getEncounteredStacks() + 1);
+        }
+      });
+    });
+  }
+
+  private void checkStackIsMarkedAndAcknowledge(PredicateHandEvent event, Consumer<ItemStack> handler) {
+    var playerInventory = event.getPlayer().getInventory();
+    var targetItem = playerInventory.getItem(event.getHeldSlot());
+
+    if (targetItem == null)
+      return;
+
+    var targetPdc = targetItem.getPersistentDataContainer();
+
+    if (!doesContainMarker(targetPdc))
+      return;
+
+    event.acknowledge();
+
+    handler.accept(targetItem);
+  }
+
+  private boolean tryUpdateFilterOnItem(ItemStack item, @Nullable PredicateAndLanguage predicateAndLanguage) {
+    if (!doesContainMarker(item.getPersistentDataContainer()))
+      return false;
+
+    var meta = item.getItemMeta();
+    var pdc = meta.getPersistentDataContainer();
+
+    if (predicateAndLanguage != null)
+      writeFilterToPdc(pdc, predicateAndLanguage);
+    else
+      removeFilterFromPdc(pdc);
+
+    updateLore(meta, item.getType());
+    item.setItemMeta(meta);
+    return true;
+  }
+
+  private void forEachHandAllCandidate(Player player, int heldSlot, Consumer<ItemStack> handler) {
+    var storageContents = player.getInventory().getStorageContents();
+
+    for (var slotIndex = 0; slotIndex < storageContents.length; ++slotIndex) {
+      if (slotIndex == heldSlot)
+        continue;
+
+      var item = storageContents[slotIndex];
+
+      if (item == null || item.getType().isAir())
+        continue;
+
+      handler.accept(item);
+    }
+  }
+
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   private boolean doesContainMarker(PersistentDataContainerView pdcView) {
     var markerFlag = pdcView.get(containerMarkerKey, PersistentDataType.BOOLEAN);
