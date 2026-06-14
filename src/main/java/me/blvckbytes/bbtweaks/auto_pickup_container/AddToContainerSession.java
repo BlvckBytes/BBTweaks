@@ -20,7 +20,7 @@ public class AddToContainerSession {
   public AddToContainerSession(
     Player player,
     FilterPredicateAccessor filterPredicateAccessor,
-    InventoryItemPredicate shulkerPredicate
+    ShulkerPredicate shulkerPredicate
   ) {
     this.inventory = player.getInventory();
     this.storageContents = inventory.getStorageContents();
@@ -35,10 +35,9 @@ public class AddToContainerSession {
       if (!Tag.SHULKER_BOXES.isTagged(item.getType()))
         continue;
 
-      if (!shulkerPredicate.test(inventory, slotIndex, item))
-        continue;
+      var disableReason = shulkerPredicate.test(inventory, slotIndex, item);
 
-      containers.add(new LazyContainer(player, item, filterPredicateAccessor));
+      containers.add(new LazyContainer(player, item, filterPredicateAccessor, disableReason));
     }
   }
 
@@ -61,6 +60,20 @@ public class AddToContainerSession {
     }
 
     return amount - remainingAmount;
+  }
+
+  public UsageCounts calculateUsageCounts() {
+    var usedSlotCount = 0;
+    var vacantSlotCount = 0;
+
+    for (var container : containers) {
+      var usageCounts = container.getUsageCounts();
+
+      usedSlotCount += usageCounts.usedSlots();
+      vacantSlotCount += usageCounts.vacantSlots();
+    }
+
+    return new UsageCounts(usedSlotCount, vacantSlotCount);
   }
 
   public void onCompletion(ContainerWritebackHandler writebackHandler) {

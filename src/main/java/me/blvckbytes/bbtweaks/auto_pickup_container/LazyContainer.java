@@ -15,6 +15,7 @@ public class LazyContainer {
   private final Player player;
   private final ItemStack itemStack;
   private final FilterPredicateAccessor filterPredicateAccessor;
+  private final @Nullable DisableReason disableReason;
 
   private boolean dirty;
 
@@ -27,11 +28,13 @@ public class LazyContainer {
   public LazyContainer(
     Player player,
     ItemStack itemStack,
-    FilterPredicateAccessor filterPredicateAccessor
+    FilterPredicateAccessor filterPredicateAccessor,
+    @Nullable DisableReason disableReason
   ) {
     this.player = player;
     this.itemStack = itemStack;
     this.filterPredicateAccessor = filterPredicateAccessor;
+    this.disableReason = disableReason;
   }
 
   public void onCompletion(ContainerWritebackHandler writebackHandler) {
@@ -44,28 +47,13 @@ public class LazyContainer {
   }
 
   public int tryAddItemAndGetAddedAmount(ItemStack itemToAdd, int amount) {
-    if (Tag.SHULKER_BOXES.isTagged(itemToAdd.getType()))
+    if (disableReason != null || Tag.SHULKER_BOXES.isTagged(itemToAdd.getType()))
       return 0;
 
-    if (inventory == null) {
-      if (inaccessible)
-        return 0;
+    tryAccessInventory();
 
-      if (!(itemStack.getItemMeta() instanceof BlockStateMeta _blockStateMeta)) {
-        inaccessible = true;
-        return 0;
-      }
-
-      if (!(_blockStateMeta.getBlockState() instanceof Container _container)) {
-        inaccessible = true;
-        return 0;
-      }
-
-      blockStateMeta = _blockStateMeta;
-      container = _container;
-      inventory = _container.getInventory();
-      filter = filterPredicateAccessor.accessFilterPredicate(player, _blockStateMeta.getPersistentDataContainer());
-    }
+    if (inventory == null)
+      return 0;
 
     if (filter != null && !filter.test(itemToAdd))
       return 0;
@@ -76,5 +64,49 @@ public class LazyContainer {
       dirty = true;
 
     return amount - remainingAmount;
+  }
+
+  public UsageCounts getUsageCounts() {
+    if (disableReason == DisableReason.NOT_MARKED)
+      return UsageCounts.EMPTY;
+
+    tryAccessInventory();
+
+    if (inventory == null)
+      return UsageCounts.EMPTY;
+
+    var size = inventory.getSize();
+    var vacantSlotCount = 0;
+
+    for (var index = 0; index < size; ++index) {
+      var item = inventory.getItem(index);
+
+      if (item == null || item.getType().isAir() || item.getAmount() == 0)
+        ++vacantSlotCount;
+    }
+
+    return new UsageCounts(size - vacantSlotCount, vacantSlotCount);
+  }
+
+  private void tryAccessInventory() {
+    if (inventory == null) {
+      if (inaccessible)
+        return;
+
+      if (!(itemStack.getItemMeta() instanceof BlockStateMeta _blockStateMeta)) {
+        inaccessible = true;
+        return;
+      }
+
+      if (!(_blockStateMeta.getBlockState() instanceof Container _container)) {
+        inaccessible = true;
+        return;
+      }
+
+      blockStateMeta = _blockStateMeta;
+      container = _container;
+      inventory = _container.getInventory();
+      filter = filterPredicateAccessor.accessFilterPredicate(player, _blockStateMeta.getPersistentDataContainer());
+    }
   }
 }

@@ -4,6 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.color.PackedColor;
+import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_pickup_container.settings.AutoPickupContainerSettingsStore;
@@ -31,6 +32,8 @@ import org.bukkit.event.inventory.CraftItemEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -45,6 +48,7 @@ import java.util.function.Consumer;
 public class AutoPickupContainerListener implements Listener, Tickable, FilterPredicateAccessor {
 
   private static final int FILTER_PREDICATE_CACHE_CLEAR_PERIOD_T = 20 * 60 * 5;
+  private static final int USAGE_INFO_MAX_UPDATE_AGE_T = 10;
 
   private record ShulkerCapture(Block block, ShulkerBox state) {}
 
@@ -116,6 +120,9 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
   private final List<ShulkerCapture> markedShulkerCaptures;
   private final Map<String, PredicateAndLanguage> filterPredicateAccessorCache;
+  private final Map<UUID, UsageInfo> usageInfoByPlayerId;
+
+  private long relativeTime;
 
   public AutoPickupContainerListener(
     Plugin plugin,
@@ -136,12 +143,29 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
     this.markedShulkerCaptures = new ArrayList<>();
     this.filterPredicateAccessorCache = new HashMap<>();
+    this.usageInfoByPlayerId = new HashMap<>();
   }
 
   @Override
   public void tick(long relativeTime) {
+    this.relativeTime = relativeTime;
+
     if (relativeTime % FILTER_PREDICATE_CACHE_CLEAR_PERIOD_T == 0)
       filterPredicateAccessorCache.clear();
+
+    for (var usageInfo : usageInfoByPlayerId.values()) {
+      if (!usageInfo.possiblyChanged)
+        continue;
+
+      var updateAge = relativeTime - usageInfo.lastUpdateTime;
+
+      if (updateAge < USAGE_INFO_MAX_UPDATE_AGE_T)
+        continue;
+
+      usageInfo.lastKnownCounts = makePickupSession(usageInfo.player).calculateUsageCounts();
+      usageInfo.lastUpdateTime = relativeTime;
+      usageInfo.possiblyChanged = false;
+    }
   }
 
   @Override
@@ -160,6 +184,15 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
       return null;
 
     return predicateAndLanguage.predicate;
+  }
+
+  public UsageCounts getLastKnownUsageCounts(Player player) {
+    var usageInfo = usageInfoByPlayerId.get(player.getUniqueId());
+
+    if (usageInfo == null)
+      return UsageCounts.EMPTY;
+
+    return usageInfo.lastKnownCounts;
   }
 
   public @Nullable MarkerModifyError modifyItemToBecomeAutoPickupContainer(ItemStack item) {
@@ -181,6 +214,30 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     item.setItemMeta(meta);
 
     return null;
+  }
+
+  @EventHandler
+  public void onQuit(PlayerQuitEvent event) {
+    usageInfoByPlayerId.remove(event.getPlayer().getUniqueId());
+  }
+
+  @EventHandler
+  public void onJoin(PlayerJoinEvent event) {
+    var player = event.getPlayer();
+
+    var usageCounts = makePickupSession(player).calculateUsageCounts();
+
+    usageInfoByPlayerId.put(player.getUniqueId(), new UsageInfo(player, usageCounts, relativeTime));
+  }
+
+  @EventHandler()
+  public void onSlotChanged(PlayerInventorySlotChangeEvent event) {
+    if (
+      doesContainMarker(event.getOldItemStack().getPersistentDataContainer())
+        || doesContainMarker(event.getNewItemStack().getPersistentDataContainer())
+    ) {
+      Bukkit.getScheduler().runTaskLater(plugin, () -> markUsageInfoAsPossiblyChanged(event.getPlayer()), 1);
+    }
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -716,10 +773,20 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   private AddToContainerSession makePickupSession(Player player) {
     return new AddToContainerSession(player, this, (inventory, slot, item) -> {
       if (!doesContainMarker(item.getPersistentDataContainer()))
-        return false;
+        return DisableReason.NOT_MARKED;
 
       // Disable auto-pickup for currently-viewed shulkers
-      return !shulkerAccessor.doesAnyAccessorHolderMatch(holder -> holder.isShulkerItemContainedByInventoryAtSlot(inventory, slot));
+      if (shulkerAccessor.doesAnyAccessorHolderMatch(holder -> holder.isShulkerItemContainedByInventoryAtSlot(inventory, slot)))
+        return DisableReason.CURRENTLY_VIEWED;
+
+      return null;
     });
+  }
+
+  private void markUsageInfoAsPossiblyChanged(Player player) {
+    var usageInfo = usageInfoByPlayerId.get(player.getUniqueId());
+
+    if (usageInfo != null)
+      usageInfo.possiblyChanged = true;
   }
 }
