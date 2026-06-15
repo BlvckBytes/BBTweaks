@@ -26,6 +26,7 @@ import me.blvckbytes.bbtweaks.mechanic.MechanicSection;
 import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakSection;
 import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceSection;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportSection;
+import me.blvckbytes.bbtweaks.offline_inventory.OfflineInventorySection;
 import me.blvckbytes.bbtweaks.ping.PingSection;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerSection;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideSection;
@@ -66,6 +67,7 @@ public class MainSection extends ConfigSection {
   public SidebarSection sidebar;
   public SignCopierSection signCopier;
   public BottleXpSection bottleXp;
+  public OfflineInventorySection offlineInventory;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

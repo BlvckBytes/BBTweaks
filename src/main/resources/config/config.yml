@@ -2326,6 +2326,36 @@ bottleXp:
       {lut.bottle_xp.prefix} <&e>Dein Inventar konnte nicht alle Flaschen fassen, weshalb das Abfüllen vor erreichen des Maximalwertes abgebrochen wurde.
     </container>
 
+offlineInventory:
+  command:
+    name: 'offlineinventory'
+    aliases:
+      - oinv
+  playersOnly: '{lut.offline_inventory_prefix} <&c>Dieser Befehl ist nur für Spieler zugänglich!'
+  noPermission: '{lut.offline_inventory_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  commandUsage: '{lut.offline_inventory_prefix} <&c>Benutzung: /{label} \<<&4>Spielername</>> \<<&4 *for-type="inventory_types" *for-separator={,<space/>}>{type}</>>'
+  invalidUsername: '{lut.offline_inventory_prefix} <&c>Der Benutzername <&4>{name}</> konnte zu keinem bestehenden Minecraft-Account zugeordnet werden!'
+  hasNotPlayedBefore: '{lut.offline_inventory_prefix} <&c>Der Spieler <&4>{name}</> hat noch nicht auf diesem Server gespielt!'
+  nbtApiNotAvailable: '{lut.offline_inventory_prefix} <&c>Das NBTAPI-Plugin ist nicht geladen, weshalb diese Funktion nicht zur Verfügung steht!'
+  failedToLoadFile: '{lut.offline_inventory_prefix} <&c>Die Datei des Spielers <&4>{name}</> konnte nicht erfolgreich geladen werden; siehe Konsole!'
+  openingInventoryView: '{lut.offline_inventory_prefix} <&7>Öffne die Ansicht <&a>{inventory_type}</> des Spielers <&a>{name}</>.'
+  cannotModifyView: '{lut.offline_inventory_prefix} <&c>Diese temporäre Ansicht kann nicht modifiziert werden!'
+  playerInventoryTitle: '<reset><&8>{name}''s Inventar'
+  playerEnderChestTitle: '<reset><&8>{name}''s Endertruhe'
+  airPlaceholderItem:
+    type: 'BARRIER'
+    name: |
+      <reset>
+        <&8>» <&c>Leerer Slot <&8>«
+    lore: |
+      <reset>
+        <br/>
+        <&7>An diesem Slot befindet sich kein<br/>
+        Item, was dieser Platzhalter verdeutlicht.<br/>
+        {lut.spacer}<br/>
+        <&8>➥ <&7>Slotbezeichnung: <&e>{slot_id}<br/>
+        {lut.spacer}
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -2352,6 +2382,7 @@ cLut:
   sidebar_prefix: '<&7>[<&6>Sidebar<&7>]'
   sign_copier_prefix: '<&7>[<&6>SignCopier<&7>]'
   auto_pickup_container_prefix: '<&7>[<&6>Sammelbox<&7>]'
+  offline_inventory_prefix: '<&7>[<&6>OfflineInventory<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

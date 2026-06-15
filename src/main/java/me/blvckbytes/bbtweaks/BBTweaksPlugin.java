@@ -23,6 +23,7 @@ import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.ipp.PredicateHelperIntegrationLoader;
+import me.blvckbytes.bbtweaks.integration.nbtapi.NbtApiIntegrationLoader;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.inv_magnet.InvMagnetCommand;
@@ -40,6 +41,8 @@ import me.blvckbytes.bbtweaks.multi_break.display.MultiBreakDisplayHandler;
 import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceHandler;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportCommand;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommand;
+import me.blvckbytes.bbtweaks.offline_inventory.OfflineInventoryCommand;
+import me.blvckbytes.bbtweaks.offline_inventory.OfflinePlayerRegistry;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerListener;
@@ -154,6 +157,9 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(SignCopyCommand.class)
         .withSingleton(SignEditCommand.class)
         .withSingleton(BottleXpCommand.class)
+        .withSingleton(NbtApiIntegrationLoader.class)
+        .withSingleton(OfflinePlayerRegistry.class)
+        .withSingleton(OfflineInventoryCommand.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);

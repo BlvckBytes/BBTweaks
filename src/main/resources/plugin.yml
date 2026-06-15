@@ -4,7 +4,7 @@ version: ${project.version}
 author: BlvckBytes
 api-version: 26.1
 depend: [ItemPredicateParser, WorldGuard, Essentials, PlaytimeRewards, LuckPerms]
-softdepend: [mcMMO, floodgate, CraftBook, EssentialsDiscord, Jobs, mcMMO, AdvancedRegionMarket, Multiverse-Core]
+softdepend: [mcMMO, floodgate, CraftBook, EssentialsDiscord, Jobs, mcMMO, AdvancedRegionMarket, Multiverse-Core, NBTAPI]
 commands:
   bbtweaks:
     description: 'Administrative base-command of this plugin'
@@ -79,6 +79,9 @@ commands:
     permission: bbtweaks.bottlexp
   autopickupcontainer:
     description: 'Manage settings regarding autopickup-containers'
+  offlineinventory:
+    description: 'View the inventory-contents of an offline-player'
+    permission: bbtweaks.offlineinventory
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
