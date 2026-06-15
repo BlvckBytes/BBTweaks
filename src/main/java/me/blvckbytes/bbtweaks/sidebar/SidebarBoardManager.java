@@ -533,7 +533,8 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
 
         return environment
           .withVariable("used_slots", usageCounts.usedSlots())
-          .withVariable("vacant_slots", usageCounts.vacantSlots());
+          .withVariable("vacant_slots", usageCounts.vacantSlots())
+          .withVariable("container_count", usageCounts.containerCount());
       }
     }
 

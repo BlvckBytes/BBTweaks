@@ -1788,7 +1788,11 @@ sidebar:
         description: |
           Der gesamte Füllstand aller sich in deinem<br/>
           Inventar befindlichen Sammelboxen, angezeigt<br/>
-          als \<Benutzte Slotanzahl>/\<Gesamte Slotanzahl>.
+          als \<Benutzte Slotanzahl>/\<Gesamte Slotanzahl>.<br/>
+          <br/>
+          <&e>🛈 Diese Zeile wird automatisch ausgeblendet,<br/>
+          wenn du keine Sammelboxen im Inventar hast,<br/>
+          um Platz zu sparen.</>
         iconType: 'PURPLE_SHULKER_BOX'
       defaultLabelStyle:
         color: 'PURPLE'
@@ -1797,6 +1801,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
+          *if="container_count"
           icon="🥃" label="Sammelboxen"
           value={
             {used_slots}/{used_slots + vacant_slots}
@@ -1808,7 +1813,11 @@ sidebar:
         description: |
           Der gesamte Füllstand aller sich in deinem<br/>
           Inventar befindlichen Sammelboxen, angezeigt<br/>
-          als Prozentwert (0-100%).
+          als Prozentwert (0-100%).<br/>
+          <br/>
+          <&e>🛈 Diese Zeile wird automatisch ausgeblendet,<br/>
+          wenn du keine Sammelboxen im Inventar hast,<br/>
+          um Platz zu sparen.</>
         iconType: 'PURPLE_SHULKER_BOX'
       defaultLabelStyle:
         color: 'PURPLE'
@@ -1817,6 +1826,7 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
+          *if="container_count"
           icon="🥃" label="Sammelboxen"
           value={
             <number [value]="(used_slots / double(used_slots + vacant_slots))*100" format="#" />%
