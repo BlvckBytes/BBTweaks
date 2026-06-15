@@ -7,6 +7,7 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.registry.FlagConflictException;
 import io.papermc.paper.event.player.PlayerInsertLecternBookEvent;
+import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -19,10 +20,12 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 import java.util.Set;
 
-public class WorldGuardFlags implements Listener {
+public class WorldGuardFlags implements Listener, Tickable {
 
   private static final Set<DamageType> HURT_BY_HEAT_DAMAGE_TYPES = Set.of(
     DamageType.HOT_FLOOR, DamageType.IN_FIRE, DamageType.ON_FIRE, DamageType.CAMPFIRE, DamageType.LAVA
@@ -136,5 +139,33 @@ public class WorldGuardFlags implements Listener {
     }
 
     return false;
+  }
+
+  @Override
+  public void tick(long relativeTime) {
+    if (relativeTime % 10 == 0)
+      handleHurtByHeatFireResistance();
+  }
+
+  // Allows for clearer vision while swimming under lava.
+  private void handleHurtByHeatFireResistance() {
+    for (var player : Bukkit.getOnlinePlayers()) {
+      if (!player.isInLava())
+        continue;
+
+      var fireResistance = player.getPotionEffect(PotionEffectType.FIRE_RESISTANCE);
+
+      if (fireResistance != null && fireResistance.getDuration() > 20)
+        continue;
+
+      if (!isFlagDeniedForAt(player, player.getLocation(), hurtByHeatFlag))
+        continue;
+
+      player.addPotionEffect(new PotionEffect(
+        PotionEffectType.FIRE_RESISTANCE,
+        20 * 5, 0,
+        false, false, false
+      ));
+    }
   }
 }
