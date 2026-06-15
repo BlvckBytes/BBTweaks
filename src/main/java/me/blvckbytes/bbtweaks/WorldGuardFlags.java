@@ -11,6 +11,7 @@ import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -36,6 +37,8 @@ public class WorldGuardFlags implements Listener, Tickable {
   private final StateFlag elytraBoostFlag;
   private final StateFlag spawnerChangeFlag;
   private final StateFlag hurtByHeatFlag;
+  private final StateFlag chiseledBookshelfInteractFlag;
+  private final StateFlag shelfInteractFlag;
 
   private final Plugin plugin;
 
@@ -45,6 +48,8 @@ public class WorldGuardFlags implements Listener, Tickable {
     elytraBoostFlag = tryRegisterFlagOrFail("elytra-boost");
     spawnerChangeFlag = tryRegisterFlagOrFail("spawner-change");
     hurtByHeatFlag = tryRegisterFlagOrFail("hurt-by-heat");
+    chiseledBookshelfInteractFlag = tryRegisterFlagOrFail("chiseled-bookshelf-interact");
+    shelfInteractFlag = tryRegisterFlagOrFail("shelf-interact");
 
     this.plugin = plugin;
   }
@@ -91,16 +96,35 @@ public class WorldGuardFlags implements Listener, Tickable {
 
     var clickedBlock = event.getClickedBlock();
 
-    if (clickedBlock == null || clickedBlock.getType() != Material.SPAWNER)
+    if (clickedBlock == null)
       return;
 
-    var heldItem = event.getItem();
+    var player = event.getPlayer();
+    var blockType = clickedBlock.getType();
 
-    if (heldItem == null || !heldItem.getType().getKey().getKey().endsWith("_spawn_egg"))
+    if (blockType == Material.SPAWNER) {
+      var heldItem = event.getItem();
+
+      if (heldItem == null || !heldItem.getType().getKey().getKey().endsWith("_spawn_egg"))
+        return;
+
+      if (isFlagDeniedForAt(player, clickedBlock.getLocation(), spawnerChangeFlag))
+        event.setCancelled(true);
+
       return;
+    }
 
-    if (isFlagDeniedForAt(event.getPlayer(), clickedBlock.getLocation(), spawnerChangeFlag))
-      event.setCancelled(true);
+    if (blockType == Material.CHISELED_BOOKSHELF) {
+      if (isFlagDeniedForAt(player, clickedBlock.getLocation(), chiseledBookshelfInteractFlag))
+        event.setCancelled(true);
+
+      return;
+    }
+
+    if (Tag.WOODEN_SHELVES.isTagged(blockType)) {
+      if (isFlagDeniedForAt(player, clickedBlock.getLocation(), shelfInteractFlag))
+        event.setCancelled(true);
+    }
   }
 
   @EventHandler(ignoreCancelled = true)
@@ -143,7 +167,7 @@ public class WorldGuardFlags implements Listener, Tickable {
 
   @Override
   public void tick(long relativeTime) {
-    if (relativeTime % 10 == 0)
+    if (relativeTime % 5 == 0)
       handleHurtByHeatFireResistance();
   }
 
