@@ -38,6 +38,7 @@ public class SignCopierSettingsDisplay extends Display<SignCopierSettings> {
     config.rootSection.signCopier.settingsDisplay.items.pasteSignGlowing.renderInto(inventory, environment);
     config.rootSection.signCopier.settingsDisplay.items.sendCopiedMessage.renderInto(inventory, environment);
     config.rootSection.signCopier.settingsDisplay.items.sendPastedMessage.renderInto(inventory, environment);
+    config.rootSection.signCopier.settingsDisplay.items.inkSacAsShortcut.renderInto(inventory, environment);
   }
 
   @Override
@@ -57,6 +58,7 @@ public class SignCopierSettingsDisplay extends Display<SignCopierSettings> {
       .withVariable("paste_sign_color", displayData.flags.contains(SettingFlag.PASTE_SIGN_COLOR))
       .withVariable("paste_sign_glowing", displayData.flags.contains(SettingFlag.PASTE_SIGN_GLOWING))
       .withVariable("send_copied_message", displayData.flags.contains(SettingFlag.SEND_COPIED_MESSAGE))
-      .withVariable("send_pasted_message", displayData.flags.contains(SettingFlag.SEND_PASTED_MESSAGE));
+      .withVariable("send_pasted_message", displayData.flags.contains(SettingFlag.SEND_PASTED_MESSAGE))
+      .withVariable("ink_sac_as_shortcut", displayData.flags.contains(SettingFlag.INK_SAC_AS_SHORTCUT));
   }
 }

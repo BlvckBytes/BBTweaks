@@ -304,6 +304,11 @@ public class SignCopyCommand implements CommandHandler, Listener {
     if (block == null || !Tag.ALL_SIGNS.isTagged(block.getType()))
       return;
 
+    var settings = settingsStore.accessSettings(event.getPlayer());
+
+    if (!settings.flags.contains(SettingFlag.INK_SAC_AS_SHORTCUT))
+      return;
+
     if (!(block.getState() instanceof Sign sign))
       return;
 

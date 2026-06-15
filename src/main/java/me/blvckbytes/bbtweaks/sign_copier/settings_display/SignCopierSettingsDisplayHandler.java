@@ -67,6 +67,9 @@ public class SignCopierSettingsDisplayHandler extends DisplayHandler<SignCopierS
     if (config.rootSection.signCopier.settingsDisplay.items.sendPastedMessage.getDisplaySlots().contains(slot))
       return SettingFlag.SEND_PASTED_MESSAGE;
 
+    if (config.rootSection.signCopier.settingsDisplay.items.inkSacAsShortcut.getDisplaySlots().contains(slot))
+      return SettingFlag.INK_SAC_AS_SHORTCUT;
+
     return null;
   }
 }

@@ -2274,6 +2274,21 @@ signCopier:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Funktion {send_pasted_message then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
+      inkSacAsShortcut:
+        slots: 14
+        type: '{ink_sac_as_shortcut then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="ink_sac_as_shortcut">Tintensack als Kurzform</> <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob du mit einem Tintensack in der<br/>
+            Hand durch Rechtsklick ein Schild kopieren und<br/>
+            durch Linksklick wieder einfügen kannst.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Funktion {ink_sac_as_shortcut then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
 
 bottleXp:
   command:

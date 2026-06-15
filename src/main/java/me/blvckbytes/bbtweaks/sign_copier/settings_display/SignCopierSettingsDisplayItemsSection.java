@@ -14,6 +14,7 @@ public class SignCopierSettingsDisplayItemsSection extends ConfigSection {
   public GuiItemStackSection pasteSignGlowing;
   public GuiItemStackSection sendCopiedMessage;
   public GuiItemStackSection sendPastedMessage;
+  public GuiItemStackSection inkSacAsShortcut;
 
   public SignCopierSettingsDisplayItemsSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

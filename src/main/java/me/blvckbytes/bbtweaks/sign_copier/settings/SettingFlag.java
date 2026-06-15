@@ -10,6 +10,7 @@ public enum SettingFlag {
   PASTE_SIGN_GLOWING(false),
   SEND_COPIED_MESSAGE(true),
   SEND_PASTED_MESSAGE(true),
+  INK_SAC_AS_SHORTCUT(true),
   ;
 
   public static final List<SettingFlag> ALL_VALUES = List.of(values());
