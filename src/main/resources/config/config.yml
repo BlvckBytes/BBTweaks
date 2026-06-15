@@ -2309,7 +2309,14 @@ bottleXp:
     <&7>Benutzung: /{label}</> \<<&d>Erfahrungspunkte</> | <&d>Prozentzahl%</>><br/>
     <br/>
     <container *for-suggestion="suggestions" *for-separator={<br/>}>
-      <&7>- /{label} <&d>{suggestion.percentage}%</>: <&c>-{suggestion.experience}exp</> (→ <&d>Level {suggestion.level_after}</>) für<space/>
+      <&7>- /{label} <&d>{suggestion.percentage}%</>:<space/>
+      <&c>-
+      <container *if="suggestion.experience < 1000" [suggestion.experience] />
+      <container *else>
+        <number [value]="suggestion.experience / 1000.0" format="#.#" />k
+      </container>
+      <space/>exp</><space/>
+      für<space/>
       <&a><$lut.bottle_xp.count_display [count]="suggestion.bottle_count"/></>
     </container>
     <br/>
