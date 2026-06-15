@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.auto_pickup_container;
 
+import me.blvckbytes.bbtweaks.mechanic.util.IntTuple;
 import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.Tag;
@@ -66,14 +67,14 @@ public class LazyContainer {
     return amount - remainingAmount;
   }
 
-  public UsageCounts getUsageCounts() {
+  public long getUsageCounts() {
     if (disableReason == DisableReason.NOT_MARKED)
-      return UsageCounts.EMPTY;
+      return 0;
 
     tryAccessInventory();
 
     if (inventory == null)
-      return UsageCounts.EMPTY;
+      return 0;
 
     var size = inventory.getSize();
     var vacantSlotCount = 0;
@@ -85,7 +86,7 @@ public class LazyContainer {
         ++vacantSlotCount;
     }
 
-    return new UsageCounts(size - vacantSlotCount, vacantSlotCount);
+    return IntTuple.create(size - vacantSlotCount, vacantSlotCount);
   }
 
   private void tryAccessInventory() {

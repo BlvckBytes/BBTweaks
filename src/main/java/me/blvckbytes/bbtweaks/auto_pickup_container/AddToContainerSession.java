@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.auto_pickup_container;
 
+import me.blvckbytes.bbtweaks.mechanic.util.IntTuple;
 import org.bukkit.Tag;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -65,15 +66,18 @@ public class AddToContainerSession {
   public UsageCounts calculateUsageCounts() {
     var usedSlotCount = 0;
     var vacantSlotCount = 0;
+    var containerCount = 0;
 
     for (var container : containers) {
       var usageCounts = container.getUsageCounts();
 
-      usedSlotCount += usageCounts.usedSlots();
-      vacantSlotCount += usageCounts.vacantSlots();
+      usedSlotCount += IntTuple.getFirst(usageCounts);
+      vacantSlotCount += IntTuple.getSecond(usageCounts);
+
+      ++containerCount;
     }
 
-    return new UsageCounts(usedSlotCount, vacantSlotCount);
+    return new UsageCounts(usedSlotCount, vacantSlotCount, containerCount);
   }
 
   public void onCompletion(ContainerWritebackHandler writebackHandler) {
