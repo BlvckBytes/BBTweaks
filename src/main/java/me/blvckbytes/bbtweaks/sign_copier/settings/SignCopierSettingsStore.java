@@ -1,7 +1,7 @@
 package me.blvckbytes.bbtweaks.sign_copier.settings;
 
-import it.unimi.dsi.fastutil.ints.IntArrayList;
 import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
+import me.blvckbytes.bbtweaks.mechanic.util.IntTuple;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -57,13 +57,29 @@ public class SignCopierSettingsStore implements Listener, Disableable {
 
     var pdc = player.getPersistentDataContainer();
 
-    var enabledFlags = pdc.get(keyEnabledFlags, PersistentDataType.INTEGER_ARRAY);
+    // Was an int[] of enabled ordinals previously, which doesn't allow for
+    // falling back on default values, so the data-layout changed since.
+    if (pdc.has(keyEnabledFlags, PersistentDataType.LONG)) {
+      var enabledValue = pdc.get(keyEnabledFlags, PersistentDataType.LONG);
 
-    if (enabledFlags != null) {
+      assert enabledValue != null;
+
+      var flagCount = IntTuple.getFirst(enabledValue);
+      var enabledMask = IntTuple.getSecond(enabledValue);
+
       settings.flags.clear();
 
-      for (var flagOrdinal : enabledFlags)
-        settings.flags.add(SettingFlag.byOrdinalOrNull(flagOrdinal));
+      for (var flag : SettingFlag.ALL_VALUES) {
+        if (flag.ordinal() >= flagCount) {
+          if (flag.defaultEnabled)
+            settings.flags.add(flag);
+
+          continue;
+        }
+
+        if ((enabledMask & (1 << flag.ordinal())) != 0)
+          settings.flags.add(flag);
+      }
     }
 
     return settings;
@@ -72,11 +88,12 @@ public class SignCopierSettingsStore implements Listener, Disableable {
   private void save(SignCopierSettings settings) {
     var pdc = settings.player.getPersistentDataContainer();
 
-    var enabledFlags = new IntArrayList();
+    var flagCount = SettingFlag.ALL_VALUES.size();
+    var enabledMask = 0;
 
     for (var flag : settings.flags)
-      enabledFlags.add(flag.ordinal());
+      enabledMask |= 1 << flag.ordinal();
 
-    pdc.set(keyEnabledFlags, PersistentDataType.INTEGER_ARRAY, enabledFlags.toIntArray());
+    pdc.set(keyEnabledFlags, PersistentDataType.LONG, IntTuple.create(flagCount, enabledMask));
   }
 }
