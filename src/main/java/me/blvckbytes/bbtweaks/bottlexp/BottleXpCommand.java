@@ -51,7 +51,7 @@ public class BottleXpCommand implements CommandHandler {
     }
 
     var experiencePerBottle = config.rootSection.bottleXp.experiencePerBottle;
-    final var availableExperience = player.getTotalExperience();
+    final var availableExperience = calculateAvailableExperience(player);
 
     if (availableExperience < experiencePerBottle) {
       config.rootSection.bottleXp.hasNoExperienceToBottle.sendMessage(player);
@@ -163,7 +163,6 @@ public class BottleXpCommand implements CommandHandler {
     var levelBefore = player.getLevel();
     player.setLevel(0);
     player.setExp(0);
-    player.setTotalExperience(0);
     player.giveExp(availableExperience - bottledExperience);
     var levelAfter = player.getLevel();
 
@@ -204,7 +203,7 @@ public class BottleXpCommand implements CommandHandler {
 
     if (args.length == 1) {
       return Stream.concat(
-        Stream.of(String.valueOf(player.getTotalExperience())),
+        Stream.of(String.valueOf(calculateAvailableExperience(player))),
         Arrays.stream(SUGGESTION_PERCENTAGES).mapToObj(String::valueOf).map(it -> it + "%")
       )
         .filter(it -> it.startsWith(args[0]))
@@ -277,5 +276,19 @@ public class BottleXpCommand implements CommandHandler {
       return 5 * lvl - 38;
 
     return 9 * lvl - 158;
+  }
+
+  private int calculateAvailableExperience(Player player) {
+    var currentLevelPercentage = player.getExp();
+    var currentLevelExperience = player.getExpToLevel();
+
+    var availableExperience = (int) (currentLevelPercentage * currentLevelExperience);
+    var currentLevel = player.getLevel();
+
+    // We've already accounted for the initial level by the getExp percentage.
+    while (--currentLevel >= 0)
+      availableExperience += getExperiencePointsNeededForLevel(currentLevel);
+
+    return availableExperience;
   }
 }
