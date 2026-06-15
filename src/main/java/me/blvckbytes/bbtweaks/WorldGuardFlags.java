@@ -2,8 +2,11 @@ package me.blvckbytes.bbtweaks;
 
 import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.world.entity.EntityType;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import com.sk89q.worldguard.protection.flags.RegistryFlag;
+import com.sk89q.worldguard.protection.flags.SetFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.registry.FlagConflictException;
 import io.papermc.paper.event.player.PlayerInsertLecternBookEvent;
@@ -15,14 +18,17 @@ import org.bukkit.Tag;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Set;
 
@@ -40,32 +46,46 @@ public class WorldGuardFlags implements Listener, Tickable {
   private final StateFlag chiseledBookshelfInteractFlag;
   private final StateFlag shelfInteractFlag;
 
+  private final SetFlag<EntityType> allowSpawnFlag;
+
   private final Plugin plugin;
 
   public WorldGuardFlags(Plugin plugin) {
-    lecternTakeFlag = tryRegisterFlagOrFail("lectern-take");
-    lecternInsertFlag = tryRegisterFlagOrFail("lectern-insert");
-    elytraBoostFlag = tryRegisterFlagOrFail("elytra-boost");
-    spawnerChangeFlag = tryRegisterFlagOrFail("spawner-change");
-    hurtByHeatFlag = tryRegisterFlagOrFail("hurt-by-heat");
-    chiseledBookshelfInteractFlag = tryRegisterFlagOrFail("chiseled-bookshelf-interact");
-    shelfInteractFlag = tryRegisterFlagOrFail("shelf-interact");
+    lecternTakeFlag = tryRegisterStateFlagOrFail(new StateFlag("lectern-take", true));
+    lecternInsertFlag = tryRegisterStateFlagOrFail(new StateFlag("lectern-insert", true));
+    elytraBoostFlag = tryRegisterStateFlagOrFail(new StateFlag("elytra-boost", true));
+    spawnerChangeFlag = tryRegisterStateFlagOrFail(new StateFlag("spawner-change", true));
+    hurtByHeatFlag = tryRegisterStateFlagOrFail(new StateFlag("hurt-by-heat", true));
+    chiseledBookshelfInteractFlag = tryRegisterStateFlagOrFail(new StateFlag("chiseled-bookshelf-interact", true));
+    shelfInteractFlag = tryRegisterStateFlagOrFail(new StateFlag("shelf-interact", true));
+
+    allowSpawnFlag = tryRegisterSetFlagOrFail(new SetFlag<>("allow-spawn", new RegistryFlag<>(null, EntityType.REGISTRY)));
 
     this.plugin = plugin;
   }
 
-  private StateFlag tryRegisterFlagOrFail(String name) {
+  private <T> SetFlag<T> tryRegisterSetFlagOrFail(SetFlag<T> flag) {
     var registry = WorldGuard.getInstance().getFlagRegistry();
 
     try {
-      var flag = new StateFlag(name, true);
       registry.register(flag);
       return flag;
     } catch (FlagConflictException e) {
-      var existing = registry.get(name);
+      throw new IllegalStateException("The WG-flag \"" + flag.getName() + "\" was already taken");
+    }
+  }
+
+  private StateFlag tryRegisterStateFlagOrFail(StateFlag flag) {
+    var registry = WorldGuard.getInstance().getFlagRegistry();
+
+    try {
+      registry.register(flag);
+      return flag;
+    } catch (FlagConflictException e) {
+      var existing = registry.get(flag.getName());
 
       if (!(existing instanceof StateFlag stateFlag))
-        throw new IllegalStateException("The WG-flag \"" + name + "\" was already taken as a non-state-flag");
+        throw new IllegalStateException("The WG-flag \"" + flag.getName() + "\" was already taken as a non-state-flag");
 
       return stateFlag;
     }
@@ -146,6 +166,28 @@ public class WorldGuardFlags implements Listener, Tickable {
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       player.setFireTicks(0);
     }, 1L);
+  }
+
+  @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+  public void onEntitySpawn(EntitySpawnEvent event) {
+    var allowedEntities = querySetFlagValueAt(event.getLocation(), allowSpawnFlag);
+
+    if (allowedEntities == null)
+      return;
+
+    var weEntityType = BukkitAdapter.adapt(event.getEntityType());
+
+    if (!allowedEntities.contains(weEntityType))
+      event.setCancelled(true);
+  }
+
+  private <T> @Nullable Set<T> querySetFlagValueAt(Location location, SetFlag<T> flag) {
+    var container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+    var query = container.createQuery();
+
+    var regions = query.getApplicableRegions(BukkitAdapter.adapt(location));
+
+    return regions.queryValue(null, flag);
   }
 
   private boolean isFlagDeniedForAt(Player player, Location location, StateFlag flag) {
