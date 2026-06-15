@@ -15,10 +15,8 @@ import me.blvckbytes.syllables_matcher.NormalizedConstant;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.apache.commons.lang3.StringUtils;
-import org.bukkit.DyeColor;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Tag;
+import org.bukkit.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.command.*;
@@ -100,9 +98,9 @@ public class SignCopyCommand implements CommandHandler, Listener {
       return true;
     }
 
-    NormalizedConstant<CommandAction> normalizedAction;
+    NormalizedConstant<CommandAction> action;
 
-    if (args.length == 0 || (normalizedAction = CommandAction.matcher.matchFirst(args[0])) == null) {
+    if (args.length == 0 || (action = CommandAction.matcher.matchFirst(args[0])) == null) {
       config.rootSection.signCopier.helpScreen.sendMessage(
         sender,
         new InterpretationEnvironment()
@@ -116,7 +114,7 @@ public class SignCopyCommand implements CommandHandler, Listener {
 
     var pdc = player.getPersistentDataContainer();
 
-    if (normalizedAction.constant == CommandAction.CLEAR) {
+    if (action.constant == CommandAction.CLEAR) {
       if (!pdc.has(keysLineContents[0])) {
         config.rootSection.signCopier.noSignCopied.sendMessage(player);
         return true;
@@ -134,34 +132,52 @@ public class SignCopyCommand implements CommandHandler, Listener {
       return true;
     }
 
-    if (normalizedAction.constant == CommandAction.EDIT || normalizedAction.constant == CommandAction.EDIT_PLAIN) {
+    if (action.constant == CommandAction.EDIT || action.constant == CommandAction.EDIT_PLAIN) {
       if (args.length < 2) {
         config.rootSection.signCopier.actionEditUsage.sendMessage(
           player,
           new InterpretationEnvironment()
             .withVariable("label", label)
-            .withVariable("action", normalizedAction.getNormalizedName())
+            .withVariable("action", action.getNormalizedName())
         );
 
         return true;
       }
 
-      handleEditAction(player, normalizedAction.constant == CommandAction.EDIT_PLAIN, args, 1);
+      handleEditAction(player, action.constant == CommandAction.EDIT_PLAIN, args, 1);
 
       return true;
     }
 
-    if (normalizedAction.constant == CommandAction.PREVIEW) {
+    if (action.constant == CommandAction.PREVIEW) {
       handlePreviewAction(player);
       return true;
     }
 
-    if (normalizedAction.constant == CommandAction.SETTINGS) {
+    if (action.constant == CommandAction.SETTINGS) {
       settingsDisplayHandler.show(player, settingsStore.accessSettings(player));
       return true;
     }
 
-    throw new IllegalArgumentException("Unimplemented action: " + normalizedAction.constant);
+    if (action.constant == CommandAction.COPY || action.constant == CommandAction.PASTE) {
+      var hitResult = player.getWorld().rayTraceBlocks(
+        player.getEyeLocation(),
+        player.getEyeLocation().getDirection(),
+        5, FluidCollisionMode.NEVER, false
+      );
+
+      Block block;
+
+      if (hitResult == null || (block = hitResult.getHitBlock()) == null || !(block.getState() instanceof Sign sign)) {
+        config.rootSection.signCopier.notLookingAtSign.sendMessage(player);
+        return true;
+      }
+
+      handleCopyPasteAction(player, sign, action.constant == CommandAction.COPY);
+      return true;
+    }
+
+    throw new IllegalArgumentException("Unimplemented action: " + action.constant);
   }
 
   public void handlePreviewAction(Player player) {
@@ -293,7 +309,10 @@ public class SignCopyCommand implements CommandHandler, Listener {
 
     event.setCancelled(true);
 
-    var player = event.getPlayer();
+    handleCopyPasteAction(event.getPlayer(), sign, event.getAction().isRightClick());
+  }
+
+  private void handleCopyPasteAction(Player player, Sign sign, boolean copy) {
     var settings = settingsStore.accessSettings(player);
 
     var environment = new InterpretationEnvironment()
@@ -301,7 +320,7 @@ public class SignCopyCommand implements CommandHandler, Listener {
       .withVariable("y", sign.getY())
       .withVariable("z", sign.getZ());
 
-    if (event.getAction().isRightClick()) {
+    if (copy) {
       copySign(player, sign);
 
       if (settings.flags.contains(SettingFlag.SEND_COPIED_MESSAGE))

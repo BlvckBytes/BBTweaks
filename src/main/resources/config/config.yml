@@ -2185,6 +2185,8 @@ signCopier:
     <&7>- <&6>/{label}</> <&e>Edit</> \<<&e>Zeile</>> [<&e>Inhalt</>] - Editiere eine Zeile in deinem Bearbeitungsspeicher (Kurzform: <&6>/{sign_edit_command}</> \<<&e>Zeile</>> [<&e>Inhalt</>])<br/>
     <&7>- <&6>/{label}</> <&e>Edit-Plain</> \<<&e>Zeile</>> [<&e>Inhalt</>] - Editiere eine Zeile, ohne Farbcodes auszuführen<br/>
     <&7>- <&6>/{label}</> <&e>Preview</> - Zeigt den Inhalt deines Bearbeitungsspeichers (Kurzform: <&6>/{sign_edit_command}</> <&e>Preview</>)<br/>
+    <&7>- <&6>/{label}</> <&e>Copy</> - Kopiert das aktuell angesehene Schild (Kurzform: Rechtsklick aufs Schild mit Tintensack)<br/>
+    <&7>- <&6>/{label}</> <&e>Paste</> - Fügt in das aktuell angesehene Schild ein (Kurzform: Linksklick aufs Schild mit Tintensack)<br/>
     <&7>- <&6>/{label}</> <&e>Clear</> - Leert deinen Bearbeitungsspeicher<br/>
     <&7>- <&6>/{label}</> <&e>Settings</> - Öffne das Einstellungsmenü<br/>
   noSignCopied: '{lut.sign_copier_prefix} <&c>Du hast noch kein Schild durch Rechtsklick mit einem Tintenbeutel kopiert!'
@@ -2205,6 +2207,7 @@ signCopier:
   signCopied: '{lut.sign_copier_prefix} <&7>Der Inhalt des Schildes bei <&a>{x} {y} {z}</> wurde in deinen Bearbeitungsspeichers kopiert.'
   signPasted: '{lut.sign_copier_prefix} <&7>Der Inhalt deines Bearbeitungsspeichers wurde am Schild bei <&a>{x} {y} {z}</> eingefügt.'
   signPasteWasCancelled: '{lut.sign_copier_prefix} <&c>Das Einfügen des Schildes bei <&4>{x} {y} {z}</> wurde verweigert; bestehen Baurechte?'
+  notLookingAtSign: '{lut.sign_copier_prefix} <&c>Du siehst aktuell kein Schild an!'
   settingsDisplay:
     title: '<&8>SignCopier-Einstellungen'
     rows: 3

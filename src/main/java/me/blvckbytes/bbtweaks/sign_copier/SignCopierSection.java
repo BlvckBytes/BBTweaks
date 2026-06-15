@@ -33,6 +33,7 @@ public class SignCopierSection extends ConfigSection {
   public ComponentMarkup signCopied;
   public ComponentMarkup signPasted;
   public ComponentMarkup signPasteWasCancelled;
+  public ComponentMarkup notLookingAtSign;
 
   public @CSAlways SignCopierSettingsDisplaySection settingsDisplay;
 

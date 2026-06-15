@@ -9,6 +9,8 @@ public enum CommandAction implements MatchableEnum {
   PREVIEW,
   CLEAR,
   SETTINGS,
+  COPY,
+  PASTE,
   ;
 
   public static final EnumMatcher<CommandAction> matcher = new EnumMatcher<>(values());
