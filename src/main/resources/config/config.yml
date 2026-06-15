@@ -1448,7 +1448,10 @@ sidebar:
         name: 'Fortschritt erster Job'
         description: |
           Der aktuelle Fortschritt innerhalb deines<br/>
-          ersten Jobs (/jobs).
+          ersten Jobs (/jobs).<br/>
+          <br/>
+          <&e>🛈 Diese Zeile wird automatisch ausgeblendet,<br/>
+          wenn du keinen Job hast, um Platz zu sparen.</>
         iconType: 'CHEST'
       defaultLabelStyle:
         color: 'ORANGE'
@@ -1457,10 +1460,10 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="💼" floodgate-icon="⚒" label={{name neq null then `{name}-Job` else "Job 1"}}
+          *if="name"
+          icon="💼" floodgate-icon="⚒" label={{name}-Job}
           value={
-            <$lut.sidebar.job_progression_format *if="progression" />
-            <container *else>Kein Job</>
+            <$lut.sidebar.job_progression_format />
           }
         />
     SECOND_JOB_PROGRESSION:
@@ -1468,7 +1471,10 @@ sidebar:
         name: 'Fortschritt zweiter Job'
         description: |
           Der aktuelle Fortschritt innerhalb deines<br/>
-          zweiten Jobs (/jobs).
+          zweiten Jobs (/jobs).<br/>
+          <br/>
+          <&e>🛈 Diese Zeile wird automatisch ausgeblendet, wenn<br/>
+          du keinen zweiten Job hast, um Platz zu sparen.</>
         iconType: 'CHEST'
       defaultLabelStyle:
         color: 'ORANGE'
@@ -1477,10 +1483,10 @@ sidebar:
       defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
-          icon="💼" floodgate-icon="⚒" label={{name neq null then `{name}-Job` else "Job 2"}}
+          *if="name"
+          icon="💼" floodgate-icon="⚒" label={{name}-Job}
           value={
-            <$lut.sidebar.job_progression_format *if="progression" />
-            <container *else>Kein Job</>
+            <$lut.sidebar.job_progression_format />
           }
         />
     MCMMO_POWER_LEVEL:
