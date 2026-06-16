@@ -17,6 +17,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerAttemptPickupItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -293,7 +294,8 @@ public class InvFilterCommand implements CommandHandler, Listener {
       event.setCancelled(true);
   }
 
-  @EventHandler(ignoreCancelled = true)
+  // Important! Check this condition first, since all other checks are more expensive.
+  @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
   public void onPreAttractItem(PreAttractItemEvent event) {
     if (isExcludedByFilter(event.getPlayer(), event.getAttractedItem()))
       event.setCancelled(true);

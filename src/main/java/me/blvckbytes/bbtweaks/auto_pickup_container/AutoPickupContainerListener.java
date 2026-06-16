@@ -443,9 +443,16 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     shulkerMeta.lore(config.rootSection.autoPickupContainer.loreToSetOnUpdate.interpret(SlotType.ITEM_LORE, environment));
   }
 
-  @EventHandler(ignoreCancelled = true)
+  // Important! Checking shulker-contents is rather expensive, so only execute
+  // this "dry-run" if every other handler was unsuccessful in finding space.
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
   public void onPreAttractItem(PreAttractItemEvent event) {
     if (event.canHoldSome())
+      return;
+
+    var settings = settingsStore.accessSettings(event.getPlayer());
+
+    if (!settings.enabled)
       return;
 
     // By simply not calling into the completion-handler, we're performing a "dry-run"
