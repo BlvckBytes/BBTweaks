@@ -5,7 +5,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
-public class AutoPickupContainerSettings {
+public class AutoPickupContainerSettings extends ItemAttemptsKeeper {
 
   private static final boolean DEFAULT_ENABLED = true;
 

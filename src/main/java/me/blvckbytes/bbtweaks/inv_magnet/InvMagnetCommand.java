@@ -152,10 +152,10 @@ public class InvMagnetCommand implements CommandHandler, Tickable, Listener {
 
   @Override
   public void tick(long relativeTime) {
-    attractNearbyItemsAndOrbs();
+    attractNearbyItemsAndOrbs(relativeTime);
   }
 
-  private void attractNearbyItemsAndOrbs() {
+  private void attractNearbyItemsAndOrbs(long relativeTime) {
     for (var world : parametersStore.getAllowedWorlds()) {
       perTickAttractionSessionByEntityId.clear();
 
@@ -180,12 +180,19 @@ public class InvMagnetCommand implements CommandHandler, Tickable, Listener {
             if (item.getPickupDelay() > 0)
               continue;
 
-            var attractEvent = new PreAttractItemEvent(player, item.getItemStack());
+            var itemStack = item.getItemStack();
+
+            if (parameter.didFailAttemptRecently(itemStack, relativeTime))
+              continue;
+
+            var attractEvent = new PreAttractItemEvent(player, itemStack);
 
             Bukkit.getPluginManager().callEvent(attractEvent);
 
-            if (attractEvent.isCancelled() || !attractEvent.canHoldSome())
+            if (attractEvent.isCancelled() || !attractEvent.canHoldSome()) {
+              parameter.submitFailedAttempt(itemStack, relativeTime);
               continue;
+            }
           }
 
           else if (!(nearbyEntity instanceof ExperienceOrb))

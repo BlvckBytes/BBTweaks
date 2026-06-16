@@ -455,11 +455,20 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     if (!settings.enabled)
       return;
 
+    var attractedItem = event.getAttractedItem();
+
+    if (settings.didFailAttemptRecently(attractedItem, relativeTime))
+      return;
+
     // By simply not calling into the completion-handler, we're performing a "dry-run"
     var dryRunSession = makePickupSession(event.getPlayer());
 
-    if (dryRunSession.tryAddItemToContainersAndGetAddedAmount(event.getAttractedItem()) > 0)
-      event.markCanHoldSome();
+    if (dryRunSession.tryAddItemToContainersAndGetAddedAmount(attractedItem) <= 0) {
+      settings.submitFailedAttempt(attractedItem, relativeTime);
+      return;
+    }
+
+    event.markCanHoldSome();
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
@@ -473,6 +482,9 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     var itemEntity = event.getItem();
     var pickedUpStack = itemEntity.getItemStack();
 
+    if (settings.didFailAttemptRecently(pickedUpStack, relativeTime))
+      return;
+
     var session = makePickupSession(player);
 
     var availableAmount = pickedUpStack.getAmount();
@@ -480,8 +492,11 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
     session.onCompletion((item, meta) -> updateLore(meta, item.getType()));
 
-    if (addedAmount == 0)
+    // Had no space to add any amount of the item to any of the containers carried by the player.
+    if (addedAmount == 0) {
+      settings.submitFailedAttempt(pickedUpStack, relativeTime);
       return;
+    }
 
     // Cancelling prevents the default pickup-behavior from being executed, but sets the fly-at-player
     // flag to false, so we need to explicitly set it again; then, the pickup-animation will be played.

@@ -2,9 +2,10 @@ package me.blvckbytes.bbtweaks.inv_magnet.parameters;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_pickup_container.settings.ItemAttemptsKeeper;
 import org.bukkit.entity.Player;
 
-public class InvMagnetParameters {
+public class InvMagnetParameters extends ItemAttemptsKeeper {
 
   public final Player player;
   private final ConfigKeeper<MainSection> config;
