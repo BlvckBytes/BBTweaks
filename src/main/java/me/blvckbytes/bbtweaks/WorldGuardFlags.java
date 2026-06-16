@@ -181,7 +181,14 @@ public class WorldGuardFlags implements Listener, Tickable {
     if (allowedEntities == null)
       return;
 
-    var weEntityType = BukkitAdapter.adapt(event.getEntityType());
+    var entityType = event.getEntityType();
+
+    // Never cancel non-alive entities with the allow-spawn flag, as one would otherwise have to
+    // manually include a whole range of entities like items, boats, snowballs, falling-blocks, etc.
+    if (!entityType.isAlive())
+      return;
+
+    var weEntityType = BukkitAdapter.adapt(entityType);
 
     if (!allowedEntities.contains(weEntityType)) {
       event.setCancelled(true);
