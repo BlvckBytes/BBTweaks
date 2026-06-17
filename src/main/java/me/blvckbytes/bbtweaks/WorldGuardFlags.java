@@ -46,6 +46,7 @@ public class WorldGuardFlags implements Listener, Tickable {
   private final StateFlag hurtByHeatFlag;
   private final StateFlag chiseledBookshelfInteractFlag;
   private final StateFlag shelfInteractFlag;
+  private final StateFlag mobSpawningFlag;
 
   private final SetFlag<EntityType> allowSpawnFlag;
   private final SetFlag<EntityType> denySpawnFlag;
@@ -62,6 +63,11 @@ public class WorldGuardFlags implements Listener, Tickable {
     hurtByHeatFlag = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("hurt-by-heat", true));
     chiseledBookshelfInteractFlag = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("chiseled-bookshelf-interact", true));
     shelfInteractFlag = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("shelf-interact", true));
+
+    if (!(flagRegistry.get("mob-spawning") instanceof StateFlag _mobSpawningFlag))
+      throw new IllegalStateException("Expected the WG-flag \"mob-spawning\" to be a registered StateFlag");
+
+    mobSpawningFlag = _mobSpawningFlag;
 
     allowSpawnFlag = tryRegisterSetFlagOrFail(flagRegistry, new SetFlag<>("allow-spawn", new RegistryFlag<>(null, EntityType.REGISTRY)));
 
@@ -195,13 +201,19 @@ public class WorldGuardFlags implements Listener, Tickable {
       return;
     }
 
-    var deniedEntities = querySetFlagValueAt(event.getLocation(), denySpawnFlag);
-
-    if (deniedEntities == null)
+    if (!event.isCancelled())
       return;
 
     // Allow to override a denial with an allowance - especially useful with overlapping regions.
-    if (deniedEntities.contains(weEntityType))
+
+    var deniedEntities = querySetFlagValueAt(event.getLocation(), denySpawnFlag);
+
+    if (deniedEntities != null && deniedEntities.contains(weEntityType)) {
+      event.setCancelled(false);
+      return;
+    }
+
+    if (isFlagDeniedForAt(null, event.getLocation(), mobSpawningFlag))
       event.setCancelled(false);
   }
 
@@ -214,18 +226,22 @@ public class WorldGuardFlags implements Listener, Tickable {
     return regions.queryValue(null, flag);
   }
 
-  private boolean isFlagDeniedForAt(Player player, Location location, StateFlag flag) {
+  private boolean isFlagDeniedForAt(@Nullable Player player, Location location, StateFlag flag) {
     var container = WorldGuard.getInstance().getPlatform().getRegionContainer();
     var query = container.createQuery();
 
     var regions = query.getApplicableRegions(BukkitAdapter.adapt(location));
-    var wgPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+    var wgPlayer = player == null ? null : WorldGuardPlugin.inst().wrapPlayer(player);
 
     var state = regions.queryState(wgPlayer, flag);
 
     if (state == StateFlag.State.DENY) {
       var world = location.getWorld();
-      return world == null || !player.hasPermission("worldguard.bypass." + world.getName());
+
+      if (world == null || player == null)
+        return true;
+
+      return !player.hasPermission("worldguard.bypass." + world.getName());
     }
 
     return false;
