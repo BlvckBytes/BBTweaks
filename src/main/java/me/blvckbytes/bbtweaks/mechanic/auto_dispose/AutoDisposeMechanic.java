@@ -3,9 +3,9 @@ package me.blvckbytes.bbtweaks.mechanic.auto_dispose;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.mechanic.PredicateMechanic;
 import me.blvckbytes.bbtweaks.util.SignUtil;
-import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -25,10 +25,10 @@ public class AutoDisposeMechanic extends PredicateMechanic<AutoDisposeInstance> 
   public AutoDisposeMechanic(
     JavaPlugin plugin,
     ConfigKeeper<MainSection> config,
-    PredicateHelper predicateHelper
+    IPPIntegration ippIntegration
   ) {
     super(
-      plugin, config, predicateHelper,
+      plugin, config, ippIntegration,
       new NamespacedKey(plugin, "auto-dispose-filter-predicate"),
       new NamespacedKey(plugin, "auto-dispose-filter-language")
     );

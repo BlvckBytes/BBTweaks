@@ -5,9 +5,9 @@ import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
+import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.inv_magnet.PreAttractItemEvent;
 import me.blvckbytes.bbtweaks.util.PredicateUtils;
-import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
@@ -36,7 +36,7 @@ public class InvFilterCommand implements CommandHandler, Listener {
   private final PluginCommand command;
   private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
-  private final PredicateHelper predicateHelper;
+  private final IPPIntegration ippIntegration;
 
   private final NamespacedKey filterPredicateKey;
   private final NamespacedKey filterLanguageKey;
@@ -46,7 +46,7 @@ public class InvFilterCommand implements CommandHandler, Listener {
 
   public InvFilterCommand(
     JavaPlugin plugin,
-    PredicateHelper predicateHelper,
+    IPPIntegration ippIntegration,
     ConfigKeeper<MainSection> config
   ) {
     this.command = Objects.requireNonNull(plugin.getCommand(InvFilterCommandSection.INITIAL_NAME));
@@ -54,7 +54,7 @@ public class InvFilterCommand implements CommandHandler, Listener {
     this.plugin = plugin;
     this.config = config;
 
-    this.predicateHelper = predicateHelper;
+    this.ippIntegration = ippIntegration;
 
     this.filterPredicateKey = new NamespacedKey(plugin, "invfilter-predicate");
     this.filterLanguageKey = new NamespacedKey(plugin, "invfilter-language");
@@ -82,7 +82,7 @@ public class InvFilterCommand implements CommandHandler, Listener {
       String setFilterCommand = null;
 
       if (currentFilter != null && currentFilter.predicateAndLanguage != null) {
-        var selectedLanguage = predicateHelper.getSelectedLanguage(player);
+        var selectedLanguage = ippIntegration.predicateHelper.getSelectedLanguage(player);
         var predicateLanguage = currentFilter.predicateAndLanguage.language;
 
         if (predicateLanguage == selectedLanguage)
@@ -151,7 +151,7 @@ public class InvFilterCommand implements CommandHandler, Listener {
       }
 
       else {
-        language = predicateHelper.getSelectedLanguage(player);
+        language = ippIntegration.predicateHelper.getSelectedLanguage(player);
         argsOffset = 1;
 
         if (args.length == argsOffset) {
@@ -169,13 +169,13 @@ public class InvFilterCommand implements CommandHandler, Listener {
       ItemPredicate predicate;
 
       try {
-        var tokens = predicateHelper.parseTokens(args, argsOffset);
-        predicate = predicateHelper.parsePredicate(language, tokens);
+        var tokens = ippIntegration.predicateHelper.parseTokens(args, argsOffset);
+        predicate = ippIntegration.predicateHelper.parsePredicate(language, tokens);
       } catch (ItemPredicateParseException e) {
         config.rootSection.invFilter.predicateError.sendMessage(
           player,
           new InterpretationEnvironment()
-            .withVariable("error", predicateHelper.createExceptionMessage(e))
+            .withVariable("error", ippIntegration.predicateHelper.createExceptionMessage(e))
         );
 
         return true;
@@ -274,7 +274,7 @@ public class InvFilterCommand implements CommandHandler, Listener {
       return List.of();
 
     if (action.constant == CommandAction.SET_FILTER || action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE)
-      return PredicateUtils.tabCompletePredicate(player, args, 1, predicateHelper, action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE);
+      return PredicateUtils.tabCompletePredicate(player, args, 1, ippIntegration, action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE);
 
     return List.of();
   }
@@ -371,8 +371,8 @@ public class InvFilterCommand implements CommandHandler, Listener {
     ItemPredicate predicate;
 
     try {
-      var tokens = predicateHelper.parseTokens(filterPredicateString);
-      predicate = predicateHelper.parsePredicate(language, tokens);
+      var tokens = ippIntegration.predicateHelper.parseTokens(filterPredicateString);
+      predicate = ippIntegration.predicateHelper.parsePredicate(language, tokens);
     } catch (ItemPredicateParseException e) {
       return null;
     }

@@ -2,7 +2,7 @@ package me.blvckbytes.bbtweaks.mechanic;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.item_predicate_parser.PredicateHelper;
+import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.item_predicate_parser.event.*;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
@@ -22,18 +22,18 @@ public abstract class PredicateMechanic<InstanceType extends MechanicInstance> e
   protected static final Component COMPONENT_PREDICATE_MODE_ON = Component.text("Predicate Mode").color(NamedTextColor.GREEN);
   protected static final Component COMPONENT_PREDICATE_MODE_OFF = Component.empty();
 
-  protected final PredicateHelper predicateHelper;
+  protected final IPPIntegration ippIntegration;
 
   protected final NamespacedKey predicateKey;
   protected final NamespacedKey predicateLanguageKey;
 
   public PredicateMechanic(
-    Plugin plugin, ConfigKeeper<MainSection> config, PredicateHelper predicateHelper,
+    Plugin plugin, ConfigKeeper<MainSection> config, IPPIntegration ippIntegration,
     NamespacedKey predicateKey, NamespacedKey predicateLanguageKey
   ) {
     super(plugin, config);
 
-    this.predicateHelper = predicateHelper;
+    this.ippIntegration = ippIntegration;
     this.predicateKey = predicateKey;
     this.predicateLanguageKey = predicateLanguageKey;
   }
@@ -94,8 +94,8 @@ public abstract class PredicateMechanic<InstanceType extends MechanicInstance> e
     ItemPredicate predicate;
 
     try {
-      var tokens = predicateHelper.parseTokens(predicateString);
-      predicate = predicateHelper.parsePredicate(language, tokens);
+      var tokens = ippIntegration.predicateHelper.parseTokens(predicateString);
+      predicate = ippIntegration.predicateHelper.parsePredicate(language, tokens);
     } catch (Throwable e) {
       return null;
     }

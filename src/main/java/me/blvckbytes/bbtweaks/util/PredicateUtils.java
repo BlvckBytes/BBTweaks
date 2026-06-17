@@ -1,6 +1,6 @@
 package me.blvckbytes.bbtweaks.util;
 
-import me.blvckbytes.item_predicate_parser.PredicateHelper;
+import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.entity.Player;
@@ -11,7 +11,7 @@ public class PredicateUtils {
 
   public static List<String> tabCompletePredicate(
     Player player, String[] args, int firstArgIndex,
-    PredicateHelper predicateHelper, boolean withLanguage
+    IPPIntegration ippIntegration, boolean withLanguage
   ) {
     TranslationLanguage language;
     int argsOffset;
@@ -30,20 +30,20 @@ public class PredicateUtils {
     }
 
     else {
-      language = predicateHelper.getSelectedLanguage(player);
+      language = ippIntegration.predicateHelper.getSelectedLanguage(player);
       argsOffset = firstArgIndex;
     }
 
     try {
-      var tokens = predicateHelper.parseTokens(args, argsOffset);
-      var completions = predicateHelper.createCompletion(language, tokens);
+      var tokens = ippIntegration.predicateHelper.parseTokens(args, argsOffset);
+      var completions = ippIntegration.predicateHelper.createCompletion(language, tokens);
 
       if (completions.expandedPreviewOrError() != null)
         player.sendActionBar(completions.expandedPreviewOrError());
 
       return completions.suggestions();
     } catch (ItemPredicateParseException e) {
-      player.sendActionBar(predicateHelper.createExceptionMessage(e));
+      player.sendActionBar(ippIntegration.predicateHelper.createExceptionMessage(e));
       return List.of();
     }
   }

@@ -2,10 +2,10 @@ package me.blvckbytes.bbtweaks.multi_break.display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
-import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;
@@ -13,18 +13,18 @@ import org.bukkit.plugin.Plugin;
 public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, MultiBreakDisplayData> {
 
   private final FloodgateIntegration floodgateIntegration;
-  private final PredicateHelper predicateHelper;
+  private final IPPIntegration ippIntegration;
 
   public MultiBreakDisplayHandler(
     FloodgateIntegration floodgateIntegration,
-    PredicateHelper predicateHelper,
+    IPPIntegration ippIntegration,
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
     super(config, plugin);
 
     this.floodgateIntegration = floodgateIntegration;
-    this.predicateHelper = predicateHelper;
+    this.ippIntegration = ippIntegration;
   }
 
   @Override
@@ -64,7 +64,7 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
         if (selectedParameters.tellIfLocked())
           return false;
 
-        selectedParameters.removeFilter(display.displayData.commandLabel(), predicateHelper.getSelectedLanguage(player));
+        selectedParameters.removeFilter(display.displayData.commandLabel(), ippIntegration.predicateHelper.getSelectedLanguage(player));
         return true;
       }
 

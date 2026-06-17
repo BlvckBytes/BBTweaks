@@ -2,20 +2,19 @@ package me.blvckbytes.bbtweaks.integration.ipp;
 
 import me.blvckbytes.bbtweaks.auto_wirer.WrappedDependency;
 import me.blvckbytes.item_predicate_parser.ItemPredicateParserPlugin;
-import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import org.bukkit.Bukkit;
 
-public class PredicateHelperIntegrationLoader {
+public class IPPIntegrationLoader {
 
   @WrappedDependency
-  public final PredicateHelper predicateHelper;
+  public final IPPIntegration ippIntegration;
 
-  public PredicateHelperIntegrationLoader() {
+  public IPPIntegrationLoader() {
     ItemPredicateParserPlugin ipp;
 
     if (!Bukkit.getServer().getPluginManager().isPluginEnabled("ItemPredicateParser") || (ipp = ItemPredicateParserPlugin.getInstance()) == null)
       throw new IllegalStateException("Expected plugin ItemPredicateParser to have been loaded at this point");
 
-    predicateHelper = ipp.getPredicateHelper();
+    ippIntegration = new IPPIntegration(ipp.getPredicateHelper(), ipp.getTranslationLanguageRegistry());
   }
 }

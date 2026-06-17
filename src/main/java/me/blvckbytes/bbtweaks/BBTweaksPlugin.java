@@ -23,7 +23,7 @@ import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegrationLoader;
-import me.blvckbytes.bbtweaks.integration.ipp.PredicateHelperIntegrationLoader;
+import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegrationLoader;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.inv_magnet.InvMagnetCommand;
@@ -98,7 +98,7 @@ public class BBTweaksPlugin extends JavaPlugin {
 
       autoWirer
         .withSingleton(MainConfigLoader.class)
-        .withSingleton(PredicateHelperIntegrationLoader.class)
+        .withSingleton(IPPIntegrationLoader.class)
         .withSingleton(McMMOIntegrationLoader.class)
         .withSingleton(FloodgateIntegrationLoader.class)
         .withSingleton(ArmIntegrationLoader.class)

@@ -3,13 +3,13 @@ package me.blvckbytes.bbtweaks.mechanic.magnet;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.mechanic.PredicateMechanic;
 import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.MagnetEditDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicRegistry;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import me.blvckbytes.bbtweaks.util.SignUtil;
-import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -46,11 +46,11 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
   public MagnetMechanic(
     JavaPlugin plugin,
     ConfigKeeper<MainSection> config,
-    PredicateHelper predicateHelper,
+    IPPIntegration ippIntegration,
     MagnetEditDisplayHandler magnetEditDisplayHandler
   ) {
     super(
-      plugin, config, predicateHelper,
+      plugin, config, ippIntegration,
       new NamespacedKey(plugin, "magnet-filter-predicate"),
       new NamespacedKey(plugin, "magnet-filter-language")
     );

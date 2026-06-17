@@ -9,10 +9,10 @@ import io.papermc.paper.persistence.PersistentDataContainerView;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_pickup_container.settings.AutoPickupContainerSettingsStore;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
+import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.inv_magnet.PreAttractItemEvent;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorWriteEvent;
-import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.event.*;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
@@ -111,7 +111,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   private final Plugin plugin;
   private final AutoPickupContainerSettingsStore settingsStore;
   private final ShulkerAccessorListener shulkerAccessor;
-  private final PredicateHelper predicateHelper;
+  private final IPPIntegration ippIntegration;
   private final ConfigKeeper<MainSection> config;
 
   private final NamespacedKey containerMarkerKey;
@@ -128,13 +128,13 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     Plugin plugin,
     AutoPickupContainerSettingsStore settingsStore,
     ShulkerAccessorListener shulkerAccessor,
-    PredicateHelper predicateHelper,
+    IPPIntegration ippIntegration,
     ConfigKeeper<MainSection> config
   ) {
     this.plugin = plugin;
     this.settingsStore = settingsStore;
     this.shulkerAccessor = shulkerAccessor;
-    this.predicateHelper = predicateHelper;
+    this.ippIntegration = ippIntegration;
     this.config = config;
 
     this.containerMarkerKey = new NamespacedKey(plugin, "auto-pickup-container");
@@ -176,7 +176,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
         new InterpretationEnvironment()
           .withVariable("predicate", predicate)
           .withVariable("language", language)
-          .withVariable("error", predicateHelper.createExceptionMessage(exception))
+          .withVariable("error", ippIntegration.predicateHelper.createExceptionMessage(exception))
       );
     });
 
@@ -757,8 +757,8 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     ItemPredicate predicate;
 
     try {
-      var tokens = predicateHelper.parseTokens(predicateString);
-      predicate = predicateHelper.parsePredicate(language, tokens);
+      var tokens = ippIntegration.predicateHelper.parseTokens(predicateString);
+      predicate = ippIntegration.predicateHelper.parsePredicate(language, tokens);
     } catch (ItemPredicateParseException exception) {
       if (errorHandler != null)
         errorHandler.handle(predicateString, languageString, exception);

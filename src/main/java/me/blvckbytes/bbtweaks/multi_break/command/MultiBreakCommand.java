@@ -5,6 +5,7 @@ import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
+import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakCommandSection;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakDimension;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
@@ -13,7 +14,6 @@ import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
 import me.blvckbytes.bbtweaks.multi_break.display.MultiBreakDisplayData;
 import me.blvckbytes.bbtweaks.multi_break.display.MultiBreakDisplayHandler;
 import me.blvckbytes.bbtweaks.util.PredicateUtils;
-import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
@@ -38,20 +38,20 @@ public class MultiBreakCommand implements CommandHandler {
   private final PluginCommand command;
   private final MultiBreakParametersStore parametersStore;
   private final MultiBreakDisplayHandler displayHandler;
-  private final PredicateHelper predicateHelper;
+  private final IPPIntegration ippIntegration;
   private final ConfigKeeper<MainSection> config;
 
   public MultiBreakCommand(
     JavaPlugin plugin,
     MultiBreakParametersStore parametersStore,
     MultiBreakDisplayHandler displayHandler,
-    PredicateHelper predicateHelper,
+    IPPIntegration ippIntegration,
     ConfigKeeper<MainSection> config
   ) {
     this.command = Objects.requireNonNull(plugin.getCommand(MultiBreakCommandSection.INITIAL_NAME));
     this.parametersStore = parametersStore;
     this.displayHandler = displayHandler;
-    this.predicateHelper = predicateHelper;
+    this.ippIntegration = ippIntegration;
     this.config = config;
   }
 
@@ -110,7 +110,7 @@ public class MultiBreakCommand implements CommandHandler {
       if (selectedParameters.tellIfLocked())
         return true;
 
-      var selectedLangauge = predicateHelper.getSelectedLanguage(player);
+      var selectedLangauge = ippIntegration.predicateHelper.getSelectedLanguage(player);
 
       int argsOffset;
       TranslationLanguage language;
@@ -164,13 +164,13 @@ public class MultiBreakCommand implements CommandHandler {
       ItemPredicate predicate;
 
       try {
-        var tokens = predicateHelper.parseTokens(args, argsOffset);
-        predicate = predicateHelper.parsePredicate(language, tokens);
+        var tokens = ippIntegration.predicateHelper.parseTokens(args, argsOffset);
+        predicate = ippIntegration.predicateHelper.parsePredicate(language, tokens);
       } catch (ItemPredicateParseException e) {
         config.rootSection.multiBreak.predicateError.sendMessage(
           player,
           new InterpretationEnvironment()
-            .withVariable("error", predicateHelper.createExceptionMessage(e))
+            .withVariable("error", ippIntegration.predicateHelper.createExceptionMessage(e))
         );
 
         return true;
@@ -251,7 +251,7 @@ public class MultiBreakCommand implements CommandHandler {
       }
 
       case GET_FILTER -> {
-        var setCommand = selectedParameters.makeFilterSetCommand(label, predicateHelper.getSelectedLanguage(player));
+        var setCommand = selectedParameters.makeFilterSetCommand(label, ippIntegration.predicateHelper.getSelectedLanguage(player));
 
         if (setCommand == null) {
           config.rootSection.multiBreak.noFilterSet.sendMessage(player, selectedParameters.makeEnvironment());
@@ -268,7 +268,7 @@ public class MultiBreakCommand implements CommandHandler {
       }
 
       case REMOVE_FILTER -> {
-        selectedParameters.removeFilter(label, predicateHelper.getSelectedLanguage(player));
+        selectedParameters.removeFilter(label, ippIntegration.predicateHelper.getSelectedLanguage(player));
         return true;
       }
 
@@ -332,7 +332,7 @@ public class MultiBreakCommand implements CommandHandler {
       return List.of();
 
     if (normalizedAction.constant == CommandAction.SET_FILTER || normalizedAction.constant == CommandAction.SET_FILTER_WITH_LANGUAGE)
-      return PredicateUtils.tabCompletePredicate(player, args, 1, predicateHelper, normalizedAction.constant == CommandAction.SET_FILTER_WITH_LANGUAGE);
+      return PredicateUtils.tabCompletePredicate(player, args, 1, ippIntegration, normalizedAction.constant == CommandAction.SET_FILTER_WITH_LANGUAGE);
 
     var parametersSlots = parametersStore.accessParametersSlots(player);
 

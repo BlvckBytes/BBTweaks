@@ -5,7 +5,7 @@ import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
-import me.blvckbytes.item_predicate_parser.PredicateHelper;
+import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
@@ -39,14 +39,14 @@ public class MultiBreakParametersStore implements Disableable, Listener {
   private final NamespacedKey keyEnabled;
 
   private final Plugin plugin;
-  private final PredicateHelper predicateHelper;
+  private final IPPIntegration ippIntegration;
   private final ConfigKeeper<MainSection> config;
 
   private final Map<UUID, MultiBreakParametersSlots> parametersSlotsByPlayerId;
 
   public MultiBreakParametersStore(
     Plugin plugin,
-    PredicateHelper predicateHelper,
+    IPPIntegration ippIntegration,
     ConfigKeeper<MainSection> config
   ) {
     this.keysSneakMode = new NamespacedKey[PARAMETERS_SLOTS_COUNT];
@@ -75,7 +75,7 @@ public class MultiBreakParametersStore implements Disableable, Listener {
       keysLocked[slotIndex] = new NamespacedKey(plugin, baseKey + "-locked");
     }
 
-    this.predicateHelper = predicateHelper;
+    this.ippIntegration = ippIntegration;
     this.plugin = plugin;
     this.config = config;
 
@@ -208,8 +208,8 @@ public class MultiBreakParametersStore implements Disableable, Listener {
     ItemPredicate predicate;
 
     try {
-      var tokens = predicateHelper.parseTokens(pdc.get(keyFilterPredicate, PersistentDataType.STRING));
-      predicate = predicateHelper.parsePredicate(language, tokens);
+      var tokens = ippIntegration.predicateHelper.parseTokens(pdc.get(keyFilterPredicate, PersistentDataType.STRING));
+      predicate = ippIntegration.predicateHelper.parsePredicate(language, tokens);
     } catch (Throwable e) {
       return null;
     }

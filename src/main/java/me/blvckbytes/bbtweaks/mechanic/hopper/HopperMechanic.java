@@ -4,10 +4,10 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegration;
+import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.mechanic.PredicateMechanic;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import me.blvckbytes.bbtweaks.util.ReflectUtil;
-import me.blvckbytes.item_predicate_parser.PredicateHelper;
 import me.blvckbytes.item_predicate_parser.event.*;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.apache.commons.lang3.StringUtils;
@@ -51,11 +51,11 @@ public class HopperMechanic extends PredicateMechanic<HopperInstance> implements
   public HopperMechanic(
     JavaPlugin plugin,
     ConfigKeeper<MainSection> config,
-    PredicateHelper predicateHelper,
+    IPPIntegration ippIntegration,
     CraftBookIntegration craftBookIntegration
   ) {
     super(
-      plugin, config, predicateHelper,
+      plugin, config, ippIntegration,
       new NamespacedKey(plugin, "hopper-predicate"),
       new NamespacedKey(plugin, "hopper-predicate-language")
     );
