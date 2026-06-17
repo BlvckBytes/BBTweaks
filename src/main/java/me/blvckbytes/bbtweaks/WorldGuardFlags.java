@@ -22,8 +22,8 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.event.entity.EntitySpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.bukkit.plugin.Plugin;
@@ -181,20 +181,18 @@ public class WorldGuardFlags implements Listener, Tickable {
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
-  public void onEntitySpawn(EntitySpawnEvent event) {
+  public void onCreatureSpawn(CreatureSpawnEvent event) {
+    var reason = event.getSpawnReason();
+
+    if (reason != CreatureSpawnEvent.SpawnReason.COMMAND && reason != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG)
+      return;
+
     var allowedEntities = querySetFlagValueAt(event.getLocation(), allowSpawnFlag);
 
     if (allowedEntities == null)
       return;
 
-    var entityType = event.getEntityType();
-
-    // Never cancel non-alive entities with the allow-spawn flag, as one would otherwise have to
-    // manually include a whole range of entities like items, boats, snowballs, falling-blocks, etc.
-    if (!entityType.isAlive())
-      return;
-
-    var weEntityType = BukkitAdapter.adapt(entityType);
+    var weEntityType = BukkitAdapter.adapt(event.getEntityType());
 
     if (!allowedEntities.contains(weEntityType)) {
       event.setCancelled(true);
