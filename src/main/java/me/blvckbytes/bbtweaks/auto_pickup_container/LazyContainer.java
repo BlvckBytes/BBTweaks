@@ -13,9 +13,9 @@ import org.jetbrains.annotations.Nullable;
 
 public class LazyContainer {
 
-  private final Player player;
+  private final @Nullable Player player;
   private final ItemStack itemStack;
-  private final FilterPredicateAccessor filterPredicateAccessor;
+  private final @Nullable FilterPredicateAccessor filterPredicateAccessor;
   private final @Nullable DisableReason disableReason;
 
   private boolean dirty;
@@ -27,9 +27,9 @@ public class LazyContainer {
   private @Nullable ItemPredicate filter;
 
   public LazyContainer(
-    Player player,
+    @Nullable Player player,
     ItemStack itemStack,
-    FilterPredicateAccessor filterPredicateAccessor,
+    @Nullable FilterPredicateAccessor filterPredicateAccessor,
     @Nullable DisableReason disableReason
   ) {
     this.player = player;
@@ -38,12 +38,18 @@ public class LazyContainer {
     this.disableReason = disableReason;
   }
 
+  public static @Nullable Inventory tryAccessInventory(ItemStack itemStack) {
+    var instance = new LazyContainer(null, itemStack, null, null);
+    instance.tryAccessInventory();
+    return instance.inventory;
+  }
+
   public void onCompletion(ContainerWritebackHandler writebackHandler) {
-    if (!dirty || container == null || blockStateMeta == null)
+    if (!dirty || container == null || blockStateMeta == null || inventory == null)
       return;
 
     blockStateMeta.setBlockState(container);
-    writebackHandler.handle(itemStack, blockStateMeta);
+    writebackHandler.handle(itemStack, blockStateMeta, inventory);
     itemStack.setItemMeta(blockStateMeta);
   }
 
@@ -107,7 +113,9 @@ public class LazyContainer {
       blockStateMeta = _blockStateMeta;
       container = _container;
       inventory = _container.getInventory();
-      filter = filterPredicateAccessor.accessFilterPredicate(player, _blockStateMeta.getPersistentDataContainer());
+
+      if (player != null && filterPredicateAccessor != null)
+        filter = filterPredicateAccessor.accessFilterPredicate(player, _blockStateMeta.getPersistentDataContainer());
     }
   }
 }

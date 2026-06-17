@@ -209,7 +209,10 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
     pdc.set(containerMarkerKey, PersistentDataType.BOOLEAN, true);
 
-    updateLore(meta, item.getType());
+    var inventory = LazyContainer.tryAccessInventory(item);
+    var counts = inventory == null ? MaterialCounts.EMPTY : MaterialCounts.fromInventory(inventory);
+
+    updateLore(meta, item.getType(), counts);
 
     item.setItemMeta(meta);
 
@@ -380,7 +383,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     if (result == null)
       return;
 
-    if (updateLoreIfMarked(result))
+    if (updateLoreAfterColorChangeIfMarked(result))
       inventory.setResult(result);
   }
 
@@ -409,12 +412,12 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
       if (itemBefore.getType() == itemAfter.getType())
         return;
 
-      if (updateLoreIfMarked(itemAfter))
+      if (updateLoreAfterColorChangeIfMarked(itemAfter))
         playerInventory.setItemInMainHand(itemAfter);
     }, 1L);
   }
 
-  private boolean updateLoreIfMarked(ItemStack item) {
+  private boolean updateLoreAfterColorChangeIfMarked(ItemStack item) {
     if (!doesContainMarker(item.getPersistentDataContainer()))
       return false;
 
@@ -423,13 +426,16 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     if (meta == null)
       return false;
 
-    updateLore(meta, item.getType());
+    var inventory = LazyContainer.tryAccessInventory(item);
+    var counts = inventory == null ? MaterialCounts.EMPTY : MaterialCounts.fromInventory(inventory);
+
+    updateLore(meta, item.getType(), counts);
 
     item.setItemMeta(meta);
     return true;
   }
 
-  private void updateLore(ItemMeta shulkerMeta, Material shulkerType) {
+  private void updateLore(ItemMeta shulkerMeta, Material shulkerType, MaterialCounts counts) {
     var dyeColor = dyeColorByShulkerMaterial.getOrDefault(shulkerType, DyeColor.WHITE);
     var bukkitColor = dyeColor.getColor();
     var hexColor = PackedColor.asNonAlphaHex(PackedColor.of(bukkitColor.getRed(), bukkitColor.getGreen(), bukkitColor.getBlue(), 255));
@@ -438,7 +444,8 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
     var environment = new InterpretationEnvironment()
       .withVariable("shulker_color", hexColor)
-      .withVariable("filter_predicate", predicateString);
+      .withVariable("filter_predicate", predicateString)
+      .withVariable("item_counts", counts.asCountList());
 
     shulkerMeta.lore(config.rootSection.autoPickupContainer.loreToSetOnUpdate.interpret(SlotType.ITEM_LORE, environment));
   }
@@ -490,7 +497,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     var availableAmount = pickedUpStack.getAmount();
     var addedAmount = session.tryAddItemToContainersAndGetAddedAmount(pickedUpStack);
 
-    session.onCompletion((item, meta) -> updateLore(meta, item.getType()));
+    session.onCompletion((item, meta, inventory) -> updateLore(meta, item.getType(), MaterialCounts.fromInventory(inventory)));
 
     // Had no space to add any amount of the item to any of the containers carried by the player.
     if (addedAmount == 0) {
@@ -527,7 +534,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   @EventHandler
   public void onShulkerAccessorWrite(ShulkerAccessorWriteEvent event) {
     if (doesContainMarker(event.meta.getPersistentDataContainer()))
-      updateLore(event.meta, event.type);
+      updateLore(event.meta, event.type, MaterialCounts.fromInventory(event.inventory));
   }
 
   @EventHandler
@@ -647,7 +654,11 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     else
       removeFilterFromPdc(pdc);
 
-    updateLore(meta, item.getType());
+    var inventory = LazyContainer.tryAccessInventory(item);
+    var counts = inventory == null ? MaterialCounts.EMPTY : MaterialCounts.fromInventory(inventory);
+
+    updateLore(meta, item.getType(), counts);
+
     item.setItemMeta(meta);
     return true;
   }
@@ -787,7 +798,10 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
     copyOverFilter(blockPdc, itemPdc);
 
-    updateLore(droppedMeta, droppedStack.getType());
+    var inventory = LazyContainer.tryAccessInventory(droppedStack);
+    var counts = inventory == null ? MaterialCounts.EMPTY : MaterialCounts.fromInventory(inventory);
+
+    updateLore(droppedMeta, droppedStack.getType(), counts);
 
     droppedStack.setItemMeta(droppedMeta);
   }
