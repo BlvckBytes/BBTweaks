@@ -1533,11 +1533,15 @@ sidebar:
         name: 'Ticks Per Second'
         description: |
           Gibt an, wie viele Ticks pro Sekunde verarbeitet<br/>
-          werden konnten, als Mittelwerte der letzten Minute,<br/>
-          fünf Minuten und zehn Minuten.<br/>
+          werden konnten, als Mittelwerte der letzten Minute<br/>
+          sowie fünf Minuten, gefolgt vom Mittelwert der MSPT<br/>
+          (Millisekunden pro Tick) der letzten 5 Sekunden.<br/>
           <br/>
-          Um flüssig zu laufen, benötigt Minecraft 20 TPS.<br/>
-          Niedrigere Werte signalisieren eine Überlastung.
+          Um flüssig zu laufen, benötigt Minecraft 20 TPS;<br/>
+          niedrigere Werte signalisieren eine Überlastung.<br/>
+          <br/>
+          Somit liegt die Maximalgrenze für den MSPT-Wert<br/>
+          bei 50ms, um 20 TPS zu gewährleisten.
         iconType: 'REDSTONE'
       defaultLabelStyle:
         color: 'LIGHT_RED'
@@ -1548,7 +1552,11 @@ sidebar:
         <$lut.sidebar.statistic_renderer
           icon="⚡" label="TPS"
           value={
-            <number *for-value="tps" *for-separator={<space/>} [value] format='#.#' locale="de_DE" />
+            <number [value]="tps[0]" format='#.#' locale="de_DE" />
+            <space/>
+            <number [value]="tps[1]" format='#.#' locale="de_DE" />
+            <space/>
+            <number [value]="average_mspt" format='#.#' locale="de_DE" />/50
           }
         />
     LIGHT_LEVEL:

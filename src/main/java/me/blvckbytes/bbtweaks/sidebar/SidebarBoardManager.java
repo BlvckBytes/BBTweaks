@@ -453,8 +453,17 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       }
 
       case TPS -> {
+        var tickTimes = Bukkit.getTickTimes();
+        double tickMillisSum = 0;
+
+        for (var tickTimeNano : tickTimes)
+          tickMillisSum += tickTimeNano / 1000.0 / 1000.0;
+
+        var tickMillisAverage = tickTimes.length == 0 ? 0 : tickMillisSum / tickTimes.length;
+
         return environment
-          .withVariable("tps", Bukkit.getServer().getTPS());
+          .withVariable("tps", Bukkit.getServer().getTPS())
+          .withVariable("average_mspt", tickMillisAverage);
       }
 
       case LIGHT_LEVEL -> {
