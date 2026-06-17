@@ -17,6 +17,7 @@ import me.blvckbytes.bbtweaks.durability_warnings.DurabilityWarningsListener;
 import me.blvckbytes.bbtweaks.durability_warnings.WarningsProfileStore;
 import me.blvckbytes.bbtweaks.durability_warnings.command.DurabilityWarningCommand;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
+import me.blvckbytes.bbtweaks.infinite_waterbucket.InfiniteWaterbucketListener;
 import me.blvckbytes.bbtweaks.integration.mc_mmo.McMMOIntegrationLoader;
 import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
@@ -147,6 +148,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(SidebarCommand.class)
         .withSingleton(SidebarBoardManager.class)
         .withSingleton(NewbieAnnounceHandler.class)
+        .withSingleton(InfiniteWaterbucketListener.class)
         .withSingleton(MainCommand.class)
         .withSingleton(CommandItemListener.class)
         .withSingleton(SignCopierSettingsStore.class)

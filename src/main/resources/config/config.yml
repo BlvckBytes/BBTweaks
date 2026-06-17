@@ -18,6 +18,9 @@ mainCommand:
   setAutoPickupContainerNoValidItem: '{lut.main_prefix} <&c>Du hältst keine Shulkerbox in der Hand!'
   setAutoPickupContainerAlreadyMarked: '{lut.main_prefix} <&c>Das von dir gehaltene Item wurde bereits als Auto-Pickup-Behälter gekennzeichnet!'
   setAutoPickupContainerSuccess: '{lut.main_prefix} <&a>Dieses Item ist nun als Auto-Pickup-Behälter gekennzeichnet.'
+  setInfiniteWaterbucketNoValidItem: '{lut.main_prefix} <&c>Du hältst keinen Wassereimer in der Hand!'
+  setInfiniteWaterbucketAlreadyMarked: '{lut.main_prefix} <&c>Das von dir gehaltene Item wurde bereits als unendlicher Wassereimer gekennzeichnet!'
+  setInfiniteWaterbucketSuccess: '{lut.main_prefix} <&a>Dieses Item ist nun als unendlicher Wassereimer gekennzeichnet.'
 
 abSleep:
   thresholdNotYetReached: '<&a>Es sind <&2>{sleeping_count}<&a>/<&2>{threshold_count} <&a>benötigen Spielern im Bett'
@@ -2338,6 +2341,18 @@ bottleXp:
       <br/>
       {lut.bottle_xp.prefix} <&e>Dein Inventar konnte nicht alle Flaschen fassen, weshalb das Abfüllen vor erreichen des Maximalwertes abgebrochen wurde.
     </container>
+
+infiniteWaterbucket:
+  noPermission: '<&7>[<&6>UWEimer<&7>] <&c>Dir fehlen die nötigen Rechte, um dieses Feature benutzen zu können!'
+  name: |
+    <reset>
+      <&b>Unendlicher Wassereimer
+  lore: |
+    <reset>
+      <br/>
+      <&3>Eine mobile, unerschöpfliche Quelle an<br/>
+      ständig verfügbarem und frischem Wasser.
+  glint: true
 
 sLut:
   textures:

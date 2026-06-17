@@ -17,6 +17,7 @@ import me.blvckbytes.bbtweaks.durability_warnings.config.DurabilityWarningsSecti
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
 import me.blvckbytes.bbtweaks.get_exp.GetExpSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
+import me.blvckbytes.bbtweaks.infinite_waterbucket.InfiniteWaterbucketSection;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordSection;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterSection;
 import me.blvckbytes.bbtweaks.inv_magnet.config.InvMagnetSection;
@@ -66,6 +67,7 @@ public class MainSection extends ConfigSection {
   public SidebarSection sidebar;
   public SignCopierSection signCopier;
   public BottleXpSection bottleXp;
+  public InfiniteWaterbucketSection infiniteWaterbucket;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

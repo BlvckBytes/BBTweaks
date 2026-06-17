@@ -5,6 +5,7 @@ import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import com.google.gson.*;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.infinite_waterbucket.InfiniteWaterbucketListener;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerListener;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
@@ -38,6 +39,7 @@ public class MainCommand implements CommandHandler {
     LWC_EXTEND_BLOCKS,
     MARK_AUTO_PICKUP_CONTAINER,
     PATCH_SIGNS_FROM_FILE,
+    MARK_INFINITE_WATERBUCKET,
     ;
 
     static final EnumMatcher<Action> matcher = new EnumMatcher<>(values());
@@ -47,18 +49,21 @@ public class MainCommand implements CommandHandler {
   private final ConfigKeeper<MainSection> config;
   private final RDBreakerListener rdBreakerListener;
   private final AutoPickupContainerListener autoPickupContainer;
+  private final InfiniteWaterbucketListener infiniteWaterbucket;
   private final Plugin plugin;
 
   public MainCommand(
     JavaPlugin plugin,
     RDBreakerListener rdBreakerListener,
     AutoPickupContainerListener autoPickupContainer,
+    InfiniteWaterbucketListener infiniteWaterbucket,
     ConfigKeeper<MainSection> config
   ) {
     this.command = Objects.requireNonNull(plugin.getCommand("bbtweaks"));
     this.config = config;
     this.rdBreakerListener = rdBreakerListener;
     this.autoPickupContainer = autoPickupContainer;
+    this.infiniteWaterbucket = infiniteWaterbucket;
     this.plugin = plugin;
   }
 
@@ -308,6 +313,28 @@ public class MainCommand implements CommandHandler {
 
           plugin.getLogger().log(Level.INFO, "Patched sign at " + x + " " + y + " " + z + " " + worldName + " (" + (patchIndex + 1) + "/" + patchEntriesArray.size() + ")");
         }
+      }
+
+      case MARK_INFINITE_WATERBUCKET -> {
+        if (!(sender instanceof Player player)) {
+          config.rootSection.mainCommand.playersOnly.sendMessage(sender);
+          return true;
+        }
+
+        var heldItem = player.getInventory().getItemInMainHand();
+        var error = infiniteWaterbucket.modifyItemToBecomeInfiniteWaterBucket(heldItem);
+
+        if (error == null) {
+          config.rootSection.mainCommand.setInfiniteWaterbucketSuccess.sendMessage(player);
+          return true;
+        }
+
+        switch (error) {
+          case ALREADY_MARKED -> config.rootSection.mainCommand.setInfiniteWaterbucketAlreadyMarked.sendMessage(player);
+          case WRONG_ITEM_TYPE -> config.rootSection.mainCommand.setInfiniteWaterbucketNoValidItem.sendMessage(player);
+        }
+
+        return true;
       }
     }
 

@@ -19,6 +19,9 @@ public class MainCommandSection extends ConfigSection {
   public ComponentMarkup setAutoPickupContainerNoValidItem;
   public ComponentMarkup setAutoPickupContainerAlreadyMarked;
   public ComponentMarkup setAutoPickupContainerSuccess;
+  public ComponentMarkup setInfiniteWaterbucketNoValidItem;
+  public ComponentMarkup setInfiniteWaterbucketAlreadyMarked;
+  public ComponentMarkup setInfiniteWaterbucketSuccess;
 
   public MainCommandSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
