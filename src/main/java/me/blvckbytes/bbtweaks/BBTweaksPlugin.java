@@ -158,6 +158,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(SignEditCommand.class)
         .withSingleton(BottleXpCommand.class)
         .withSingleton(ListChunkTicketsCommand.class)
+        .withSingleton(ObstructedContainerOpener.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);
