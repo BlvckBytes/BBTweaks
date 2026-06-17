@@ -79,6 +79,9 @@ commands:
     permission: bbtweaks.bottlexp
   autopickupcontainer:
     description: 'Manage settings regarding autopickup-containers'
+  listchunktickets:
+    description: 'List all currently active chunk-tickets within your world'
+    permission: bbtweaks.listchunktickets
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
