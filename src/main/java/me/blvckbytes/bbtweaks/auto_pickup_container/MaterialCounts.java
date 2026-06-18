@@ -12,7 +12,7 @@ public record MaterialCounts(Map<Material, MutableInt> counts) {
 
   public static MaterialCounts EMPTY = new MaterialCounts(Collections.emptyMap());
 
-  public List<TranslatedMaterialCount> asTranslatedCountList(IPPIntegration ippIntegration) {
+  public List<TranslatedMaterialCount> asSortedTranslatedCountList(IPPIntegration ippIntegration) {
     var result = new ArrayList<TranslatedMaterialCount>();
 
     // Sadly, there is no way to reliably wrap translate-components in the lore where these
@@ -31,7 +31,14 @@ public record MaterialCounts(Map<Material, MutableInt> counts) {
       result.add(new TranslatedMaterialCount(translation, entry.getValue().value));
     }
 
+    result.sort((a, b) -> -Integer.compare(a.count(), b.count()));
+
     return result;
+  }
+
+  public void addCountsFrom(MaterialCounts other) {
+    for (var entry : other.counts.entrySet())
+      counts.computeIfAbsent(entry.getKey(), k -> new MutableInt()).value += entry.getValue().value;
   }
 
   public static MaterialCounts fromInventory(Inventory inventory) {

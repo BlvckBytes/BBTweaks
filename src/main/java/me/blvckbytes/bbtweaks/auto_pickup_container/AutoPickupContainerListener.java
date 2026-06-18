@@ -513,7 +513,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     var environment = new InterpretationEnvironment()
       .withVariable("shulker_color", hexColor)
       .withVariable("filter_predicate", predicateString)
-      .withVariable("item_counts", counts.asTranslatedCountList(ippIntegration));
+      .withVariable("item_counts", counts.asSortedTranslatedCountList(ippIntegration));
 
     shulkerMeta.lore(config.rootSection.autoPickupContainer.loreToSetOnUpdate.interpret(SlotType.ITEM_LORE, environment));
   }
@@ -757,7 +757,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  private boolean doesContainMarker(PersistentDataContainerView pdcView) {
+  public boolean doesContainMarker(PersistentDataContainerView pdcView) {
     var markerFlag = pdcView.get(containerMarkerKey, PersistentDataType.BOOLEAN);
     return markerFlag != null && markerFlag;
   }

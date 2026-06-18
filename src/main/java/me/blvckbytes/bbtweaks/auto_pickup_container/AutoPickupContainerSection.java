@@ -13,6 +13,9 @@ public class AutoPickupContainerSection extends ConfigSection {
 
   public ComponentMarkup loreToSetOnUpdate;
   public ComponentMarkup filterErrorNotification;
+  public ComponentMarkup overviewNoContainers;
+  public ComponentMarkup overviewAllContainersEmpty;
+  public ComponentMarkup overviewScreen;
 
   public AutoPickupContainerSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

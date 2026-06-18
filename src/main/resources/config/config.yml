@@ -1022,6 +1022,15 @@ autoPickupContainer:
         }
       />
   filterErrorNotification: '{lut.auto_pickup_container_prefix} <&c>Der Filter <&4>{predicate} <&c>einer Box in deinem Inventar konnte nicht geladen werden: <&4>{error}.'
+  overviewNoContainers: '{lut.auto_pickup_container_prefix} <&c>Du hast aktuell keine Sammelboxen im Inventar!'
+  overviewAllContainersEmpty: '{lut.auto_pickup_container_prefix} <&c>Alle Sammelboxen in deinem Inventar sind aktuell leer!'
+  overviewScreen: |
+    <&8><&m>{" " ** 30}</> <&6>Sammelbox <&8><&m>{" " ** 30}</><br/>
+    <&7>Inhalt von insgesamt {container_count} Sammelboxen:<br/>
+    <container *for-item="item_counts" *for-separator={<br/>}>
+      <&7>- <&6>{item.count}x</> <&e>{item.type}
+    </container>
+    <br/>
 
 getExp:
   command:

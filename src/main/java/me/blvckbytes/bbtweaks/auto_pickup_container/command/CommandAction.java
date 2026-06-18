@@ -7,6 +7,7 @@ public enum CommandAction implements MatchableEnum {
   ENABLE,
   DISABLE,
   TOGGLE,
+  OVERVIEW,
   ;
 
   public static EnumMatcher<CommandAction> matcher = new EnumMatcher<>(values());
