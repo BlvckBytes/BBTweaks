@@ -2397,11 +2397,22 @@ listChunkTickets:
   noActiveTickets: '{lut.list_chunk_tickets_prefix} <&7>In der Welt <&c>{world}</> sind aktuell keine Tickets aktiv.'
   ticketListScreen: |
     <&8><&m>{" " ** 30}</> <&6>ChunkTickets <&8><&m>{" " ** 30}</><br/>
-    <&7>Aktive Tickets in der Welt <&a>{world}</>:<br/>
-    <container *for-ticket="tickets">
-      <hover-text value={<&a>Klicke, um dich zum Chunk zu teleportieren}>
-        <run-command value=`/tppos {ticket.x} {ticket.y} {ticket.z}`>
-          <&7>- (<&a>{x}|{z}</>): <&a *for-plugin="ticket.plugins" *for-separator={,<space/>}>{plugin}</>
+    <&7>Aktive Tickets in der Welt <&a>{world}</> (<&a>{len(tickets)}</>):<br/>
+    <container *for-ticket="tickets" *for-separator={;<space/>} *let-command=`/tppos {ticket.x} {ticket.y} {ticket.z}`>
+      <hover-text value={<&a>Klick: {command}}>
+        <run-command [value]="command">
+          <&7>(
+          x=<&a>{ticket.x}</> z=<&a>{ticket.z}</>
+          <container *if="ticket.regions" *let-regions={<&a *for-region="ticket.regions" *for-separator={,<space/>}>{region}}>
+            <space/>
+            <container *if="len(ticket.regions) > 1">
+              regions=({regions})
+            </container>
+            <container *else>
+              region={regions}
+            </container>
+          </container>
+          ): <&a *for-plugin="ticket.plugins" *for-separator={,<space/>}>{plugin}</>
     </container>
 
 sLut:

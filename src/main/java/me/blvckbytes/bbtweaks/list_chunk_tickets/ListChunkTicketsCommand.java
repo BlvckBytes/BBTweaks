@@ -3,8 +3,15 @@ package me.blvckbytes.bbtweaks.list_chunk_tickets;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.math.BlockVector3;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
+import me.blvckbytes.bbtweaks.util.TeleportUtil;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
@@ -13,10 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class ListChunkTicketsCommand implements CommandHandler {
 
@@ -69,7 +73,15 @@ public class ListChunkTicketsCommand implements CommandHandler {
       for (var plugin : plugins)
         pluginNames.add(plugin.getName());
 
-      existingTickets.add(new ExistingChunkTicket(chunk, pluginNames));
+      var x = chunk.getX() << 4;
+      var z = chunk.getZ() << 4;
+
+      var teleportLocation = TeleportUtil.findSafeTeleportLocation(chunk.getWorld(), x, z);
+
+      if (teleportLocation == null)
+        teleportLocation = new Location(chunk.getWorld(), x, 100, z);
+
+      existingTickets.add(new ExistingChunkTicket(chunk, teleportLocation, pluginNames, getRegionsInChunk(chunk)));
     }
 
     if (existingTickets.isEmpty()) {
@@ -95,5 +107,34 @@ public class ListChunkTicketsCommand implements CommandHandler {
   @Override
   public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
     return List.of();
+  }
+
+  private Set<String> getRegionsInChunk(Chunk chunk) {
+    var world = chunk.getWorld();
+
+    var regionManager = WorldGuard.getInstance().getPlatform()
+      .getRegionContainer()
+      .get(BukkitAdapter.adapt(world));
+
+    if (regionManager == null)
+      return Collections.emptySet();
+
+    var minX = chunk.getX() << 4;
+    var minZ = chunk.getZ() << 4;
+    var maxX = minX + 15;
+    var maxZ = minZ + 15;
+
+    var queryRegion = new ProtectedCuboidRegion(
+      "__chunk_query__",
+      BlockVector3.at(minX, world.getMinHeight(), minZ),
+      BlockVector3.at(maxX, world.getMaxHeight() - 1, maxZ)
+    );
+
+    var ids = new HashSet<String>();
+
+    for (var region : regionManager.getApplicableRegions(queryRegion))
+       ids.add(region.getId());
+
+    return ids;
   }
 }
