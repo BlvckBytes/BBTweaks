@@ -80,12 +80,12 @@ public class AddToContainerSession {
     return new UsageCounts(usedSlotCount, vacantSlotCount, containerCount);
   }
 
-  public void onCompletion(ContainerWritebackHandler writebackHandler) {
+  public void onCompletion() {
     if (!dirty)
       return;
 
     for (var container : containers)
-      container.onCompletion(writebackHandler);
+      container.onCompletion();
 
     inventory.setStorageContents(storageContents);
   }

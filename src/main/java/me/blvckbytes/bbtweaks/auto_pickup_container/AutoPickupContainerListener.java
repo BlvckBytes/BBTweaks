@@ -4,6 +4,8 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.color.PackedColor;
+import io.papermc.paper.datacomponent.DataComponentTypes;
+import io.papermc.paper.datacomponent.item.TooltipDisplay;
 import io.papermc.paper.event.player.PlayerInventorySlotChangeEvent;
 import io.papermc.paper.persistence.PersistentDataContainerView;
 import me.blvckbytes.bbtweaks.MainSection;
@@ -11,8 +13,9 @@ import me.blvckbytes.bbtweaks.auto_pickup_container.settings.AutoPickupContainer
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.inv_magnet.PreAttractItemEvent;
+import me.blvckbytes.bbtweaks.shulker_accessor.PostShulkerAccessorWriteEvent;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
-import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorWriteEvent;
+import me.blvckbytes.bbtweaks.shulker_accessor.PreShulkerAccessorWriteEvent;
 import me.blvckbytes.item_predicate_parser.event.*;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
@@ -121,6 +124,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   private final List<ShulkerCapture> markedShulkerCaptures;
   private final Map<String, PredicateAndLanguage> filterPredicateAccessorCache;
   private final Map<UUID, UsageInfo> usageInfoByPlayerId;
+  private final Map<UUID, SlotChanges> slotChangesByPlayerId;
 
   private long relativeTime;
 
@@ -144,6 +148,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     this.markedShulkerCaptures = new ArrayList<>();
     this.filterPredicateAccessorCache = new HashMap<>();
     this.usageInfoByPlayerId = new HashMap<>();
+    this.slotChangesByPlayerId = new HashMap<>();
   }
 
   @Override
@@ -165,6 +170,36 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
       usageInfo.lastKnownCounts = makePickupSession(usageInfo.player).calculateUsageCounts();
       usageInfo.lastUpdateTime = relativeTime;
       usageInfo.possiblyChanged = false;
+    }
+
+    for (var slotChanges : slotChangesByPlayerId.values()) {
+      var playerInventory = slotChanges.player.getInventory();
+
+      slotChanges.forEachChangedSlotAndUnmark(relativeTime, slot -> {
+        var item = playerInventory.getItem(slot);
+
+        if (item == null || item.getType().isAir())
+          return;
+
+        if (!doesContainMarker(item.getPersistentDataContainer()))
+          return;
+
+        // Important! We must not interfere with the shulker-accessor, as to avoid it getting
+        // out-of-sync, which is why its writeback-events handle updating separately.
+        if (shulkerAccessor.doesAnyAccessorHolderMatch(it -> it.isShulkerItemContainedByInventoryAtSlot(playerInventory, slot)))
+          return;
+
+        var meta = item.getItemMeta();
+
+        var shulkerInventory = LazyContainer.tryAccessInventory(item);
+        var counts = shulkerInventory == null ? MaterialCounts.EMPTY : MaterialCounts.fromInventory(shulkerInventory);
+
+        updateLore(meta, item.getType(), counts);
+
+        item.setItemMeta(meta);
+
+        updateData(item);
+      });
     }
   }
 
@@ -216,12 +251,17 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
     item.setItemMeta(meta);
 
+    updateData(item);
+
     return null;
   }
 
   @EventHandler
   public void onQuit(PlayerQuitEvent event) {
-    usageInfoByPlayerId.remove(event.getPlayer().getUniqueId());
+    var playerId = event.getPlayer().getUniqueId();
+
+    usageInfoByPlayerId.remove(playerId);
+    slotChangesByPlayerId.remove(playerId);
   }
 
   @EventHandler
@@ -233,13 +273,22 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     usageInfoByPlayerId.put(player.getUniqueId(), new UsageInfo(player, usageCounts, relativeTime));
   }
 
-  @EventHandler()
+  @EventHandler
   public void onSlotChanged(PlayerInventorySlotChangeEvent event) {
-    if (
-      doesContainMarker(event.getOldItemStack().getPersistentDataContainer())
-        || doesContainMarker(event.getNewItemStack().getPersistentDataContainer())
-    ) {
-      Bukkit.getScheduler().runTaskLater(plugin, () -> markUsageInfoAsPossiblyChanged(event.getPlayer()), 1);
+    var player = event.getPlayer();
+
+    var newItem = event.getNewItemStack();
+    var oldItem = event.getOldItemStack();
+
+    var doesNewContainMarker = doesContainMarker(newItem.getPersistentDataContainer());
+
+    if (doesContainMarker(oldItem.getPersistentDataContainer()) || doesNewContainMarker) {
+      // For some odd reason, there are many calls with old being AIR, even when I just open containers
+      // and do not change any of the actual slots in my inventory. Avoid updating in those cases.
+      if (doesNewContainMarker && newItem.getType() == oldItem.getType())
+        markSlotRequiringUpdate(player, event.getSlot());
+
+      markUsageInfoAsPossiblyChanged(player);
     }
   }
 
@@ -432,7 +481,26 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     updateLore(meta, item.getType(), counts);
 
     item.setItemMeta(meta);
+
+    updateData(item);
+
     return true;
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private void updateData(ItemStack shulkerItem) {
+    var builder = TooltipDisplay.tooltipDisplay();
+
+    var current = shulkerItem.getData(DataComponentTypes.TOOLTIP_DISPLAY);
+
+    if (current != null) {
+      builder.hiddenComponents(current.hiddenComponents());
+      builder.hideTooltip(current.hideTooltip());
+    }
+
+    builder.addHiddenComponents(DataComponentTypes.CONTAINER);
+
+    shulkerItem.setData(DataComponentTypes.TOOLTIP_DISPLAY, builder.build());
   }
 
   private void updateLore(ItemMeta shulkerMeta, Material shulkerType, MaterialCounts counts) {
@@ -445,7 +513,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     var environment = new InterpretationEnvironment()
       .withVariable("shulker_color", hexColor)
       .withVariable("filter_predicate", predicateString)
-      .withVariable("item_counts", counts.asCountList());
+      .withVariable("item_counts", counts.asTranslatedCountList(ippIntegration));
 
     shulkerMeta.lore(config.rootSection.autoPickupContainer.loreToSetOnUpdate.interpret(SlotType.ITEM_LORE, environment));
   }
@@ -497,7 +565,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     var availableAmount = pickedUpStack.getAmount();
     var addedAmount = session.tryAddItemToContainersAndGetAddedAmount(pickedUpStack);
 
-    session.onCompletion((item, meta, inventory) -> updateLore(meta, item.getType(), MaterialCounts.fromInventory(inventory)));
+    session.onCompletion();
 
     // Had no space to add any amount of the item to any of the containers carried by the player.
     if (addedAmount == 0) {
@@ -532,9 +600,15 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   }
 
   @EventHandler
-  public void onShulkerAccessorWrite(ShulkerAccessorWriteEvent event) {
+  public void onPreShulkerAccessorWrite(PreShulkerAccessorWriteEvent event) {
     if (doesContainMarker(event.meta.getPersistentDataContainer()))
       updateLore(event.meta, event.type, MaterialCounts.fromInventory(event.inventory));
+  }
+
+  @EventHandler
+  public void onPostShulkerAccessorWrite(PostShulkerAccessorWriteEvent event) {
+    if (doesContainMarker(event.item.getPersistentDataContainer()))
+      updateData(event.item);
   }
 
   @EventHandler
@@ -660,6 +734,9 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     updateLore(meta, item.getType(), counts);
 
     item.setItemMeta(meta);
+
+    updateData(item);
+
     return true;
   }
 
@@ -804,6 +881,8 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     updateLore(droppedMeta, droppedStack.getType(), counts);
 
     droppedStack.setItemMeta(droppedMeta);
+
+    updateData(droppedStack);
   }
 
   private AddToContainerSession makePickupSession(Player player) {
@@ -817,6 +896,12 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
       return null;
     });
+  }
+
+  private void markSlotRequiringUpdate(Player player, int slot) {
+    slotChangesByPlayerId
+      .computeIfAbsent(player.getUniqueId(), k -> new SlotChanges(player))
+      .markRequiringUpdate(slot);
   }
 
   private void markUsageInfoAsPossiblyChanged(Player player) {

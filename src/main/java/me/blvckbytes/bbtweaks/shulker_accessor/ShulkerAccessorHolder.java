@@ -119,9 +119,11 @@ public class ShulkerAccessorHolder extends ChangeDetectionHolder {
 
     blockStateMeta.setBlockState(container);
 
-    Bukkit.getPluginManager().callEvent(new ShulkerAccessorWriteEvent(shulkerItem.getType(), blockStateMeta, getInventory()));
+    Bukkit.getPluginManager().callEvent(new PreShulkerAccessorWriteEvent(shulkerItem.getType(), blockStateMeta, getInventory()));
 
     shulkerItem.setItemMeta(blockStateMeta);
+
+    Bukkit.getPluginManager().callEvent(new PostShulkerAccessorWriteEvent(shulkerItem));
 
     return true;
   }

@@ -44,12 +44,11 @@ public class LazyContainer {
     return instance.inventory;
   }
 
-  public void onCompletion(ContainerWritebackHandler writebackHandler) {
+  public void onCompletion() {
     if (!dirty || container == null || blockStateMeta == null || inventory == null)
       return;
 
     blockStateMeta.setBlockState(container);
-    writebackHandler.handle(itemStack, blockStateMeta, inventory);
     itemStack.setItemMeta(blockStateMeta);
   }
 

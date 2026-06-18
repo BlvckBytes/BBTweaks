@@ -7,7 +7,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.jetbrains.annotations.NotNull;
 
-public class ShulkerAccessorWriteEvent extends Event {
+public class PreShulkerAccessorWriteEvent extends Event {
 
   private static final HandlerList handlers = new HandlerList();
 
@@ -15,7 +15,7 @@ public class ShulkerAccessorWriteEvent extends Event {
   public final BlockStateMeta meta;
   public final Inventory inventory;
 
-  public ShulkerAccessorWriteEvent(Material type, BlockStateMeta meta, Inventory inventory) {
+  public PreShulkerAccessorWriteEvent(Material type, BlockStateMeta meta, Inventory inventory) {
     this.type = type;
     this.meta = meta;
     this.inventory = inventory;

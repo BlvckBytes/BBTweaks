@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.auto_pickup_container;
 
+import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.util.MutableInt;
+import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.Material;
 import org.bukkit.inventory.Inventory;
 
@@ -10,11 +12,24 @@ public record MaterialCounts(Map<Material, MutableInt> counts) {
 
   public static MaterialCounts EMPTY = new MaterialCounts(Collections.emptyMap());
 
-  public List<MaterialCount> asCountList() {
-    var result = new ArrayList<MaterialCount>();
+  public List<TranslatedMaterialCount> asTranslatedCountList(IPPIntegration ippIntegration) {
+    var result = new ArrayList<TranslatedMaterialCount>();
 
-    for (var entry : counts.entrySet())
-      result.add(new MaterialCount(entry.getKey(), entry.getValue().value));
+    // Sadly, there is no way to reliably wrap translate-components in the lore where these
+    // counts are displayed, so we will have to display server-side evaluated german names
+    // to every client, no matter their configured locale - a compromise solution.
+
+    var translationRegistry = ippIntegration.languageRegistry.getTranslationRegistry(TranslationLanguage.GERMAN_DE);
+
+    for (var entry : counts.entrySet()) {
+      var material = entry.getKey();
+      var translation = translationRegistry.getTranslationBySingleton(material);
+
+      if (translation == null)
+        translation = material.name();
+
+      result.add(new TranslatedMaterialCount(translation, entry.getValue().value));
+    }
 
     return result;
   }
