@@ -28,6 +28,7 @@ import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.inv_magnet.InvMagnetCommand;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
+import me.blvckbytes.bbtweaks.lava_sponge.LavaSponge;
 import me.blvckbytes.bbtweaks.list_chunk_tickets.ListChunkTicketsCommand;
 import me.blvckbytes.bbtweaks.main_command.MainCommand;
 import me.blvckbytes.bbtweaks.markers_menu.MarkersCommand;
