@@ -28,7 +28,7 @@ public record MaterialCounts(Map<Material, MutableInt> counts) {
       if (translation == null)
         translation = material.name();
 
-      result.add(new TranslatedMaterialCount(translation, entry.getValue().value));
+      result.add(new TranslatedMaterialCount(material, translation, entry.getValue().value));
     }
 
     result.sort((a, b) -> -Integer.compare(a.count(), b.count()));

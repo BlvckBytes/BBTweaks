@@ -1029,6 +1029,11 @@ autoPickupContainer:
     <&7>Inhalt von insgesamt {container_count} Sammelboxen:<br/>
     <container *for-item="item_counts" *for-separator={<br/>}>
       <&7>- <&6>{item.count}x</> <&e>{item.type}
+      <container *if="item.count > item.stack_size and item.stack_size > 1">
+        <space/><&7>(
+        <&6><$lut.count_display [item.count] [item.stack_size] /></>
+        )
+      </container>
     </container>
     <br/>
 
@@ -2355,18 +2360,18 @@ bottleXp:
       </container>
       <space/>exp</><space/>
       für<space/>
-      <&a><$lut.bottle_xp.count_display [count]="suggestion.bottle_count"/></>
+      <&a><$lut.count_display [count]="suggestion.bottle_count" singular="Flasche" plural="Flaschen" /></>
     </container>
     <br/>
-  invalidMaximumValue: "{lut.bottle_xp.prefix} <&c>Der Maximalwert <&4>{input}</> muss eine positive Ganzzahl größer Null sein!"
-  maximumPercentageTooHigh: "{lut.bottle_xp.prefix} <&c>Die Prozentzahl <&4>{percentage}</> darf nicht größer als <&4>100</> sein!"
-  maximumValueExceedsAvailable: "{lut.bottle_xp.prefix} <&c>Der Maximalwert von <&4>{maximum_experience}exp</> überschreitet deine verfügbare Erfahrung von <&4>{available_experience}exp</>."
-  maximumValueBelowExpPerBottle: "{lut.bottle_xp.prefix} <&c>Der Maximalwert von <&4>{maximum_experience}exp</> unterschreitet den Umrechnungskurs von <&4>{experience_per_bottle}exp/Flasche</>."
-  hasNoExperienceToBottle: "{lut.bottle_xp.prefix} <&c>Du besitzt nicht genug Erfahrung, um sie in Flaschen füllen zu können!"
-  cannotHoldAnyBottles: "{lut.bottle_xp.prefix} <&c>Du hast nicht genug Platz im Inventar, um Erfahrungsflaschen aufzunehmen!"
+  invalidMaximumValue: "{lut.bottle_xp_prefix} <&c>Der Maximalwert <&4>{input}</> muss eine positive Ganzzahl größer Null sein!"
+  maximumPercentageTooHigh: "{lut.bottle_xp_prefix} <&c>Die Prozentzahl <&4>{percentage}</> darf nicht größer als <&4>100</> sein!"
+  maximumValueExceedsAvailable: "{lut.bottle_xp_prefix} <&c>Der Maximalwert von <&4>{maximum_experience}exp</> überschreitet deine verfügbare Erfahrung von <&4>{available_experience}exp</>."
+  maximumValueBelowExpPerBottle: "{lut.bottle_xp_prefix} <&c>Der Maximalwert von <&4>{maximum_experience}exp</> unterschreitet den Umrechnungskurs von <&4>{experience_per_bottle}exp/Flasche</>."
+  hasNoExperienceToBottle: "{lut.bottle_xp_prefix} <&c>Du besitzt nicht genug Erfahrung, um sie in Flaschen füllen zu können!"
+  cannotHoldAnyBottles: "{lut.bottle_xp_prefix} <&c>Du hast nicht genug Platz im Inventar, um Erfahrungsflaschen aufzunehmen!"
   afterBottling: |
-    {lut.bottle_xp.prefix} <&7>Es wurden <&c>{bottled_experience}exp</>/<&d>{available_experience}exp</> (<&d>Level {level_before}</> → <&d>Level {level_after}</>) in<space/>
-    <&a><$lut.bottle_xp.count_display [count]="bottle_count"/></> abgefüllt
+    {lut.bottle_xp_prefix} <&7>Es wurden <&c>{bottled_experience}exp</>/<&d>{available_experience}exp</> (<&d>Level {level_before}</> → <&d>Level {level_after}</>) in<space/>
+    <&a><$lut.count_display [count]="bottle_count" singular="Flasche" plural="Flaschen" /></> abgefüllt
     <container *if="maximum_experience < available_experience">
       ; Maximalwert: <&d>{maximum_experience}exp</>
       <container *if="maximum_percentage"><space/>(<&d>{maximum_percentage}%</>)</>
@@ -2374,7 +2379,7 @@ bottleXp:
     .
     <container *if="inventory_full">
       <br/>
-      {lut.bottle_xp.prefix} <&e>Dein Inventar konnte nicht alle Flaschen fassen, weshalb das Abfüllen vor erreichen des Maximalwertes abgebrochen wurde.
+      {lut.bottle_xp_prefix} <&e>Dein Inventar konnte nicht alle Flaschen fassen, weshalb das Abfüllen vor erreichen des Maximalwertes abgebrochen wurde.
     </container>
 
 infiniteWaterbucket:
@@ -2442,6 +2447,7 @@ cLut:
   sign_copier_prefix: '<&7>[<&6>SignCopier<&7>]'
   auto_pickup_container_prefix: '<&7>[<&6>Sammelbox<&7>]'
   list_chunk_tickets_prefix: '<&7>[<&6>ChunkTickets<&7>]'
+  bottle_xp_prefix: '<&7>[<&6>BottleXp<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}
@@ -2501,6 +2507,25 @@ cLut:
       <container *if="floor(seconds) neq seconds">≈</container>
       <duration [value]="ceil(seconds) * 1000" units="hms" />
     </container>
+  count_display: |
+    <separate
+      separator={<space/>und<space/>}
+      value={
+        <container
+          *let-stack_count="count / stack_size"
+          *if="stack_count > 0"
+        >{stack_count} {stack_count eq 1 then "Stack" else "Stacks"}
+      }
+      value={
+        <container
+          *let-item_count="count % stack_size"
+          *if="item_count > 0"
+        >
+          {item_count}
+          <container *if="has(singular) and has(plural)">
+            <space/>{item_count eq 1 then singular else plural}
+      }
+    />
   tri_state:
     'TRUE': '<&a>An'
     'FALSE': '<&c>Aus'
@@ -2604,21 +2629,3 @@ cLut:
         >
           {value}
       </color>
-  bottle_xp:
-    prefix: '<&7>[<&6>BottleXp<&7>]'
-    count_display: |
-      <separate
-        separator={<space/>und<space/>}
-        value={
-          <container
-            *let-stack_count="count / stack_size"
-            *if="stack_count > 0"
-          >{stack_count} {stack_count eq 1 then "Stack" else "Stacks"}
-        }
-        value={
-          <container
-            *let-bottle_count="count % stack_size"
-            *if="bottle_count > 0"
-          >{bottle_count} {bottle_count eq 1 then "Flasche" else "Flaschen"}
-        }
-      />
