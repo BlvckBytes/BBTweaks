@@ -1003,11 +1003,10 @@ autoPickupContainer:
               <word-wrap
                 [@formatted_counts]
                 width=50
-                prefix={<&8>➥ <&7>Inhalt:<space/>}
                 value-separator={<&7>,<space/>}
                 token-renderer={
-                  <container *if="token matches '[0-9]+x'"><color [shulker_color]>{token}</container>
-                  <container *else><color [shulker_color] lighten=30>{token}</container>
+                  <container *if="token matches '[0-9]+x'"><color [shulker_color] lighten=30>{token}</container>
+                  <container *else><&f>{token}</container>
                 }
               />
         }
@@ -1026,13 +1025,12 @@ autoPickupContainer:
   overviewAllContainersEmpty: '{lut.auto_pickup_container_prefix} <&c>Alle Sammelboxen in deinem Inventar sind aktuell leer!'
   overviewScreen: |
     <&8><&m>{" " ** 30}</> <&6>Sammelbox <&8><&m>{" " ** 30}</><br/>
-    <&7>Inhalt von insgesamt {container_count} Sammelboxen:<br/>
+    <&7>Inhalt von insgesamt <&6>{container_count}</> Sammelboxen:<br/>
+    <br/>
     <container *for-item="item_counts" *for-separator={<br/>}>
       <&7>- <&6>{item.count}x</> <&e>{item.type}
       <container *if="item.count > item.stack_size and item.stack_size > 1">
-        <space/><&7>(
-        <&6><$lut.count_display [item.count] [item.stack_size] /></>
-        )
+        <space/><&7>(<$lut.count_display [item.count] [item.stack_size] />)
       </container>
     </container>
     <br/>
