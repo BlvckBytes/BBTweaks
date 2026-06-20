@@ -36,18 +36,20 @@ public class AddToContainerSession {
       if (!Tag.SHULKER_BOXES.isTagged(item.getType()))
         continue;
 
-      var disableReason = shulkerPredicate.test(inventory, slotIndex, item);
+      var disableReasons = shulkerPredicate.test(inventory, slotIndex, item);
 
-      containers.add(new LazyContainer(player, item, filterPredicateAccessor, disableReason));
+      containers.add(new LazyContainer(player, item, filterPredicateAccessor, disableReasons));
     }
   }
 
-  public int tryAddItemToContainersAndGetAddedAmount(ItemStack itemToAdd) {
+  public int tryAddItemToContainersAndGetAddedAmount(ItemStack itemToAdd, AddFlag... flags) {
+    var flagsSet = AddFlag.makeSet(flags);
+
     var amount = itemToAdd.getAmount();
     var remainingAmount = amount;
 
     for (var container : containers) {
-      var addedAmount = container.tryAddItemAndGetAddedAmount(itemToAdd, remainingAmount);
+      var addedAmount = container.tryAddItemAndGetAddedAmount(itemToAdd, remainingAmount, flagsSet);
 
       if (addedAmount <= 0)
         continue;
@@ -63,13 +65,13 @@ public class AddToContainerSession {
     return amount - remainingAmount;
   }
 
-  public UsageCounts calculateUsageCounts() {
+  public UsageCounts calculateMarkedUsageCounts() {
     var usedSlotCount = 0;
     var vacantSlotCount = 0;
     var containerCount = 0;
 
     for (var container : containers) {
-      var usageCounts = container.getUsageCounts();
+      var usageCounts = container.calculateUsageCountsIfMarked();
 
       usedSlotCount += IntTuple.getFirst(usageCounts);
       vacantSlotCount += IntTuple.getSecond(usageCounts);

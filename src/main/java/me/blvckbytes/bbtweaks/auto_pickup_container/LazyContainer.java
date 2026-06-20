@@ -11,12 +11,14 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BlockStateMeta;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
+
 public class LazyContainer {
 
   private final @Nullable Player player;
   private final ItemStack itemStack;
   private final @Nullable FilterPredicateAccessor filterPredicateAccessor;
-  private final @Nullable DisableReason disableReason;
+  private final EnumSet<DisableReason> disableReasons;
 
   private boolean dirty;
 
@@ -30,12 +32,12 @@ public class LazyContainer {
     @Nullable Player player,
     ItemStack itemStack,
     @Nullable FilterPredicateAccessor filterPredicateAccessor,
-    @Nullable DisableReason disableReason
+    EnumSet<DisableReason> disableReasons
   ) {
     this.player = player;
     this.itemStack = itemStack;
     this.filterPredicateAccessor = filterPredicateAccessor;
-    this.disableReason = disableReason;
+    this.disableReasons = disableReasons;
   }
 
   public static @Nullable Inventory tryAccessInventory(ItemStack itemStack) {
@@ -52,8 +54,16 @@ public class LazyContainer {
     itemStack.setItemMeta(blockStateMeta);
   }
 
-  public int tryAddItemAndGetAddedAmount(ItemStack itemToAdd, int amount) {
-    if (disableReason != null || Tag.SHULKER_BOXES.isTagged(itemToAdd.getType()))
+  public int tryAddItemAndGetAddedAmount(ItemStack itemToAdd, int amount, EnumSet<AddFlag> flags) {
+    if (disableReasons.contains(DisableReason.CURRENTLY_VIEWED))
+      return 0;
+
+    if (disableReasons.contains(DisableReason.NOT_MARKED)) {
+      if (!flags.contains(AddFlag.ALLOW_UNMARKED))
+        return 0;
+    }
+
+    if (Tag.SHULKER_BOXES.isTagged(itemToAdd.getType()))
       return 0;
 
     tryAccessInventory();
@@ -72,8 +82,8 @@ public class LazyContainer {
     return amount - remainingAmount;
   }
 
-  public long getUsageCounts() {
-    if (disableReason == DisableReason.NOT_MARKED)
+  public long calculateUsageCountsIfMarked() {
+    if (disableReasons.contains(DisableReason.NOT_MARKED))
       return 0;
 
     tryAccessInventory();

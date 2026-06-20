@@ -167,7 +167,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
       if (updateAge < USAGE_INFO_MAX_UPDATE_AGE_T)
         continue;
 
-      usageInfo.lastKnownCounts = makePickupSession(usageInfo.player).calculateUsageCounts();
+      usageInfo.lastKnownCounts = makePickupSession(usageInfo.player).calculateMarkedUsageCounts();
       usageInfo.lastUpdateTime = relativeTime;
       usageInfo.possiblyChanged = false;
     }
@@ -268,7 +268,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   public void onJoin(PlayerJoinEvent event) {
     var player = event.getPlayer();
 
-    var usageCounts = makePickupSession(player).calculateUsageCounts();
+    var usageCounts = makePickupSession(player).calculateMarkedUsageCounts();
 
     usageInfoByPlayerId.put(player.getUniqueId(), new UsageInfo(player, usageCounts, relativeTime));
   }
@@ -885,16 +885,18 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     updateData(droppedStack);
   }
 
-  private AddToContainerSession makePickupSession(Player player) {
+  public AddToContainerSession makePickupSession(Player player) {
     return new AddToContainerSession(player, this, (inventory, slot, item) -> {
+      var disableReasons = EnumSet.noneOf(DisableReason.class);
+
       if (!doesContainMarker(item.getPersistentDataContainer()))
-        return DisableReason.NOT_MARKED;
+        disableReasons.add(DisableReason.NOT_MARKED);
 
       // Disable auto-pickup for currently-viewed shulkers
       if (shulkerAccessor.doesAnyAccessorHolderMatch(holder -> holder.isShulkerItemContainedByInventoryAtSlot(inventory, slot)))
-        return DisableReason.CURRENTLY_VIEWED;
+        disableReasons.add(DisableReason.CURRENTLY_VIEWED);
 
-      return null;
+      return disableReasons;
     });
   }
 

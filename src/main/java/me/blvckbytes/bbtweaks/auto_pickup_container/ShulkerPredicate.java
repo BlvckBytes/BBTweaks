@@ -2,11 +2,12 @@ package me.blvckbytes.bbtweaks.auto_pickup_container;
 
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
+
+import java.util.EnumSet;
 
 @FunctionalInterface
 public interface ShulkerPredicate {
 
-  @Nullable DisableReason test(Inventory inventory, int slot, ItemStack item);
+  EnumSet<DisableReason> test(Inventory inventory, int slot, ItemStack item);
 
 }
