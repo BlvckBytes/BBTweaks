@@ -2341,13 +2341,13 @@ bottleXp:
   command:
     name: 'bottlexp'
   experiencePerBottle: 16
-  playersOnly: "{lut.bottlexp_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!"
-  noPermission: "{lut.bottlexp_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!"
+  playersOnly: "{lut.bottle_xp_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!"
+  noPermission: "{lut.bottle_xp_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!"
   experienceOverview: |
     <&8><&m>{" " ** 30}</> <&6>BottleXp <&8><&m>{" " ** 30}</><br/>
     <&7>Verfügbare Erfahrung: <&d>{available_experience}exp</> (<&d>{available_level} Level</>)<br/>
     <&7>Umrechnungskurs: <&d>{experience_per_bottle}exp/Flasche</><br/>
-    <&7>Benutzung: /{label}</> \<<&d>Erfahrungspunkte</> | <&d>Prozentzahl%</>><br/>
+    <&7>Benutzung: /{label}</> \<<&d>Erfahrungspunkte</> | <&d>Prozentzahl%</>> [<&d *for-storage="storages" *for-separator={,<space/>}>{storage}</>]<br/>
     <br/>
     <container *for-suggestion="suggestions" *for-separator={<br/>}>
       <&7>- /{label} <&d>{suggestion.percentage}%</>:<space/>
@@ -2361,23 +2361,47 @@ bottleXp:
       <&a><$lut.count_display [count]="suggestion.bottle_count" singular="Flasche" plural="Flaschen" /></>
     </container>
     <br/>
-  invalidMaximumValue: "{lut.bottle_xp_prefix} <&c>Der Maximalwert <&4>{input}</> muss eine positive Ganzzahl größer Null sein!"
-  maximumPercentageTooHigh: "{lut.bottle_xp_prefix} <&c>Die Prozentzahl <&4>{percentage}</> darf nicht größer als <&4>100</> sein!"
-  maximumValueExceedsAvailable: "{lut.bottle_xp_prefix} <&c>Der Maximalwert von <&4>{maximum_experience}exp</> überschreitet deine verfügbare Erfahrung von <&4>{available_experience}exp</>."
-  maximumValueBelowExpPerBottle: "{lut.bottle_xp_prefix} <&c>Der Maximalwert von <&4>{maximum_experience}exp</> unterschreitet den Umrechnungskurs von <&4>{experience_per_bottle}exp/Flasche</>."
-  hasNoExperienceToBottle: "{lut.bottle_xp_prefix} <&c>Du besitzt nicht genug Erfahrung, um sie in Flaschen füllen zu können!"
-  cannotHoldAnyBottles: "{lut.bottle_xp_prefix} <&c>Du hast nicht genug Platz im Inventar, um Erfahrungsflaschen aufzunehmen!"
+  commandUsage: '{lut.bottle_xp_prefix} <&c>Benutzung: /{label} \<<&4>Erfahrungspunkte</> | <&4>Prozentzahl%</>> [<&4 *for-storage="storages" *for-separator={,<space/>}>{storage}</>]'
+  invalidMaximumValue: '{lut.bottle_xp_prefix} <&c>Der Maximalwert <&4>{input}</> muss eine positive Ganzzahl größer Null sein!'
+  maximumPercentageTooHigh: '{lut.bottle_xp_prefix} <&c>Die Prozentzahl <&4>{percentage}</> darf nicht größer als <&4>100</> sein!'
+  maximumValueExceedsAvailable: '{lut.bottle_xp_prefix} <&c>Der Maximalwert von <&4>{maximum_experience}exp</> überschreitet deine verfügbare Erfahrung von <&4>{available_experience}exp</>.'
+  maximumValueBelowExpPerBottle: '{lut.bottle_xp_prefix} <&c>Der Maximalwert von <&4>{maximum_experience}exp</> unterschreitet den Umrechnungskurs von <&4>{experience_per_bottle}exp/Flasche</>.'
+  hasNoExperienceToBottle: '{lut.bottle_xp_prefix} <&c>Du besitzt nicht genug Erfahrung, um sie in Flaschen füllen zu können!'
+  carriesNoShulkerBoxes: '{lut.bottle_xp_prefix} <&c>Es befinden sich aktuell keine Shulkerboxen in deinem Inventar!'
+  cannotHoldAnyBottles: |
+    {lut.bottle_xp_prefix} <&c>Du hast nicht genug Platz<space/>
+    <separate
+      separator={<space/>oder<space/>}
+      value={<container *if="use_inventory">im Inventar}
+      value={<container *if="use_shulkers">in Shulkerboxen}
+    />
+    , um Erfahrungsflaschen aufzunehmen!
   afterBottling: |
     {lut.bottle_xp_prefix} <&7>Es wurden <&c>{bottled_experience}exp</>/<&d>{available_experience}exp</> (<&d>Level {level_before}</> → <&d>Level {level_after}</>) in<space/>
-    <&a><$lut.count_display [count]="bottle_count" singular="Flasche" plural="Flaschen" /></> abgefüllt
+    <&a><$lut.count_display [count]="bottle_count" singular="Flasche" plural="Flaschen" /></><space/>
+    <separate
+      separator={<space/>und<space/>}
+      value={<container *if="use_inventory">in dein Inventar}
+      value={<container *if="use_shulkers">in Shulkerboxen}
+    />
+    <space/>abgefüllt
     <container *if="maximum_experience < available_experience">
       ; Maximalwert: <&d>{maximum_experience}exp</>
       <container *if="maximum_percentage"><space/>(<&d>{maximum_percentage}%</>)</>
     </container>
     .
-    <container *if="inventory_full">
+    <container *if="exhausted_space">
       <br/>
-      {lut.bottle_xp_prefix} <&e>Dein Inventar konnte nicht alle Flaschen fassen, weshalb das Abfüllen vor erreichen des Maximalwertes abgebrochen wurde.
+      {lut.bottle_xp_prefix} <&e>
+      <separate
+        separator={<space/>und<space/>}
+        value={<container *if="use_inventory">Dein Inventar}
+        value={<container *if="use_shulkers">{use_inventory then "d" else "D"}eine Shulkerboxen}
+      />
+      <space/>{use_shulkers then "konnten" else "konnte"}
+      <space/>nicht alle Flaschen fassen, weshalb das Abfüllen vor erreichen des Maximalwertes bei<space/>
+      <&6><number [value]="bottled_experience/double(available_experience) * 100" format="#.##" locale="DE" />%</>
+      <space/>der verfügbaren Erfahrung abgebrochen wurde.
     </container>
 
 infiniteWaterbucket:

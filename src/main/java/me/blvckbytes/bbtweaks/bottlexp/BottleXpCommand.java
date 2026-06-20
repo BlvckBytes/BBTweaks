@@ -5,14 +5,13 @@ import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
-import me.blvckbytes.bbtweaks.un_craft.SpaceSimulator;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,13 +27,16 @@ public class BottleXpCommand implements CommandHandler {
   private static final int[] SUGGESTION_PERCENTAGES = { 100, 75, 50, 25 };
 
   private final PluginCommand command;
+  private final AutoPickupContainerListener autoPickupContainerListener;
   private final ConfigKeeper<MainSection> config;
 
   public BottleXpCommand(
     JavaPlugin plugin,
+    AutoPickupContainerListener autoPickupContainerListener,
     ConfigKeeper<MainSection> config
   ) {
     this.command = Objects.requireNonNull(plugin.getCommand(BottleXpCommandSection.INITIAL_NAME));
+    this.autoPickupContainerListener = autoPickupContainerListener;
     this.config = config;
   }
 
@@ -58,105 +60,122 @@ public class BottleXpCommand implements CommandHandler {
       return true;
     }
 
+    var environment = new InterpretationEnvironment()
+      .withVariable("available_experience", availableExperience)
+      .withVariable("experience_per_bottle", experiencePerBottle)
+      .withVariable("stack_size", Material.EXPERIENCE_BOTTLE.getMaxStackSize());
+
     if (args.length == 0) {
       var suggestions = makeOverviewSuggestions(availableExperience, experiencePerBottle);
 
       config.rootSection.bottleXp.experienceOverview.sendMessage(
         player,
-        new InterpretationEnvironment()
+        environment
           .withVariable("label", label)
           .withVariable("suggestions", suggestions)
-          .withVariable("experience_per_bottle", experiencePerBottle)
-          .withVariable("available_experience", availableExperience)
           .withVariable("available_level", player.getLevel())
           .withVariable("stack_size", Material.EXPERIENCE_BOTTLE.getMaxStackSize())
+          .withVariable("storages", BottleStorage.matcher.createCompletions(null))
       );
 
       return true;
     }
 
-    // Let's allow for player's specifying "50 %" instead of "50%".
-    var parameter = String.join("", args);
-    var isPercentage = false;
+    var normalizedStorage = BottleStorage.matcher.getNormalizedConstant(BottleStorage.DEFAULT_VALUE);
 
-    // Let's be lenient here as well, allowing for multiple mistyped percent-signs.
-    while (parameter.endsWith("%")) {
-      parameter = parameter.substring(0, parameter.length() - 1);
-      isPercentage = true;
+    if (args.length > 2 || (args.length > 1 && (normalizedStorage = BottleStorage.matcher.matchFirst(args[1])) == null)) {
+      config.rootSection.bottleXp.commandUsage.sendMessage(
+        player,
+        environment
+          .withVariable("label", label)
+          .withVariable("storages", BottleStorage.matcher.createCompletions(null))
+      );
+
+      return true;
     }
 
-    int numericParameter;
+    environment
+      .withVariable("use_inventory", normalizedStorage.constant.intoInventory)
+      .withVariable("use_shulkers", normalizedStorage.constant.intoShulkers);
+
+    var limitString = args[0];
+    var isLimitPercentage = false;
+
+    if (limitString.endsWith("%")) {
+      limitString = limitString.substring(0, limitString.length() - 1);
+      isLimitPercentage = true;
+    }
+
+    int numericLimit;
 
     try {
-      numericParameter = Integer.parseInt(parameter);
+      numericLimit = Integer.parseInt(limitString);
 
-      if (numericParameter <= 0)
+      if (numericLimit <= 0)
         throw new IllegalArgumentException();
     } catch (Throwable e) {
       config.rootSection.bottleXp.invalidMaximumValue.sendMessage(
         player,
         new InterpretationEnvironment()
-          .withVariable("input", parameter)
+          .withVariable("input", limitString)
       );
 
       return true;
     }
 
-    var maximumExperience = numericParameter;
+    var maximumExperience = numericLimit;
 
-    if (isPercentage) {
-      if (numericParameter > 100) {
+    if (isLimitPercentage) {
+      if (numericLimit > 100) {
         config.rootSection.bottleXp.maximumPercentageTooHigh.sendMessage(
           player,
           new InterpretationEnvironment()
-            .withVariable("percentage", numericParameter)
+            .withVariable("percentage", numericLimit)
         );
 
         return true;
       }
 
-      maximumExperience = (int) (availableExperience * (numericParameter / 100D));
+      maximumExperience = (int) (availableExperience * (numericLimit / 100D));
     }
 
-    if (maximumExperience > availableExperience) {
-      config.rootSection.bottleXp.maximumValueExceedsAvailable.sendMessage(
-        player,
-        new InterpretationEnvironment()
-          .withVariable("maximum_experience", maximumExperience)
-          .withVariable("available_experience", availableExperience)
-      );
+    environment
+      .withVariable("maximum_experience", maximumExperience)
+      .withVariable("maximum_percentage", isLimitPercentage ? numericLimit : null);
 
+    if (maximumExperience > availableExperience) {
+      config.rootSection.bottleXp.maximumValueExceedsAvailable.sendMessage(player, environment);
       return true;
     }
 
     if (maximumExperience < experiencePerBottle) {
-      config.rootSection.bottleXp.maximumValueBelowExpPerBottle.sendMessage(
-        player,
-        new InterpretationEnvironment()
-          .withVariable("maximum_experience", maximumExperience)
-          .withVariable("experience_per_bottle", experiencePerBottle)
-      );
-
+      config.rootSection.bottleXp.maximumValueBelowExpPerBottle.sendMessage(player, environment);
       return true;
     }
 
-    var spaceSimulator = new SpaceSimulator(player.getInventory(), ItemStack::getType);
+    var handoutSession = new BottleHandoutSession(player, normalizedStorage.constant, autoPickupContainerListener);
+
+    if (normalizedStorage.constant.intoShulkers && !handoutSession.encounteredShulkerBoxes()) {
+      config.rootSection.bottleXp.carriesNoShulkerBoxes.sendMessage(player, environment);
+      return true;
+    }
 
     var bottledExperience = 0;
     var bottleCount = 0;
+    var wasSpaceExhausted = false;
 
     while (maximumExperience - bottledExperience >= experiencePerBottle) {
-      spaceSimulator.addItem(Material.EXPERIENCE_BOTTLE, 1);
-
-      if (spaceSimulator.didDropItems())
+      if (!handoutSession.tryAddABottle()) {
+        wasSpaceExhausted = true;
         break;
+      }
 
       ++bottleCount;
       bottledExperience += experiencePerBottle;
     }
 
     if (bottledExperience == 0) {
-      config.rootSection.bottleXp.cannotHoldAnyBottles.sendMessage(player);
+      config.rootSection.bottleXp.cannotHoldAnyBottles.sendMessage(player, environment);
       return true;
     }
 
@@ -166,31 +185,16 @@ public class BottleXpCommand implements CommandHandler {
     player.giveExp(availableExperience - bottledExperience);
     var levelAfter = player.getLevel();
 
-    var remainingBottleCount = bottleCount;
-
-    while (remainingBottleCount > 0) {
-      var dropCount = Math.min(remainingBottleCount, Material.EXPERIENCE_BOTTLE.getMaxStackSize());
-
-      player.getInventory()
-        .addItem(new ItemStack(Material.EXPERIENCE_BOTTLE, dropCount))
-        .values()
-        .forEach(player::dropItem);
-
-      remainingBottleCount -= dropCount;
-    }
+    handoutSession.onCompletion();
 
     config.rootSection.bottleXp.afterBottling.sendMessage(
       player,
-      new InterpretationEnvironment()
+      environment
         .withVariable("bottle_count", bottleCount)
         .withVariable("bottled_experience", bottledExperience)
-        .withVariable("available_experience", availableExperience)
-        .withVariable("maximum_experience", maximumExperience)
-        .withVariable("maximum_percentage", isPercentage ? numericParameter : null)
         .withVariable("level_before", levelBefore)
         .withVariable("level_after", levelAfter)
-        .withVariable("inventory_full", spaceSimulator.didDropItems())
-        .withVariable("stack_size", Material.EXPERIENCE_BOTTLE.getMaxStackSize())
+        .withVariable("exhausted_space", wasSpaceExhausted)
     );
 
     return true;
@@ -209,6 +213,9 @@ public class BottleXpCommand implements CommandHandler {
         .filter(it -> it.startsWith(args[0]))
         .toList();
     }
+
+    if (args.length == 2)
+      return BottleStorage.matcher.createCompletions(args[1]);
 
     return List.of();
   }

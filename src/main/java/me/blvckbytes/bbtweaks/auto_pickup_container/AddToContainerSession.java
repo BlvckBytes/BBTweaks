@@ -42,6 +42,10 @@ public class AddToContainerSession {
     }
   }
 
+  public boolean foundContainers() {
+    return !containers.isEmpty();
+  }
+
   public int tryAddItemToContainersAndGetAddedAmount(ItemStack itemToAdd, AddFlag... flags) {
     var flagsSet = AddFlag.makeSet(flags);
 

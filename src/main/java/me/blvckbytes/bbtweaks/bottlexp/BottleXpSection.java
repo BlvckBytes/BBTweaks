@@ -19,11 +19,13 @@ public class BottleXpSection extends ConfigSection {
   public ComponentMarkup playersOnly;
   public ComponentMarkup noPermission;
   public ComponentMarkup experienceOverview;
+  public ComponentMarkup commandUsage;
   public ComponentMarkup invalidMaximumValue;
   public ComponentMarkup maximumPercentageTooHigh;
   public ComponentMarkup maximumValueExceedsAvailable;
   public ComponentMarkup maximumValueBelowExpPerBottle;
   public ComponentMarkup hasNoExperienceToBottle;
+  public ComponentMarkup carriesNoShulkerBoxes;
   public ComponentMarkup cannotHoldAnyBottles;
   public ComponentMarkup afterBottling;
 
