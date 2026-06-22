@@ -11,6 +11,7 @@ public enum SettingFlag {
   SEND_COPIED_MESSAGE(true),
   SEND_PASTED_MESSAGE(true),
   INK_SAC_AS_SHORTCUT(true),
+  PASTE_ADDITIONAL_ATTRIBUTES(false),
   ;
 
   public static final List<SettingFlag> ALL_VALUES = List.of(values());

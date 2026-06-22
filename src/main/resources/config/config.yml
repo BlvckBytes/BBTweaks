@@ -2336,6 +2336,21 @@ signCopier:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Funktion {ink_sac_as_shortcut then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
+      pasteAdditionalAttributes:
+        slots: 15
+        type: '{paste_additional_attributes then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="paste_additional_attributes">Zusatzattribute einfügen</> <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob unsichtbare Zusatzattribute,<br/>
+            welche am kopierten Schild gesetzt wurden<br/>
+            (Prädikate, etc.), eingefügt werden sollen.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Funktion {paste_additional_attributes then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
 
 bottleXp:
   command:

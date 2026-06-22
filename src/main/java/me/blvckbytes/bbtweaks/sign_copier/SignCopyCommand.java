@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.auto_wirer.LateWired;
+import me.blvckbytes.bbtweaks.sign_copier.event.SignCopierExtractAdditionalAttributesEvent;
 import me.blvckbytes.bbtweaks.sign_copier.settings.SettingFlag;
 import me.blvckbytes.bbtweaks.sign_copier.settings.SignCopierSettings;
 import me.blvckbytes.bbtweaks.sign_copier.settings.SignCopierSettingsStore;
@@ -52,7 +53,7 @@ public class SignCopyCommand implements CommandHandler, Listener {
   private final ConfigKeeper<MainSection> config;
 
   private final NamespacedKey[] keysLineContents, keysLineIsPlain;
-  private final NamespacedKey keyIsGlowing, keySignColor;
+  private final NamespacedKey keyIsGlowing, keySignColor, keyAdditionalAttributes;
 
   private @LateWired SignEditCommand signEditCommand;
 
@@ -79,6 +80,7 @@ public class SignCopyCommand implements CommandHandler, Listener {
 
     this.keyIsGlowing = new NamespacedKey(plugin, "sign-copier-is-glowing");
     this.keySignColor = new NamespacedKey(plugin, "sign-copier-sign-color");
+    this.keyAdditionalAttributes = new NamespacedKey(plugin, "sign-copier-additional-attributes");
   }
 
   @Override
@@ -393,6 +395,13 @@ public class SignCopyCommand implements CommandHandler, Listener {
     if (settings.flags.contains(SettingFlag.PASTE_SIGN_COLOR))
       signSide.setColor(getDyeColor(pdc));
 
+    if (settings.flags.contains(SettingFlag.PASTE_ADDITIONAL_ATTRIBUTES)) {
+      var additionalAttributesPdc = pdc.get(keyAdditionalAttributes, PersistentDataType.TAG_CONTAINER);
+
+      if (additionalAttributesPdc != null)
+        additionalAttributesPdc.copyTo(sign.getPersistentDataContainer(), true);
+    }
+
     return null;
   }
 
@@ -460,6 +469,15 @@ public class SignCopyCommand implements CommandHandler, Listener {
       pdc.remove(keySignColor);
     else
       pdc.set(keySignColor, PersistentDataType.STRING, signColor.name());
+
+    var additionalAttributesPdc = sign.getPersistentDataContainer().getAdapterContext().newPersistentDataContainer();
+
+    Bukkit.getPluginManager().callEvent(new SignCopierExtractAdditionalAttributesEvent(sign, additionalAttributesPdc));
+
+    if (additionalAttributesPdc.isEmpty())
+      pdc.remove(keyAdditionalAttributes);
+    else
+      pdc.set(keyAdditionalAttributes, PersistentDataType.TAG_CONTAINER, additionalAttributesPdc);
   }
 
   private Component renderLine(String contents) {
