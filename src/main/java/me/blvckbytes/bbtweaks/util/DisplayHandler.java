@@ -14,6 +14,7 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 
 public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType>, DisplayDataType> implements Listener, Disableable {
@@ -61,6 +62,10 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
 
   protected abstract void handleClick(Player player, DisplayType display, ClickType clickType, int slot);
 
+  protected void handleOwnInventoryClick(Player player, DisplayType display, ClickType clickType, int slot) {}
+
+  protected void handleOwnInventoryDrag(Player player, DisplayType display, Set<Integer> slots) {}
+
   @Override
   public void disable() {
     for (var displayIterator = displayByPlayerId.entrySet().iterator(); displayIterator.hasNext();) {
@@ -83,8 +88,31 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
     if (!(event.getWhoClicked() instanceof Player player))
       return;
 
-    if (displayByPlayerId.containsKey(player.getUniqueId()))
-      event.setCancelled(true);
+    var display = displayByPlayerId.get(player.getUniqueId());
+
+    if (display == null)
+      return;
+
+    event.setCancelled(true);
+
+    var displayInventory = player.getOpenInventory().getTopInventory();
+
+    if (!display.isInventory(displayInventory))
+      return;
+
+    var displaySize = displayInventory.getSize();
+    var rawSlots = event.getRawSlots();
+
+    for (var rawSlot : rawSlots) {
+      // Affected the top-inventory
+      if (rawSlot < displaySize)
+        return;
+    }
+
+    // Allow to drag exclusively in the bottom-inventory
+    event.setCancelled(false);
+
+    handleOwnInventoryDrag(player, display, event.getInventorySlots());
   }
 
   @EventHandler
@@ -120,7 +148,16 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
   }
 
   @EventHandler
+  public void onCreative(InventoryCreativeEvent event) {
+    handleInventoryClick(event);
+  }
+
+  @EventHandler
   public void onInventoryClick(InventoryClickEvent event) {
+    handleInventoryClick(event);
+  }
+
+  private void handleInventoryClick(InventoryClickEvent event) {
     if (!(event.getWhoClicked() instanceof Player player))
       return;
 
@@ -131,23 +168,68 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
 
     event.setCancelled(true);
 
-    if (
-      event.getAction() == InventoryAction.MOVE_TO_OTHER_INVENTORY &&
-      event.getClickedInventory() != player.getInventory()
-    ) {
+    var action = event.getAction();
+
+    if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY && event.getClickedInventory() != player.getInventory())
       lastMoveToOwnInventoryStampByPlayerId.put(player.getUniqueId(), System.currentTimeMillis());
-    }
 
     var displayInventory = player.getOpenInventory().getTopInventory();
 
     if (!display.isInventory(displayInventory))
       return;
 
+    var clickType = event.getClick();
     var slot = event.getRawSlot();
 
-    if (slot < 0 || slot >= displayInventory.getSize())
-      return;
+    // Clicked somewhere outside the inventory
+    if (slot < 0) {
+      if (action == InventoryAction.DROP_ONE_CURSOR || action == InventoryAction.DROP_ALL_CURSOR)
+        event.setCancelled(false);
 
-    handleClick(player, display, event.getClick(), slot);
+      return;
+    }
+
+    var displaySize = displayInventory.getSize();
+
+    // Clicked somewhere inside own inventory
+    if (slot >= displaySize) {
+      var inventoryRelativeSlot = slot - displaySize;
+
+      if (inventoryRelativeSlot >= 9 * 4)
+        return;
+
+      if (isAllowedActionInOwnInventory(action))
+        event.setCancelled(false);
+
+      handleOwnInventoryClick(player, display, clickType, inventoryRelativeSlot);
+      return;
+    }
+
+    handleClick(player, display, clickType, slot);
+  }
+
+  private boolean isAllowedActionInOwnInventory(InventoryAction action) {
+    return switch (action) {
+      case
+        PICKUP_ALL,
+        PICKUP_SOME,
+        PICKUP_HALF,
+        PICKUP_ONE,
+        PLACE_ALL,
+        PLACE_SOME,
+        PLACE_ONE,
+        SWAP_WITH_CURSOR,
+        DROP_ALL_SLOT,
+        DROP_ONE_SLOT,
+        HOTBAR_SWAP,
+        CLONE_STACK,
+        PICKUP_FROM_BUNDLE,
+        PICKUP_ALL_INTO_BUNDLE,
+        PICKUP_SOME_INTO_BUNDLE,
+        PLACE_FROM_BUNDLE,
+        PLACE_ALL_INTO_BUNDLE,
+        PLACE_SOME_INTO_BUNDLE -> true;
+      default -> false;
+    };
   }
 }
