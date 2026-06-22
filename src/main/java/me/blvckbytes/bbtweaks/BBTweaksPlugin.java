@@ -28,6 +28,8 @@ import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.inv_magnet.InvMagnetCommand;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
+import me.blvckbytes.bbtweaks.itemdata.ItemDataCommand;
+import me.blvckbytes.bbtweaks.itemdata.display.ItemDataDisplayHandler;
 import me.blvckbytes.bbtweaks.lava_sponge.LavaSponge;
 import me.blvckbytes.bbtweaks.list_chunk_tickets.ListChunkTicketsCommand;
 import me.blvckbytes.bbtweaks.main_command.MainCommand;
@@ -160,6 +162,8 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(BottleXpCommand.class)
         .withSingleton(ListChunkTicketsCommand.class)
         .withSingleton(ObstructedContainerOpener.class)
+        .withSingleton(ItemDataDisplayHandler.class)
+        .withSingleton(ItemDataCommand.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);
