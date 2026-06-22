@@ -14,14 +14,24 @@ public class SignCopierExtractAdditionalAttributesEvent extends Event {
 
   public final Sign sign;
 
+  public final PersistentDataContainer signPdc;
+
   private final PersistentDataContainer additionalAttributesPdc;
 
   public SignCopierExtractAdditionalAttributesEvent(Sign sign, PersistentDataContainer additionalAttributesPdc) {
     this.sign = sign;
+    this.signPdc = sign.getPersistentDataContainer();
     this.additionalAttributesPdc = additionalAttributesPdc;
   }
 
-  public <P, C> void add(NamespacedKey key, @NotNull PersistentDataType<P, C> type, @NotNull C value) {
+  public <P, C> void copyFromSignPdcAndAddIfSet(NamespacedKey key, PersistentDataType<P, C> type) {
+    C value = signPdc.get(key, type);
+
+    if (value != null)
+      add(key, type, value);
+  }
+
+  public <P, C> void add(NamespacedKey key, PersistentDataType<P, C> type, @NotNull C value) {
     if (additionalAttributesPdc.has(key))
       throw new IllegalStateException("Key " + key + " has already been added to this event");
 

@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.mechanic;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
+import me.blvckbytes.bbtweaks.sign_copier.event.SignCopierExtractAdditionalAttributesEvent;
 import me.blvckbytes.item_predicate_parser.event.*;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
@@ -36,6 +37,12 @@ public abstract class PredicateMechanic<InstanceType extends MechanicInstance> e
     this.ippIntegration = ippIntegration;
     this.predicateKey = predicateKey;
     this.predicateLanguageKey = predicateLanguageKey;
+  }
+
+  @EventHandler
+  public void onExtractAdditionalAttributes(SignCopierExtractAdditionalAttributesEvent event) {
+    event.copyFromSignPdcAndAddIfSet(predicateKey, PersistentDataType.STRING);
+    event.copyFromSignPdcAndAddIfSet(predicateLanguageKey, PersistentDataType.STRING);
   }
 
   @EventHandler
