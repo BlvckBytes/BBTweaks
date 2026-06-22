@@ -122,13 +122,7 @@ public class SignCopyCommand implements CommandHandler, Listener {
         return true;
       }
 
-      for (var lineIndex = 0; lineIndex < NUMBER_OF_LINES; ++lineIndex) {
-        if (pdc.has(keysLineContents[lineIndex]))
-          pdc.remove(keysLineContents[lineIndex]);
-
-        if (pdc.has(keysLineIsPlain[lineIndex]))
-          pdc.remove(keysLineIsPlain[lineIndex]);
-      }
+      removeAllKeys(pdc);
 
       config.rootSection.signCopier.copiedSignRemoved.sendMessage(player);
       return true;
@@ -448,36 +442,55 @@ public class SignCopyCommand implements CommandHandler, Listener {
   private void copySign(Player player, Sign sign) {
     var pdc = player.getPersistentDataContainer();
 
-    var signSide = sign.getTargetSide(player);
-    var lines = signSide.lines();
+    try {
+      var signSide = sign.getTargetSide(player);
+      var lines = signSide.lines();
 
-    for (var lineIndex = 0; lineIndex < NUMBER_OF_LINES; ++lineIndex) {
-      if (lineIndex >= lines.size())
-        break;
+      for (var lineIndex = 0; lineIndex < NUMBER_OF_LINES; ++lineIndex) {
+        if (lineIndex >= lines.size())
+          break;
 
-      var contents = escapeAmpersands(MiniMessage.miniMessage().serialize(lines.get(lineIndex)));
+        var contents = escapeAmpersands(MiniMessage.miniMessage().serialize(lines.get(lineIndex)));
 
-      pdc.set(keysLineContents[lineIndex], PersistentDataType.STRING, contents);
-      pdc.set(keysLineIsPlain[lineIndex], PersistentDataType.BOOLEAN, false);
+        pdc.set(keysLineContents[lineIndex], PersistentDataType.STRING, contents);
+        pdc.set(keysLineIsPlain[lineIndex], PersistentDataType.BOOLEAN, false);
+      }
+
+      pdc.set(keyIsGlowing, PersistentDataType.BOOLEAN, signSide.isGlowingText());
+
+      var signColor = signSide.getColor();
+
+      if (signColor == null)
+        pdc.remove(keySignColor);
+      else
+        pdc.set(keySignColor, PersistentDataType.STRING, signColor.name());
+
+      var additionalAttributesPdc = sign.getPersistentDataContainer().getAdapterContext().newPersistentDataContainer();
+
+      Bukkit.getPluginManager().callEvent(new SignCopierExtractAdditionalAttributesEvent(sign, additionalAttributesPdc));
+
+      if (additionalAttributesPdc.isEmpty())
+        pdc.remove(keyAdditionalAttributes);
+      else
+        pdc.set(keyAdditionalAttributes, PersistentDataType.TAG_CONTAINER, additionalAttributesPdc);
+    } catch (Throwable e) {
+      // Avoid pasting corrupted signs later on - rather flush the buffer and make them try again.
+      removeAllKeys(pdc);
+
+      throw e;
     }
+  }
 
-    pdc.set(keyIsGlowing, PersistentDataType.BOOLEAN, signSide.isGlowingText());
+  private void removeAllKeys(PersistentDataContainer pdc) {
+    for (var key : keysLineContents)
+      pdc.remove(key);
 
-    var signColor = signSide.getColor();
+    for (var key : keysLineIsPlain)
+      pdc.remove(key);
 
-    if (signColor == null)
-      pdc.remove(keySignColor);
-    else
-      pdc.set(keySignColor, PersistentDataType.STRING, signColor.name());
-
-    var additionalAttributesPdc = sign.getPersistentDataContainer().getAdapterContext().newPersistentDataContainer();
-
-    Bukkit.getPluginManager().callEvent(new SignCopierExtractAdditionalAttributesEvent(sign, additionalAttributesPdc));
-
-    if (additionalAttributesPdc.isEmpty())
-      pdc.remove(keyAdditionalAttributes);
-    else
-      pdc.set(keyAdditionalAttributes, PersistentDataType.TAG_CONTAINER, additionalAttributesPdc);
+    pdc.remove(keyIsGlowing);
+    pdc.remove(keySignColor);
+    pdc.remove(keyAdditionalAttributes);
   }
 
   private Component renderLine(String contents) {
