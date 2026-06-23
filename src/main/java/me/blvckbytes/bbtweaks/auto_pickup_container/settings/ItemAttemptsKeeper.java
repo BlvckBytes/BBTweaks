@@ -12,7 +12,7 @@ public class ItemAttemptsKeeper {
   // for possibly dozens of stacks per tick is going to cause in a TPS-drop; to mitigate this, failed
   // attempts are kept and not checked for again until the max-age elapsed.
 
-  private static final long MAX_AGE_T = 2;
+  private static final long MAX_AGE_T = 5;
 
   // There will only be very few entries at a time, so a list is by far outperforming a map.
   private final List<ItemAttempt> attempts;
