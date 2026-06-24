@@ -21,6 +21,7 @@ import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.TransmitterMechanic;
 import me.blvckbytes.bbtweaks.util.BooleanConsumer;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Sign;
@@ -167,10 +168,7 @@ public class SignMechanicManager implements Disableable, Listener {
 
   @EventHandler
   public void onChunkLoad(ChunkLoadEvent event) {
-    for (var tileEntity : event.getChunk().getTileEntities()) {
-      if (!(tileEntity instanceof Sign sign))
-        continue;
-
+    forEachSignInChunk(event.getChunk(), sign -> {
       correspondSign(sign, mechanic -> {
         if (!Tag.WALL_SIGNS.isTagged(sign.getType())) {
           sign.getBlock().breakNaturally();
@@ -180,16 +178,20 @@ public class SignMechanicManager implements Disableable, Listener {
         if (mechanic.onSignLoad(sign) == null)
           sign.getBlock().breakNaturally();
       });
-    }
+    });
   }
 
   @EventHandler
   public void onChunkUnload(ChunkUnloadEvent event) {
-    for (var tileEntity : event.getChunk().getTileEntities()) {
-      if (!(tileEntity instanceof Sign sign))
-        continue;
-
+    forEachSignInChunk(event.getChunk(), sign -> {
       correspondSign(sign, mechanic -> mechanic.onSignUnload(sign));
+    });
+  }
+
+  private void forEachSignInChunk(Chunk chunk, Consumer<Sign> handler) {
+    for (var tileEntity : chunk.getTileEntities(block -> Tag.WALL_SIGNS.isTagged(block.getType()), false)) {
+      if (tileEntity instanceof Sign sign)
+        handler.accept(sign);
     }
   }
 
