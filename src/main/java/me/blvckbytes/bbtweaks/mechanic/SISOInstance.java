@@ -19,7 +19,6 @@ public abstract class SISOInstance implements MechanicInstance {
   protected final Sign sign;
   protected final BlockFace signFacing;
   protected final Block mountBlock;
-  private final BlockData mountBlockData;
   protected final Block inputBlock;
 
   private @Nullable Block cachedOutputBlock;
@@ -35,7 +34,6 @@ public abstract class SISOInstance implements MechanicInstance {
 
     this.signFacing = ((Directional) sign.getBlockData()).getFacing();
     this.mountBlock = sign.getBlock().getRelative(signFacing.getOppositeFace());
-    this.mountBlockData = mountBlock.getBlockData();
     this.inputBlock = sign.getBlock().getRelative(signFacing);
 
     this.availableOutputBlocks = new ArrayList<>();
@@ -129,14 +127,14 @@ public abstract class SISOInstance implements MechanicInstance {
     stateSetter.accept(lastOutputState);
   }
 
-  protected void tryWriteOutputState(boolean state) {
+  protected @Nullable Block tryWriteOutputState(boolean state) {
     if (state == lastOutputState && !isInitialWrite)
-      return;
+      return null;
 
     updateOutputBlock();
 
     if (cachedOutputBlock == null || cachedOutputBlockData == null)
-      return;
+      return null;
 
     lastOutputState = state;
     isInitialWrite = false;
@@ -144,15 +142,31 @@ public abstract class SISOInstance implements MechanicInstance {
     cachedOutputBlockData.setPowered(state);
     cachedOutputBlock.setBlockData(cachedOutputBlockData);
 
-    if (mountBlockData instanceof Lightable lightable)
+    tryForceStateOnMountBlockOf(cachedOutputBlock, cachedOutputBlockData, state);
+
+    return cachedOutputBlock;
+  }
+
+  protected void tryForceStateOnMountBlockOf(Block block, BlockData data, boolean state) {
+    if (!(data instanceof Directional directional))
+      return;
+
+    var mountedOnBlock = block.getRelative(directional.getFacing().getOppositeFace());
+
+    if (!isBlockLoaded(mountedOnBlock))
+      return;
+
+    var mountedOnData = mountedOnBlock.getBlockData();
+
+    if (mountedOnData instanceof Lightable lightable)
       lightable.setLit(state);
 
-    if (mountBlockData instanceof Powerable powerable)
+    if (mountedOnData instanceof Powerable powerable)
       powerable.setPowered(state);
 
     // Force the mount-block to recalculate its power-state; sadly, this is the only known way.
-    mountBlock.setType(Material.BARRIER);
-    mountBlock.setBlockData(mountBlockData);
+    mountedOnBlock.setType(Material.BARRIER);
+    mountedOnBlock.setBlockData(mountedOnData);
   }
 
   protected boolean getLastOutputState() {
