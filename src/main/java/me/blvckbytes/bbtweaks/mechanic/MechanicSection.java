@@ -10,6 +10,7 @@ import me.blvckbytes.bbtweaks.mechanic.auto_dispose.AutoDisposeSection;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchSection;
 import me.blvckbytes.bbtweaks.mechanic.hopper.HopperSection;
 import me.blvckbytes.bbtweaks.mechanic.inv_move.InvMoveSection;
+import me.blvckbytes.bbtweaks.mechanic.lever_array.LeverArraySection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.config.MagnetSection;
 import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderSection;
 import me.blvckbytes.bbtweaks.mechanic.quick_unload.QuickUnloadSection;
@@ -29,6 +30,7 @@ public class MechanicSection extends ConfigSection {
   public HiddenSwitchSection hiddenSwitch;
   public QuickUnloadSection quickUnload;
   public InvMoveSection invMove;
+  public LeverArraySection leverArray;
 
   public ComponentMarkup noWallSign;
 

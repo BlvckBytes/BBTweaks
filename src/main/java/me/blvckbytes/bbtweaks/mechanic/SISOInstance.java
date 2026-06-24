@@ -11,7 +11,7 @@ import java.util.*;
 
 public abstract class SISOInstance implements MechanicInstance {
 
-  private static final BlockFace[] DIRECT_FACES = new BlockFace[] {
+  protected static final BlockFace[] DIRECT_FACES = new BlockFace[] {
     BlockFace.UP, BlockFace.DOWN,
     BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
   };
@@ -125,6 +125,10 @@ public abstract class SISOInstance implements MechanicInstance {
       return;
 
     stateSetter.accept(lastOutputState);
+  }
+
+  protected boolean hasCachedOutputBlock() {
+    return cachedOutputBlock != null;
   }
 
   protected @Nullable Block tryWriteOutputState(boolean state) {

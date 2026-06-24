@@ -442,6 +442,30 @@ mechanic:
         ; nicht hineingepasst hat <&c *for-item="unfitted_items" *for-separator={,<space/>}>{item.amount}x <translate [item.key] /></>
       </container>
       .
+  leverArray:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um ein LeverArray zu erstellen!'
+    propagationSpeedEnableMalformedExpression: '{lut.mechanic_prefix} <&c>Ungültige Eingabe für die Ausbreitungsgeschwindigkeit des <&4>An-Zustandes</>: <&4>{input}<&c>!'
+    propagationSpeedEnableNegative: '{lut.mechanic_prefix} <&c>Die Ausbreitungsgeschwindigkeit des <&4>An-Zustandes</> von <&4>{speed} <&c>ist negativ!'
+    propagationSpeedDisableMalformedExpression: '{lut.mechanic_prefix} <&c>Ungültige Eingabe für die Ausbreitungsgeschwindigkeit des <&4>Aus-Zustandes</>: <&4>{input}<&c>!'
+    propagationSpeedDisableNegative: '{lut.mechanic_prefix} <&c>Die Ausbreitungsgeschwindigkeit des <&4>Aus-Zustandes</> von <&4>{speed} <&c>ist negativ!'
+    creationSuccess: |
+      {lut.mechanic_prefix} <&7>Das <&a>LeverArray <&7>bei <&a>{x} {y} {z} <&7>wurde<space/>
+      <container *if="propagation_speed_enable > 0 or propagation_speed_disable > 0">
+        mit einer Ausbreitungsgeschwindigkeit<space/>
+        <separate
+          separator={<space/>und<space/>}
+          value={
+            <container *if="propagation_speed_enable > 0">
+              des <&a>An-Zustandes</> von <&a>{propagation_speed_enable} Tick{propagation_speed_enable > 1 then "s"}</>
+          }
+          value={
+            <container *if="propagation_speed_disable > 0">
+              des <&a>Aus-Zustandes</> von <&a>{propagation_speed_disable} Tick{propagation_speed_disable > 1 then "s"}</>
+          }
+        />
+        <space/>
+      </container>
+      erfolgreich erstellt!
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
