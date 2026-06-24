@@ -6,6 +6,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
 import org.bukkit.inventory.DoubleChestInventory;
 
@@ -35,8 +36,12 @@ public class SignUtil {
     for (var containerBlock : containerBlocks) {
       for (var signFace : SIGN_FACES) {
         var possibleSignBlock = containerBlock.getRelative(signFace);
+        var blockData = possibleSignBlock.getBlockData();
 
-        if (!(Tag.WALL_SIGNS.isTagged(possibleSignBlock.getType())))
+        if (!(Tag.WALL_SIGNS.isTagged(blockData.getMaterial())))
+          continue;
+
+        if (((Directional) blockData).getFacing() != signFace)
           continue;
 
         if (predicate.test((Sign) possibleSignBlock.getState()))
