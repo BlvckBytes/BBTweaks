@@ -111,6 +111,8 @@ permissions:
     description: 'Use the quick-unload mechanic'
   bbtweaks.mechanic.inv-move:
     description: 'Use the inv-move mechanic'
+  bbtweaks.mechanic.lever-array:
+    description: 'Use the lever-array mechanic'
   bbtweaks.markers:
     description: 'Browse all available markers'
   bbtweaks.setmarker:
