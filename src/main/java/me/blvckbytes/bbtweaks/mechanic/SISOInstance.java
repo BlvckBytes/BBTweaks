@@ -127,18 +127,18 @@ public abstract class SISOInstance implements MechanicInstance {
     stateSetter.accept(lastOutputState);
   }
 
-  protected boolean hasCachedOutputBlock() {
-    return cachedOutputBlock != null;
+  public @Nullable Block getCachedOutputBlock() {
+    return cachedOutputBlock;
   }
 
-  protected @Nullable Block tryWriteOutputState(boolean state) {
+  protected boolean tryWriteOutputState(boolean state) {
     if (state == lastOutputState && !isInitialWrite)
-      return null;
+      return false;
 
     updateOutputBlock();
 
     if (cachedOutputBlock == null || cachedOutputBlockData == null)
-      return null;
+      return false;
 
     lastOutputState = state;
     isInitialWrite = false;
@@ -147,8 +147,7 @@ public abstract class SISOInstance implements MechanicInstance {
     cachedOutputBlock.setBlockData(cachedOutputBlockData);
 
     tryForceStateOnMountBlockOf(cachedOutputBlock, cachedOutputBlockData, state);
-
-    return cachedOutputBlock;
+    return true;
   }
 
   protected void tryForceStateOnMountBlockOf(Block block, BlockData data, boolean state) {

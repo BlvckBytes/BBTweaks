@@ -22,7 +22,6 @@ public class LeverArrayInstance extends SISOInstance {
 
   private final Long2ObjectMap<TriState> lastKnownPowerStateByCompactId;
 
-  private @Nullable Block lastAlteredOutputBlock;
   private long lastWriteStamp;
   private int deltaLimit;
 
@@ -48,18 +47,16 @@ public class LeverArrayInstance extends SISOInstance {
 
     var newState = inputPower > 0;
 
-    var alteredOutputBlock = tryWriteOutputState(newState);
+    var didChangeOutput = tryWriteOutputState(newState);
+    var cachedOutputBlock = getCachedOutputBlock();
 
-    if (!hasCachedOutputBlock()) {
-      lastAlteredOutputBlock = null;
+    if (cachedOutputBlock == null)
       return true;
-    }
 
     var maximumDelta = MAX_EXTENT - 1;
     var propagationSpeed = newState ? propagationSpeedEnable : propagationSpeedDisable;
 
-    if (alteredOutputBlock != null) {
-      lastAlteredOutputBlock = alteredOutputBlock;
+    if (didChangeOutput) {
       lastWriteStamp = time;
       deltaLimit = propagationSpeed <= 0 ? maximumDelta : 0;
     }
@@ -71,16 +68,13 @@ public class LeverArrayInstance extends SISOInstance {
       }
     }
 
-    if (lastAlteredOutputBlock == null)
-      return true;
-
-    var walkingDirection = determineFaceToGetFromSignTo(lastAlteredOutputBlock);
+    var walkingDirection = determineFaceToGetFromSignTo(cachedOutputBlock);
 
     if (walkingDirection == null)
       return true;
 
     for (var delta = 1; delta <= deltaLimit; ++delta) {
-      var nextBlock = lastAlteredOutputBlock.getRelative(walkingDirection, delta);
+      var nextBlock = cachedOutputBlock.getRelative(walkingDirection, delta);
       var compactId = CompactId.computeWorldlessBlockId(nextBlock);
 
       var lastKnownState = lastKnownPowerStateByCompactId.getOrDefault(compactId, TriState.NULL);
