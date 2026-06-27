@@ -21,7 +21,6 @@ import me.blvckbytes.bbtweaks.infinite_waterbucket.InfiniteWaterbucketListener;
 import me.blvckbytes.bbtweaks.integration.mc_mmo.McMMOIntegrationLoader;
 import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
-import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegrationLoader;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
@@ -106,7 +105,6 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(FloodgateIntegrationLoader.class)
         .withSingleton(ArmIntegrationLoader.class)
         .withSingleton(DiscordIntegrationLoader.class)
-        .withSingleton(CraftBookIntegrationLoader.class)
         .withSingleton(ActionBarSleepMessage.class)
         .withSingleton(RDBreakerListener.class)
         .withSingleton(LavaSponge.class)

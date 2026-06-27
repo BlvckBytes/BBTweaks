@@ -2,7 +2,6 @@ package me.blvckbytes.bbtweaks.mechanic.hopper;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.integration.craftbook.CraftBookIntegration;
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.Material;
@@ -24,21 +23,18 @@ public class HopperInstance extends SISOInstance {
   private @Nullable Inventory hopperInventory;
   private final @Nullable ItemPredicate predicate;
   private final ItemCompatibilities itemCompatibilities;
-  private final CraftBookIntegration craftBookIntegration;
   private final ConfigKeeper<MainSection> config;
 
   public HopperInstance(
     Sign sign,
     @Nullable ItemPredicate predicate,
     ItemCompatibilities itemCompatibilities,
-    CraftBookIntegration craftBookIntegration,
     ConfigKeeper<MainSection> config
   ) {
     super(sign);
 
     this.predicate = predicate;
     this.itemCompatibilities = itemCompatibilities;
-    this.craftBookIntegration = craftBookIntegration;
     this.config = config;
   }
 
@@ -111,17 +107,20 @@ public class HopperInstance extends SISOInstance {
     if (destinationBlock.getState() instanceof InventoryHolder destinationInventoryHolder)
       remainingAmount = tryTransportItemAndGetRemainder(destinationInventoryHolder, destinationBlock.getType(), sourceItem, hopperFacing);
 
-    else if (destinationBlock.getType() == Material.STICKY_PISTON) {
-      var transportedItems = new ArrayList<ItemStack>(1);
-      transportedItems.add(sourceItem);
-
-      var leftovers = craftBookIntegration.requestPipeAndGetLeftovers(destinationBlock, transportedItems);
-
-      remainingAmount = 0;
-
-      for (var item : leftovers)
-        remainingAmount += item.getAmount();
-    }
+    // NOTE: We've removed the PipeRequestEvent from our CB3-fork, so this is no longer directly supported.
+    //       One could simply move the item into the hopper inventory and fire a HopperInventorySearchEvent,
+    //       which will trigger the pipe to then suck from the hopper-block itself. That said, nobody needs it atm.
+//    else if (destinationBlock.getType() == Material.STICKY_PISTON) {
+//      var transportedItems = new ArrayList<ItemStack>(1);
+//      transportedItems.add(sourceItem);
+//
+//      var leftovers = craftBookIntegration.requestPipeAndGetLeftovers(destinationBlock, transportedItems);
+//
+//      remainingAmount = 0;
+//
+//      for (var item : leftovers)
+//        remainingAmount += item.getAmount();
+//    }
 
     else
       return true;
