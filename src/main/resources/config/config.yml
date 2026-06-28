@@ -471,6 +471,10 @@ mechanic:
     missingRadius: '{lut.mechanic_prefix} <&c>Die Angabe des Suchradius in der vierten Zeile ist verpflichtend!'
     nonPositiveRadius: '{lut.mechanic_prefix} <&c>Die Eingabe <&4>{input}</> für den Suchradius ist keine positive Ganzzahl!'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>Planter</> bei <&a>{x} {y} {z}</> wurde erfolgreich erstellt!'
+  autoCrafter:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen AutoCrafter zu erstellen!'
+    notOnACrafter: '{lut.mechanic_prefix} <&c>Ein AutoCrafter kann nur an einem Crafter-Block angebracht werden!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>AutoCrafter</> bei <&a>{x} {y} {z}</> wurde erfolgreich erstellt!'
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'

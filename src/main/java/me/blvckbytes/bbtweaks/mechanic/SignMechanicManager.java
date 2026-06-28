@@ -4,6 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.AutoWirer;
 import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
+import me.blvckbytes.bbtweaks.mechanic.auto_crafter.AutoCrafterMechanic;
 import me.blvckbytes.bbtweaks.mechanic.clock.ClockMechanic;
 import me.blvckbytes.bbtweaks.mechanic.auto_dispose.AutoDisposeMechanic;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchCommand;
@@ -74,6 +75,7 @@ public class SignMechanicManager implements Disableable, Listener {
     registerMechanic(autoWirer.withSingletonAndGet(InvMoveMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(LeverArrayMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(PlanterMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(AutoCrafterMechanic.class));
   }
 
   @Override
