@@ -208,7 +208,6 @@ public class HopperMechanic extends PredicateMechanic<HopperInstance> implements
     var hopperInstance = instanceByHopperPosition.get(hopperBlock.getWorld(), hopperBlock.getX(), hopperBlock.getY(), hopperBlock.getZ());
 
     // Disable vanilla push/pull-behavior for all hoppers on which an instance is mounted.
-    // Note: This also disables picking up items right above the hopper.
     if (hopperInstance != null)
       event.setInventory(null);
   }
