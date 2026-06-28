@@ -13,10 +13,11 @@ import org.bukkit.inventory.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-
 public class HopperInstance extends SISOInstance {
+
+  // We want to have bottles, buckets, etc. stack as efficiently as possible, such that
+  // the crafter can operate at its full speed without having to await another hopper-refill.
+  private static final int CRAFTER_MAX_STACK_SIZE = 64;
 
   private static final int[] BREWER_POTION_SLOTS = { 0, 1, 2 };
 
@@ -141,7 +142,7 @@ public class HopperInstance extends SISOInstance {
     var destinationInventory = destinationInventoryHolder.getInventory();
 
     if (destinationInventoryHolder instanceof Crafter crafter)
-      return distributeItemAndGetRemainder(destinationInventory, item, (slotIndex, slotContents) -> !crafter.isSlotDisabled(slotIndex));
+      return distributeIntoCrafterToMakeEvenAndGetRemainder(destinationInventory, crafter, item);
 
     if (destinationInventory instanceof BrewerInventory) {
       if (hopperFacing == BlockFace.DOWN) {
@@ -304,74 +305,76 @@ public class HopperInstance extends SISOInstance {
     return predicate == null || predicate.test(item);
   }
 
-  private int distributeItemAndGetRemainder(Inventory inventory, ItemStack item, SlotPredicate slotPredicate) {
-    var remainingAmountToAdd = item.getAmount();
-    var similarItems = new ArrayList<ItemStack>();
+  private static int distributeIntoCrafterToMakeEvenAndGetRemainder(Inventory inventory, Crafter crafter, ItemStack item) {
+    var spaceByIndex = new int[inventory.getSize()];
+    var addedAmountByIndex = new int[inventory.getSize()];
 
-    for (var slotIndex = 0; slotIndex < inventory.getSize(); ++slotIndex) {
-      var currentItem = inventory.getItem(slotIndex);
-
-      if (!slotPredicate.test(slotIndex, currentItem))
+    for (var index = 0; index < spaceByIndex.length; ++index) {
+      if (crafter.isSlotDisabled(index))
         continue;
 
-      if (isAir(currentItem)) {
-        var newItem = new ItemStack(item);
-        newItem.setAmount(1);
-        inventory.setItem(slotIndex, newItem);
+      var currentItem = inventory.getItem(index);
 
-        if (--remainingAmountToAdd <= 0)
-          return 0;
-
-        // Otherwise, we're not able to modify the amount later on by reference - the
-        // inventory seems to clone the stack internally when setting.
-        similarItems.add(inventory.getItem(slotIndex));
+      if (currentItem == null || currentItem.getType().isAir()) {
+        spaceByIndex[index] = CRAFTER_MAX_STACK_SIZE;
         continue;
       }
 
       if (!currentItem.isSimilar(item))
         continue;
 
-      var space = currentItem.getMaxStackSize() - currentItem.getAmount();
+      var currentSpace = CRAFTER_MAX_STACK_SIZE - currentItem.getAmount();
 
-      if (space <= 0)
+      if (currentSpace <= 0)
         continue;
 
-      similarItems.add(currentItem);
+      spaceByIndex[index] = currentSpace;
     }
 
-    if (similarItems.isEmpty())
-      return remainingAmountToAdd;
+    var remainingAmount = item.getAmount();
 
-    similarItems.sort(Comparator.comparingInt(ItemStack::getAmount));
+    while (remainingAmount > 0) {
+      var maxSpace = 0;
+      var maxSpaceIndex = -1;
 
-    var currentItemIndex = 0;
-    var lastItemAmount = 0;
+      for (var index = 0; index < spaceByIndex.length; ++index) {
+        var currentSpace = spaceByIndex[index];
 
-    var maxStackSize = item.getMaxStackSize();
+        if (currentSpace <= 0)
+          continue;
 
-    while (remainingAmountToAdd > 0) {
-      var currentItem = similarItems.get(currentItemIndex);
-      var currentAmount = currentItem.getAmount();
+        if (maxSpaceIndex < 0 || currentSpace > maxSpace) {
+          maxSpaceIndex = index;
+          maxSpace = currentSpace;
+        }
+      }
 
-      if (currentAmount >= maxStackSize && currentItemIndex == 0)
+      if (maxSpaceIndex < 0)
         break;
 
-      if (currentItemIndex > 0 && currentAmount > lastItemAmount) {
-        currentItemIndex = 0;
+      ++addedAmountByIndex[maxSpaceIndex];
+      --spaceByIndex[maxSpaceIndex];
+      --remainingAmount;
+    }
+
+    for (var index = 0; index < addedAmountByIndex.length; ++index) {
+      var addedAmount = addedAmountByIndex[index];
+
+      if (addedAmount <= 0)
+        continue;
+
+      var currentItem = inventory.getItem(index);
+
+      if (currentItem == null) {
+        var newStack = new ItemStack(item);
+        newStack.setAmount(addedAmount);
+        inventory.setItem(index, newStack);
         continue;
       }
 
-      lastItemAmount = currentAmount;
-
-      currentItem.setAmount(currentAmount + 1);
-      --remainingAmountToAdd;
-
-      if (++currentItemIndex >= similarItems.size())
-        currentItemIndex = 0;
+      currentItem.setAmount(currentItem.getAmount() + addedAmount);
     }
 
-    item.setAmount(remainingAmountToAdd);
-
-    return remainingAmountToAdd;
+    return remainingAmount;
   }
 }
