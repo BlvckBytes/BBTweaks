@@ -113,6 +113,8 @@ permissions:
     description: 'Use the inv-move mechanic'
   bbtweaks.mechanic.lever-array:
     description: 'Use the lever-array mechanic'
+  bbtweaks.mechanic.auto-crafter:
+    description: 'Use the auto-crafter mechanic'
   bbtweaks.markers:
     description: 'Browse all available markers'
   bbtweaks.setmarker:
