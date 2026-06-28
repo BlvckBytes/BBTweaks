@@ -151,9 +151,16 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     currentTime = time;
 
     instanceBySignPosition.forEachValue(instance -> {
-      if (!instance.tick(time)) {
-        instance.getSign().getBlock().breakNaturally();
-        onSignDestroy(null, instance.getSign());
+      var sign = instance.getSign();
+
+      try {
+        if (!instance.tick(time)) {
+          sign.getBlock().breakNaturally();
+          onSignDestroy(null, sign);
+        }
+      } catch (Throwable e) {
+        var locString = sign.getX() + " " + sign.getY() + " " + sign.getZ() + " " + sign.getWorld().getName();
+        plugin.getLogger().log(Level.SEVERE, "An error occurred while ticking a mechanic at " + locString, e);
       }
     });
   }
