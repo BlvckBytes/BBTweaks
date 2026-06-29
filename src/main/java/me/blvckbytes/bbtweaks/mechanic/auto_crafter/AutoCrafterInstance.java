@@ -41,6 +41,10 @@ public class AutoCrafterInstance extends SISOInstance {
     if (!(blockData instanceof org.bukkit.block.data.type.Crafter crafterData))
       return false;
 
+    // Allows to temporarily deactivate the crafter by powering it.
+    if (crafterData.isTriggered())
+      return true;
+
     var outputFace = switch (crafterData.getOrientation()) {
       case DOWN_NORTH, DOWN_EAST, DOWN_SOUTH, DOWN_WEST -> BlockFace.DOWN;
       case UP_NORTH, UP_EAST, UP_SOUTH, UP_WEST -> BlockFace.UP;
