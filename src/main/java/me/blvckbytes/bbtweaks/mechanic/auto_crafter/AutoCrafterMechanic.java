@@ -4,10 +4,13 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
+import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.block.CrafterCraftEvent;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.plugin.Plugin;
@@ -27,8 +30,12 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
 
   private final List<CachedRecipe> cachedRecipes = new ArrayList<>();
 
+  private final CacheByPosition<AutoCrafterInstance> instanceByCrafterPosition;
+
   public AutoCrafterMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
     super(plugin, config);
+
+    this.instanceByCrafterPosition = new CacheByPosition<>();
 
     // Let's give other plugins plenty of time to register additional recipes.
     Bukkit.getScheduler().runTaskLater(plugin, this::updateRecipeCache, 20L);
@@ -52,13 +59,15 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
     }
 
     var instance = new AutoCrafterInstance(sign, this);
+    var crafter = instance.getMountBlock();
 
-    if (creator != null && instance.getMountBlock().getType() != Material.CRAFTER) {
+    if (creator != null && crafter.getType() != Material.CRAFTER) {
       config.rootSection.mechanic.autoCrafter.notOnACrafter.sendMessage(creator);
       return null;
     }
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
+    instanceByCrafterPosition.put(crafter.getWorld(), crafter.getX(), crafter.getY(), crafter.getZ(), instance);
 
     if (creator != null) {
       config.rootSection.mechanic.autoCrafter.creationSuccess.sendMessage(
@@ -74,8 +83,29 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
   }
 
   @Override
+  public @Nullable AutoCrafterInstance onSignDestroy(@Nullable Player destroyer, Sign sign) {
+    var instance = super.onSignDestroy(destroyer, sign);
+
+    if (instance != null) {
+      var crafter = instance.getMountBlock();
+      instanceByCrafterPosition.invalidate(crafter.getWorld(), crafter.getX(), crafter.getY(), crafter.getZ());
+    }
+
+    return instance;
+  }
+
+  @Override
   public List<CachedRecipe> getRecipes() {
     return Collections.unmodifiableList(cachedRecipes);
+  }
+
+  @EventHandler
+  public void onCrafterCraft(CrafterCraftEvent event) {
+    var crafter = event.getBlock();
+    var crafterInstance = instanceByCrafterPosition.get(crafter.getWorld(), crafter.getX(), crafter.getY(), crafter.getZ());
+
+    if (crafterInstance != null)
+      event.setCancelled(true);
   }
 
   private void updateRecipeCache() {
