@@ -75,8 +75,12 @@ public abstract class SISOInstance implements MechanicInstance {
     var blockData = inputBlock.getBlockData();
     var blockMaterial = blockData.getMaterial();
 
-    if (isPowerBlock(blockMaterial))
+    if (isPowerBlock(blockMaterial)) {
+      if (blockData instanceof Lightable lightable && !lightable.isLit())
+        return 0;
+
       return 15;
+    }
 
     if (blockData instanceof Directional directional && !isDirectionalInvariant(blockMaterial)) {
       // I have no idea why the facing always points the opposite way - that's just what experiments showed.
