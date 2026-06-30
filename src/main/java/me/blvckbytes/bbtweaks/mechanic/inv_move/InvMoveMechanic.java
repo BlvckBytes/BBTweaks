@@ -139,8 +139,15 @@ public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implemen
     }
 
     if (SignUtil.checkIfAnyContainerSignMatches(container, this::isSignRegistered)) {
-      if (creator != null)
-        config.rootSection.mechanic.invMove.existingSign.sendMessage(creator, environment);
+      if (creator != null) {
+        config.rootSection.mechanic.invMove.existingSign.sendMessage(
+          creator,
+          new InterpretationEnvironment()
+            .withVariable("x", mountBlock.getX())
+            .withVariable("y", mountBlock.getY())
+            .withVariable("z", mountBlock.getZ())
+        );
+      }
 
       return null;
     }

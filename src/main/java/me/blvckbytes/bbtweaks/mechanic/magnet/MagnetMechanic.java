@@ -288,8 +288,15 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
 
     if (!config.rootSection.mechanic.magnet.allowMultipleSignsPerContainer) {
       if (SignUtil.checkIfAnyContainerSignMatches(container, this::isSignRegistered)) {
-        if (creator != null)
-          config.rootSection.mechanic.magnet.existingSign.sendMessage(creator, environment);
+        if (creator != null) {
+          config.rootSection.mechanic.magnet.existingSign.sendMessage(
+            creator,
+            new InterpretationEnvironment()
+              .withVariable("x", mountBlock.getX())
+              .withVariable("y", mountBlock.getY())
+              .withVariable("z", mountBlock.getZ())
+          );
+        }
 
         return null;
       }

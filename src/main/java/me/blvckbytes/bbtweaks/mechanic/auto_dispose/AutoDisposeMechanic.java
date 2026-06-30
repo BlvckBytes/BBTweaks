@@ -68,8 +68,15 @@ public class AutoDisposeMechanic extends PredicateMechanic<AutoDisposeInstance> 
     }
 
     if (SignUtil.checkIfAnyContainerSignMatches(container, this::isSignRegistered)) {
-      if (creator != null)
-        config.rootSection.mechanic.autoDispose.existingSign.sendMessage(creator, environment);
+      if (creator != null) {
+        config.rootSection.mechanic.autoDispose.existingSign.sendMessage(
+          creator,
+          new InterpretationEnvironment()
+            .withVariable("x", mountBlock.getX())
+            .withVariable("y", mountBlock.getY())
+            .withVariable("z", mountBlock.getZ())
+        );
+      }
 
       return null;
     }
