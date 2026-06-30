@@ -4,9 +4,12 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
+import me.blvckbytes.bbtweaks.util.BlockUtil;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
+import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.block.Crafter;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -61,9 +64,27 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
     var instance = new AutoCrafterInstance(sign, this);
     var crafter = instance.getMountBlock();
 
-    if (creator != null && crafter.getType() != Material.CRAFTER) {
-      config.rootSection.mechanic.autoCrafter.notOnACrafter.sendMessage(creator);
-      return null;
+    if (BlockUtil.isBlockLoaded(crafter)) {
+      if (!(crafter.getState(false) instanceof Crafter crafterState)) {
+        if (creator != null)
+          config.rootSection.mechanic.autoCrafter.notOnACrafter.sendMessage(creator);
+
+        return null;
+      }
+
+      if (SignUtil.checkIfAnyContainerSignMatches(crafterState, this::isSignRegistered)) {
+        if (creator != null) {
+          config.rootSection.mechanic.autoCrafter.existingSign.sendMessage(
+            creator,
+            new InterpretationEnvironment()
+              .withVariable("x", crafter.getX())
+              .withVariable("y", crafter.getY())
+              .withVariable("z", crafter.getZ())
+          );
+        }
+
+        return null;
+      }
     }
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);

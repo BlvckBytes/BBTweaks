@@ -9,6 +9,7 @@ public class AutoCrafterSection extends ConfigSection {
 
   public ComponentMarkup noPermission;
   public ComponentMarkup notOnACrafter;
+  public ComponentMarkup existingSign;
   public ComponentMarkup creationSuccess;
 
   public AutoCrafterSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
