@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.mechanic.quick_unload;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.mechanic.PredicateMechanic;
 import me.blvckbytes.bbtweaks.mechanic.common.FlagEnum;
@@ -33,18 +34,24 @@ import java.util.List;
 
 public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> {
 
-  private static final int FLAGS_LINE = 2;
+  private static final int FIRST_FLAGS_LINE = 2;
+  private static final int SECOND_FLAGS_LINE = 3;
+
+  private final AutoPickupContainerListener autoPickupContainerListener;
 
   public QuickUnloadMechanic(
     JavaPlugin plugin,
     ConfigKeeper<MainSection> config,
-    IPPIntegration ippIntegration
+    IPPIntegration ippIntegration,
+    AutoPickupContainerListener autoPickupContainerListener
   ) {
     super(
       plugin, config, ippIntegration,
       new NamespacedKey(plugin, "quick-unload-filter-predicate"),
       new NamespacedKey(plugin, "quick-unload-filter-language")
     );
+
+    this.autoPickupContainerListener = autoPickupContainerListener;
   }
 
   @Override
@@ -153,6 +160,12 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
       if (!(blockStateMeta.getBlockState() instanceof Container container))
         return;
 
+      if (autoPickupContainerListener.doesContainMarker(blockStateMeta.getPersistentDataContainer())) {
+        if (instance.flags.contains(QuickUnloadFlag.EXCLUDE_AUTO_PICKUP_CONTAINERS))
+          return;
+      } else if (instance.flags.contains(QuickUnloadFlag.EXCLUDE_NORMAL_SHULKERS))
+        return;
+
       ++counters.encounteredContainerItems;
 
       var inventory = container.getInventory();
@@ -247,7 +260,11 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
     EnumSet<QuickUnloadFlag> flags;
 
     try {
-      flags = FlagEnum.parse(QuickUnloadFlag.class, SignUtil.getPlainTextLine(sign, FLAGS_LINE));
+      flags = FlagEnum.parse(
+        QuickUnloadFlag.class,
+        SignUtil.getPlainTextLine(sign, FIRST_FLAGS_LINE),
+        SignUtil.getPlainTextLine(sign, SECOND_FLAGS_LINE)
+      );
     } catch (UnknownFlagException exception) {
       if (creator != null)
         config.rootSection.mechanic.quickUnload.unknownFlag.sendMessage(creator, exception.makeEnvironment());

@@ -5,6 +5,8 @@ import me.blvckbytes.bbtweaks.mechanic.common.FlagEnum;
 public enum QuickUnloadFlag implements FlagEnum {
   SILENT("silent"),
   INCLUDE_BUNDLES("+bundles"),
+  EXCLUDE_AUTO_PICKUP_CONTAINERS("-sbox"),
+  EXCLUDE_NORMAL_SHULKERS("-shulker"),
   ;
 
   private final String shorthand;
