@@ -10,11 +10,13 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 
 public class AutoCrafterInstance extends SISOInstance {
 
   private static final ItemStack AIR_STACK = new ItemStack(Material.AIR);
 
+  private final EnumSet<AutoCrafterFlag> flags;
   private final RecipeCache recipeCache;
 
   private @Nullable CachedRecipe cachedRecipe;
@@ -22,9 +24,10 @@ public class AutoCrafterInstance extends SISOInstance {
   private long cachedRecipeMatrixLsb;
   private TriState wasMatrixInvalid = TriState.NULL;
 
-  public AutoCrafterInstance(Sign sign, RecipeCache recipeCache) {
+  public AutoCrafterInstance(Sign sign, EnumSet<AutoCrafterFlag> flags, RecipeCache recipeCache) {
     super(sign);
 
+    this.flags = flags;
     this.recipeCache = recipeCache;
   }
 

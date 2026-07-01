@@ -469,6 +469,7 @@ mechanic:
     noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen AutoCrafter zu erstellen!'
     notOnACrafter: '{lut.mechanic_prefix} <&c>Ein AutoCrafter kann nur an einem Crafter-Block angebracht werden!'
     existingSign: '{lut.mechanic_prefix} <&c>Am Crafter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein AutoCrafter!'
+    unknownFlag: '{lut.mechanic_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="known_flags" *for-separator={,<space/>}>{flag}</>.'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>AutoCrafter</> bei <&a>{x} {y} {z}</> wurde erfolgreich erstellt!'
 
 seedOverride:

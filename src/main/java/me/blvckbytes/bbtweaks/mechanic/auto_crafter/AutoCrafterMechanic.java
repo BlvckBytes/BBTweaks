@@ -4,6 +4,8 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
+import me.blvckbytes.bbtweaks.mechanic.common.FlagEnum;
+import me.blvckbytes.bbtweaks.mechanic.common.UnknownFlagException;
 import me.blvckbytes.bbtweaks.util.BlockUtil;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import me.blvckbytes.bbtweaks.util.SignUtil;
@@ -21,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -30,6 +33,8 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
     if (Material.values().length > 4096)
       throw new IllegalStateException("There are more than 4K materials, which exceeds our expectation - cannot bit-pack the matrix into two longs without a loss of information!");
   }
+
+  private static final int FLAGS_LINE = 2;
 
   private final List<CachedRecipe> cachedRecipes = new ArrayList<>();
 
@@ -61,7 +66,18 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
       return null;
     }
 
-    var instance = new AutoCrafterInstance(sign, this);
+    EnumSet<AutoCrafterFlag> flags;
+
+    try {
+      flags = FlagEnum.parse(AutoCrafterFlag.class, SignUtil.getPlainTextLine(sign, FLAGS_LINE));
+    } catch (UnknownFlagException exception) {
+      if (creator != null)
+        config.rootSection.mechanic.autoCrafter.unknownFlag.sendMessage(creator, exception.makeEnvironment());
+
+      return null;
+    }
+
+    var instance = new AutoCrafterInstance(sign, flags, this);
     var crafter = instance.getMountBlock();
 
     if (BlockUtil.isBlockLoaded(crafter)) {
