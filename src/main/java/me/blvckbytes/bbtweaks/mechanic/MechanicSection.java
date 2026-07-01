@@ -9,7 +9,6 @@ import me.blvckbytes.bbtweaks.mechanic.auto_crafter.AutoCrafterSection;
 import me.blvckbytes.bbtweaks.mechanic.clock.ClockSection;
 import me.blvckbytes.bbtweaks.mechanic.auto_dispose.AutoDisposeSection;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchSection;
-import me.blvckbytes.bbtweaks.mechanic.hopper.HopperSection;
 import me.blvckbytes.bbtweaks.mechanic.inv_move.InvMoveSection;
 import me.blvckbytes.bbtweaks.mechanic.lever_array.LeverArraySection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.config.MagnetSection;
@@ -28,7 +27,6 @@ public class MechanicSection extends ConfigSection {
   public TransmitterReceiverSection transmitterReceiver;
   public AutoDisposeSection autoDispose;
   public SignFlipperSection signFlipper;
-  public HopperSection hopper;
   public HiddenSwitchSection hiddenSwitch;
   public QuickUnloadSection quickUnload;
   public InvMoveSection invMove;

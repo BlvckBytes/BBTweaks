@@ -10,7 +10,6 @@ import me.blvckbytes.bbtweaks.mechanic.auto_dispose.AutoDisposeMechanic;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchCommand;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchMechanic;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.PasswordCommand;
-import me.blvckbytes.bbtweaks.mechanic.hopper.HopperMechanic;
 import me.blvckbytes.bbtweaks.mechanic.inv_move.InvMoveMechanic;
 import me.blvckbytes.bbtweaks.mechanic.lever_array.LeverArrayMechanic;
 import me.blvckbytes.bbtweaks.mechanic.magnet.command.MagnetVisualizeCommand;
@@ -67,7 +66,6 @@ public class SignMechanicManager implements Disableable, Listener {
     registerMechanic(autoWirer.withSingletonAndGet(TransmitterMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(AutoDisposeMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(SignFlipperMechanic.class));
-    registerMechanic(autoWirer.withSingletonAndGet(HopperMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(HiddenSwitchMechanic.class));
     autoWirer.withSingleton(HiddenSwitchCommand.class);
     autoWirer.withSingleton(PasswordCommand.class);
