@@ -46,6 +46,10 @@ import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportCommand;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommand;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
+import me.blvckbytes.bbtweaks.pipes.mechanic.PipeBlockCacheRegistry;
+import me.blvckbytes.bbtweaks.pipes.mechanic.PipeRedstoneEventCaller;
+import me.blvckbytes.bbtweaks.pipes.mechanic.PipeTimingsCommand;
+import me.blvckbytes.bbtweaks.pipes.mechanic.Pipes;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerListener;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
 import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.InventoryChangeDetector;
@@ -162,6 +166,10 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(ObstructedContainerOpener.class)
         .withSingleton(ItemDataDisplayHandler.class)
         .withSingleton(ItemDataCommand.class)
+        .withSingleton(PipeRedstoneEventCaller.class)
+        .withSingleton(PipeTimingsCommand.class)
+        .withSingleton(PipeBlockCacheRegistry.class)
+        .withSingleton(Pipes.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);

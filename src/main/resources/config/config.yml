@@ -2528,6 +2528,31 @@ itemData:
             <br/>
             <$lut.item_data.data_entries />
 
+pipes:
+  pipeTimingsCommand:
+    name: 'pipetimings'
+  signCreateNoPermission: '{lut.pipes_prefix} <&c>Dir fehlen die nötigen Zugriffsrechte, um ein Pipe-Schild zu erstellen!'
+  signCreateNoPistonFound: '{lut.pipes_prefix} <&c>Ein Pipe-Schild muss an einem Kolben montiert werden!'
+  unsupportedSignType: '{lut.pipes_prefix} <&c>Pipe-Schilder können nur Wand- oder Steheschilder sein!'
+  signCreated: '{lut.pipes_prefix} <&7>Das Pipe-Schild wurde erfolgreich erstellt!'
+  notifications:
+    notificationRadius: 10
+    notifyOwnersOfRegion: true
+    notifyMembersOfRegion: false
+    notifyIgnoredRegions: []
+    debounceSeconds: 15
+    malformedSignToken: '{lut.pipes_prefix} <&c>Der Begriff "<&4>{token}</>" auf <&4>Zeile {line}</> am Schild bei <&4>{sign_coordinates}</> auf dem Rohr bei <&4>{coordinates}</> ist ungültig!'
+    noSignEncountered: '{lut.pipes_prefix} <&c>Konnte kein erforderliches <&4>[Pipe]</>-Schild auf dem Rohr bei <&4>{coordinates}</> finden; <&4>werfe Items</> am Eingang!'
+    pistonLimitExceeded: '{lut.pipes_prefix} <&c>Kolben-Obergrenze von <&4>{limit}</> bei <&4>{coordinates}</> überschritten; <&4>werfe Items</> am Eingang!'
+    tubeLimitExceeded: '{lut.pipes_prefix} <&c>Rohrblock-Obergrenze von <&4>{limit}</> bei <&4>{coordinates}</> überschritten; <&4>werfe Items</> am Eingang!'
+    warmingUp: '<&6>Pipe wärmt auf... {tubes} Rohre, {pistons} Kolben'
+  requireSign: true
+  dropExceededLimits: true
+  dropNoSign: true
+  maxTubeBlockCount: -1
+  maxPistonBlockCount: -1
+  maxCacheLoadCount: 600
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -2557,6 +2582,7 @@ cLut:
   list_chunk_tickets_prefix: '<&7>[<&6>ChunkTickets<&7>]'
   bottle_xp_prefix: '<&7>[<&6>BottleXp<&7>]'
   item_data_prefix: '<&7>[<&6>ItemData<&7>]'
+  pipes_prefix: '<&7>[<&6>Pipes<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

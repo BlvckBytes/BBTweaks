@@ -84,6 +84,8 @@ commands:
     permission: bbtweaks.listchunktickets
   itemdata:
     description: 'Displays hidden data of items'
+  pipetimings:
+    description: 'Temporarily activate timing pipe-processes per chunk'
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
@@ -125,3 +127,5 @@ permissions:
     description: 'Give a player access to a named tier of invmagnet-limits'
   bbtweaks.getexp.orb:
     description: 'Allows to use an optional parameter to hand out exp as an orb'
+  bbtweaks.pipes:
+    description: 'Allows to create pipe-signs, used to activate pipes'
