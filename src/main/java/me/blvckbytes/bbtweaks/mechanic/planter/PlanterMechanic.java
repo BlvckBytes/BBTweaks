@@ -65,6 +65,18 @@ public class PlanterMechanic extends BaseMechanic<PlanterInstance> {
       return null;
     }
 
+    if (radius > config.rootSection.mechanic.planter.maximumRadius) {
+      if (creator != null) {
+        config.rootSection.mechanic.planter.exceededMaximumRadius.sendMessage(
+          creator,
+          new InterpretationEnvironment()
+            .withVariable("radius", radius)
+            .withVariable("maximum", config.rootSection.mechanic.planter.maximumRadius)
+        );
+      }
+      return null;
+    }
+
     var instance = new PlanterInstance(sign, radius);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
