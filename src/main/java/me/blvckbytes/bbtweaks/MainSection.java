@@ -31,7 +31,7 @@ import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakSection;
 import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceSection;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportSection;
 import me.blvckbytes.bbtweaks.ping.PingSection;
-import me.blvckbytes.bbtweaks.pipes.mechanic.PipesSection;
+import me.blvckbytes.bbtweaks.pipes.PipesSection;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerSection;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideSection;
 import me.blvckbytes.bbtweaks.shulker_accessor.config.ShulkerAccessorSection;
