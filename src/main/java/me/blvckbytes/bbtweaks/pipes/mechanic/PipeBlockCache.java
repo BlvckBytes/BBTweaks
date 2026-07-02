@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.pipes.mechanic;
 
 import it.unimi.dsi.fastutil.longs.*;
 import me.blvckbytes.bbtweaks.pipes.mechanic.notification.PipeNotification;
+import me.blvckbytes.bbtweaks.util.CompactId;
 import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;

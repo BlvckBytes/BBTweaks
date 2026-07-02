@@ -190,6 +190,15 @@ public class AutoWirer implements Listener {
     return null;
   }
 
+  public <T> @Nullable T findDependencyInstance(Class<T> type) {
+    for (var dependencyInstance : instantiatedDependencies) {
+      if (type.isInstance(dependencyInstance.instance()))
+        return type.cast(dependencyInstance.instance());
+    }
+
+    return null;
+  }
+
   private void handleInterfaceFeatures(DependencyInstance dependencyInstance) {
     if (dependencyInstance.instance() instanceof Listener listener)
       Bukkit.getPluginManager().registerEvents(listener, plugin);

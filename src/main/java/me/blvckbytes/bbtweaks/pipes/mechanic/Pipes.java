@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.pipes.mechanic.notification.*;
+import me.blvckbytes.bbtweaks.util.CompactId;
 import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;

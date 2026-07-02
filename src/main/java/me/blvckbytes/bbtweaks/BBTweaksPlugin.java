@@ -46,10 +46,7 @@ import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportCommand;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommand;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
-import me.blvckbytes.bbtweaks.pipes.mechanic.PipeBlockCacheRegistry;
-import me.blvckbytes.bbtweaks.pipes.mechanic.PipeRedstoneEventCaller;
-import me.blvckbytes.bbtweaks.pipes.mechanic.PipeTimingsCommand;
-import me.blvckbytes.bbtweaks.pipes.mechanic.Pipes;
+import me.blvckbytes.bbtweaks.pipes.mechanic.*;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerListener;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
 import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.InventoryChangeDetector;
@@ -180,5 +177,11 @@ public class BBTweaksPlugin extends JavaPlugin {
   @Override
   public void onDisable() {
     autoWirer.onDisable();
+  }
+
+  // Used by the PipePredicates plugin
+  @SuppressWarnings("unused")
+  public @Nullable PipesApi getPipesApi() {
+    return autoWirer == null ? null : autoWirer.findDependencyInstance(PipesApi.class);
   }
 }
