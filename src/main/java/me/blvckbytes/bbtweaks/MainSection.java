@@ -10,6 +10,7 @@ import me.blvckbytes.bbtweaks.auto_fly.AutoFlySection;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerSection;
 import me.blvckbytes.bbtweaks.auto_tool.AutoToolSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideSection;
+import me.blvckbytes.bbtweaks.block_facing.BlockFacingSection;
 import me.blvckbytes.bbtweaks.bottlexp.BottleXpSection;
 import me.blvckbytes.bbtweaks.command_items.CommandItemsSection;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsSection;
@@ -76,6 +77,7 @@ public class MainSection extends ConfigSection {
   public LavaSpongeSection lavaSponge;
   public ItemDataSection itemData;
   public PipesSection pipes;
+  public BlockFacingSection blockFacing;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

@@ -2555,6 +2555,90 @@ pipes:
   maxPistonBlockCount: -1
   maxCacheLoadCount: 600
 
+blockFacing:
+  command:
+    name: 'blockfacing'
+    aliases:
+      - bf
+      - blockausrichtung
+  playersOnly: '{lut.block_facing_prefix} <&c>Dieser Befehl ist nur für Spieler zugänglich!'
+  noPermission: '{lut.block_facing_prefix} <&c>Dir fehlen die nötigen Rechte um diese Funktion benutzen zu können!'
+  actionUsage: '{lut.block_facing_prefix} <&c>Benutzung: /{label} \<<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>>'
+  modifyPlacedBlocksNowEnabled: '{lut.block_facing_prefix} <&7>Das Ausrichten beim Setzen von Blöcken ist nun <&a>aktiviert</>.'
+  modifyPlacedBlocksAlreadyEnabled: '{lut.block_facing_prefix} <&c>Das Ausrichten beim Setzen von Blöcken ist bereits aktiviert!'
+  modifyPlacedBlocksNowDisabled: '{lut.block_facing_prefix} <&7>Das Ausrichten beim Setzen von Blöcken ist nun <&c>deaktiviert</>.'
+  modifyPlacedBlocksAlreadyDisabled: '{lut.block_facing_prefix} <&c>Das Ausrichten beim Setzen von Blöcken ist bereits deaktiviert!'
+  modifyExistingBlocksNowEnabled: '{lut.block_facing_prefix} <&7>Das Ausrichten bereits gesetzter Blöcke durch Rechtsklick mit einem Stock in der Hand ist nun <&a>aktiviert</>.'
+  modifyExistingBlocksAlreadyEnabled: '{lut.block_facing_prefix} <&c>Das Ausrichten bereits gesetzter Blöcke durch Rechtsklick mit einem Stock in der Hand ist bereits aktiviert.'
+  modifyExistingBlocksNowDisabled: '{lut.block_facing_prefix} <&7>Das Ausrichten bereits gesetzter Blöcke durch Rechtsklick mit einem Stock in der Hand ist nun <&c>deaktiviert</>.'
+  modifyExistingBlocksAlreadyDisabled: '{lut.block_facing_prefix} <&c>Das Ausrichten bereits gesetzter Blöcke durch Rechtsklick mit einem Stock in der Hand ist bereits deaktiviert.'
+  facingOverrideNowSelected: '{lut.block_facing_prefix} <&7>Die Blockausrichtung <&a>{facing}</> ist nun ausgewählt.'
+  facingOverrideAlreadySelected: '{lut.block_facing_prefix} <&c>Die Blockausrichtung <&4>{facing}</> ist bereits ausgewählt!'
+  facingNames:
+    NORTH: 'Norden'
+    EAST: 'Osten'
+    SOUTH: 'Süden'
+    WEST: 'Westen'
+    UP: 'Oben'
+    DOWN: 'Unten'
+    IN_LOOKING_DIRECTION: 'Blickrichtung'
+    AGAINST_LOOKING_DIRECTION: 'Gegen-Blickrichtung'
+  settingsDisplay:
+    title: '<&8>Blockausrichtung'
+    rows: 3
+    items:
+      filler:
+        type: BLACK_STAINED_GLASS_PANE
+        name: ' '
+        slots: '0..last_slot'
+      modifyExistingBlocks:
+        slots: '17'
+        name: |
+          <reset>
+            <&8>» <&c><&a *use="modify_existing_blocks">Ausrichtung bestehender Blöcke</> <&8>«
+        type: '{modify_existing_blocks then "GREEN_CONCRETE" else "RED_CONCRETE"}'
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Schalte die Ausrichtung bestehender Blöcke<br/>
+            durch Rechtsklick mit einem Stock in der Hand<br/>
+            ein oder aus.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Umschalten<br/>
+            {lut.spacer}
+      modifyPlacedBlocks:
+        slots: '16'
+        name: |
+          <reset>
+            <&8>» <&c><&a *use="modify_placed_blocks">Ausrichtung beim Setzen</> <&8>«
+        type: '{modify_placed_blocks then "GREEN_CONCRETE" else "RED_CONCRETE"}'
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Schalte die Ausrichtung von Blöcken beim<br/>
+            Setzen dieser ein oder aus.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Umschalten<br/>
+            {lut.spacer}
+      facing:
+        slots: '[1,11,19,9,12,13,14,15]'
+        type: '{facing_enabled then "YELLOW_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="facing_enabled">Ausrichtung: {name}</> <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, in welche Richtung Blöcke<br/>
+            ausgerichtet werden sollen.
+            <container *if="not facing_enabled">
+              <br/>
+              {lut.spacer}<br/>
+              <&8>➥ <&e>Linksklick <&7>Richtung auswählen<br/>
+              {lut.spacer}
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -2585,6 +2669,7 @@ cLut:
   bottle_xp_prefix: '<&7>[<&6>BottleXp<&7>]'
   item_data_prefix: '<&7>[<&6>ItemData<&7>]'
   pipes_prefix: '<&7>[<&6>Pipes<&7>]'
+  block_facing_prefix: '<&7>[<&6>BlockFacing<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

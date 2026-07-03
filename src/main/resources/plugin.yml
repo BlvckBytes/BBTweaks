@@ -86,6 +86,9 @@ commands:
     description: 'Displays hidden data of items'
   pipetimings:
     description: 'Temporarily activate timing pipe-processes per chunk'
+  blockfacing:
+    description: 'Allows to select the block-facing for newly placed blocks or to toggle on existing ones'
+    permission: bbtweaks.blockfacing
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

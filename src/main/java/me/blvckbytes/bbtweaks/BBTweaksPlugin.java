@@ -10,6 +10,9 @@ import me.blvckbytes.bbtweaks.auto_wirer.AutoWirer;
 import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
 import me.blvckbytes.bbtweaks.back.BacktrackCommand;
 import me.blvckbytes.bbtweaks.back.LocationHistoryStore;
+import me.blvckbytes.bbtweaks.block_facing.command.BlockFacingCommand;
+import me.blvckbytes.bbtweaks.block_facing.settings.BlockFacingSettingsStore;
+import me.blvckbytes.bbtweaks.block_facing.settings_display.BlockFacingSettingsDisplayHandler;
 import me.blvckbytes.bbtweaks.bottlexp.BottleXpCommand;
 import me.blvckbytes.bbtweaks.command_items.CommandItemListener;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
@@ -167,6 +170,9 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(PipeTimingsCommand.class)
         .withSingleton(PipeBlockCacheRegistry.class)
         .withSingleton(Pipes.class)
+        .withSingleton(BlockFacingSettingsStore.class)
+        .withSingleton(BlockFacingSettingsDisplayHandler.class)
+        .withSingleton(BlockFacingCommand.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);
