@@ -161,7 +161,7 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
       return;
     }
 
-    if (!(mountBlock.getState() instanceof Container container)) {
+    if (!(mountBlock.getState(false) instanceof Container container)) {
       inventory = null;
       inventoryBlockType = Material.AIR;
       wasMissingContainer = true;

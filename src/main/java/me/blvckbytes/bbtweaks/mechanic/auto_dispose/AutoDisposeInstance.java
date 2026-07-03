@@ -34,7 +34,7 @@ public class AutoDisposeInstance extends SISOInstance {
     if (inputPower == null || inputPower > 0)
       return true;
 
-    if (!(mountBlock.getState() instanceof Container container))
+    if (!(mountBlock.getState(false) instanceof Container container))
       return false;
 
     var inventory = container.getInventory();

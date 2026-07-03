@@ -25,6 +25,6 @@ public class InvMoveInstance extends SISOInstance {
     if (time % 5 != 0)
       return true;
 
-    return mountBlock.getState() instanceof Container;
+    return mountBlock.getState(false) instanceof Container;
   }
 }
