@@ -1,13 +1,8 @@
 package me.blvckbytes.bbtweaks.mechanic.hidden_switch;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
-import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
-import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
-import at.blvckbytes.component_markup.markup.parser.MarkupParser;
-import at.blvckbytes.component_markup.util.InputView;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.LateWired;
 import me.blvckbytes.bbtweaks.mechanic.common.InstanceSession;
@@ -35,7 +30,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchInstance> implements Listener {
@@ -191,7 +185,7 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
     var environment = getSignEnvironment(sign);
 
     var inventoryTitle = config.rootSection.mechanic.hiddenSwitch.keysInventoryTitle
-      .interpret(SlotType.INVENTORY_TITLE, environment).get(0);
+      .interpret(SlotType.INVENTORY_TITLE, environment).getFirst();
 
     var keysInventory = Bukkit.createInventory(null, 9 * 6, inventoryTitle);
 
@@ -238,26 +232,6 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
       config.rootSection.mechanic.hiddenSwitch.creationSuccess.sendMessage(creator, environment);
 
     return instance;
-  }
-
-  private InterpretationEnvironment addErrorVariables(InterpretationEnvironment environment, MarkupParseException e) {
-    return environment
-      .withVariable("error_message", e.getErrorMessage())
-      .withVariable("error_position", e.getErrorPosition() + 1);
-  }
-
-  private @Nullable ComponentMarkup tryParseMarkup(String markup, Consumer<MarkupParseException> errorHandler) {
-    if (markup.isBlank())
-      return null;
-
-    try {
-      var ast = MarkupParser.parse(InputView.of(markup), BuiltInTagRegistry.INSTANCE);
-      return new ComponentMarkup(ast, new InterpretationEnvironment(), (view, position, message, e) -> {});
-    } catch (MarkupParseException e) {
-      errorHandler.accept(e);
-    }
-
-    return null;
   }
 
   @Override

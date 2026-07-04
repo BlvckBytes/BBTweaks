@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.mechanic;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
+import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import at.blvckbytes.component_markup.expression.ast.ExpressionNode;
 import at.blvckbytes.component_markup.expression.interpreter.ExpressionInterpreter;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
@@ -9,6 +10,9 @@ import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParseException;
 import at.blvckbytes.component_markup.expression.parser.ExpressionParser;
 import at.blvckbytes.component_markup.expression.tokenizer.ExpressionTokenizeException;
+import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry;
+import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
+import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.util.InputView;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
@@ -28,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.logging.Level;
 
 public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic<InstanceType>, Listener {
@@ -227,5 +232,25 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
         plugin.getLogger().log(Level.SEVERE, "Could not pass event " + event.getEventName() + " to " + listener.getPlugin().getName(), e);
       }
     }
+  }
+
+  protected InterpretationEnvironment addErrorVariables(InterpretationEnvironment environment, MarkupParseException e) {
+    return environment
+      .withVariable("error_message", e.getErrorMessage())
+      .withVariable("error_position", e.getErrorPosition() + 1);
+  }
+
+  protected @Nullable ComponentMarkup tryParseMarkup(String markup, Consumer<MarkupParseException> errorHandler) {
+    if (markup.isBlank())
+      return null;
+
+    try {
+      var ast = MarkupParser.parse(InputView.of(markup), BuiltInTagRegistry.INSTANCE);
+      return new ComponentMarkup(ast, new InterpretationEnvironment(), (_, _, _, _) -> {});
+    } catch (MarkupParseException e) {
+      errorHandler.accept(e);
+    }
+
+    return null;
   }
 }
