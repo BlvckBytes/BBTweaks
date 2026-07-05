@@ -31,7 +31,7 @@ public class PlanterInstance extends SISOInstance {
   public PlanterInstance(Sign sign, int radius) {
     super(sign);
 
-    this.searchArea = new SearchArea(getSign().getLocation(), radius);
+    this.searchArea = new SearchArea(getMountBlock().getLocation(), radius);
   }
 
   @Override

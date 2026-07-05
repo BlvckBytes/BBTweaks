@@ -61,18 +61,22 @@ public final class SearchArea {
     }
 
     public boolean isOutsideOfArea(Location location) {
-        return !isWithinSphericalRadius(location, center, radius);
+        var distanceToCenter = getMaxAxisBlockDistance(center, location);
+        return distanceToCenter > radius * radius;
     }
 
-    private boolean isWithinSphericalRadius(Location l1, Location l2, double radius) {
-        return l1.getWorld().equals(l2.getWorld()) && Math.floor(getDistanceSquared(l1, l2)) <= radius * radius; // Floor for more accurate readings
-    }
-
-    private static double getDistanceSquared(Location l1, Location l2) {
-        if (!l1.getWorld().equals(l2.getWorld()))
+    private int getMaxAxisBlockDistance(Location a, Location b) {
+        if(!a.getWorld().equals(b.getWorld()))
             return Integer.MAX_VALUE;
 
-        return l1.distanceSquared(l2);
+        var deltaX = Math.abs(a.getBlockX() - b.getBlockX());
+        var deltaY = Math.abs(a.getBlockY() - b.getBlockY());
+        var deltaZ = Math.abs(a.getBlockZ() - b.getBlockZ());
+
+        if (deltaX >= deltaY && deltaX >= deltaZ)
+            return deltaX;
+
+        return Math.max(deltaY, deltaZ);
     }
 
     private void forEachLoadedChunkInArea(Consumer<Chunk> handler) {
