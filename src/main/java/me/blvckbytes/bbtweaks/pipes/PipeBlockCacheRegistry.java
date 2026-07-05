@@ -1,7 +1,7 @@
 package me.blvckbytes.bbtweaks.pipes;
 
 import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
-import org.bukkit.Bukkit;
+import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.World;
@@ -10,18 +10,16 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class PipeBlockCacheRegistry implements Listener, Disableable {
+public class PipeBlockCacheRegistry implements Listener, Disableable, Tickable {
 
   private static final int EXPIRED_TICKET_REMOVAL_INTERVAL_T = 5;
 
@@ -32,25 +30,26 @@ public class PipeBlockCacheRegistry implements Listener, Disableable {
   private final Plugin plugin;
   private final Map<UUID, PipeBlockCache> blockCacheByWorldUid;
 
-  private final BukkitTask chunkTicketTask;
-
-  private int relativeTimeTicks;
+  private long relativeTimeTicks;
 
   public PipeBlockCacheRegistry(
     Plugin plugin
   ) {
     this.plugin = plugin;
     this.blockCacheByWorldUid = new HashMap<>();
-
-    this.chunkTicketTask = Bukkit.getScheduler().runTaskTimer(plugin, () -> {
-      relativeTimeTicks += EXPIRED_TICKET_REMOVAL_INTERVAL_T;
-
-      for (var cache : blockCacheByWorldUid.values())
-        cache.expireChunkTickets(false);
-    }, 0, EXPIRED_TICKET_REMOVAL_INTERVAL_T);
   }
 
-  public int getRelativeTimeTicks() {
+  @Override
+  public void tick(long relativeTime) {
+    this.relativeTimeTicks = relativeTime;
+
+    if (relativeTime % EXPIRED_TICKET_REMOVAL_INTERVAL_T == 0) {
+      for (var cache : blockCacheByWorldUid.values())
+        cache.expireChunkTickets(false);
+    }
+  }
+
+  public long getRelativeTimeTicks() {
     return relativeTimeTicks;
   }
 
@@ -60,9 +59,6 @@ public class PipeBlockCacheRegistry implements Listener, Disableable {
 
   @Override
   public void disable() {
-    HandlerList.unregisterAll(this);
-    this.chunkTicketTask.cancel();
-
     for (var cache : blockCacheByWorldUid.values())
       cache.disable();
 

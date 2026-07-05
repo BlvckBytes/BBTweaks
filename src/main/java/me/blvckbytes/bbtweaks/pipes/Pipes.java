@@ -594,7 +594,7 @@ public class Pipes implements PipesApi, Listener {
   }
 
   @EventHandler(priority = EventPriority.HIGH)
-  public void onBlockRedstoneChange(PipeRedstoneEvent event) {
+  public void onPipeRedstone(PipeRedstoneEvent event) {
     startPipeAndHandleNotifications(event.getBlock(), null);
   }
 

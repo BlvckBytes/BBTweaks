@@ -21,7 +21,7 @@ public class ChunkTicket {
             plugin.getLogger().warning("Could not add plugin-ticket to chunk at " + chunk.getX() + " " + chunk.getZ());
     }
 
-    public boolean handleExpiration(Plugin plugin, int ticksNow, boolean force) {
+    public boolean handleExpiration(Plugin plugin, long ticksNow, boolean force) {
         if (this.chunk == null)
             return false;
 
