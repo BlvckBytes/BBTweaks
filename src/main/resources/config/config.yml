@@ -473,6 +473,22 @@ mechanic:
     existingSign: '{lut.mechanic_prefix} <&c>Am Crafter bei <&4>{x} {y} {z} <&c>befindet sich bereits ein AutoCrafter!'
     unknownFlag: '{lut.mechanic_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="known_flags" *for-separator={,<space/>}>{flag}</>.'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>AutoCrafter</> bei <&a>{x} {y} {z}</> wurde erfolgreich erstellt!'
+  showcase:
+    maximumAxisOffset: 10
+    offsetSelectingTimeoutSeconds: 15
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um ein Showcase zu erstellen!'
+    malformedChatMessage: '{lut.mechanic_prefix} <&c>Die Chat-Nachricht (1. Zeile) ist fehlerhaft: <&4>{error_message} (Zeichen #{error_position})'
+    malformedInventoryTitle: '{lut.mechanic_prefix} <&c>Der Inventartitel (4. Zeile) ist fehlerhaft: <&4>{error_message} (Zeichen #{error_position})'
+    cannotEditSign: '{lut.mechanic_prefix} <&c>Du hast keinen Zugriff auf dieses Schild!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Das <&a>Showcase</> bei <&a>{x} {y} {z}</> wurde erfolgreich erstellt!'
+    axisOffsetLimitExceeded: '{lut.mechanic_prefix} <&c>Die Limitierung von <&4>{limit} <&c>des offsets pro Achse wurde überschritten!'
+    triedBindingToSign: '{lut.mechanic_prefix} <&c>Das Schild selbst kann nicht als Behälterblock benutzt werden!'
+    blockSelectionPrompt: '{lut.mechanic_prefix} <&7>Wähle den gewünschten <&a>Behälterblock <&7>des Showcases bei <&a>{x} {y} {z} <&7>durch klicken innerhalb <&a>{timeout}s <&7>aus!'
+    blockSelectionTimeout: '{lut.mechanic_prefix} <&c>Breche Auswahl eines <&4>Behälterblocks <&c>des Showcases bei <&4>{x} {y} {z} <&c>aufgrund von Inaktivität (<&4>{timeout}s<&c>) ab!'
+    blockSelectionNoContainer: '{lut.mechanic_prefix} <&c>Der gewählte offset-Block ist kein Behälter!'
+    blockSelectionSuccess: '{lut.mechanic_prefix} <&7>Das Showcase bei <&a>{x} {y} {z} <&7>benutzt nun den Behälter bei den offsets <&a>{x_offset} {y_offset} {z_offset}<&7>.'
+    defaultInventoryTitle: '<&8>Showcase'
+    cannotModifyInventory: '{lut.mechanic_prefix} <&c>Das Inventar eines Showcases kann nicht modifiziert werden!'
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'

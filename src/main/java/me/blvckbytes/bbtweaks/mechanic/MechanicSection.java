@@ -15,6 +15,7 @@ import me.blvckbytes.bbtweaks.mechanic.magnet.config.MagnetSection;
 import me.blvckbytes.bbtweaks.mechanic.planter.PlanterSection;
 import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderSection;
 import me.blvckbytes.bbtweaks.mechanic.quick_unload.QuickUnloadSection;
+import me.blvckbytes.bbtweaks.mechanic.showcase.ShowcaseSection;
 import me.blvckbytes.bbtweaks.mechanic.sign_flipper.SignFlipperSection;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.TransmitterReceiverSection;
 
@@ -33,6 +34,7 @@ public class MechanicSection extends ConfigSection {
   public LeverArraySection leverArray;
   public PlanterSection planter;
   public AutoCrafterSection autoCrafter;
+  public ShowcaseSection showcase;
 
   public ComponentMarkup noWallSign;
 
