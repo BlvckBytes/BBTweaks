@@ -56,6 +56,7 @@ public class Pipes implements PipesApi, Listener {
   private PipeBlockCache currentBlockCache;
 
   private final PipeTimingsCommand pipeTimingsCommand;
+  private final PipesInventoryUtil inventoryUtil;
 
   private final Map<UUID, Map<String, Long>> lastNotificationSendByDebounceIdByPlayerId;
 
@@ -63,12 +64,14 @@ public class Pipes implements PipesApi, Listener {
     Plugin plugin,
     ConfigKeeper<MainSection> config,
     PipeBlockCacheRegistry cacheRegistry,
-    PipeTimingsCommand pipeTimingsCommand
+    PipeTimingsCommand pipeTimingsCommand,
+    PipesInventoryUtil inventoryUtil
   ) {
     this.plugin = plugin;
     this.config = config;
     this.cacheRegistry = cacheRegistry;
     this.pipeTimingsCommand = pipeTimingsCommand;
+    this.inventoryUtil = inventoryUtil;
 
     this.lastNotificationSendByDebounceIdByPlayerId = new HashMap<>();
   }
@@ -200,7 +203,7 @@ public class Pipes implements PipesApi, Listener {
       var blockType = CachedBlock.getMaterial(cachedPutBlock);
 
       filteredPipeItems.forEachActiveItemAndBreakAfterReduce((_, item) -> {
-        return InventoryUtil.addItemToInventoryAndGetRemainingAmount(blockInventory, blockType, item);
+        return inventoryUtil.addItemToInventoryAndGetRemainingAmount(blockInventory, blockType, item);
       });
 
       return EnumerationDecision.CONTINUE;

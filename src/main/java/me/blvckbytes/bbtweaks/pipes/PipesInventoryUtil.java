@@ -11,7 +11,7 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-public class InventoryUtil {
+public class PipesInventoryUtil {
 
   // We want to have bottles, buckets, etc. stack as efficiently as possible, such that
   // the crafter can operate at its full speed without having to await another pipe-refill.
@@ -23,12 +23,12 @@ public class InventoryUtil {
   private static final int BREWER_INGREDIENT_INDEX = 3;
   private static final int BREWER_FUEL_INDEX = 4;
 
-  private static final Set<Material> furnaceIngredients;
-  private static final Set<Material> blastFurnaceIngredients;
-  private static final Set<Material> smokerIngredients;
-  private static final Set<Material> potionIngredientTypes;
+  private final Set<Material> furnaceIngredients;
+  private final Set<Material> blastFurnaceIngredients;
+  private final Set<Material> smokerIngredients;
+  private final Set<Material> potionIngredientTypes;
 
-  static {
+  public PipesInventoryUtil() {
     furnaceIngredients = new HashSet<>();
     blastFurnaceIngredients = new HashSet<>();
     smokerIngredients = new HashSet<>();
@@ -84,11 +84,11 @@ public class InventoryUtil {
     potionIngredientTypes.add(Material.DRAGON_BREATH);
   }
 
-  private static boolean isAPotionIngredient(ItemStack item) {
+  private boolean isAPotionIngredient(ItemStack item) {
     return potionIngredientTypes.contains(item.getType());
   }
 
-  public static int addItemToInventoryAndGetRemainingAmount(
+  public int addItemToInventoryAndGetRemainingAmount(
     AddOnlyInventory inventory,
     Material blockMaterial,
     ItemStack itemToAdd
@@ -154,7 +154,7 @@ public class InventoryUtil {
     return remainingAmount;
   }
 
-  private static int addItemToBrewingStandAndGetRemainingAmount(
+  private int addItemToBrewingStandAndGetRemainingAmount(
     AddOnlyInventory inventory,
     ItemStack itemToAdd
   ) {
