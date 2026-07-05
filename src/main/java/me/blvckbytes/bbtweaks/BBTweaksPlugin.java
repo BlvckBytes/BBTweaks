@@ -169,6 +169,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(PipeRedstoneEventCaller.class)
         .withSingleton(PipeTimingsCommand.class)
         .withSingleton(PipeBlockCacheRegistry.class)
+        .withSingleton(PipesInventoryUtil.class)
         .withSingleton(Pipes.class)
         .withSingleton(BlockFacingSettingsStore.class)
         .withSingleton(BlockFacingSettingsDisplayHandler.class)

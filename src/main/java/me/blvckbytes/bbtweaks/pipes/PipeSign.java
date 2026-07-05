@@ -1,6 +1,6 @@
 package me.blvckbytes.bbtweaks.pipes;
 
-import com.cryptomorin.xseries.XMaterial;
+import at.blvckbytes.cm_mapper.MaterialMatcher;
 import me.blvckbytes.bbtweaks.pipes.notification.MalformedSignNotification;
 import me.blvckbytes.bbtweaks.pipes.notification.PipeNotification;
 import org.bukkit.Material;
@@ -60,11 +60,9 @@ public class PipeSign {
         if (trimmedLowerToken.length() > NAMESPACE_PREFIX_LOWER.length() && trimmedLowerToken.startsWith(NAMESPACE_PREFIX_LOWER))
             trimmedLowerToken = trimmedLowerToken.substring(NAMESPACE_PREFIX_LOWER.length()).trim();
 
-        Material material;
+        var material = MaterialMatcher.tryMatch(trimmedLowerToken);
 
-        var xMaterial = XMaterial.matchXMaterial(trimmedLowerToken);
-
-        if (xMaterial.isPresent() && (material = xMaterial.get().get()) != null)
+        if (material != null)
             return material;
 
         if ((material = NumericItemMaterials.tryGetMaterialByNotation(trimmedLowerToken)) != null)
