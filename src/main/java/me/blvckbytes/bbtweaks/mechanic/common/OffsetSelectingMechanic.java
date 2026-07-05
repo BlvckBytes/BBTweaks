@@ -86,8 +86,9 @@ public abstract class OffsetSelectingMechanic<InstanceType extends MechanicInsta
 
       return handler.apply(sign, new Offsets(xOffset, yOffset, zOffset));
     } catch (Throwable e) {
-      sign.getSide(Side.FRONT).line(offsetsLineIndex, Component.text("0 0 0"));
-      return handler.apply((Sign) sign.getBlock().getState(), Offsets.ZERO);
+      var newSign = (Sign) sign.getBlock().getState();
+      newSign.getSide(Side.FRONT).line(offsetsLineIndex, Component.text("0 0 0"));
+      return handler.apply(newSign, Offsets.ZERO);
     }
   }
 
