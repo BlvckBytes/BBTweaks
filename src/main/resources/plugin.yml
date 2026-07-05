@@ -120,6 +120,8 @@ permissions:
     description: 'Use the lever-array mechanic'
   bbtweaks.mechanic.auto-crafter:
     description: 'Use the auto-crafter mechanic'
+  bbtweaks.mechanic.showcase:
+    description: 'Use the showcase mechanic'
   bbtweaks.markers:
     description: 'Browse all available markers'
   bbtweaks.setmarker:
