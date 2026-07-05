@@ -1,11 +1,11 @@
 package me.blvckbytes.bbtweaks.durability_warnings.config;
 
+import at.blvckbytes.cm_mapper.MaterialMatcher;
 import at.blvckbytes.cm_mapper.mapper.MappingError;
 import at.blvckbytes.cm_mapper.mapper.section.CSIgnore;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
-import com.cryptomorin.xseries.XMaterial;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
 import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
@@ -36,11 +36,10 @@ public class DurabilityWarningSection extends ConfigSection {
     super.afterParsing(fields);
 
     for (var itemType : itemTypes) {
-      var xMaterial = XMaterial.matchXMaterial(itemType);
-      Material material;
+      var material = MaterialMatcher.tryMatch(itemType);
 
-      if (xMaterial.isEmpty() || (material = xMaterial.get().get()) == null)
-        throw new MappingError("Invalid XMaterial-value: " + itemType);
+      if (material == null)
+        throw new MappingError("Invalid Material-value: " + itemType);
 
       if (!_itemTypes.add(material))
         throw new MappingError("Duplicate material: " + itemType);

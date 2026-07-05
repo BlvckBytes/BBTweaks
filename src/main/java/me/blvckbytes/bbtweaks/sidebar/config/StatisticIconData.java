@@ -1,12 +1,12 @@
 package me.blvckbytes.bbtweaks.sidebar.config;
 
+import at.blvckbytes.cm_mapper.MaterialMatcher;
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import at.blvckbytes.cm_mapper.mapper.MappingError;
 import at.blvckbytes.cm_mapper.mapper.section.CSIgnore;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
-import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Material;
 import org.jetbrains.annotations.Nullable;
 
@@ -32,9 +32,11 @@ public class StatisticIconData extends ConfigSection {
     if (iconType == null || iconType.isBlank())
       throw new MappingError("Property \"iconType\" cannot be absent or blank");
 
-    var matchedMaterial = XMaterial.matchXMaterial(iconType.trim());
+    var matchedMaterial = MaterialMatcher.tryMatch(iconType.trim());
 
-    if (matchedMaterial.isEmpty() || (_iconType = matchedMaterial.get().get()) == null)
-      throw new MappingError("Invalid \"iconType\" XMaterial-value: " + iconType);
+    if (matchedMaterial == null)
+      throw new MappingError("Invalid \"iconType\" Material-value: " + iconType);
+
+    _iconType = matchedMaterial;
   }
 }

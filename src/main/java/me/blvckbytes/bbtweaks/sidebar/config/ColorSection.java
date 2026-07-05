@@ -1,12 +1,12 @@
 package me.blvckbytes.bbtweaks.sidebar.config;
 
+import at.blvckbytes.cm_mapper.MaterialMatcher;
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import at.blvckbytes.cm_mapper.mapper.MappingError;
 import at.blvckbytes.cm_mapper.mapper.section.CSIgnore;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
-import com.cryptomorin.xseries.XMaterial;
 import org.bukkit.Material;
 
 import java.lang.reflect.Field;
@@ -29,9 +29,11 @@ public class ColorSection extends ConfigSection {
     super.afterParsing(fields);
 
     var materialString = iconType.asPlainString(null);
-    var xMaterial = XMaterial.matchXMaterial(materialString);
+    var material = MaterialMatcher.tryMatch(materialString);
 
-    if (xMaterial.isEmpty() || (_iconType = xMaterial.get().get()) == null)
-      throw new MappingError("Unknown XMaterial \"" + materialString + "\" on property \"iconType\"");
+    if (material == null)
+      throw new MappingError("Unknown Material \"" + materialString + "\" on property \"iconType\"");
+
+    _iconType = material;
   }
 }

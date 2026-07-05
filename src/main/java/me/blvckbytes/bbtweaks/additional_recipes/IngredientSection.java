@@ -1,12 +1,12 @@
 package me.blvckbytes.bbtweaks.additional_recipes;
 
+import at.blvckbytes.cm_mapper.MaterialMatcher;
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import at.blvckbytes.cm_mapper.mapper.MappingError;
 import at.blvckbytes.cm_mapper.mapper.section.CSIgnore;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
-import com.cryptomorin.xseries.XMaterial;
 import me.blvckbytes.bbtweaks.un_craft.MaterialTagRegistry;
 import org.bukkit.Material;
 import org.bukkit.inventory.RecipeChoice;
@@ -37,12 +37,12 @@ public class IngredientSection extends ConfigSection {
     if (this.materials != null) {
       for (var type : this.materials) {
         var materialString = type.asPlainString(null).toUpperCase().trim();
-        var xMaterial = XMaterial.matchXMaterial(materialString);
+        var material = MaterialMatcher.tryMatch(materialString);
 
-        if (xMaterial.isEmpty())
-          throw new MappingError("Could not correspond \"" + materialString + "\" to a valid XMaterial");
+        if (material == null)
+          throw new MappingError("Could not correspond \"" + materialString + "\" to a valid Material");
 
-        materials.add(xMaterial.get().get());
+        materials.add(material);
       }
     }
 
