@@ -145,7 +145,8 @@ public class BlockFacingCommand implements CommandHandler, Listener {
     }, 1);
   }
 
-  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  // Do not go up to MONITOR, as to not clash with the obstructed container opener
+  @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
   public void onInteract(PlayerInteractEvent event) {
     if (!event.getAction().isRightClick())
       return;
