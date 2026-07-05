@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.frame_locking;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Container;
@@ -12,6 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.hanging.HangingBreakEvent;
@@ -105,6 +107,13 @@ public class FrameLockingHandler implements Listener {
     var heldItem = player.getInventory().getItemInMainHand();
 
     if (heldItem.getType() != Material.TRIAL_KEY)
+      return false;
+
+    //noinspection UnstableApiUsage
+    var fakeBreakEvent = new BlockBreakEvent(entity.getLocation().getBlock(), player);
+    Bukkit.getPluginManager().callEvent(fakeBreakEvent);
+
+    if (fakeBreakEvent.isCancelled())
       return false;
 
     var pdc = itemFrame.getPersistentDataContainer();
