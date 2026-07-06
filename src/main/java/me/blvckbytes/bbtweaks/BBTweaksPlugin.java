@@ -21,6 +21,10 @@ import me.blvckbytes.bbtweaks.durability_warnings.WarningsProfileStore;
 import me.blvckbytes.bbtweaks.durability_warnings.command.DurabilityWarningCommand;
 import me.blvckbytes.bbtweaks.frame_locking.FrameLockingHandler;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
+import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerListener;
+import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerSettingsStore;
+import me.blvckbytes.bbtweaks.hotbar_randomizer.command.HotbarRandomizerCommand;
+import me.blvckbytes.bbtweaks.hotbar_randomizer.settings_display.HotbarRandomizerSettingsDisplayHandler;
 import me.blvckbytes.bbtweaks.infinite_waterbucket.InfiniteWaterbucketListener;
 import me.blvckbytes.bbtweaks.integration.mc_mmo.McMMOIntegrationLoader;
 import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
@@ -176,6 +180,10 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(BlockFacingSettingsDisplayHandler.class)
         .withSingleton(BlockFacingCommand.class)
         .withSingleton(FrameLockingHandler.class)
+        .withSingleton(HotbarRandomizerSettingsStore.class)
+        .withSingleton(HotbarRandomizerSettingsDisplayHandler.class)
+        .withSingleton(HotbarRandomizerCommand.class)
+        .withSingleton(HotbarRandomizerListener.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);

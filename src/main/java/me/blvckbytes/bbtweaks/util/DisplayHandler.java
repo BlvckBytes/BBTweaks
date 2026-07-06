@@ -11,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -43,6 +44,10 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
   }
 
   public abstract DisplayType instantiateDisplay(Player player, DisplayDataType displayData);
+
+  public @Nullable DisplayType getDisplay(Player player) {
+    return displayByPlayerId.get(player.getUniqueId());
+  }
 
   public void show(Player player, DisplayDataType displayData) {
     displayByPlayerId.put(player.getUniqueId(), instantiateDisplay(player, displayData));

@@ -89,6 +89,9 @@ commands:
   blockfacing:
     description: 'Allows to select the block-facing for newly placed blocks or to toggle on existing ones'
     permission: bbtweaks.blockfacing
+  hotbarrandomizer:
+    description: 'Allows to randomize the selected slot of your hotbar'
+    permission: bbtweaks.hotbar-randomizer
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
