@@ -2730,6 +2730,74 @@ hotbarRandomizer:
           <reset>
             <&8>» <&c>Leerer Hotbar-Slot (<&4>{slot}</>) <&8>«
 
+homes:
+  homeCommand:
+    name: 'home'
+    aliases:
+      - 'h'
+    homeList: |
+      {lut.homes_prefix}<space/>
+      <container *if="len(homes) eq 0">
+        <&c>Du hast noch keine Homepunkte gesetzt!
+      </container>
+      <container *else>
+        <&7>Deine Homepunkte:<space/>
+        <container *for-home="homes" *for-separator={,<space/>}>
+          <hover-item
+            name={Welt: {home.world}}
+            lore={
+              Koordinaten: {home.x} {home.y} {home.z}
+              <container *if="home.last_used_at">
+                <br/>
+                Zuletzt benutzt: <date [home.last_used_at] format="EEE dd.MM.yyyy HH:mm:ss" zone="Europe/Berlin" locale="de_DE" />
+              </container>
+            }
+          >
+            <&f>{home.name}
+      </container>
+    commandUsage: '{lut.homes_prefix} <&7>'
+    homeDoesNotExist: '{lut.homes_prefix} <&7>'
+    renameUsage: '{lut.homes_prefix} <&7>'
+    newHomeNameAlreadyExists: '{lut.homes_prefix} <&c>Ein Home mit dem Namen'
+    homeRenamed: '{lut.homes_prefix} <&7>'
+    notMarkedAsFavorite: '{lut.homes_prefix} <&7>'
+    removedFavoriteNumber: '{lut.homes_prefix} <&7>'
+    markFavoriteUsage: '{lut.homes_prefix} <&7>'
+    malformedFavoriteNumber: '{lut.homes_prefix} <&7>'
+    setFavoriteNumber: '{lut.homes_prefix} <&7>'
+    setIconUsage: '{lut.homes_prefix} <&7>'
+    setIconMaterial: '{lut.homes_prefix} <&7>'
+    noIconSet: '{lut.homes_prefix} <&7>'
+    iconRemoved: '{lut.homes_prefix} <&7>'
+  delHomeCommand:
+    name: 'delhome'
+    aliases:
+      - 'remhome'
+      - 'rmhome'
+    commandUsage: '{lut.homes_prefix} <&c>Benutzung: /{label} \<<&4>Home-Name</>>'
+    homeDoesNotExist: '{lut.homes_prefix} <&c>'
+    homeDeleted: '{lut.homes_prefix} <&7>'
+  setHomeCommand:
+    name: 'sethome'
+    aliases:
+      - 'createhome'
+    commandUsage: '{lut.homes_prefix} <&c>Benutzung: /{label} \<<&4>Home-Name</>> [Icon-Typ]'
+    homeSet: '{lut.homes_prefix} <&7>'
+    homeOverwritten: '{lut.homes_prefix} <&7>'
+  homesCommand:
+    name: 'homes'
+  worldDisplayNames:
+    world: 'Bauwelt'
+    world_farm: 'Farmwelt'
+    world_nether: 'Nether'
+    world_the_end: 'End'
+  playersOnly: '{lut.homes_prefix} <&c>Dieser Befehl ist nur Spielern zugänglich!'
+  cannotUseColonInName: '{lut.homes_prefix} <&c>Doppelpunkte sind im Home-Namen nicht erlaubt!'
+  targetPlayerNameCannotBeEmpty: '{lut.homes_prefix} <&c>Der Spielername vor dem Doppelpunkt darf nicht leer sein!'
+  targetPlayerNameIsUnknown: '{lut.homes_prefix} <&c>Der Spielername <&4>{name}</> ist dem Home-System unbekannt!'
+  targetHomeNameCannotBeEmpty: '{lut.homes_prefix} <&c>Der Home-Name nach dem Doppelpunkt darf nicht leer sein!'
+  unknownIconMaterial: '{lut.homes_prefix} <&7>'
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -2763,6 +2831,7 @@ cLut:
   block_facing_prefix: '<&7>[<&6>BlockFacing<&7>]'
   frame_locking_prefix: '<&7>[<&6>FrameLocking<&7>]'
   hotbar_randomizer_prefix: '<&7>[<&6>HotbarRandomizer<&7>]'
+  homes_prefix: '<&7>[<&6>Homes<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

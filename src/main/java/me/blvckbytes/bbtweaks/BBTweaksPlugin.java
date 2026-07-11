@@ -21,6 +21,11 @@ import me.blvckbytes.bbtweaks.durability_warnings.WarningsProfileStore;
 import me.blvckbytes.bbtweaks.durability_warnings.command.DurabilityWarningCommand;
 import me.blvckbytes.bbtweaks.frame_locking.FrameLockingHandler;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
+import me.blvckbytes.bbtweaks.homes.command.DelHomeCommand;
+import me.blvckbytes.bbtweaks.homes.command.HomeCommand;
+import me.blvckbytes.bbtweaks.homes.command.HomesCommand;
+import me.blvckbytes.bbtweaks.homes.command.SetHomeCommand;
+import me.blvckbytes.bbtweaks.homes.storage.HomesStorage;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerListener;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerSettingsStore;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.command.HotbarRandomizerCommand;
@@ -184,6 +189,11 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(HotbarRandomizerSettingsDisplayHandler.class)
         .withSingleton(HotbarRandomizerCommand.class)
         .withSingleton(HotbarRandomizerListener.class)
+        .withSingleton(HomesStorage.class)
+        .withSingleton(HomeCommand.class)
+        .withSingleton(HomesCommand.class)
+        .withSingleton(SetHomeCommand.class)
+        .withSingleton(DelHomeCommand.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);

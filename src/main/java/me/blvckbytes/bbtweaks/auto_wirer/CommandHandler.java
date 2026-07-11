@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 
 public interface CommandHandler extends CommandExecutor, TabCompleter {
 
+  // TODO: boolean overrideOnNameCollision();
+
   PluginCommand getCommand();
 
   @Nullable CommandSection getCommandSection();

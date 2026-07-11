@@ -92,6 +92,14 @@ commands:
   hotbarrandomizer:
     description: 'Allows to randomize the selected slot of your hotbar'
     permission: bbtweaks.hotbar-randomizer
+  home:
+    description: 'Teleport to one of your homes'
+  homes:
+    description: 'Browse your homes using a UI'
+  sethome:
+    description: 'Set a home at your current position'
+  delhome:
+    description: 'Delete a home by its name'
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
