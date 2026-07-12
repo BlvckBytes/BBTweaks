@@ -21,6 +21,8 @@ import java.util.List;
 
 public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> {
 
+  // TODO: Item mit [Showcase]-Name wird zur Minimalversion mit default UI
+
   private static final int CHAT_MESSAGE_LINE_ID = 0;
   private static final int OFFSET_VALUES_LINE_ID = 2;
   private static final int INVENTORY_TITLE_LINE_ID = 3;
