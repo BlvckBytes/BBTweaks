@@ -292,7 +292,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     }
   }
 
-  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+  @EventHandler(priority = EventPriority.HIGH)
   public void onItemSpawn(ItemSpawnEvent event) {
     var item = event.getEntity();
     var itemStack = item.getItemStack();
