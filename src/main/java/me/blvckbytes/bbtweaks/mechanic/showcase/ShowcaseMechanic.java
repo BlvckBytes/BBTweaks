@@ -4,7 +4,6 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.common.OffsetSelectingMechanic;
-import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import net.kyori.adventure.text.Component;
@@ -14,6 +13,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.type.WallSign;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,6 +34,8 @@ import java.util.List;
 
 public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> {
 
+  private static final int MAX_FRAME_SIGN_DISTANCE = 3;
+
   private static final String DISCRIMINATOR = "Showcase";
   private static final String ITEM_NAME = "[" + DISCRIMINATOR + "]";
 
@@ -42,7 +44,6 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
   private static final int INVENTORY_TITLE_LINE_ID = 3;
 
   private final ShowcaseDisplayHandler displayHandler;
-  private final CacheByPosition<ShowcaseInstance> instanceByInteractionPosition;
   private final NamespacedKey keyShowcaseEntity;
 
   private final List<Location> brokenShowcaseEntityLocations = new ArrayList<>();
@@ -55,7 +56,6 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
     super(plugin, config, OFFSET_VALUES_LINE_ID, () -> config.rootSection.mechanic.showcase);
 
     this.displayHandler = displayHandler;
-    this.instanceByInteractionPosition = new CacheByPosition<>();
     this.keyShowcaseEntity = new NamespacedKey(plugin, "showcase-entity");
   }
 
@@ -114,33 +114,8 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
-    instanceByInteractionPosition.put(
-      instance.interactionPosition.getWorld(),
-      instance.interactionPosition.getBlockX(),
-      instance.interactionPosition.getBlockY(),
-      instance.interactionPosition.getBlockZ(),
-      instance
-    );
-
     if (creator != null)
       config.rootSection.mechanic.showcase.creationSuccess.sendMessage(creator, environment);
-
-    return instance;
-  }
-
-  @Override
-  public @Nullable ShowcaseInstance onSignDestroy(@Nullable Player destroyer, Sign sign) {
-    var instance = super.onSignDestroy(destroyer, sign);
-
-    if (instance == null)
-      return null;
-
-    instanceByInteractionPosition.invalidate(
-      instance.interactionPosition.getWorld(),
-      instance.interactionPosition.getBlockX(),
-      instance.interactionPosition.getBlockY(),
-      instance.interactionPosition.getBlockZ()
-    );
 
     return instance;
   }
@@ -158,8 +133,25 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
     if (player.isSneaking())
       return;
 
-    var location = frame.getLocation();
-    var instance = instanceByInteractionPosition.get(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
+    var mountFace = frame.getFacing().getOppositeFace();
+    var frameBlock = frame.getLocation().getBlock();
+
+    ShowcaseInstance instance = null;
+
+    for (var offset = 1; offset <= MAX_FRAME_SIGN_DISTANCE + 1; ++offset) {
+      var possibleSignBlock = frameBlock.getRelative(mountFace, offset);
+
+      if (!(possibleSignBlock.getBlockData() instanceof WallSign wallSign))
+        continue;
+
+      if (wallSign.getFacing() != mountFace)
+        continue;
+
+      instance = instanceBySignPosition.get(possibleSignBlock.getWorld(), possibleSignBlock.getX(), possibleSignBlock.getY(), possibleSignBlock.getZ());
+
+      if (instance != null)
+        break;
+    }
 
     if (instance == null) {
       if (!isShowcaseEntity(frame))
