@@ -20,6 +20,7 @@ import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -439,7 +440,7 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
     return true;
   }
 
-  @EventHandler(ignoreCancelled = true)
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
   public void onItemSpawn(ItemSpawnEvent event) {
     var itemEntity = event.getEntity();
 
