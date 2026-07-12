@@ -10,6 +10,7 @@ import me.blvckbytes.bbtweaks.mechanic.clock.ClockSection;
 import me.blvckbytes.bbtweaks.mechanic.auto_dispose.AutoDisposeSection;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchSection;
 import me.blvckbytes.bbtweaks.mechanic.inv_move.InvMoveSection;
+import me.blvckbytes.bbtweaks.mechanic.item_notifier.ItemNotifierSection;
 import me.blvckbytes.bbtweaks.mechanic.lever_array.LeverArraySection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.config.MagnetSection;
 import me.blvckbytes.bbtweaks.mechanic.planter.PlanterSection;
@@ -35,6 +36,7 @@ public class MechanicSection extends ConfigSection {
   public PlanterSection planter;
   public AutoCrafterSection autoCrafter;
   public ShowcaseSection showcase;
+  public ItemNotifierSection itemNotifier;
 
   public ComponentMarkup noWallSign;
 

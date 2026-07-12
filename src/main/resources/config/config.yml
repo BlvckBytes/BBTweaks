@@ -489,6 +489,45 @@ mechanic:
     blockSelectionSuccess: '{lut.mechanic_prefix} <&7>Das Showcase bei <&a>{x} {y} {z} <&7>benutzt nun den Behälter bei den offsets <&a>{x_offset} {y_offset} {z_offset}<&7>.'
     defaultInventoryTitle: '<&8>Showcase'
     cannotModifyInventory: '{lut.mechanic_prefix} <&c>Das Inventar eines Showcases kann nicht modifiziert werden!'
+  itemNotifier:
+    radiusExtent: 15
+    notificationCooldownMs: 5000
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen ItemNotifier zu erstellen!'
+    noContainer: '{lut.mechanic_prefix} <&c>Ein ItemNotifier kann nur an einem Behälterblock angebracht werden!'
+    missingName: '{lut.mechanic_prefix} <&c>Ein ItemNotifier erfordert einen frei wählbaren Namen in der dritten Zeile, der bei Benachrichtigungen angezeigt wird!'
+    unknownFlag: '{lut.mechanic_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="known_flags" *for-separator={,<space/>}>{flag}</>.'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>ItemNotifier</> bei <&a>{x} {y} {z}</> wurde erfolgreich erstellt!'
+    notificationByTrigger:
+      ADD:
+        chat: '{lut.item_notifier_prefix} <&7>Bei <&a>{name}</> ({x} {y} {z}) wurde eine <&a>Hinzufügung</> (Slot {slot}, <translate [changed_type_key] />) erkannt!'
+        title: '{lut.item_notifier_prefix}'
+        subtitle: '<&e>{name}'
+        notificationTitleDurationMs: 2500
+        sound: 'BLOCK_NOTE_PLING'
+      REMOVE:
+        chat: '{lut.item_notifier_prefix} <&7>Bei <&a>{name}</> ({x} {y} {z}) wurde eine <&a>Entfernung</> (Slot {slot}, <translate [changed_type_key] />) erkannt!'
+        title: '{lut.item_notifier_prefix}'
+        subtitle: '<&e>{name}'
+        notificationTitleDurationMs: 2500
+        sound: 'BLOCK_NOTE_PLING'
+      FULL_SLOTS:
+        chat: '{lut.item_notifier_prefix} <&7>Bei <&a>{name}</> ({x} {y} {z}) sind nun <&a>alle Slots belegt</>!'
+        title: '{lut.item_notifier_prefix}'
+        subtitle: '<&e>{name}'
+        notificationTitleDurationMs: 2500
+        sound: 'BLOCK_NOTE_PLING'
+      FULL_STACKS:
+        chat: '{lut.item_notifier_prefix} <&7>Bei <&a>{name}</> ({x} {y} {z}) sind nun <&a>alle Slots mit vollen Stacks belegt</>!'
+        title: '{lut.item_notifier_prefix}'
+        subtitle: '<&e>{name}'
+        notificationTitleDurationMs: 2500
+        sound: 'BLOCK_NOTE_PLING'
+      EMPTY:
+        chat: '{lut.item_notifier_prefix} <&7>Bei <&a>{name}</> ({x} {y} {z}) sind nun <&a>alle Slots leer</>!'
+        title: '{lut.item_notifier_prefix}'
+        subtitle: '<&e>{name}'
+        notificationTitleDurationMs: 2500
+        sound: 'BLOCK_NOTE_PLING'
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
@@ -2763,6 +2802,7 @@ cLut:
   block_facing_prefix: '<&7>[<&6>BlockFacing<&7>]'
   frame_locking_prefix: '<&7>[<&6>FrameLocking<&7>]'
   hotbar_randomizer_prefix: '<&7>[<&6>HotbarRandomizer<&7>]'
+  item_notifier_prefix: '<&7>[<&6>ItemNotifier<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

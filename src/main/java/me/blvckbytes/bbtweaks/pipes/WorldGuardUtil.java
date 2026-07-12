@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.pipes;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.WorldGuard;
 import com.sk89q.worldguard.domains.DefaultDomain;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -26,13 +27,7 @@ public class WorldGuardUtil {
     if (!notifyOwnersOfRegion && !notifyMembersOfRegion)
       return;
 
-    var applicableRegions = WorldGuard.getInstance()
-      .getPlatform()
-      .getRegionContainer()
-      .createQuery()
-      .getApplicableRegions(BukkitAdapter.adapt(location));
-
-    for (var region : applicableRegions) {
+    for (var region : getApplicableRegions(location)) {
       if (ignoredRegionsLower.contains(region.getId().toLowerCase()))
         continue;
 
@@ -51,6 +46,14 @@ public class WorldGuardUtil {
       if (notifyOwnersOfRegion)
         forEachOnlineDomainPlayer(region.getOwners(), player -> handler.handle(player, regionDetails));
     }
+  }
+
+  public static ApplicableRegionSet getApplicableRegions(Location location) {
+    return WorldGuard.getInstance()
+      .getPlatform()
+      .getRegionContainer()
+      .createQuery()
+      .getApplicableRegions(BukkitAdapter.adapt(location));
   }
 
   private static List<String> getOwnerNames(ProtectedRegion region) {
@@ -77,7 +80,7 @@ public class WorldGuardUtil {
     return result;
   }
 
-  private static void forEachOnlineDomainPlayer(DefaultDomain domain, Consumer<Player> handler) {
+  public static void forEachOnlineDomainPlayer(DefaultDomain domain, Consumer<Player> handler) {
     Player player;
 
     for (var playerName : domain.getPlayers()) {
