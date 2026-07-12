@@ -125,6 +125,8 @@ permissions:
     description: 'Use the auto-crafter mechanic'
   bbtweaks.mechanic.showcase:
     description: 'Use the showcase mechanic'
+  bbtweaks.mechanic.item-notifier:
+    description: 'Use the item-notifier mechanic'
   bbtweaks.markers:
     description: 'Browse all available markers'
   bbtweaks.setmarker:
