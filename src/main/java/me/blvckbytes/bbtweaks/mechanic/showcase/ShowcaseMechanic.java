@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.mechanic.showcase;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.common.OffsetSelectingMechanic;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
@@ -211,6 +212,16 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
     event.getEntity()
       .getPersistentDataContainer()
       .set(keyShowcaseEntity, PersistentDataType.BOOLEAN, true);
+
+    var location = event.getEntity().getLocation();
+
+    config.rootSection.mechanic.showcase.creationSuccess.sendMessage(
+      player,
+      new InterpretationEnvironment()
+        .withVariable("x", location.getBlockX())
+        .withVariable("y", location.getBlockY())
+        .withVariable("z", location.getBlockZ())
+    );
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
