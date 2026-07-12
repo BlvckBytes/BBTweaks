@@ -4,24 +4,37 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.common.OffsetSelectingMechanic;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import me.blvckbytes.bbtweaks.util.SignUtil;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.ItemSpawnEvent;
+import org.bukkit.event.hanging.HangingBreakEvent;
+import org.bukkit.event.hanging.HangingPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> {
 
-  // TODO: Item mit [Showcase]-Name wird zur Minimalversion mit default UI
+  private static final String DISCRIMINATOR = "Showcase";
+  private static final String ITEM_NAME = "[" + DISCRIMINATOR + "]";
 
   private static final int CHAT_MESSAGE_LINE_ID = 0;
   private static final int OFFSET_VALUES_LINE_ID = 2;
@@ -29,6 +42,9 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
 
   private final ShowcaseDisplayHandler displayHandler;
   private final CacheByPosition<ShowcaseInstance> instanceByInteractionPosition;
+  private final NamespacedKey keyShowcaseEntity;
+
+  private final List<Location> brokenShowcaseEntityLocations = new ArrayList<>();
 
   public ShowcaseMechanic(
     ShowcaseDisplayHandler displayHandler,
@@ -39,6 +55,7 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
 
     this.displayHandler = displayHandler;
     this.instanceByInteractionPosition = new CacheByPosition<>();
+    this.keyShowcaseEntity = new NamespacedKey(plugin, "showcase-entity");
   }
 
   @Override
@@ -62,7 +79,7 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
 
   @Override
   public List<String> getDiscriminators() {
-    return List.of("Showcase");
+    return List.of(DISCRIMINATOR);
   }
 
   @Override
@@ -132,6 +149,9 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
     if (!(event.getRightClicked() instanceof ItemFrame frame))
       return;
 
+    if (event.getHand() != EquipmentSlot.HAND)
+      return;
+
     var player = event.getPlayer();
 
     if (player.isSneaking())
@@ -140,8 +160,10 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
     var location = frame.getLocation();
     var instance = instanceByInteractionPosition.get(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ());
 
-    if (instance == null || shouldDebounceInteraction(player, instance))
-      return;
+    if (instance == null) {
+      if (!isShowcaseEntity(frame))
+        return;
+    }
 
     var frameItem = frame.getItem();
 
@@ -151,6 +173,94 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
     event.setCancelled(true);
 
     displayHandler.show(player, new ShowcaseDisplayData(instance, frameItem));
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+  public void onEntityPlace(HangingPlaceEvent event) {
+    var player = event.getPlayer();
+
+    if (player == null)
+      return;
+
+    var entityItem = event.getItemStack();
+
+    if (entityItem == null)
+      return;
+
+    var itemType = entityItem.getType();
+
+    if (itemType != Material.ITEM_FRAME && itemType != Material.GLOW_ITEM_FRAME)
+      return;
+
+    var itemMeta = entityItem.getItemMeta();
+
+    if (itemMeta == null)
+      return;
+
+    var itemName = ComponentUtil.asTrimmedText(itemMeta.displayName());
+
+    if (!itemName.equalsIgnoreCase(ITEM_NAME))
+      return;
+
+    if (!player.hasPermission("bbtweaks.mechanic.showcase")) {
+      config.rootSection.mechanic.showcase.noPermission.sendMessage(player);
+      event.setCancelled(true);
+      return;
+    }
+
+    event.getEntity()
+      .getPersistentDataContainer()
+      .set(keyShowcaseEntity, PersistentDataType.BOOLEAN, true);
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
+  public void onHangingBreak(HangingBreakEvent event) {
+    if (!(event.getEntity() instanceof ItemFrame frame))
+      return;
+
+    if (isShowcaseEntity(frame))
+      brokenShowcaseEntityLocations.add(frame.getLocation());
+  }
+
+  @EventHandler(priority = EventPriority.HIGH)
+  public void onItemSpawn(ItemSpawnEvent event) {
+    var item = event.getEntity();
+    var itemStack = item.getItemStack();
+    var itemType = itemStack.getType();
+
+    if (itemType != Material.ITEM_FRAME && itemType != Material.GLOW_ITEM_FRAME)
+      return;
+
+    var location = event.getLocation();
+
+    for (var index = 0; index < brokenShowcaseEntityLocations.size(); ++index) {
+      var brokenLocation = brokenShowcaseEntityLocations.get(index);
+
+      if (brokenLocation.getWorld() != location.getWorld())
+        continue;
+
+      if (brokenLocation.getBlockX() != location.getBlockX() || brokenLocation.getBlockY() != location.getBlockY() || brokenLocation.getBlockZ() != location.getBlockZ())
+        continue;
+
+      brokenShowcaseEntityLocations.remove(index);
+
+      var itemMeta = itemStack.getItemMeta();
+
+      if (itemMeta == null)
+        return;
+
+      itemMeta.displayName(Component.text(ITEM_NAME));
+      itemStack.setItemMeta(itemMeta);
+      item.setItemStack(itemStack);
+
+      return;
+    }
+  }
+
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+  private boolean isShowcaseEntity(ItemFrame entity) {
+    var isShowcaseEntity = entity.getPersistentDataContainer().get(keyShowcaseEntity, PersistentDataType.BOOLEAN);
+    return isShowcaseEntity != null && isShowcaseEntity;
   }
 
   @EventHandler

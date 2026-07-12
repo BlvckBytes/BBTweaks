@@ -32,7 +32,7 @@ public class ShowcaseDisplay extends Display<ShowcaseDisplayData> {
   public void show() {
     super.show();
 
-    if (displayData.instance().chatMessage != null) {
+    if (displayData.instance() != null && displayData.instance().chatMessage != null) {
       displayData.instance().chatMessage.sendMessage(
         player,
         new InterpretationEnvironment()
@@ -44,14 +44,14 @@ public class ShowcaseDisplay extends Display<ShowcaseDisplayData> {
   @Override
   protected Inventory makeInventory() {
     var title = (
-      displayData.instance().inventoryTitle == null
+      displayData.instance() == null || displayData.instance().inventoryTitle == null
         ? config.rootSection.mechanic.showcase.defaultInventoryTitle
         : displayData.instance().inventoryTitle
     ).interpret(SlotType.INVENTORY_TITLE, null).getFirst();
 
     Inventory inventory;
 
-    if (displayData.instance().containerPosition == null || !(displayData.instance().containerPosition.getBlock().getState(false) instanceof Container container)) {
+    if (displayData.instance() == null || displayData.instance().containerPosition == null || !(displayData.instance().containerPosition.getBlock().getState(false) instanceof Container container)) {
       inventory = Bukkit.createInventory(null, 9 * 3, title);
       inventory.setItem(13, displayData.frameItem());
       return inventory;
