@@ -395,7 +395,7 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
     if (player == null)
       return true;
 
-    if (instance.getKeyCount() == 0 && instance.password == null) {
+    if (instance.getKeyCount() == 0 && instance.password == null || instance.testPlayerNameForPresenceInKeysInventory(player)) {
       instance.interactAndSendMessage(player, getCurrentTime());
       return true;
     }

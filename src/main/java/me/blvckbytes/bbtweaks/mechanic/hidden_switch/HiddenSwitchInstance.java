@@ -8,15 +8,20 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.SISOFlag;
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.bbtweaks.mechanic.common.Offsets;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
 public class HiddenSwitchInstance extends SISOInstance {
+
+  private static final String PLAYER_NAME_PREFIX = "Player:";
 
   public final Inventory keysInventory;
   public final Location interactionPosition;
@@ -94,7 +99,7 @@ public class HiddenSwitchInstance extends SISOInstance {
     for (var slotIndex = 0; slotIndex < keysInventory.getSize(); ++slotIndex) {
       var currentItem = keysInventory.getItem(slotIndex);
 
-      if (currentItem == null)
+      if (currentItem == null || getAllowedPlayerNameFromMeta(currentItem.getItemMeta()) != null)
         continue;
 
       if (currentItem.isSimilar(item))
@@ -102,6 +107,42 @@ public class HiddenSwitchInstance extends SISOInstance {
     }
 
     return true;
+  }
+
+  private @Nullable String getAllowedPlayerNameFromMeta(@Nullable ItemMeta itemMeta) {
+    if (itemMeta == null)
+      return null;
+
+    var itemName = ComponentUtil.asTrimmedText(itemMeta.displayName());
+
+    if (!StringUtils.startsWithIgnoreCase(itemName, PLAYER_NAME_PREFIX))
+      return null;
+
+    return itemName.substring(PLAYER_NAME_PREFIX.length());
+  }
+
+  public boolean testPlayerNameForPresenceInKeysInventory(Player player) {
+    if (!hasKeys)
+      return false;
+
+    var playerName = player.getName();
+
+    for (var slotIndex = 0; slotIndex < keysInventory.getSize(); ++slotIndex) {
+      var currentItem = keysInventory.getItem(slotIndex);
+
+      if (currentItem == null)
+        continue;
+
+      var allowedName = getAllowedPlayerNameFromMeta(currentItem.getItemMeta());
+
+      if (allowedName == null)
+        continue;
+
+      if (allowedName.equalsIgnoreCase(playerName))
+        return true;
+    }
+
+    return false;
   }
 
   public void interactAndSendMessage(Player player, long time) {
