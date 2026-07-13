@@ -27,6 +27,10 @@ import java.util.*;
 
 public class InvMagnetCommand implements CommandHandler, Tickable, Listener {
 
+  // Per minecraft-wiki, it's 1.425, but I'd rather remain on the low side of that.
+  // I'm aware that it's not just a simple radius in vanilla, but rather a hitbox distance.
+  private static final double VANILLA_PICKUP_RADIUS = 1.42;
+
   private final PluginCommand command;
   private final InvMagnetParametersStore parametersStore;
   private final ConfigKeeper<MainSection> config;
@@ -164,15 +168,16 @@ public class InvMagnetCommand implements CommandHandler, Tickable, Listener {
           continue;
 
         var parameter = parametersStore.accessParameters(player);
-        var radius = parameter.getRadius();
+        double effectiveRadius = parameter.getRadius();
+        var isMagnetDisabled = !parameter.enabled || effectiveRadius <= 0;
 
-        if (!parameter.enabled || radius <= 0)
-          continue;
+        if (isMagnetDisabled)
+          effectiveRadius = VANILLA_PICKUP_RADIUS;
 
         // Attract near their chest
         var playerLocation = player.getLocation().add(0, .75, 0);
 
-        for (var nearbyEntity : player.getNearbyEntities(radius, radius, radius)) {
+        for (var nearbyEntity : player.getNearbyEntities(effectiveRadius, effectiveRadius, effectiveRadius)) {
           if (nearbyEntity.isDead() || !nearbyEntity.isValid())
             continue;
 
@@ -199,8 +204,15 @@ public class InvMagnetCommand implements CommandHandler, Tickable, Listener {
             continue;
 
           perTickAttractionSessionByEntityId
-            .computeIfAbsent(nearbyEntity.getEntityId(), k -> new EntityAttractionSession(nearbyEntity))
-            .attractIfClosest(nearbyEntity, playerLocation);
+            .computeIfAbsent(nearbyEntity.getEntityId(), _ -> new EntityAttractionSession(nearbyEntity))
+            .attractOrClearIfClosest(
+              nearbyEntity,
+              playerLocation,
+              // Do not actually attract if the current player has their magnet disabled,
+              // but still cause the attraction of a further-away player to be cancelled,
+              // such that they cannot "steal" the item the player is trying to pick up.
+              isMagnetDisabled
+            );
         }
       }
     }

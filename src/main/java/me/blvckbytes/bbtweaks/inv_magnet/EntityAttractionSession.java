@@ -8,23 +8,23 @@ public class EntityAttractionSession {
 
   private static final double OLD_VELOCITY_FACTOR = .4;
 
-  private final Vector velocity;
-  private final double x, y, z;
+  private final Vector originalVelocity;
+  private final double originalX, originalY, originalZ;
 
   private double lastDistanceSquared = -1;
 
   public EntityAttractionSession(Entity entity) {
-    velocity = entity.getVelocity();
+    originalVelocity = entity.getVelocity();
 
-    x = entity.getX();
-    y = entity.getY();
-    z = entity.getZ();
+    originalX = entity.getX();
+    originalY = entity.getY();
+    originalZ = entity.getZ();
   }
 
-  public void attractIfClosest(Entity entity, Location to) {
-    var deltaX = to.getX() - x;
-    var deltaY = to.getY() - y;
-    var deltaZ = to.getZ() - z;
+  public void attractOrClearIfClosest(Entity attractedEntity, Location to, boolean clearIfClosest) {
+    var deltaX = to.getX() - originalX;
+    var deltaY = to.getY() - originalY;
+    var deltaZ = to.getZ() - originalZ;
 
     var distanceSquared = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
 
@@ -33,14 +33,19 @@ public class EntityAttractionSession {
 
     lastDistanceSquared = distanceSquared;
 
+    if (clearIfClosest) {
+      attractedEntity.setVelocity(originalVelocity);
+      return;
+    }
+
     var distance = Math.sqrt(distanceSquared);
 
     var speed = Math.min(0.65, 0.12 + (distance * 0.08));
 
-    entity.setVelocity(new Vector(
-      deltaX / distance * speed + OLD_VELOCITY_FACTOR * velocity.getX(),
-      deltaY / distance * speed + OLD_VELOCITY_FACTOR * velocity.getY(),
-      deltaZ / distance * speed + OLD_VELOCITY_FACTOR * velocity.getZ()
+    attractedEntity.setVelocity(new Vector(
+      deltaX / distance * speed + OLD_VELOCITY_FACTOR * originalVelocity.getX(),
+      deltaY / distance * speed + OLD_VELOCITY_FACTOR * originalVelocity.getY(),
+      deltaZ / distance * speed + OLD_VELOCITY_FACTOR * originalVelocity.getZ()
     ));
   }
 }
