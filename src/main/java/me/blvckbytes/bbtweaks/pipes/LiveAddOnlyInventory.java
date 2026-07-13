@@ -1,17 +1,30 @@
 package me.blvckbytes.bbtweaks.pipes;
 
+import me.blvckbytes.bbtweaks.util.AddOnlyInventory;
 import org.bukkit.block.Crafter;
+import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.Nullable;
 
 public class LiveAddOnlyInventory extends AddOnlyInventory {
 
-  private final @Nullable InventoryHolder inventoryHolder;
+  private final InventoryHolder inventoryHolder;
 
-  public LiveAddOnlyInventory(InventoryHolder inventoryHolder) {
-    super(inventoryHolder.getInventory());
+  private LiveAddOnlyInventory(Inventory inventory, InventoryHolder inventoryHolder) {
+    super(
+      inventory.getContents(),
+      // Account for the fact that mutating the contents-array does not set vacant slots in the inventory.
+      (slot, wasVacant, addedItem, _, _) -> {
+        if (wasVacant)
+          inventory.setItem(slot, addedItem);
+      },
+      null
+    );
+
     this.inventoryHolder = inventoryHolder;
+  }
+
+  public static LiveAddOnlyInventory fromInventoryHolder(InventoryHolder inventoryHolder) {
+    return new LiveAddOnlyInventory(inventoryHolder.getInventory(), inventoryHolder);
   }
 
   @Override
@@ -21,7 +34,4 @@ public class LiveAddOnlyInventory extends AddOnlyInventory {
 
     return crafter.isSlotDisabled(slot);
   }
-
-  @Override
-  protected void onAddition(ItemStack addedItem, int addedAmount) {}
 }

@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.pipes;
 
 import it.unimi.dsi.fastutil.longs.*;
 import me.blvckbytes.bbtweaks.pipes.notification.PipeNotification;
+import me.blvckbytes.bbtweaks.util.AddOnlyInventory;
 import me.blvckbytes.bbtweaks.util.CompactId;
 import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import org.bukkit.Bukkit;
@@ -207,7 +208,7 @@ public class PipeBlockCache implements CachedBlockResolver {
             return null;
         }
 
-        return new LiveAddOnlyInventory(holder);
+        return LiveAddOnlyInventory.fromInventoryHolder(holder);
     }
 
     @Override

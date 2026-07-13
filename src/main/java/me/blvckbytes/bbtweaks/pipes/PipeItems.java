@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.pipes;
 
+import me.blvckbytes.bbtweaks.util.ItemUtil;
 import me.blvckbytes.bbtweaks.util.MutableInt;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
