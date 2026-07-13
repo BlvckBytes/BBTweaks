@@ -6,6 +6,14 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.function.Function;
 
+// TODO: I think that there's an issue with this approach, namely that we do not stack onto
+//       similar stacks that have space first, and only then make use of vacant slots; in this
+//       case, we may be able to store less than is actually possible, due to a vacant slot possibly
+//       having been assigned with a non-maxed-out stack and since we do not look back to ever fill it
+//       up again within the same session of adding an item.
+
+// TODO: Maybe we can also use the simulated add only inventory here instead?
+
 public class SpaceSimulator {
 
   private final int[] slotAmounts;

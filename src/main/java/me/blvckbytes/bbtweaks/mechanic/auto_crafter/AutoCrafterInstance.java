@@ -3,6 +3,8 @@ package me.blvckbytes.bbtweaks.mechanic.auto_crafter;
 import at.blvckbytes.component_markup.util.TriState;
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.bbtweaks.util.BlockUtil;
+import me.blvckbytes.bbtweaks.util.SimulatingAddOnlyInventory;
+import me.blvckbytes.bbtweaks.util.SlotItemAddition;
 import org.bukkit.Material;
 import org.bukkit.block.*;
 import org.bukkit.inventory.Inventory;
@@ -13,6 +15,8 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 
 public class AutoCrafterInstance extends SISOInstance {
+
+  private static final int MATRIX_SIZE = 9;
 
   private static final ItemStack AIR_STACK = new ItemStack(Material.AIR);
 
@@ -224,7 +228,7 @@ public class AutoCrafterInstance extends SISOInstance {
 
     recipeResultItems.add(cachedRecipe.getResultCopy());
 
-    for (int index = 0; index < 9; index++) {
+    for (int index = 0; index < MATRIX_SIZE; index++) {
       var matrixItem = crafterInventory.getItem(index);
 
       if (matrixItem == null)
@@ -238,6 +242,44 @@ public class AutoCrafterInstance extends SISOInstance {
 
       if (typeAfterUse != null)
         recipeResultItems.add(new ItemStack(typeAfterUse, 1));
+    }
+
+    // If a container is attached, crafting becomes a transaction - either all results fit, or we stall.
+    if (outputInventory != null) {
+      var additions = new ArrayList<SlotItemAddition>();
+
+      var simulatingInventory = new SimulatingAddOnlyInventory(
+        outputInventory,
+        (slot, wasVacant, addedItem, addedAmount, stackSizeOverride) -> additions.add(new SlotItemAddition(slot, wasVacant, addedItem, addedAmount, stackSizeOverride)),
+        null
+      );
+
+      for (var result : recipeResultItems) {
+        var amountToAdd = result.getAmount();
+        var addedAmount = simulatingInventory.addItemAndGetAddedAmount(result, amountToAdd);
+
+        // Stall crafting if the results have no more space.
+        if (addedAmount < amountToAdd)
+          return;
+      }
+
+      for (var addition : additions) {
+        // Theoretically unreachable, if nobody modified the inventory in the mean-time.
+        if (!addition.performIfCanFit(outputInventory))
+          dropItem(outputBlock, addition.makeStack());
+      }
+    }
+
+    else {
+      for (var result : recipeResultItems)
+        dropItem(outputBlock, result);
+    }
+
+    for (int index = 0; index < MATRIX_SIZE; index++) {
+      var matrixItem = crafterInventory.getItem(index);
+
+      if (matrixItem == null)
+        continue;
 
       if (matrixItem.getAmount() <= 1) {
         crafterInventory.setItem(index, null);
@@ -246,26 +288,12 @@ public class AutoCrafterInstance extends SISOInstance {
 
       matrixItem.setAmount(matrixItem.getAmount() - 1);
     }
+  }
 
-    ArrayList<ItemStack> leftovers;
-
-    if (outputInventory == null)
-      leftovers = recipeResultItems;
-
-    else {
-      leftovers = new ArrayList<>();
-
-      for (ItemStack stack : recipeResultItems)
-        leftovers.addAll(outputInventory.addItem(stack).values());
-    }
-
-    if (!leftovers.isEmpty()) {
-      var world = outputBlock.getWorld();
-      var location = outputBlock.getLocation().add(.5, .5, .5);
-
-      for (var leftover : leftovers)
-        world.dropItem(location, leftover);
-    }
+  private void dropItem(Block outputBlock, ItemStack item) {
+    var world = outputBlock.getWorld();
+    var location = outputBlock.getLocation().add(.5, .5, .5);
+    world.dropItem(location, item);
   }
 
   private static boolean doesRecipeMatchAtOffset(
