@@ -46,16 +46,6 @@ public class SpaceSimulator {
     }
   }
 
-  public void setAmount(int slot, int amount) {
-    if ((slotAmounts[slot] = Math.max(0, amount)) == 0)
-      slotTypes[slot] = Material.AIR;
-  }
-
-  public void takeFromItem(int slot, int amount) {
-    if ((slotAmounts[slot] = Math.max(0, slotAmounts[slot] - amount)) == 0)
-      slotTypes[slot] = Material.AIR;
-  }
-
   public void addItem(Material material, int amount) {
     for (var slot = 0; slot < slotAmounts.length; ++slot) {
       var slotType = slotTypes[slot];

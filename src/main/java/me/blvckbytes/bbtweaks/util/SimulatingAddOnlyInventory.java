@@ -12,10 +12,27 @@ public class SimulatingAddOnlyInventory extends AddOnlyInventory {
     @Nullable PerCallItemAdditionHandler perCallItemAdditionHandler
   ) {
     super(
-      copyContents(capturedInventory.getContents()),
+      copyContents(capturedInventory.getStorageContents()),
       perSlotItemAdditionHandler,
       perCallItemAdditionHandler
     );
+  }
+
+  // Yes - not quite "add-only", but we only use this for simulating and some usage-sites need to reduce
+  // as well. It's not at all critical, so instead of deriving again, I'm fine with this addition.
+  public void setSlotAmount(int slot, int amount) {
+    var targetItem = inventoryContents[slot];
+
+    if (!ItemUtil.isStackValid(targetItem))
+      return;
+
+    if (amount <= 0) {
+      targetItem.setAmount(0);
+      inventoryContents[slot] = null;
+      return;
+    }
+
+    targetItem.setAmount(amount);
   }
 
   @Override

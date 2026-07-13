@@ -11,6 +11,7 @@ import me.blvckbytes.bbtweaks.un_craft.config.ChoiceEntry;
 import me.blvckbytes.bbtweaks.un_craft.config.OverviewItem;
 import me.blvckbytes.bbtweaks.un_craft.config.TypeExclusionRule;
 import me.blvckbytes.bbtweaks.util.MutableInt;
+import me.blvckbytes.bbtweaks.util.SimulatingAddOnlyInventory;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -61,6 +62,7 @@ public class UnCraftCommand implements CommandHandler, Listener {
 
   private static final String REASON_MARKER = "Reason:";
   private static final String REASON_SEPARATOR = "; ";
+  private static final int PLAYER_INVENTORY_SIZE = 9 * 4;
 
   private final PluginCommand command;
 
@@ -278,7 +280,7 @@ public class UnCraftCommand implements CommandHandler, Listener {
         return true;
       }
 
-      for (var slotIndex = 0; slotIndex < inventory.getSize(); ++slotIndex) {
+      for (var slotIndex = 0; slotIndex < PLAYER_INVENTORY_SIZE; ++slotIndex) {
         var slotContents = inventory.getItem(slotIndex);
 
         if (slotContents == null || slotContents.getType().isAir())
@@ -325,7 +327,9 @@ public class UnCraftCommand implements CommandHandler, Listener {
     // Simulate the remaining space of the inventory while accumulating results, since we're not
     // immediately adding and thus receive no feedback regarding dropped items. The goal is to drop
     // no items at all, because it can create needless lag - especially if abused wilfully.
-    var spaceSimulator = new SpaceSimulator(player.getInventory(), item -> tryExtractMaterialFromItem(item).material);
+    var simulatingInventory = new SimulatingAddOnlyInventory(player.getInventory(), null, null);
+
+    var ranOutOfSpace = false;
 
     itemLoop: for (var currentIndex = 0; currentIndex < targetItems.size(); ++currentIndex) {
       var currentItem = targetItems.get(currentIndex);
@@ -351,11 +355,14 @@ public class UnCraftCommand implements CommandHandler, Listener {
 
             var movedAmount = Math.min(remainingSpace, nextAmount);
 
+            // Update the inventory directly (no harm done, as nothing is created or destroyed) and
+            // also update the simulating inventory, since a slot may become vacant after moving.
+
             currentItem.item.setAmount(currentAmount + movedAmount);
-            spaceSimulator.setAmount(currentIndex, currentAmount + movedAmount);
+            simulatingInventory.setSlotAmount(currentItem.slot, currentAmount + movedAmount);
 
             nextItem.item.setAmount(nextAmount - movedAmount);
-            spaceSimulator.setAmount(nextIndex, nextAmount - movedAmount);
+            simulatingInventory.setSlotAmount(nextItem.slot, nextAmount - movedAmount);
 
             if (movedAmount == nextAmount)
               inventory.setItem(nextItem.slot, null);
@@ -387,17 +394,25 @@ public class UnCraftCommand implements CommandHandler, Listener {
           newAmount = remainingAmount - targetEntry.inputAmount;
         }
 
-        spaceSimulator.takeFromItem(currentItem.slot, remainingAmount - newAmount);
+        // Reduce by the uncrafted amount of items (either unit or reduced).
+        simulatingInventory.setSlotAmount(currentItem.slot, newAmount);
 
         // Check whether we can still fit all results before actually adding them to the accumulator,
         // making uncrafting items behave like an atomic transaction.
-        resultEntries.forEach(entry -> {
-          if (entry.amount() > 0)
-            spaceSimulator.addItem(entry.material(), entry.amount());
-        });
 
-        if (spaceSimulator.didDropItems())
-          break itemLoop;
+        for (var resultEntry : resultEntries) {
+          var amountToAdd = resultEntry.amount();
+
+          if (amountToAdd <= 0)
+            continue;
+
+          var addedAmount = simulatingInventory.addItemAndGetAddedAmount(resultEntry.material(), amountToAdd);
+
+          if (addedAmount < amountToAdd) {
+            ranOutOfSpace = true;
+            break itemLoop;
+          }
+        }
 
         // Now add to the accumulators, seeing how we're still within limits.
         resultEntries.forEach(entry -> {
@@ -421,7 +436,7 @@ public class UnCraftCommand implements CommandHandler, Listener {
     }
 
     if (wholeUnitsUnCraftCounter == 0 && reducedUnitsUnCraftAmounts.isEmpty()) {
-      if (spaceSimulator.didDropItems()) {
+      if (ranOutOfSpace) {
         config.rootSection.unCraft.notEnoughSpace.sendMessage(sender);
         return true;
       }
@@ -481,7 +496,7 @@ public class UnCraftCommand implements CommandHandler, Listener {
       forEachStackOfTypeCountMap(itemsToDrop, player::dropItem);
     }
 
-    if (spaceSimulator.didDropItems())
+    if (ranOutOfSpace)
       config.rootSection.unCraft.noMoreSpace.sendMessage(sender);
 
     for (var additionalMessage : targetEntry.additionalMessages)

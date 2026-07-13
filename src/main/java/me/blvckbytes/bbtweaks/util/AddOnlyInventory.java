@@ -1,14 +1,30 @@
 package me.blvckbytes.bbtweaks.util;
 
+import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AddOnlyInventory {
 
+  private static final @Nullable ItemStack[] unitStackByMaterialOrdinal;
+
+  static {
+    var materialValues = Material.values();
+
+    unitStackByMaterialOrdinal = new ItemStack[materialValues.length];
+
+    for (var index = 0; index < materialValues.length; ++index) {
+      var material = materialValues[index];
+
+      if (material.isItem())
+        unitStackByMaterialOrdinal[index] = new ItemStack(material);
+    }
+  }
+
   // NOTE: We intentionally *never* store an item by reference, as to absolutely avoid
   //       untracked mutations. This is far more important than the little allocation.
 
-  private final ItemStack[] inventoryContents;
+  protected final ItemStack[] inventoryContents;
   private final @Nullable PerSlotItemAdditionHandler perSlotItemAdditionHandler;
   private final @Nullable PerCallItemAdditionHandler perCallItemAdditionHandler;
 
@@ -26,6 +42,15 @@ public abstract class AddOnlyInventory {
 
   public int getSize() {
     return inventoryContents.length;
+  }
+
+  public int addItemAndGetAddedAmount(Material typeToAdd, int amountToAdd) {
+    var unitStack = unitStackByMaterialOrdinal[typeToAdd.ordinal()];
+
+    if (unitStack == null)
+      return 0;
+
+    return addItemAndGetAddedAmount(unitStack, amountToAdd);
   }
 
   public int addItemAndGetAddedAmount(ItemStack itemToAdd, int amountToAdd) {
