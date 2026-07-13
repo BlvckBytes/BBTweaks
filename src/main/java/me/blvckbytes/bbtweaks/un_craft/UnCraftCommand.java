@@ -221,7 +221,7 @@ public class UnCraftCommand implements CommandHandler, Listener {
     UnCraftEntry targetEntry;
 
     if (permittedEntries.size() == 1)
-      targetEntry = permittedEntries.get(0);
+      targetEntry = permittedEntries.getFirst();
 
     else {
       if (argsAndFlags.args().isEmpty()) {
@@ -242,7 +242,7 @@ public class UnCraftCommand implements CommandHandler, Listener {
         return true;
       }
 
-      var targetString = argsAndFlags.args().get(0);
+      var targetString = argsAndFlags.args().getFirst();
       int targetNumber;
 
       try {
@@ -402,9 +402,9 @@ public class UnCraftCommand implements CommandHandler, Listener {
         // Now add to the accumulators, seeing how we're still within limits.
         resultEntries.forEach(entry -> {
           if (entry.amount() < 0)
-            subtractedItems.computeIfAbsent(entry.material(), k -> new MutableInt()).value += entry.amount() * -1;
+            subtractedItems.computeIfAbsent(entry.material(), _ -> new MutableInt()).value += entry.amount() * -1;
           else
-            itemsToAdd.computeIfAbsent(entry.material(), k -> new MutableInt()).value += entry.amount();
+            itemsToAdd.computeIfAbsent(entry.material(), _ -> new MutableInt()).value += entry.amount();
         });
 
         // Also only increment counters and add to trackers at this point, now that it actually went through.
@@ -468,7 +468,7 @@ public class UnCraftCommand implements CommandHandler, Listener {
 
     forEachStackOfTypeCountMap(itemsToAdd, item -> {
       for (var remainder : inventory.addItem(item).values())
-        itemsToDrop.computeIfAbsent(item.getType(), k -> new MutableInt()).value += remainder.getAmount();
+        itemsToDrop.computeIfAbsent(item.getType(), _ -> new MutableInt()).value += remainder.getAmount();
     });
 
     if (!itemsToDrop.isEmpty()) {
@@ -557,7 +557,7 @@ public class UnCraftCommand implements CommandHandler, Listener {
     if (result == null) {
       exclusionReasonsOutput.addAll(exclusionReasons);
       // If we're already excluding the recipe, we might as well have the ingredient noted down, for further information
-      result = availableChoices.iterator().next();
+      result = availableChoices.getFirst();
     }
 
     return result;
@@ -567,7 +567,7 @@ public class UnCraftCommand implements CommandHandler, Listener {
   private void addChoiceToUnCraftResults(@NotNull RecipeChoice choice, Map<Material, Integer> unCraftResults, Set<String> exclusionReasonsOutput) {
     if (choice instanceof RecipeChoice.MaterialChoice materialChoice) {
       var material = decideChoiceMaterial(materialChoice, exclusionReasonsOutput);
-      unCraftResults.put(material, unCraftResults.computeIfAbsent(material, k -> 0) + 1);
+      unCraftResults.put(material, unCraftResults.computeIfAbsent(material, _ -> 0) + 1);
       return;
     }
 
@@ -702,52 +702,54 @@ public class UnCraftCommand implements CommandHandler, Listener {
     var exclusionReasons = new HashSet<String>();
     var unCraftResults = new HashMap<Material, Integer>();
 
-    if (recipe instanceof ShapedRecipe shapedRecipe) {
-      var choiceMap = shapedRecipe.getChoiceMap();
+    switch (recipe) {
+      case ShapedRecipe shapedRecipe -> {
+        var choiceMap = shapedRecipe.getChoiceMap();
 
-      for (var shapeRow : shapedRecipe.getShape()) {
-        for (var ingredientIndex = 0; ingredientIndex < shapeRow.length(); ++ingredientIndex) {
-          var ingredientChar = shapeRow.charAt(ingredientIndex);
-          var choice = choiceMap.get(ingredientChar);
+        for (var shapeRow : shapedRecipe.getShape()) {
+          for (var ingredientIndex = 0; ingredientIndex < shapeRow.length(); ++ingredientIndex) {
+            var ingredientChar = shapeRow.charAt(ingredientIndex);
+            var choice = choiceMap.get(ingredientChar);
 
-          // Empty placeholder char - ignore
-          if (choice == null)
-            continue;
+            // Empty placeholder char - ignore
+            if (choice == null)
+              continue;
 
-          addChoiceToUnCraftResults(choice, unCraftResults, exclusionReasons);
+            addChoiceToUnCraftResults(choice, unCraftResults, exclusionReasons);
+          }
         }
       }
-    }
 
-    else if (recipe instanceof ShapelessRecipe shapelessRecipe) {
-      for (var choice : shapelessRecipe.getChoiceList())
-        addChoiceToUnCraftResults(choice, unCraftResults, exclusionReasons);
-    }
+      case ShapelessRecipe shapelessRecipe -> {
+        for (var choice : shapelessRecipe.getChoiceList())
+          addChoiceToUnCraftResults(choice, unCraftResults, exclusionReasons);
+      }
 
-    // These include coloring shulker-boxes... Why did they do it for them, but not for all other
-    // coloring-processes? Unbelievable! I was looking all over the place to find this!
-    else if (recipe instanceof TransmuteRecipe transmuteRecipe) {
-      // The thing undergoing change
-      addChoiceToUnCraftResults(transmuteRecipe.getInput(), unCraftResults, exclusionReasons);
+      // These include coloring shulker-boxes... Why did they do it for them, but not for all other
+      // coloring-processes? Unbelievable! I was looking all over the place to find this!
+      case TransmuteRecipe transmuteRecipe -> {
+        // The thing undergoing change
+        addChoiceToUnCraftResults(transmuteRecipe.getInput(), unCraftResults, exclusionReasons);
 
-      // The "catalyst" (in the case of shulker-boxes, the dye)
-      addChoiceToUnCraftResults(transmuteRecipe.getMaterial(), unCraftResults, exclusionReasons);
-    }
+        // The "catalyst" (in the case of shulker-boxes, the dye)
+        addChoiceToUnCraftResults(transmuteRecipe.getMaterial(), unCraftResults, exclusionReasons);
+      }
 
-    else if (recipe instanceof StonecuttingRecipe stonecuttingRecipe) {
-      addChoiceToUnCraftResults(stonecuttingRecipe.getInputChoice(), unCraftResults, exclusionReasons);
-    }
+      case StonecuttingRecipe stonecuttingRecipe -> {
+        addChoiceToUnCraftResults(stonecuttingRecipe.getInputChoice(), unCraftResults, exclusionReasons);
+      }
 
-    else if (recipe instanceof SmithingTransformRecipe smithingTransformRecipe) {
-      addChoiceToUnCraftResults(smithingTransformRecipe.getTemplate(), unCraftResults, exclusionReasons);
-      addChoiceToUnCraftResults(smithingTransformRecipe.getBase(), unCraftResults, exclusionReasons);
-      addChoiceToUnCraftResults(smithingTransformRecipe.getAddition(), unCraftResults, exclusionReasons);
-      exclusionReasons.add(config.rootSection.unCraft.additionalReasons.smithingRecipe.asPlainString(null));
-    }
+      case SmithingTransformRecipe smithingTransformRecipe -> {
+        addChoiceToUnCraftResults(smithingTransformRecipe.getTemplate(), unCraftResults, exclusionReasons);
+        addChoiceToUnCraftResults(smithingTransformRecipe.getBase(), unCraftResults, exclusionReasons);
+        addChoiceToUnCraftResults(smithingTransformRecipe.getAddition(), unCraftResults, exclusionReasons);
+        exclusionReasons.add(config.rootSection.unCraft.additionalReasons.smithingRecipe.asPlainString(null));
+      }
 
-    else {
-      // BlastingRecipe, SmokerRecipe, FurnaceRecipe, etc.
-      return;
+      default -> {
+        // BlastingRecipe, SmokerRecipe, FurnaceRecipe, etc.
+        return;
+      }
     }
 
     var result = recipe.getResult();
