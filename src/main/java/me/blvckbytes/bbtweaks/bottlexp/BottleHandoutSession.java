@@ -3,7 +3,7 @@ package me.blvckbytes.bbtweaks.bottlexp;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AddFlag;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AddToContainerSession;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
-import me.blvckbytes.bbtweaks.un_craft.SpaceSimulator;
+import me.blvckbytes.bbtweaks.util.SimulatingAddOnlyInventory;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -17,7 +17,7 @@ public class BottleHandoutSession {
 
   private int inventoryBottlesCount;
 
-  private final @Nullable SpaceSimulator inventorySpaceSimulator;
+  private final @Nullable SimulatingAddOnlyInventory simulatingPlayerInventory;
   private final @Nullable AddToContainerSession addToContainerSession;
 
   public BottleHandoutSession(
@@ -27,7 +27,7 @@ public class BottleHandoutSession {
   ) {
     this.player = player;
 
-    this.inventorySpaceSimulator = bottleStorage.intoInventory ? new SpaceSimulator(player.getInventory(), ItemStack::getType) : null;
+    this.simulatingPlayerInventory = bottleStorage.intoInventory ? new SimulatingAddOnlyInventory(player.getInventory(), null, null) : null;
     this.addToContainerSession = bottleStorage.intoShulkers ? autoPickupContainerListener.makePickupSession(player) : null;
   }
 
@@ -41,10 +41,10 @@ public class BottleHandoutSession {
         return true;
     }
 
-    if (inventorySpaceSimulator != null) {
-      inventorySpaceSimulator.addItem(Material.EXPERIENCE_BOTTLE, 1);
+    if (simulatingPlayerInventory != null) {
+      var addedAmount = simulatingPlayerInventory.addItemAndGetAddedAmount(Material.EXPERIENCE_BOTTLE, 1);
 
-      if (inventorySpaceSimulator.didDropItems())
+      if (addedAmount == 0)
         return false;
 
       ++inventoryBottlesCount;
