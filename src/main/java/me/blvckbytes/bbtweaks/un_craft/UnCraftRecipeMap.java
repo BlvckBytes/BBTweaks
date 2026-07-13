@@ -25,8 +25,24 @@ public class UnCraftRecipeMap {
     return recipes;
   }
 
-  public void addUnCraftingRecipe(Material unCraftedType, UnCraftEntry recipe) {
-    recipesByUnCraftedType.computeIfAbsent(unCraftedType, k -> new ArrayList<>()).add(recipe);
+  public boolean addUnCraftingRecipe(Material unCraftedType, UnCraftEntry recipe) {
+    var bucket = recipesByUnCraftedType.computeIfAbsent(unCraftedType, _ -> new ArrayList<>());
+
+    // Allow to have multiple excluded recipes for the same type, seeing how we do accumulate
+    // various reasons as to why an input is denied, but do not store multiple usable recipes
+    // that are equivalent, since that always represents (unintentional) duplication.
+    if (recipe.exclusionReasons.isEmpty()) {
+      for (var entry : bucket) {
+        if (!entry.exclusionReasons.isEmpty())
+          continue;
+
+        if (entry.matchesResultTypes(recipe))
+          return false;
+      }
+    }
+
+    bucket.add(recipe);
+    return true;
   }
 
   public void clear() {

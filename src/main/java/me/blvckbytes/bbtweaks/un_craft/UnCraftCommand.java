@@ -681,7 +681,10 @@ public class UnCraftCommand implements CommandHandler, Listener {
             }
           }
 
-          recipeMap.addUnCraftingRecipe(parsedRecipe.uncraftedItemType(), entry);
+          if (!recipeMap.addUnCraftingRecipe(parsedRecipe.uncraftedItemType(), entry)) {
+            plugin.getLogger().warning("Ignoring duplicate recipe for uncrafted type " + parsedRecipe.uncraftedItemType());
+            continue;
+          }
 
           if (!entry.exclusionReasons.isEmpty())
             ++excludedCounter;
