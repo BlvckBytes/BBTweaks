@@ -11,7 +11,7 @@ public class LiveAddOnlyInventory extends AddOnlyInventory {
 
   private LiveAddOnlyInventory(Inventory inventory, InventoryHolder inventoryHolder) {
     super(
-      inventory.getContents(),
+      inventory.getStorageContents(),
       // Account for the fact that mutating the contents-array does not set vacant slots in the inventory.
       (slot, wasVacant, addedItem, _, _) -> {
         if (wasVacant)
