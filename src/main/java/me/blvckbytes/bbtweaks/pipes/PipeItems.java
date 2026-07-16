@@ -27,19 +27,31 @@ public class PipeItems {
   }
 
   private final List<ItemAndOriginSlot> contents;
+  private long filteredOutContentIndices;
   private final MutableInt reducedContentIndex;
 
-  private PipeItems(List<ItemAndOriginSlot> contents, MutableInt reducedContentIndex) {
+  private PipeItems(
+    List<ItemAndOriginSlot> contents,
+    long filteredOutContentIndices,
+    MutableInt reducedContentIndex
+  ) {
     this.contents = contents;
+    this.filteredOutContentIndices = filteredOutContentIndices;
     this.reducedContentIndex = reducedContentIndex;
   }
 
   public PipeItems() {
-    this(new ArrayList<>(), new MutableInt(-1));
+    this(new ArrayList<>(), 0, new MutableInt(-1));
   }
 
   public boolean addIfNonDuplicate(int originSlot, @NotNull ItemStack item) {
     if (!ItemUtil.isStackValid(item))
+      return false;
+
+    // Unreachable in day-to-day scenarios, as a double-chest has 54 slots and
+    // even putting this many different items in there is highly unlikely.
+    // Ensures that we can use a long to create a filtered-out indices bit-set.
+    if (contents.size() >= Long.SIZE)
       return false;
 
     for (var itemAndSlot : contents) {
@@ -92,22 +104,25 @@ public class PipeItems {
   }
 
   public PipeItems filterAndMakeSub(Predicate<ItemStack> predicate) {
-    var filteredContents = new ArrayList<ItemAndOriginSlot>(contents.size());
+    var subItems = new PipeItems(contents, filteredOutContentIndices, reducedContentIndex);
 
-    forEachActiveItem((_, itemAndSlot) -> {
-      if (predicate.test(itemAndSlot.item))
-        filteredContents.add(itemAndSlot);
+    forEachActiveItem((contentIndex, itemAndOriginSlot) -> {
+      if (itemAndOriginSlot.item != null && !predicate.test(itemAndOriginSlot.item))
+        subItems.filteredOutContentIndices |= 1L << contentIndex;
 
       return true;
     });
 
-    return new PipeItems(filteredContents, reducedContentIndex);
+    return subItems;
   }
 
   private void forEachActiveItem(ActiveItemIterationHandler handler) {
     var reducedIndex = reducedContentIndex.value;
 
     if (reducedIndex >= 0) {
+      if ((filteredOutContentIndices & (1L << reducedIndex)) != 0)
+        return;
+
       var reducedItem = contents.get(reducedIndex);
 
       if (reducedItem.item != null)
@@ -117,6 +132,9 @@ public class PipeItems {
     }
 
     for (var index = 0; index < contents.size(); ++index) {
+      if ((filteredOutContentIndices & (1L << index)) != 0)
+        continue;
+
       var itemAndSlot = contents.get(index);
 
       // Unreachable, as we only set it to null after a reduction to zero.
