@@ -15,14 +15,14 @@ public class CachedShapedRecipe implements CachedRecipe {
   public final int width, height;
   public final boolean horizontallyAsymmetrical;
 
-  private final RecipeChoice[][] choiceMatrix;
+  private final RecipeChoice.MaterialChoice[][] choiceMatrix;
 
   public CachedShapedRecipe(
     ItemStack result,
     int width,
     int height,
     boolean horizontallyAsymmetrical,
-    RecipeChoice[][] choiceMatrix
+    RecipeChoice.MaterialChoice[][] choiceMatrix
   ) {
     this.result = result;
     this.width = width;
@@ -45,7 +45,7 @@ public class CachedShapedRecipe implements CachedRecipe {
       return null;
 
     var choiceMap = recipe.getChoiceMap();
-    var choiceMatrix = new RecipeChoice[height][width];
+    var choiceMatrix = new RecipeChoice.MaterialChoice[height][width];
 
     for (var rowIndex = 0; rowIndex < shapeLines.length; ++rowIndex) {
       var columnChars = shapeLines[rowIndex].toCharArray();
@@ -60,10 +60,13 @@ public class CachedShapedRecipe implements CachedRecipe {
 
         // There may be letters used in the shape that have a null-value assigned,
         // for whatever odd internal reason of how they map them from minecraft.
-        if (choice == null || choice == RecipeChoice.empty())
+        if (choice == null || RecipeChoice.empty().equals(choice))
           continue;
 
-        choiceMatrix[rowIndex][columnIndex] = choice;
+        if (!(choice instanceof RecipeChoice.MaterialChoice materialChoice))
+          return null;
+
+        choiceMatrix[rowIndex][columnIndex] = materialChoice;
       }
     }
 

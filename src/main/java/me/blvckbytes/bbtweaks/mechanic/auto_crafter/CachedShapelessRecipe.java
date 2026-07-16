@@ -12,24 +12,27 @@ import java.util.List;
 public class CachedShapelessRecipe implements CachedRecipe {
 
   private final ItemStack result;
-  private final List<RecipeChoice> choiceList;
+  private final List<RecipeChoice.MaterialChoice> choiceList;
 
   private CachedShapelessRecipe(
     ItemStack result,
-    List<RecipeChoice> choiceList
+    List<RecipeChoice.MaterialChoice> choiceList
   ) {
     this.result = result;
     this.choiceList = choiceList;
   }
 
   public static @Nullable CachedShapelessRecipe createIfValid(ShapelessRecipe recipe) {
-    var choiceList = new ArrayList<RecipeChoice>();
+    var choiceList = new ArrayList<RecipeChoice.MaterialChoice>();
 
     for (var recipeChoice : recipe.getChoiceList()) {
-      if (recipeChoice == null || recipeChoice == RecipeChoice.empty())
+      if (recipeChoice == null || RecipeChoice.empty().equals(recipeChoice))
         continue;
 
-      choiceList.add(recipeChoice);
+      if (!(recipeChoice instanceof RecipeChoice.MaterialChoice materialChoice))
+        return null;
+
+      choiceList.add(materialChoice);
     }
 
     if (choiceList.isEmpty())
