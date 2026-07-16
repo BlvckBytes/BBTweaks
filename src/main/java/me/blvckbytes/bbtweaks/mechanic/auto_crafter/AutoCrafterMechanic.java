@@ -13,6 +13,7 @@ import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Tag;
 import org.bukkit.block.Crafter;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -21,6 +22,7 @@ import org.bukkit.event.block.CrafterCraftEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
 import org.bukkit.persistence.PersistentDataType;
@@ -39,6 +41,11 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
     if (Material.values().length > 4096)
       throw new IllegalStateException("There are more than 4K materials, which exceeds our expectation - cannot bit-pack the matrix into two longs without a loss of information!");
   }
+
+  private static final RecipeChoice.MaterialChoice MATERIALS_PLANKS = new RecipeChoice.MaterialChoice(Tag.PLANKS);
+  private static final RecipeChoice.MaterialChoice MATERIALS_WOODEN_SLABS = new RecipeChoice.MaterialChoice(Tag.WOODEN_SLABS);
+  private static final RecipeChoice.MaterialChoice MATERIALS_WOOL = new RecipeChoice.MaterialChoice(Tag.WOOL);
+  private static final RecipeChoice.MaterialChoice MATERIALS_STONE = new RecipeChoice.MaterialChoice(Tag.ITEMS_STONE_CRAFTING_MATERIALS);
 
   private static final int FLAGS_LINE = 2;
 
@@ -61,26 +68,37 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
 
   @Override
   public boolean onInstanceClick(Player player, AutoCrafterInstance instance, boolean wasLeftClick) {
-    if (wasLeftClick || !player.isSneaking())
+    if (!player.isSneaking())
       return false;
 
     if (!instance.hasFlag(AutoCrafterFlag.ENABLE_META_RECIPE))
       return false;
 
     var sign = instance.getSign();
+    var environment = getSignEnvironment(sign);
 
     if (!canEditSign(player, sign)) {
-      config.rootSection.mechanic.autoCrafter.cannotEditSign.sendMessage(player);
+      config.rootSection.mechanic.autoCrafter.cannotEditSign.sendMessage(player, environment);
+      return true;
+    }
+
+    if (wasLeftClick) {
+      config.rootSection.mechanic.autoCrafter.matchedMetaRecipes.sendMessage(
+        player,
+        environment
+          .withVariable("recipes", instance.metaRecipes.stream().map(recipe -> recipe.getKey().getKey()).toList())
+      );
+
       return true;
     }
 
     if (!instance.metaRecipeInventory.getViewers().isEmpty()) {
-      config.rootSection.mechanic.autoCrafter.anotherIsEditing.sendMessage(player);
+      config.rootSection.mechanic.autoCrafter.anotherIsEditing.sendMessage(player, environment);
       return true;
     }
 
     player.openInventory(instance.metaRecipeInventory);
-    config.rootSection.mechanic.autoCrafter.metaRecipeInventoryOpening.sendMessage(player, getSignEnvironment(sign));
+    config.rootSection.mechanic.autoCrafter.metaRecipeInventoryOpening.sendMessage(player, environment);
 
     return true;
   }
@@ -191,6 +209,23 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
   @Override
   public List<CachedRecipe> getRecipes() {
     return Collections.unmodifiableList(cachedRecipes);
+  }
+
+  @Override
+  public RecipeChoice.MaterialChoice expandMetaMaterial(Material material) {
+    if (Tag.PLANKS.isTagged(material))
+      return MATERIALS_PLANKS;
+
+    if (Tag.WOODEN_SLABS.isTagged(material))
+      return MATERIALS_WOODEN_SLABS;
+
+    if (Tag.WOOL.isTagged(material))
+      return MATERIALS_WOOL;
+
+    if (Tag.ITEMS_STONE_CRAFTING_MATERIALS.isTagged(material))
+      return MATERIALS_STONE;
+
+    return new RecipeChoice.MaterialChoice(material);
   }
 
   @EventHandler

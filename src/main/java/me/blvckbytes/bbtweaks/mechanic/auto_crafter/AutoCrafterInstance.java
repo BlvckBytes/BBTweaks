@@ -3,24 +3,27 @@ package me.blvckbytes.bbtweaks.mechanic.auto_crafter;
 import at.blvckbytes.component_markup.util.TriState;
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.bbtweaks.util.BlockUtil;
+import me.blvckbytes.bbtweaks.util.ItemUtil;
 import me.blvckbytes.bbtweaks.util.SimulatingAddOnlyInventory;
 import me.blvckbytes.bbtweaks.util.SlotItemAddition;
 import org.bukkit.Material;
 import org.bukkit.block.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.List;
 
 public class AutoCrafterInstance extends SISOInstance {
 
   public static final int MATRIX_SIZE = 9;
 
-  private static final ItemStack AIR_STACK = new ItemStack(Material.AIR);
-
   public final Inventory metaRecipeInventory;
+  public final List<CachedRecipe> metaRecipes;
+
   private final EnumSet<AutoCrafterFlag> flags;
   private final RecipeCache recipeCache;
 
@@ -36,6 +39,27 @@ public class AutoCrafterInstance extends SISOInstance {
     RecipeCache recipeCache
   ) {
     super(sign);
+
+    this.metaRecipes = new ArrayList<>();
+
+    if (flags.contains(AutoCrafterFlag.ENABLE_META_RECIPE)) {
+      var metaMatrixContents = new MatrixContent[MATRIX_SIZE];
+
+      for (var index = 0; index < metaMatrixContents.length; ++index) {
+        var currentItem = metaRecipeInventory.getItem(index);
+
+        metaMatrixContents[index] = new MatrixContent(
+          ItemUtil.isStackValid(currentItem)
+            ? recipeCache.expandMetaMaterial(currentItem.getType())
+            : null
+        );
+      }
+
+      for (var cachedRecipe : recipeCache.getRecipes()) {
+        if (areMatrixContentsSatisfyingRecipe(metaMatrixContents, cachedRecipe))
+          this.metaRecipes.add(cachedRecipe);
+      }
+    }
 
     this.metaRecipeInventory = metaRecipeInventory;
     this.flags = flags;
@@ -92,7 +116,7 @@ public class AutoCrafterInstance extends SISOInstance {
   private long getSlotTypeOrdinal(ItemStack[] matrixContents, int slot) {
     ItemStack item;
 
-    if (slot < 0 || slot >= matrixContents.length || !isStackValid(item = matrixContents[slot]))
+    if (slot < 0 || slot >= matrixContents.length || !ItemUtil.isStackValid(item = matrixContents[slot]))
       return Material.AIR.ordinal();
 
     return item.getType().ordinal();
@@ -129,7 +153,7 @@ public class AutoCrafterInstance extends SISOInstance {
       return;
 
     for (var cachedRecipe : recipeCache.getRecipes()) {
-      if (!isMatrixSatisfyingRecipe(matrixContents, cachedRecipe))
+      if (!areMatrixContentsSatisfyingRecipe(matrixContents, cachedRecipe))
         continue;
 
       this.cachedRecipe = cachedRecipe;
@@ -160,7 +184,7 @@ public class AutoCrafterInstance extends SISOInstance {
 
       var matrixItem = matrixContents[matrixSlot];
 
-      if (!isStackValid(matrixItem)) {
+      if (!ItemUtil.isStackValid(matrixItem)) {
         hasVacantSlots = true;
         continue;
       }
@@ -199,7 +223,7 @@ public class AutoCrafterInstance extends SISOInstance {
 
       var maxAmountItem = crafterInventory.getItem(maxAmountSlot);
 
-      if (!isStackValid(maxAmountItem))
+      if (!ItemUtil.isStackValid(maxAmountItem))
         return;
 
       crafterInventory.setItem(maxAmountSlot, null);
@@ -228,7 +252,7 @@ public class AutoCrafterInstance extends SISOInstance {
 
     var didMatrixChange = cachedRecipeMatrixMsb != computeMatrixMsb(matrixContents) || cachedRecipeMatrixLsb != computeMatrixLsb(matrixContents);
 
-    if (didMatrixChange && !isMatrixSatisfyingRecipe(matrixContents, cachedRecipe)) {
+    if (didMatrixChange && !areMatrixContentsSatisfyingRecipe(matrixContents, cachedRecipe)) {
       tryRecomputeCachedRecipe(matrixContents);
 
       if (cachedRecipe == null)
@@ -310,16 +334,16 @@ public class AutoCrafterInstance extends SISOInstance {
   private static boolean doesRecipeMatchAtOffset(
     CachedShapedRecipe recipe,
     int rowOffset, int columnOffset, boolean mirrorHorizontally,
-    ItemStack[] matrixContents
+    @NotNull MatrixContent[] matrixContents
   ) {
     for (int rowIndex = 0; rowIndex < 3; ++rowIndex) {
       for (int columnIndex = 0; columnIndex < 3; ++columnIndex) {
-        var matrixItem = matrixContents[columnIndex + rowIndex * 3];
+        var matrixContent = matrixContents[columnIndex + rowIndex * 3];
 
         // Recipes are always trimmed and aligned to the top left corner, i.e. (0, 0). If we now seek
         // to slide the window of the choices-matrix, all slots prior to the offset need to be vacant.
         if (rowIndex < rowOffset || columnIndex < columnOffset) {
-          if (isStackValid(matrixItem))
+          if (matrixContent.isValid())
             return false;
 
           continue;
@@ -334,13 +358,13 @@ public class AutoCrafterInstance extends SISOInstance {
 
         // The shaped recipe has a hole at this location, meaning we expect a vacant slot.
         if (choice == null) {
-          if (isStackValid(matrixItem))
+          if (matrixContent.isValid())
             return false;
 
           continue;
         }
 
-        if (!choice.test(matrixItem == null ? AIR_STACK : matrixItem))
+        if (!matrixContent.test(choice))
           return false;
       }
     }
@@ -349,7 +373,16 @@ public class AutoCrafterInstance extends SISOInstance {
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  private static boolean isMatrixSatisfyingRecipe(ItemStack[] matrixContents, CachedRecipe cachedRecipe) {
+  private static boolean areMatrixContentsSatisfyingRecipe(ItemStack[] matrixContents, CachedRecipe cachedRecipe) {
+    var adaptedContents = new MatrixContent[matrixContents.length];
+
+    for (var index = 0; index < matrixContents.length; ++index)
+      adaptedContents[index] = new MatrixContent(matrixContents[index]);
+
+    return areMatrixContentsSatisfyingRecipe(adaptedContents, cachedRecipe);
+  }
+
+  private static boolean areMatrixContentsSatisfyingRecipe(MatrixContent[] matrixContents, CachedRecipe cachedRecipe) {
     if (cachedRecipe instanceof CachedShapedRecipe shapedRecipe) {
       for (int rowOffset = 0; rowOffset <= 3 - shapedRecipe.height; ++rowOffset) {
         for (int columnOffset = 0; columnOffset <= 3 - shapedRecipe.width; ++columnOffset) {
@@ -373,8 +406,8 @@ public class AutoCrafterInstance extends SISOInstance {
       if (remainingIngredients.isEmpty())
         return false;
 
-      for (ItemStack matrixItem : matrixContents) {
-        if (!isStackValid(matrixItem))
+      for (var matrixContent : matrixContents) {
+        if (!matrixContent.isValid())
           continue;
 
         // No more required ingredients left, but there are still additional items in the crafting-matrix => mismatch.
@@ -382,9 +415,9 @@ public class AutoCrafterInstance extends SISOInstance {
           return false;
 
         for (var iterator = remainingIngredients.iterator(); iterator.hasNext();) {
-          var requiredIngredient = iterator.next();
+          var requiredChoice = iterator.next();
 
-          if (requiredIngredient.test(matrixItem)) {
+          if (matrixContent.test(requiredChoice)) {
             iterator.remove();
             break;
           }
@@ -395,17 +428,6 @@ public class AutoCrafterInstance extends SISOInstance {
     }
 
     return false;
-  }
-
-  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  private static boolean isStackValid(ItemStack item) {
-    if (item == null)
-      return false;
-
-    if (item.getType().isAir())
-      return false;
-
-    return item.getAmount() > 0;
   }
 
   // ================================================================================
@@ -428,7 +450,7 @@ public class AutoCrafterInstance extends SISOInstance {
 
       var currentItem = inventory.getItem(index);
 
-      if (!isStackValid(currentItem)) {
+      if (!ItemUtil.isStackValid(currentItem)) {
         spaceByIndex[index] = CRAFTER_MAX_STACK_SIZE;
         continue;
       }
@@ -481,7 +503,7 @@ public class AutoCrafterInstance extends SISOInstance {
 
       var currentItem = inventory.getItem(index);
 
-      if (!isStackValid(currentItem)) {
+      if (!ItemUtil.isStackValid(currentItem)) {
         var newItem = new ItemStack(itemToAdd);
         newItem.setAmount(simulatedAddedAmount);
         inventory.setItem(index, newItem);

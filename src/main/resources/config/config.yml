@@ -478,6 +478,15 @@ mechanic:
     metaRecipeInventoryTitle: '<&8>Metarezept'
     metaRecipeInventoryOpening: '{lut.mechanic_prefix} <&7>Du kannst nun das <&a>Metarezept</> des AutoCrafters bei <&a>{x} {y} {z}</> editieren.'
     metaRecipeInventorySaved: '{lut.mechanic_prefix} <&7>Das <&a>Metarezept</> des AutoCrafters bei <&a>{x} {y} {z}</> wurde gespeichert.'
+    matchedMetaRecipes: |
+      {lut.mechanic_prefix}<space/>
+      <container *if="len(recipes) eq 0">
+        <&c>Das <&4>Metarezept</> des AutoCrafters bei <&4>{x} {y} {z}</> konnte keine Übereinstimmungen mit bestehenden Rezepten finden!
+      </container>
+      <container *else>
+        <&7>Das <&a>Metarezept</> des AutoCrafters bei <&a>{x} {y} {z}</> stimmt mit den folgenden Rezepten überein:<space/>
+        <&a *for-recipe="recipes" *for-separator={,<space/>}>{recipe}</>.
+      </container>
   showcase:
     maximumAxisOffset: 10
     offsetSelectingTimeoutSeconds: 15

@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.mechanic.auto_crafter;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
@@ -17,18 +18,22 @@ public class CachedShapedRecipe implements CachedRecipe {
 
   private final RecipeChoice.MaterialChoice[][] choiceMatrix;
 
+  private final NamespacedKey key;
+
   public CachedShapedRecipe(
     ItemStack result,
     int width,
     int height,
     boolean horizontallyAsymmetrical,
-    RecipeChoice.MaterialChoice[][] choiceMatrix
+    RecipeChoice.MaterialChoice[][] choiceMatrix,
+    NamespacedKey key
   ) {
     this.result = result;
     this.width = width;
     this.height = height;
     this.horizontallyAsymmetrical = horizontallyAsymmetrical;
     this.choiceMatrix = choiceMatrix;
+    this.key = key;
   }
 
   public static @Nullable CachedShapedRecipe createIfValid(ShapedRecipe recipe) {
@@ -81,7 +86,7 @@ public class CachedShapedRecipe implements CachedRecipe {
       }
     }
 
-    return new CachedShapedRecipe(recipe.getResult(), width, height, horizontallyAsymmetrical, choiceMatrix);
+    return new CachedShapedRecipe(recipe.getResult(), width, height, horizontallyAsymmetrical, choiceMatrix, recipe.getKey());
   }
 
   @Override
@@ -89,7 +94,12 @@ public class CachedShapedRecipe implements CachedRecipe {
     return new ItemStack(result);
   }
 
-  public @Nullable RecipeChoice getChoiceAt(int row, int column) {
+  @Override
+  public NamespacedKey getKey() {
+    return key;
+  }
+
+  public @Nullable RecipeChoice.MaterialChoice getChoiceAt(int row, int column) {
     if (row < 0 || column < 0 || row >= choiceMatrix.length)
       return null;
 

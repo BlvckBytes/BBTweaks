@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.mechanic.auto_crafter;
 
+import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapelessRecipe;
@@ -13,13 +14,16 @@ public class CachedShapelessRecipe implements CachedRecipe {
 
   private final ItemStack result;
   private final List<RecipeChoice.MaterialChoice> choiceList;
+  private final NamespacedKey key;
 
   private CachedShapelessRecipe(
     ItemStack result,
-    List<RecipeChoice.MaterialChoice> choiceList
+    List<RecipeChoice.MaterialChoice> choiceList,
+    NamespacedKey key
   ) {
     this.result = result;
     this.choiceList = choiceList;
+    this.key = key;
   }
 
   public static @Nullable CachedShapelessRecipe createIfValid(ShapelessRecipe recipe) {
@@ -38,7 +42,7 @@ public class CachedShapelessRecipe implements CachedRecipe {
     if (choiceList.isEmpty())
       return null;
 
-    return new CachedShapelessRecipe(recipe.getResult(), choiceList);
+    return new CachedShapelessRecipe(recipe.getResult(), choiceList, recipe.getKey());
   }
 
   @Override
@@ -46,7 +50,12 @@ public class CachedShapelessRecipe implements CachedRecipe {
     return new ItemStack(result);
   }
 
-  public List<RecipeChoice> getChoiceList() {
+  @Override
+  public NamespacedKey getKey() {
+    return key;
+  }
+
+  public List<RecipeChoice.MaterialChoice> getChoiceList() {
     return Collections.unmodifiableList(choiceList);
   }
 }

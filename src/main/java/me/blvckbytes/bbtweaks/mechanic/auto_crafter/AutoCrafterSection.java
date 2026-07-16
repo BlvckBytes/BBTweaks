@@ -17,6 +17,7 @@ public class AutoCrafterSection extends ConfigSection {
   public ComponentMarkup metaRecipeInventoryOpening;
   public ComponentMarkup metaRecipeInventoryTitle;
   public ComponentMarkup metaRecipeInventorySaved;
+  public ComponentMarkup matchedMetaRecipes;
 
   public AutoCrafterSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
