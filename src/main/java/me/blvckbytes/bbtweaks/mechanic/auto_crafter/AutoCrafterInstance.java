@@ -16,10 +16,11 @@ import java.util.EnumSet;
 
 public class AutoCrafterInstance extends SISOInstance {
 
-  private static final int MATRIX_SIZE = 9;
+  public static final int MATRIX_SIZE = 9;
 
   private static final ItemStack AIR_STACK = new ItemStack(Material.AIR);
 
+  public final Inventory metaRecipeInventory;
   private final EnumSet<AutoCrafterFlag> flags;
   private final RecipeCache recipeCache;
 
@@ -28,11 +29,21 @@ public class AutoCrafterInstance extends SISOInstance {
   private long cachedRecipeMatrixLsb;
   private TriState wasMatrixInvalid = TriState.NULL;
 
-  public AutoCrafterInstance(Sign sign, EnumSet<AutoCrafterFlag> flags, RecipeCache recipeCache) {
+  public AutoCrafterInstance(
+    Sign sign,
+    Inventory metaRecipeInventory,
+    EnumSet<AutoCrafterFlag> flags,
+    RecipeCache recipeCache
+  ) {
     super(sign);
 
+    this.metaRecipeInventory = metaRecipeInventory;
     this.flags = flags;
     this.recipeCache = recipeCache;
+  }
+
+  public boolean hasFlag(AutoCrafterFlag flag) {
+    return flags.contains(flag);
   }
 
   @Override

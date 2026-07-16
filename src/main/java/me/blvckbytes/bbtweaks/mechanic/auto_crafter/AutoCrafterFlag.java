@@ -4,6 +4,7 @@ import me.blvckbytes.bbtweaks.mechanic.common.FlagEnum;
 
 public enum AutoCrafterFlag implements FlagEnum {
   USE_SLOT_STATE_AS_PATTERN("slot-pattern"),
+  ENABLE_META_RECIPE("meta"),
   ;
 
   private final String shorthand;
