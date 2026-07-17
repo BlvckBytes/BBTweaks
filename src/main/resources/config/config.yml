@@ -1986,6 +1986,29 @@ sidebar:
             <number [value]="(used_slots / double(used_slots + vacant_slots))*100" format="#" />%
           }
         />
+    BLOCK_FACING_STATUS:
+      iconData:
+        name: 'BlockFacing Status'
+        description: |
+          Der aktuelle Aktivierungszustand der<br/>
+          automatischen Blockausrichtung (/bf).<br/>
+          <br/>
+          <&e>🛈 Der Wert zeigt die eingestellte Farbe nur<br/>
+          dann an, wenn die Funktion aktiv ist und verbleibt<br/>
+          im inaktiven Zustand ausgegraut.
+        iconType: 'PISTON'
+      defaultLabelStyle:
+        color: 'LIGHT_GRAY'
+      defaultValueStyle:
+        color: 'LIGHT_GREEN'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="◆" floodgate-icon="➜" label="BlockFacing" [value-color-override]="not enabled then '&7'"
+          value={
+            {enabled then `An ({facing})` else "Aus"}
+          }
+        />
   colorDisplay:
     title: |
       <&8>Farbauswahl<space/>

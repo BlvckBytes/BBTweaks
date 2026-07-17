@@ -12,17 +12,17 @@ import java.util.concurrent.ThreadLocalRandom;
 
 public enum FacingOverride implements MatchableEnum {
   // NOTE: The ordinal of this enum is used as the main identifier!
-  NORTH,
-  EAST,
-  SOUTH,
-  WEST,
-  UP,
-  DOWN,
-  IN_LOOKING_DIRECTION,
-  AGAINST_LOOKING_DIRECTION,
-  RANDOM_UP_DOWN,
-  RANDOM_CARDINAL,
-  RANDOM_ALL,
+  NORTH("N"),
+  EAST("E"),
+  SOUTH("S"),
+  WEST("W"),
+  UP("U"),
+  DOWN("D"),
+  IN_LOOKING_DIRECTION("L"),
+  AGAINST_LOOKING_DIRECTION("-L"),
+  RANDOM_UP_DOWN("R/UD"),
+  RANDOM_CARDINAL("R/C"),
+  RANDOM_ALL("R/A"),
   ;
 
   public static List<FacingOverride> ALL_VALUES = List.of(values());
@@ -43,6 +43,12 @@ public enum FacingOverride implements MatchableEnum {
     BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST,
     BlockFace.UP, BlockFace.DOWN
   };
+
+  public final String sidebarShorthand;
+
+  FacingOverride(String sidebarShorthand) {
+    this.sidebarShorthand = sidebarShorthand;
+  }
 
   public BlockFace getFace(Player player) {
     return switch (this) {

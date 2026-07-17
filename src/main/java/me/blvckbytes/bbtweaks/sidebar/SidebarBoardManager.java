@@ -16,6 +16,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.auto_tool.AutoToolCommand;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
+import me.blvckbytes.bbtweaks.block_facing.settings.BlockFacingSettingsStore;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
@@ -62,6 +63,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
   private final FloodgateIntegration floodgateIntegration;
   private final SidebarPreferencesStore sidebarPreferencesStore;
   private final AutoPickupContainerListener autoPickupContainerListener;
+  private final BlockFacingSettingsStore blockFacingSettingsStore;
   private final PlaytimeRewardsAPI playtimeRewards;
   private final LuckPerms luckPerms;
   private final IEssentials essentials;
@@ -84,6 +86,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     FloodgateIntegration floodgateIntegration,
     SidebarPreferencesStore sidebarPreferencesStore,
     AutoPickupContainerListener autoPickupContainerListener,
+    BlockFacingSettingsStore blockFacingSettingsStore,
     ConfigKeeper<MainSection> config
   ) {
     this.multiBreakParametersStore = multiBreakParametersStore;
@@ -94,6 +97,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     this.floodgateIntegration = floodgateIntegration;
     this.sidebarPreferencesStore = sidebarPreferencesStore;
     this.autoPickupContainerListener = autoPickupContainerListener;
+    this.blockFacingSettingsStore = blockFacingSettingsStore;
 
     var playtimeRegistration = Bukkit.getServicesManager().getRegistration(PlaytimeRewardsAPI.class);
 
@@ -544,6 +548,14 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
           .withVariable("used_slots", usageCounts.usedSlots())
           .withVariable("vacant_slots", usageCounts.vacantSlots())
           .withVariable("container_count", usageCounts.containerCount());
+      }
+
+      case BLOCK_FACING_STATUS -> {
+        var settings = blockFacingSettingsStore.access(player);
+
+        return environment
+          .withVariable("enabled", settings.enabled)
+          .withVariable("facing", settings.facingOverride.sidebarShorthand);
       }
     }
 
