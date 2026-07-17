@@ -527,6 +527,28 @@ mechanic:
         subtitle: '<&e>{name}'
         notificationTitleDurationMs: 2500
         sound: 'BLOCK_NOTE_PLING'
+  poolCrafter:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um einen PoolCrafter zu erstellen!'
+    notOnADropper: '{lut.mechanic_prefix} <&c>Ein PoolCrafter kann nur an einem Spender-Block (Dropper) angebracht werden!'
+    existingSign: '{lut.mechanic_prefix} <&c>Am Spender (Dropper) bei <&4>{x} {y} {z} <&c>befindet sich bereits ein PoolCrafter!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Der <&a>PoolCrafter</> bei <&a>{x} {y} {z}</> wurde erfolgreich erstellt!'
+    cannotEditSign: '{lut.mechanic_prefix} <&c>Du hast keinen Zugriff auf dieses Schild!'
+    selectedRecipeResults: |
+      {lut.mechanic_prefix}<space/>
+      <container *if="len(recipe_result_type_keys) eq 0">
+        <&c>Der PoolCrafter bei <&4>{x} {y} {z}</> konnte keine übereinstimmenden Rezepte finden!
+      </container>
+      <container *else>
+        <&7>Der PoolCrafter bei <&a>{x} {y} {z}</> nutzt<space/>
+        <container *if="len(recipe_result_type_keys) eq 1">
+          das folgende übereinstimmende Rezept:<space/>
+        </container>
+        <container *else>
+          die folgenden übereinstimmenden Rezepte (<&a>{len(recipe_result_type_keys)}</>):<space/>
+        </container>
+        <&a *for-key="recipe_result_type_keys" *for-separator={,<space/>}><translate [key] /></>
+        .
+      </container>
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'

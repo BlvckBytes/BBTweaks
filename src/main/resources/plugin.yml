@@ -127,6 +127,8 @@ permissions:
     description: 'Use the showcase mechanic'
   bbtweaks.mechanic.item-notifier:
     description: 'Use the item-notifier mechanic'
+  bbtweaks.mechanic.pool-crafter:
+    description: 'Use the pool-crafter mechanic'
   bbtweaks.markers:
     description: 'Browse all available markers'
   bbtweaks.setmarker:

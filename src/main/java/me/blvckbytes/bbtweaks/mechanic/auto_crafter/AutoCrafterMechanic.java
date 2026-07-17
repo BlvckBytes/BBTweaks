@@ -121,6 +121,15 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
     return Collections.unmodifiableList(cachedRecipes);
   }
 
+  @Override
+  public @Nullable Material getEmptyTypeAfterUse(Material ingredient) {
+    return switch (ingredient) {
+      case WATER_BUCKET, LAVA_BUCKET, MILK_BUCKET -> Material.BUCKET;
+      case HONEY_BOTTLE -> Material.GLASS_BOTTLE;
+      default -> null;
+    };
+  }
+
   @EventHandler
   public void onCrafterCraft(CrafterCraftEvent event) {
     var crafter = event.getBlock();

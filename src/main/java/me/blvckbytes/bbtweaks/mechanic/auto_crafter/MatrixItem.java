@@ -9,7 +9,7 @@ public class MatrixItem implements MatrixContent {
 
   private final @Nullable ItemStack itemStack;
 
-  public MatrixItem(@Nullable ItemStack itemStack) {
+  private MatrixItem(@Nullable ItemStack itemStack) {
     this.itemStack = itemStack;
   }
 

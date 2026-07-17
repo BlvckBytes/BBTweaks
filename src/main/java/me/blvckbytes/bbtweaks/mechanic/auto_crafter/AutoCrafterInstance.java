@@ -5,13 +5,13 @@ import me.blvckbytes.bbtweaks.util.BlockUtil;
 import me.blvckbytes.bbtweaks.util.ItemUtil;
 import me.blvckbytes.bbtweaks.util.SimulatingAddOnlyInventory;
 import me.blvckbytes.bbtweaks.util.SlotItemAddition;
-import org.bukkit.Material;
 import org.bukkit.block.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class AutoCrafterInstance extends SISOInstance {
 
@@ -140,46 +140,14 @@ public class AutoCrafterInstance extends SISOInstance {
       if (matrixItem == null)
         continue;
 
-      var typeAfterUse = switch (matrixItem.getType()) {
-        case WATER_BUCKET, LAVA_BUCKET, MILK_BUCKET -> Material.BUCKET;
-        case HONEY_BOTTLE -> Material.GLASS_BOTTLE;
-        default -> null;
-      };
+      var typeAfterUse = recipeCache.getEmptyTypeAfterUse(matrixItem.getType());
 
       if (typeAfterUse != null)
         recipeResultItems.add(new ItemStack(typeAfterUse, 1));
     }
 
-    // If a container is attached, crafting becomes a transaction - either all results fit, or we stall.
-    if (outputInventory != null) {
-      var additions = new ArrayList<SlotItemAddition>();
-
-      var simulatingInventory = new SimulatingAddOnlyInventory(
-        outputInventory,
-        (slot, wasVacant, addedItem, addedAmount, stackSizeOverride) -> additions.add(new SlotItemAddition(slot, wasVacant, addedItem, addedAmount, stackSizeOverride)),
-        null
-      );
-
-      for (var result : recipeResultItems) {
-        var amountToAdd = result.getAmount();
-        var addedAmount = simulatingInventory.addItemAndGetAddedAmount(result, amountToAdd);
-
-        // Stall crafting if the results have no more space.
-        if (addedAmount < amountToAdd)
-          return;
-      }
-
-      for (var addition : additions) {
-        // Theoretically unreachable, if nobody modified the inventory in the mean-time.
-        if (!addition.performIfCanFit(outputInventory))
-          dropItem(outputBlock, addition.makeStack());
-      }
-    }
-
-    else {
-      for (var result : recipeResultItems)
-        dropItem(outputBlock, result);
-    }
+    if (tryStoreOrDropAndGetIfNoSpace(outputBlock, outputInventory, recipeResultItems))
+      return;
 
     for (int index = 0; index < MATRIX_SIZE; index++) {
       var matrixItem = crafterInventory.getItem(index);
@@ -196,7 +164,47 @@ public class AutoCrafterInstance extends SISOInstance {
     }
   }
 
-  private void dropItem(Block outputBlock, ItemStack item) {
+  public static boolean tryStoreOrDropAndGetIfNoSpace(
+    Block outputBlock,
+    @Nullable Inventory outputInventory,
+    List<ItemStack> recipeResultItems
+  ) {
+    if (outputInventory == null) {
+      for (var result : recipeResultItems)
+        dropItem(outputBlock, result);
+
+      return false;
+    }
+
+    // If a container is attached, crafting becomes a transaction - either all results fit, or we stall.
+
+    var additions = new ArrayList<SlotItemAddition>();
+
+    var simulatingInventory = new SimulatingAddOnlyInventory(
+      outputInventory,
+      (slot, wasVacant, addedItem, addedAmount, stackSizeOverride) -> additions.add(new SlotItemAddition(slot, wasVacant, addedItem, addedAmount, stackSizeOverride)),
+      null
+    );
+
+    for (var result : recipeResultItems) {
+      var amountToAdd = result.getAmount();
+      var addedAmount = simulatingInventory.addItemAndGetAddedAmount(result, amountToAdd);
+
+      // Stall crafting if the results have no more space.
+      if (addedAmount < amountToAdd)
+        return true;
+    }
+
+    for (var addition : additions) {
+      // Theoretically unreachable, if nobody modified the inventory in the mean-time.
+      if (!addition.performIfCanFit(outputInventory))
+        dropItem(outputBlock, addition.makeStack());
+    }
+
+    return false;
+  }
+
+  private static void dropItem(Block outputBlock, ItemStack item) {
     var world = outputBlock.getWorld();
     var location = outputBlock.getLocation().add(.5, .5, .5);
     world.dropItem(location, item);

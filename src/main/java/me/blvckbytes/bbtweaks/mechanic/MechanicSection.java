@@ -14,6 +14,7 @@ import me.blvckbytes.bbtweaks.mechanic.item_notifier.ItemNotifierSection;
 import me.blvckbytes.bbtweaks.mechanic.lever_array.LeverArraySection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.config.MagnetSection;
 import me.blvckbytes.bbtweaks.mechanic.planter.PlanterSection;
+import me.blvckbytes.bbtweaks.mechanic.pool_crafter.PoolCrafterSection;
 import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderSection;
 import me.blvckbytes.bbtweaks.mechanic.quick_unload.QuickUnloadSection;
 import me.blvckbytes.bbtweaks.mechanic.showcase.ShowcaseSection;
@@ -37,6 +38,7 @@ public class MechanicSection extends ConfigSection {
   public AutoCrafterSection autoCrafter;
   public ShowcaseSection showcase;
   public ItemNotifierSection itemNotifier;
+  public PoolCrafterSection poolCrafter;
 
   public ComponentMarkup noWallSign;
 

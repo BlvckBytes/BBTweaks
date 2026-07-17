@@ -1,13 +1,11 @@
 package me.blvckbytes.bbtweaks.mechanic.auto_crafter;
 
-import org.bukkit.NamespacedKey;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 public class CachedShapedRecipe implements CachedRecipe {
 
@@ -17,8 +15,7 @@ public class CachedShapedRecipe implements CachedRecipe {
   public final boolean horizontallyAsymmetrical;
 
   private final RecipeChoice.MaterialChoice[][] choiceMatrix;
-
-  private final NamespacedKey key;
+  private final List<RecipeChoice.MaterialChoice> allChoices;
 
   public CachedShapedRecipe(
     ItemStack result,
@@ -26,14 +23,14 @@ public class CachedShapedRecipe implements CachedRecipe {
     int height,
     boolean horizontallyAsymmetrical,
     RecipeChoice.MaterialChoice[][] choiceMatrix,
-    NamespacedKey key
+    List<RecipeChoice.MaterialChoice> allChoices
   ) {
     this.result = result;
     this.width = width;
     this.height = height;
     this.horizontallyAsymmetrical = horizontallyAsymmetrical;
     this.choiceMatrix = choiceMatrix;
-    this.key = key;
+    this.allChoices = allChoices;
   }
 
   public static @Nullable CachedShapedRecipe createIfValid(ShapedRecipe recipe) {
@@ -51,6 +48,7 @@ public class CachedShapedRecipe implements CachedRecipe {
 
     var choiceMap = recipe.getChoiceMap();
     var choiceMatrix = new RecipeChoice.MaterialChoice[height][width];
+    var allChoices = new ArrayList<RecipeChoice.MaterialChoice>();
 
     for (var rowIndex = 0; rowIndex < shapeLines.length; ++rowIndex) {
       var columnChars = shapeLines[rowIndex].toCharArray();
@@ -72,8 +70,12 @@ public class CachedShapedRecipe implements CachedRecipe {
           return null;
 
         choiceMatrix[rowIndex][columnIndex] = materialChoice;
+        allChoices.add(materialChoice);
       }
     }
+
+    if (allChoices.isEmpty())
+      return null;
 
     var horizontallyAsymmetrical = false;
 
@@ -86,17 +88,19 @@ public class CachedShapedRecipe implements CachedRecipe {
       }
     }
 
-    return new CachedShapedRecipe(recipe.getResult(), width, height, horizontallyAsymmetrical, choiceMatrix, recipe.getKey());
+    return new CachedShapedRecipe(
+      recipe.getResult(),
+      width,
+      height,
+      horizontallyAsymmetrical,
+      choiceMatrix,
+      Collections.unmodifiableList(allChoices)
+    );
   }
 
   @Override
   public ItemStack getResultCopy() {
     return new ItemStack(result);
-  }
-
-  @Override
-  public NamespacedKey getKey() {
-    return key;
   }
 
   @Override
@@ -114,6 +118,11 @@ public class CachedShapedRecipe implements CachedRecipe {
     }
 
     return false;
+  }
+
+  @Override
+  public List<RecipeChoice.MaterialChoice> getChoicesForAllSlots() {
+    return allChoices;
   }
 
   private boolean doesRecipeMatchAtOffset(
