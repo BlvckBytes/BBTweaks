@@ -92,9 +92,6 @@ public class PoolCrafterInstance extends SISOInstance {
         break;
     }
 
-    if (inputInventories.isEmpty())
-      return true;
-
     if (!(mountBlock.getState(false) instanceof Container dropperContainer))
       return false;
 
@@ -124,6 +121,9 @@ public class PoolCrafterInstance extends SISOInstance {
     tryRecomputeCachedRecipes(matrixContents);
 
     if (cachedRecipes.isEmpty())
+      return;
+
+    if (inputInventories.isEmpty())
       return;
 
     var inputItemsByMaterial = new EnumMap<Material, List<InputItem>>(Material.class);
