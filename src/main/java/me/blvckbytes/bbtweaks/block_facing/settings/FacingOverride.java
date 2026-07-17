@@ -8,6 +8,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 public enum FacingOverride implements MatchableEnum {
   // NOTE: The ordinal of this enum is used as the main identifier!
@@ -19,6 +20,9 @@ public enum FacingOverride implements MatchableEnum {
   DOWN,
   IN_LOOKING_DIRECTION,
   AGAINST_LOOKING_DIRECTION,
+  RANDOM_UP_DOWN,
+  RANDOM_CARDINAL,
+  RANDOM_ALL,
   ;
 
   public static List<FacingOverride> ALL_VALUES = List.of(values());
@@ -26,6 +30,19 @@ public enum FacingOverride implements MatchableEnum {
   public static final FacingOverride DEFAULT_VALUE = IN_LOOKING_DIRECTION;
 
   public static final EnumMatcher<FacingOverride> matcher = new EnumMatcher<>(values());
+
+  private static final BlockFace[] UP_DOWN_FACES = {
+    BlockFace.UP, BlockFace.DOWN
+  };
+
+  private static final BlockFace[] CARDINAL_FACES = {
+    BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
+  };
+
+  private static final BlockFace[] ALL_FACES = {
+    BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST,
+    BlockFace.UP, BlockFace.DOWN
+  };
 
   public BlockFace getFace(Player player) {
     return switch (this) {
@@ -37,6 +54,9 @@ public enum FacingOverride implements MatchableEnum {
       case DOWN -> BlockFace.DOWN;
       case IN_LOOKING_DIRECTION -> determineLookingDirection(player);
       case AGAINST_LOOKING_DIRECTION -> determineLookingDirection(player).getOppositeFace();
+      case RANDOM_UP_DOWN -> UP_DOWN_FACES[ThreadLocalRandom.current().nextInt(UP_DOWN_FACES.length)];
+      case RANDOM_CARDINAL -> CARDINAL_FACES[ThreadLocalRandom.current().nextInt(CARDINAL_FACES.length)];
+      case RANDOM_ALL -> ALL_FACES[ThreadLocalRandom.current().nextInt(ALL_FACES.length)];
     };
   }
 

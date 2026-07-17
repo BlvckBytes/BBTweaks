@@ -2640,14 +2640,10 @@ blockFacing:
   playersOnly: '{lut.block_facing_prefix} <&c>Dieser Befehl ist nur für Spieler zugänglich!'
   noPermission: '{lut.block_facing_prefix} <&c>Dir fehlen die nötigen Rechte um diese Funktion benutzen zu können!'
   actionUsage: '{lut.block_facing_prefix} <&c>Benutzung: /{label} \<<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>>'
-  modifyPlacedBlocksNowEnabled: '{lut.block_facing_prefix} <&7>Das Ausrichten beim Setzen von Blöcken ist nun <&a>aktiviert</>.'
-  modifyPlacedBlocksAlreadyEnabled: '{lut.block_facing_prefix} <&c>Das Ausrichten beim Setzen von Blöcken ist bereits aktiviert!'
-  modifyPlacedBlocksNowDisabled: '{lut.block_facing_prefix} <&7>Das Ausrichten beim Setzen von Blöcken ist nun <&c>deaktiviert</>.'
-  modifyPlacedBlocksAlreadyDisabled: '{lut.block_facing_prefix} <&c>Das Ausrichten beim Setzen von Blöcken ist bereits deaktiviert!'
-  modifyExistingBlocksNowEnabled: '{lut.block_facing_prefix} <&7>Das Ausrichten bereits gesetzter Blöcke durch Rechtsklick mit einem Stock in der Hand ist nun <&a>aktiviert</>.'
-  modifyExistingBlocksAlreadyEnabled: '{lut.block_facing_prefix} <&c>Das Ausrichten bereits gesetzter Blöcke durch Rechtsklick mit einem Stock in der Hand ist bereits aktiviert.'
-  modifyExistingBlocksNowDisabled: '{lut.block_facing_prefix} <&7>Das Ausrichten bereits gesetzter Blöcke durch Rechtsklick mit einem Stock in der Hand ist nun <&c>deaktiviert</>.'
-  modifyExistingBlocksAlreadyDisabled: '{lut.block_facing_prefix} <&c>Das Ausrichten bereits gesetzter Blöcke durch Rechtsklick mit einem Stock in der Hand ist bereits deaktiviert.'
+  nowEnabled: '{lut.block_facing_prefix} <&7>Die automatische Blockausrichtung ist nun <&a>aktiviert</>.'
+  alreadyEnabled: '{lut.block_facing_prefix} <&c>Die automatische Blockausrichtung ist bereits aktiviert!'
+  nowDisabled: '{lut.block_facing_prefix} <&7>Die automatische Blockausrichtung ist nun <&c>deaktiviert</>.'
+  alreadyDisabled: '{lut.block_facing_prefix} <&c>Die automatische Blockausrichtung ist bereits deaktiviert!'
   facingOverrideNowSelected: '{lut.block_facing_prefix} <&7>Die Blockausrichtung <&a>{facing}</> ist nun ausgewählt.'
   facingOverrideAlreadySelected: '{lut.block_facing_prefix} <&c>Die Blockausrichtung <&4>{facing}</> ist bereits ausgewählt!'
   facingNames:
@@ -2659,6 +2655,9 @@ blockFacing:
     DOWN: 'Unten'
     IN_LOOKING_DIRECTION: 'Blickrichtung'
     AGAINST_LOOKING_DIRECTION: 'Gegen-Blickrichtung'
+    RANDOM_UP_DOWN: 'Zufällig-Oben-Unten'
+    RANDOM_CARDINAL: 'Zufällige-Himmelsrichtung'
+    RANDOM_ALL: 'Zufällig-Alle'
   settingsDisplay:
     title: '<&8>Blockausrichtung'
     rows: 3
@@ -2667,39 +2666,25 @@ blockFacing:
         type: BLACK_STAINED_GLASS_PANE
         name: ' '
         slots: '0..last_slot'
-      modifyExistingBlocks:
+      enabled:
         slots: '17'
         name: |
           <reset>
-            <&8>» <&c><&a *use="modify_existing_blocks">Ausrichtung bestehender Blöcke</> <&8>«
-        type: '{modify_existing_blocks then "GREEN_CONCRETE" else "RED_CONCRETE"}'
+            <&8>» <&c><&a *use="enabled">{enabled then "Aktiviert" else "Deaktiviert"}</> <&8>«
+        type: '{enabled then "GREEN_CONCRETE" else "RED_CONCRETE"}'
         lore: |
           <reset>
             <br/>
             {lut.spacer}<br/>
-            <&7>Schalte die Ausrichtung bestehender Blöcke<br/>
-            durch Rechtsklick mit einem Stock in der Hand<br/>
-            ein oder aus.<br/>
+            <&7>Schaltet die Funktion um, dass Blöcke<br/>
+            automatisch beim Platzieren- sowie manuell<br/>
+            durch Klick auf bestehende Blöcke per Stock<br/>
+            ausgerichtet werden.<br/>
             {lut.spacer}<br/>
-            <&8>➥ <&e>Linksklick <&7>Umschalten<br/>
-            {lut.spacer}
-      modifyPlacedBlocks:
-        slots: '16'
-        name: |
-          <reset>
-            <&8>» <&c><&a *use="modify_placed_blocks">Ausrichtung beim Setzen</> <&8>«
-        type: '{modify_placed_blocks then "GREEN_CONCRETE" else "RED_CONCRETE"}'
-        lore: |
-          <reset>
-            <br/>
-            {lut.spacer}<br/>
-            <&7>Schalte die Ausrichtung von Blöcken beim<br/>
-            Setzen dieser ein oder aus.<br/>
-            {lut.spacer}<br/>
-            <&8>➥ <&e>Linksklick <&7>Umschalten<br/>
+            <&8>➥ <&e>Linksklick <&7>Funktion {enabled then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
       facing:
-        slots: '[1,11,19,9,12,13,14,15]'
+        slots: '[1,11,19,9,3,21,13,14,6,15,24]'
         type: '{facing_enabled then "YELLOW_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
         name: |
           <reset>

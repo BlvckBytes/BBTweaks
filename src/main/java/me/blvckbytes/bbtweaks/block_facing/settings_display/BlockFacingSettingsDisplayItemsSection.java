@@ -9,8 +9,7 @@ import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 @CSAlways
 public class BlockFacingSettingsDisplayItemsSection extends ConfigSection {
 
-  public GuiItemStackSection modifyPlacedBlocks;
-  public GuiItemStackSection modifyExistingBlocks;
+  public GuiItemStackSection enabled;
   public GuiItemStackSection facing;
   public GuiItemStackSection filler;
 

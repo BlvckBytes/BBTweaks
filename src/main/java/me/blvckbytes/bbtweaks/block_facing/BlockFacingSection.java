@@ -22,14 +22,10 @@ public class BlockFacingSection extends ConfigSection {
   public ComponentMarkup playersOnly;
   public ComponentMarkup noPermission;
   public ComponentMarkup actionUsage;
-  public ComponentMarkup modifyPlacedBlocksNowEnabled;
-  public ComponentMarkup modifyPlacedBlocksAlreadyEnabled;
-  public ComponentMarkup modifyPlacedBlocksNowDisabled;
-  public ComponentMarkup modifyPlacedBlocksAlreadyDisabled;
-  public ComponentMarkup modifyExistingBlocksNowEnabled;
-  public ComponentMarkup modifyExistingBlocksAlreadyEnabled;
-  public ComponentMarkup modifyExistingBlocksNowDisabled;
-  public ComponentMarkup modifyExistingBlocksAlreadyDisabled;
+  public ComponentMarkup nowEnabled;
+  public ComponentMarkup alreadyEnabled;
+  public ComponentMarkup nowDisabled;
+  public ComponentMarkup alreadyDisabled;
   public ComponentMarkup facingOverrideNowSelected;
   public ComponentMarkup facingOverrideAlreadySelected;
 

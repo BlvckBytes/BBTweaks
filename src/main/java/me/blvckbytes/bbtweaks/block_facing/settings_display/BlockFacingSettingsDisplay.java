@@ -36,8 +36,7 @@ public class BlockFacingSettingsDisplay extends Display<BlockFacingSettings> {
 
     config.rootSection.blockFacing.settingsDisplay.items.filler.renderInto(inventory, environment);
 
-    config.rootSection.blockFacing.settingsDisplay.items.modifyPlacedBlocks.renderInto(inventory, environment);
-    config.rootSection.blockFacing.settingsDisplay.items.modifyExistingBlocks.renderInto(inventory, environment);
+    config.rootSection.blockFacing.settingsDisplay.items.enabled.renderInto(inventory, environment);
 
     var facingItem = config.rootSection.blockFacing.settingsDisplay.items.facing;
 
@@ -75,8 +74,7 @@ public class BlockFacingSettingsDisplay extends Display<BlockFacingSettings> {
 
   private InterpretationEnvironment createEnvironment() {
     return new InterpretationEnvironment()
-      .withVariable("modify_placed_blocks", displayData.modifyPlacedBlocks)
-      .withVariable("modify_existing_blocks", displayData.modifyExistingBlocks)
+      .withVariable("enabled", displayData.enabled)
       .withVariable("is_floodgate", isFloodgate);
   }
 }

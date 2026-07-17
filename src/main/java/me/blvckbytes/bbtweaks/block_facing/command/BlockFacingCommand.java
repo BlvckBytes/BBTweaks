@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.block_facing.settings.BlockFacingSettingsStore;
+import me.blvckbytes.bbtweaks.block_facing.settings.FacingOverride;
 import me.blvckbytes.bbtweaks.block_facing.settings_display.BlockFacingSettingsDisplayHandler;
 import org.bukkit.Axis;
 import org.bukkit.Bukkit;
@@ -36,6 +37,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Stream;
 
 public class BlockFacingCommand implements CommandHandler, Listener {
 
@@ -90,6 +92,17 @@ public class BlockFacingCommand implements CommandHandler, Listener {
     var normalizedAction = CommandAction.matcher.matchFirst(args[0]);
 
     if (normalizedAction == null) {
+      var normalizedFacing = FacingOverride.matcher.matchFirst(args[0]);
+
+      if (normalizedFacing != null) {
+        settings.setFacingOverride(normalizedFacing.constant);
+
+        if (!settings.enabled)
+          settings.setEnabled(true);
+
+        return true;
+      }
+
       config.rootSection.blockFacing.actionUsage.sendMessage(
         player,
         new InterpretationEnvironment()
@@ -101,12 +114,9 @@ public class BlockFacingCommand implements CommandHandler, Listener {
     }
 
     switch (normalizedAction.constant) {
-      case PLACING_ON -> settings.setModifyPlacedBlocks(true);
-      case PLACING_OFF -> settings.setModifyPlacedBlocks(false);
-      case PLACING_TOGGLE -> settings.setModifyPlacedBlocks(null);
-      case EXISTING_ON -> settings.setModifyExistingBlocks(true);
-      case EXISTING_OFF -> settings.setModifyExistingBlocks(false);
-      case EXISTING_TOGGLE -> settings.setModifyExistingBlocks(null);
+      case ON -> settings.setEnabled(true);
+      case OFF -> settings.setEnabled(false);
+      case TOGGLE -> settings.setEnabled(null);
     }
 
     return true;
@@ -117,8 +127,12 @@ public class BlockFacingCommand implements CommandHandler, Listener {
     if (!(sender instanceof Player player) || !command.testPermission(player))
       return List.of();
 
-    if (args.length == 1)
-      return CommandAction.matcher.createCompletions(args[0]);
+    if (args.length == 1) {
+      return Stream.concat(
+        CommandAction.matcher.createCompletions(args[0]).stream(),
+        FacingOverride.matcher.createCompletions(args[0]).stream()
+      ).toList();
+    }
 
     return List.of();
   }
@@ -128,7 +142,7 @@ public class BlockFacingCommand implements CommandHandler, Listener {
     var player = event.getPlayer();
     var settings = settingsStore.access(event.getPlayer());
 
-    if (!settings.modifyPlacedBlocks)
+    if (!settings.enabled)
       return;
 
     if (settings.doesLackPermission())
@@ -164,7 +178,7 @@ public class BlockFacingCommand implements CommandHandler, Listener {
     var player = event.getPlayer();
     var settings = settingsStore.access(player);
 
-    if (!settings.modifyExistingBlocks)
+    if (!settings.enabled)
       return;
 
     if (settings.doesLackPermission())

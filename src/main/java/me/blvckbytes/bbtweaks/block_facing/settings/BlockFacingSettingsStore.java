@@ -22,7 +22,7 @@ public class BlockFacingSettingsStore implements Listener, Disableable {
 
   private final ConfigKeeper<MainSection> config;
 
-  private final NamespacedKey keyModifyPlacedBlocks, keyModifyExistingBlocks, keyFacingOverride;
+  private final NamespacedKey keyEnabled, keyFacingOverride;
 
   public BlockFacingSettingsStore(
     ConfigKeeper<MainSection> config,
@@ -32,8 +32,7 @@ public class BlockFacingSettingsStore implements Listener, Disableable {
 
     this.config = config;
 
-    this.keyModifyPlacedBlocks = new NamespacedKey(plugin, "block-facing-modify-placed-blocks");
-    this.keyModifyExistingBlocks = new NamespacedKey(plugin, "block-facing-modify-existing-blocks");
+    this.keyEnabled = new NamespacedKey(plugin, "block-facing-enabled");
     this.keyFacingOverride = new NamespacedKey(plugin, "block-facing-facing-override");
   }
 
@@ -63,8 +62,7 @@ public class BlockFacingSettingsStore implements Listener, Disableable {
   private void save(BlockFacingSettings settings) {
     var pdc = settings.player.getPersistentDataContainer();
 
-    pdc.set(keyModifyPlacedBlocks, PersistentDataType.BOOLEAN, settings.modifyPlacedBlocks);
-    pdc.set(keyModifyExistingBlocks, PersistentDataType.BOOLEAN, settings.modifyExistingBlocks);
+    pdc.set(keyEnabled, PersistentDataType.BOOLEAN, settings.enabled);
     pdc.set(keyFacingOverride, PersistentDataType.INTEGER, settings.facingOverride.ordinal());
   }
 
@@ -72,15 +70,10 @@ public class BlockFacingSettingsStore implements Listener, Disableable {
     var pdc = player.getPersistentDataContainer();
     var settings = new BlockFacingSettings(player, config);
 
-    var modifyPlacedBlocksValue = pdc.get(keyModifyPlacedBlocks, PersistentDataType.BOOLEAN);
+    var enabledValue = pdc.get(keyEnabled, PersistentDataType.BOOLEAN);
 
-    if (modifyPlacedBlocksValue != null)
-      settings.modifyPlacedBlocks = modifyPlacedBlocksValue;
-
-    var modifyExistingBlocksValue = pdc.get(keyModifyExistingBlocks, PersistentDataType.BOOLEAN);
-
-    if (modifyExistingBlocksValue != null)
-      settings.modifyExistingBlocks = modifyExistingBlocksValue;
+    if (enabledValue != null)
+      settings.enabled = enabledValue;
 
     var facingOverrideValue = pdc.get(keyFacingOverride, PersistentDataType.INTEGER);
 

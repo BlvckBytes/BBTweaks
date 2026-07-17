@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.block_facing.settings;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
@@ -11,8 +12,7 @@ public class BlockFacingSettings {
 
   private final ConfigKeeper<MainSection> config;
 
-  public boolean modifyPlacedBlocks;
-  public boolean modifyExistingBlocks;
+  public boolean enabled;
 
   public FacingOverride facingOverride;
 
@@ -30,54 +30,50 @@ public class BlockFacingSettings {
     if (player.hasPermission("bbtweaks.blockfacing"))
       return false;
 
-    modifyPlacedBlocks = false;
-    modifyExistingBlocks = false;
+    enabled = false;
     return true;
   }
 
-  public void setModifyPlacedBlocks(@Nullable Boolean value) {
-    var newValue = value == null ? !modifyPlacedBlocks : value;
+  public void setFacingOverride(FacingOverride facingOverride) {
+    if (this.facingOverride == facingOverride) {
+      config.rootSection.blockFacing.facingOverrideAlreadySelected.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("facing", FacingOverride.matcher.getNormalizedName(facingOverride))
+      );
 
-    if (newValue == modifyPlacedBlocks) {
-      if (newValue) {
-        config.rootSection.blockFacing.modifyPlacedBlocksAlreadyEnabled.sendMessage(player);
-        return;
-      }
-
-      config.rootSection.blockFacing.modifyPlacedBlocksAlreadyDisabled.sendMessage(player);
       return;
     }
 
-    modifyPlacedBlocks = newValue;
+    this.facingOverride = facingOverride;
 
-    if (newValue) {
-      config.rootSection.blockFacing.modifyPlacedBlocksNowEnabled.sendMessage(player);
-      return;
-    }
-
-    config.rootSection.blockFacing.modifyPlacedBlocksNowDisabled.sendMessage(player);
+    config.rootSection.blockFacing.facingOverrideNowSelected.sendMessage(
+      player,
+      new InterpretationEnvironment()
+        .withVariable("facing", FacingOverride.matcher.getNormalizedName(facingOverride))
+    );
   }
 
-  public void setModifyExistingBlocks(@Nullable Boolean value) {
-    var newValue = value == null ? !modifyExistingBlocks : value;
+  public void setEnabled(@Nullable Boolean value) {
+    var newValue = value == null ? !enabled : value;
 
-    if (newValue == modifyExistingBlocks) {
+    if (newValue == enabled) {
       if (newValue) {
-        config.rootSection.blockFacing.modifyExistingBlocksAlreadyEnabled.sendMessage(player);
+        config.rootSection.blockFacing.alreadyEnabled.sendMessage(player);
         return;
       }
 
-      config.rootSection.blockFacing.modifyExistingBlocksAlreadyDisabled.sendMessage(player);
+      config.rootSection.blockFacing.alreadyDisabled.sendMessage(player);
       return;
     }
 
-    modifyExistingBlocks = newValue;
+    enabled = newValue;
 
     if (newValue) {
-      config.rootSection.blockFacing.modifyExistingBlocksNowEnabled.sendMessage(player);
+      config.rootSection.blockFacing.nowEnabled.sendMessage(player);
       return;
     }
 
-    config.rootSection.blockFacing.modifyExistingBlocksNowDisabled.sendMessage(player);
+    config.rootSection.blockFacing.nowDisabled.sendMessage(player);
   }
 }
