@@ -10,7 +10,6 @@ import org.bukkit.Material;
 import org.bukkit.block.*;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -115,7 +114,7 @@ public class AutoCrafterInstance extends SISOInstance {
       return;
 
     for (var cachedRecipe : recipeCache.getRecipes()) {
-      if (!areMatrixContentsSatisfyingRecipe(matrixContents, cachedRecipe))
+      if (!cachedRecipe.areMatrixContentsSatisfyingRecipe(matrixContents, MatrixItem::new))
         continue;
 
       this.cachedRecipe = cachedRecipe;
@@ -164,7 +163,7 @@ public class AutoCrafterInstance extends SISOInstance {
 
     var didMatrixChange = cachedRecipeMatrixMsb != computeMatrixMsb(matrixContents) || cachedRecipeMatrixLsb != computeMatrixLsb(matrixContents);
 
-    if (didMatrixChange && !areMatrixContentsSatisfyingRecipe(matrixContents, cachedRecipe)) {
+    if (didMatrixChange && !cachedRecipe.areMatrixContentsSatisfyingRecipe(matrixContents, MatrixItem::new)) {
       tryRecomputeCachedRecipe(matrixContents);
 
       if (cachedRecipe == null)
@@ -241,104 +240,5 @@ public class AutoCrafterInstance extends SISOInstance {
     var world = outputBlock.getWorld();
     var location = outputBlock.getLocation().add(.5, .5, .5);
     world.dropItem(location, item);
-  }
-
-  private static boolean doesRecipeMatchAtOffset(
-    CachedShapedRecipe recipe,
-    int rowOffset, int columnOffset, boolean mirrorHorizontally,
-    @NotNull MatrixContent[] matrixContents
-  ) {
-    for (int rowIndex = 0; rowIndex < 3; ++rowIndex) {
-      for (int columnIndex = 0; columnIndex < 3; ++columnIndex) {
-        var matrixContent = matrixContents[columnIndex + rowIndex * 3];
-
-        // Recipes are always trimmed and aligned to the top left corner, i.e. (0, 0). If we now seek
-        // to slide the window of the choices-matrix, all slots prior to the offset need to be vacant.
-        if (rowIndex < rowOffset || columnIndex < columnOffset) {
-          if (matrixContent.isValid())
-            return false;
-
-          continue;
-        }
-
-        var targetColumn = columnIndex - columnOffset;
-
-        if (mirrorHorizontally)
-          targetColumn = (recipe.width - 1) - targetColumn;
-
-        var choice = recipe.getChoiceAt(rowIndex - rowOffset, targetColumn);
-
-        // The shaped recipe has a hole at this location, meaning we expect a vacant slot.
-        if (choice == null) {
-          if (matrixContent.isValid())
-            return false;
-
-          continue;
-        }
-
-        if (!matrixContent.test(choice))
-          return false;
-      }
-    }
-
-    return true;
-  }
-
-  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  private static boolean areMatrixContentsSatisfyingRecipe(ItemStack[] matrixContents, CachedRecipe cachedRecipe) {
-    var adaptedContents = new MatrixContent[matrixContents.length];
-
-    for (var index = 0; index < matrixContents.length; ++index)
-      adaptedContents[index] = new MatrixContent(matrixContents[index]);
-
-    return areMatrixContentsSatisfyingRecipe(adaptedContents, cachedRecipe);
-  }
-
-  private static boolean areMatrixContentsSatisfyingRecipe(MatrixContent[] matrixContents, CachedRecipe cachedRecipe) {
-    if (cachedRecipe instanceof CachedShapedRecipe shapedRecipe) {
-      for (int rowOffset = 0; rowOffset <= 3 - shapedRecipe.height; ++rowOffset) {
-        for (int columnOffset = 0; columnOffset <= 3 - shapedRecipe.width; ++columnOffset) {
-          if (doesRecipeMatchAtOffset(shapedRecipe, rowOffset, columnOffset, false, matrixContents))
-            return true;
-
-          if (shapedRecipe.horizontallyAsymmetrical) {
-            if (doesRecipeMatchAtOffset(shapedRecipe, rowOffset, columnOffset, true, matrixContents))
-              return true;
-          }
-        }
-      }
-
-      return false;
-    }
-
-    if (cachedRecipe instanceof CachedShapelessRecipe shapelessRecipe) {
-      var remainingIngredients = new ArrayList<>(shapelessRecipe.getChoiceList());
-
-      // If it's empty already, something is wrong with the recipe.
-      if (remainingIngredients.isEmpty())
-        return false;
-
-      for (var matrixContent : matrixContents) {
-        if (!matrixContent.isValid())
-          continue;
-
-        // No more required ingredients left, but there are still additional items in the crafting-matrix => mismatch.
-        if (remainingIngredients.isEmpty())
-          return false;
-
-        for (var iterator = remainingIngredients.iterator(); iterator.hasNext();) {
-          var requiredChoice = iterator.next();
-
-          if (matrixContent.test(requiredChoice)) {
-            iterator.remove();
-            break;
-          }
-        }
-      }
-
-      return remainingIngredients.isEmpty();
-    }
-
-    return false;
   }
 }

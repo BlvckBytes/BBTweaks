@@ -8,6 +8,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.function.Function;
 
 public class CachedShapedRecipe implements CachedRecipe {
 
@@ -99,7 +100,65 @@ public class CachedShapedRecipe implements CachedRecipe {
     return key;
   }
 
-  public @Nullable RecipeChoice.MaterialChoice getChoiceAt(int row, int column) {
+  @Override
+  public <T> boolean areMatrixContentsSatisfyingRecipe(T[] matrixContents, Function<T, MatrixContent> contentMapper) {
+    for (int rowOffset = 0; rowOffset <= 3 - height; ++rowOffset) {
+      for (int columnOffset = 0; columnOffset <= 3 - width; ++columnOffset) {
+        if (doesRecipeMatchAtOffset(rowOffset, columnOffset, false, matrixContents, contentMapper))
+          return true;
+
+        if (horizontallyAsymmetrical) {
+          if (doesRecipeMatchAtOffset(rowOffset, columnOffset, true, matrixContents, contentMapper))
+            return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
+  private <T> boolean doesRecipeMatchAtOffset(
+    int rowOffset, int columnOffset, boolean mirrorHorizontally,
+    T[] matrixContents, Function<T, MatrixContent> contentMapper
+  ) {
+    for (int rowIndex = 0; rowIndex < 3; ++rowIndex) {
+      for (int columnIndex = 0; columnIndex < 3; ++columnIndex) {
+        var matrixContent = matrixContents[columnIndex + rowIndex * 3];
+        var mappedMatrixContent = contentMapper.apply(matrixContent);
+
+        // Recipes are always trimmed and aligned to the top left corner, i.e. (0, 0). If we now seek
+        // to slide the window of the choices-matrix, all slots prior to the offset need to be vacant.
+        if (rowIndex < rowOffset || columnIndex < columnOffset) {
+          if (mappedMatrixContent.isPresent())
+            return false;
+
+          continue;
+        }
+
+        var targetColumn = columnIndex - columnOffset;
+
+        if (mirrorHorizontally)
+          targetColumn = (width - 1) - targetColumn;
+
+        var choice = getChoiceAt(rowIndex - rowOffset, targetColumn);
+
+        // The shaped recipe has a hole at this location, meaning we expect a vacant slot.
+        if (choice == null) {
+          if (mappedMatrixContent.isPresent())
+            return false;
+
+          continue;
+        }
+
+        if (!mappedMatrixContent.test(choice))
+          return false;
+      }
+    }
+
+    return true;
+  }
+
+  private @Nullable RecipeChoice.MaterialChoice getChoiceAt(int row, int column) {
     if (row < 0 || column < 0 || row >= choiceMatrix.length)
       return null;
 

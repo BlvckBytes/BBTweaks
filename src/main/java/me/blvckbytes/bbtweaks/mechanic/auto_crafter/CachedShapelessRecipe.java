@@ -7,8 +7,8 @@ import org.bukkit.inventory.ShapelessRecipe;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 public class CachedShapelessRecipe implements CachedRecipe {
 
@@ -55,7 +55,34 @@ public class CachedShapelessRecipe implements CachedRecipe {
     return key;
   }
 
-  public List<RecipeChoice.MaterialChoice> getChoiceList() {
-    return Collections.unmodifiableList(choiceList);
+  @Override
+  public <T> boolean areMatrixContentsSatisfyingRecipe(T[] matrixContents, Function<T, MatrixContent> contentMapper) {
+    var remainingIngredients = new ArrayList<>(choiceList);
+
+    // If it's empty already, something is wrong with the recipe.
+    if (remainingIngredients.isEmpty())
+      return false;
+
+    for (var matrixContent : matrixContents) {
+      var mappedMatrixContent = contentMapper.apply(matrixContent);
+
+      if (!mappedMatrixContent.isPresent())
+        continue;
+
+      // No more required ingredients left, but there are still additional items in the crafting-matrix => mismatch.
+      if (remainingIngredients.isEmpty())
+        return false;
+
+      for (var iterator = remainingIngredients.iterator(); iterator.hasNext();) {
+        var requiredChoice = iterator.next();
+
+        if (mappedMatrixContent.test(requiredChoice)) {
+          iterator.remove();
+          break;
+        }
+      }
+    }
+
+    return remainingIngredients.isEmpty();
   }
 }
