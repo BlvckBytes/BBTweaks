@@ -1,37 +1,26 @@
 package me.blvckbytes.bbtweaks.mechanic.auto_crafter;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
-import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
-import me.blvckbytes.bbtweaks.mechanic.common.FlagEnum;
-import me.blvckbytes.bbtweaks.mechanic.common.UnknownFlagException;
 import me.blvckbytes.bbtweaks.util.BlockUtil;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Tag;
 import org.bukkit.block.Crafter;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.CrafterCraftEvent;
-import org.bukkit.event.inventory.InventoryCloseEvent;
-import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.RecipeChoice;
 import org.bukkit.inventory.ShapedRecipe;
 import org.bukkit.inventory.ShapelessRecipe;
-import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.logging.Level;
 
@@ -42,25 +31,14 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
       throw new IllegalStateException("There are more than 4K materials, which exceeds our expectation - cannot bit-pack the matrix into two longs without a loss of information!");
   }
 
-  private static final RecipeChoice.MaterialChoice MATERIALS_PLANKS = new RecipeChoice.MaterialChoice(Tag.PLANKS);
-  private static final RecipeChoice.MaterialChoice MATERIALS_WOODEN_SLABS = new RecipeChoice.MaterialChoice(Tag.WOODEN_SLABS);
-  private static final RecipeChoice.MaterialChoice MATERIALS_WOOL = new RecipeChoice.MaterialChoice(Tag.WOOL);
-  private static final RecipeChoice.MaterialChoice MATERIALS_STONE = new RecipeChoice.MaterialChoice(Tag.ITEMS_STONE_CRAFTING_MATERIALS);
-
-  private static final int FLAGS_LINE = 2;
-
   private final List<CachedRecipe> cachedRecipes = new ArrayList<>();
 
   private final CacheByPosition<AutoCrafterInstance> instanceByCrafterPosition;
-
-  private final NamespacedKey keyMetaRecipe;
 
   public AutoCrafterMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
     super(plugin, config);
 
     this.instanceByCrafterPosition = new CacheByPosition<>();
-
-    this.keyMetaRecipe = new NamespacedKey(plugin, "auto-crafter-meta-recipe");
 
     // Let's give other plugins plenty of time to register additional recipes.
     Bukkit.getScheduler().runTaskLater(plugin, this::updateRecipeCache, 20L);
@@ -68,39 +46,7 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
 
   @Override
   public boolean onInstanceClick(Player player, AutoCrafterInstance instance, boolean wasLeftClick) {
-    if (!player.isSneaking())
-      return false;
-
-    if (!instance.hasFlag(AutoCrafterFlag.ENABLE_META_RECIPE))
-      return false;
-
-    var sign = instance.getSign();
-    var environment = getSignEnvironment(sign);
-
-    if (!canEditSign(player, sign)) {
-      config.rootSection.mechanic.autoCrafter.cannotEditSign.sendMessage(player, environment);
-      return true;
-    }
-
-    if (wasLeftClick) {
-      config.rootSection.mechanic.autoCrafter.matchedMetaRecipes.sendMessage(
-        player,
-        environment
-          .withVariable("recipes", instance.metaRecipes.stream().map(recipe -> recipe.getKey().getKey()).toList())
-      );
-
-      return true;
-    }
-
-    if (!instance.metaRecipeInventory.getViewers().isEmpty()) {
-      config.rootSection.mechanic.autoCrafter.anotherIsEditing.sendMessage(player, environment);
-      return true;
-    }
-
-    player.openInventory(instance.metaRecipeInventory);
-    config.rootSection.mechanic.autoCrafter.metaRecipeInventoryOpening.sendMessage(player, environment);
-
-    return true;
+    return false;
   }
 
   @Override
@@ -115,43 +61,7 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
       return null;
     }
 
-    EnumSet<AutoCrafterFlag> flags;
-
-    try {
-      flags = FlagEnum.parse(AutoCrafterFlag.class, SignUtil.getPlainTextLine(sign, FLAGS_LINE));
-    } catch (UnknownFlagException exception) {
-      if (creator != null)
-        config.rootSection.mechanic.autoCrafter.unknownFlag.sendMessage(creator, exception.makeEnvironment());
-
-      return null;
-    }
-
-    var metaRecipeInventoryHolder = new MetaRecipeInventoryHolder();
-
-    var metaRecipeInventory = Bukkit.createInventory(
-      metaRecipeInventoryHolder,
-      InventoryType.DROPPER,
-      config.rootSection.mechanic.autoCrafter.metaRecipeInventoryTitle.interpret(SlotType.INVENTORY_TITLE, null).getFirst()
-    );
-
-    var metaRecipeBytes = sign.getPersistentDataContainer().get(keyMetaRecipe, PersistentDataType.BYTE_ARRAY);
-
-    if (metaRecipeBytes != null) {
-      try {
-        var metaRecipeItems = ItemStack.deserializeItemsFromBytes(metaRecipeBytes);
-
-        if (metaRecipeItems.length != AutoCrafterInstance.MATRIX_SIZE)
-          throw new IllegalStateException("Unexpected length: " + metaRecipeItems.length);
-
-        metaRecipeInventory.setContents(metaRecipeItems);
-      } catch (Throwable e) {
-        plugin.getLogger().log(Level.SEVERE, "An error occurred while trying to parse the meta-recipe at " + sign.getX() + " " + sign.getY() + " " + sign.getZ() + " " + sign.getWorld().getName(), e);
-      }
-    }
-
-    var instance = new AutoCrafterInstance(sign, metaRecipeInventory, flags, this);
-
-    metaRecipeInventoryHolder.instance = instance;
+    var instance = new AutoCrafterInstance(sign, this);
 
     var crafter = instance.getMountBlock();
 
@@ -211,23 +121,6 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
     return Collections.unmodifiableList(cachedRecipes);
   }
 
-  @Override
-  public RecipeChoice.MaterialChoice expandMetaMaterial(Material material) {
-    if (Tag.PLANKS.isTagged(material))
-      return MATERIALS_PLANKS;
-
-    if (Tag.WOODEN_SLABS.isTagged(material))
-      return MATERIALS_WOODEN_SLABS;
-
-    if (Tag.WOOL.isTagged(material))
-      return MATERIALS_WOOL;
-
-    if (Tag.ITEMS_STONE_CRAFTING_MATERIALS.isTagged(material))
-      return MATERIALS_STONE;
-
-    return new RecipeChoice.MaterialChoice(material);
-  }
-
   @EventHandler
   public void onCrafterCraft(CrafterCraftEvent event) {
     var crafter = event.getBlock();
@@ -235,31 +128,6 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
 
     if (crafterInstance != null)
       event.setCancelled(true);
-  }
-
-  @EventHandler
-  public void onInventoryClose(InventoryCloseEvent event) {
-    if (!(event.getPlayer() instanceof Player player))
-      return;
-
-    if (!(event.getInventory().getHolder(false) instanceof MetaRecipeInventoryHolder metaRecipeInventoryHolder))
-      return;
-
-    var crafterInstance = metaRecipeInventoryHolder.instance;
-
-    if (crafterInstance == null)
-      return;
-
-    var sign = crafterInstance.getSign();
-
-    var metaRecipeBytes = ItemStack.serializeItemsAsBytes(crafterInstance.metaRecipeInventory.getContents());
-
-    sign.getPersistentDataContainer().set(keyMetaRecipe, PersistentDataType.BYTE_ARRAY, metaRecipeBytes);
-    sign.update(true, false);
-
-    reloadInstanceBySign(sign);
-
-    config.rootSection.mechanic.autoCrafter.metaRecipeInventorySaved.sendMessage(player, getSignEnvironment(sign));
   }
 
   private void updateRecipeCache() {

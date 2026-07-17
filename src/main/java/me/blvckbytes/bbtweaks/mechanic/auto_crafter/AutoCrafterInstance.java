@@ -14,17 +14,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
 
 public class AutoCrafterInstance extends SISOInstance {
 
-  public static final int MATRIX_SIZE = 9;
+  private static final int MATRIX_SIZE = 9;
 
-  public final Inventory metaRecipeInventory;
-  public final List<CachedRecipe> metaRecipes;
-
-  private final EnumSet<AutoCrafterFlag> flags;
   private final RecipeCache recipeCache;
 
   private @Nullable CachedRecipe cachedRecipe;
@@ -32,42 +26,10 @@ public class AutoCrafterInstance extends SISOInstance {
   private long cachedRecipeMatrixLsb;
   private TriState wasMatrixInvalid = TriState.NULL;
 
-  public AutoCrafterInstance(
-    Sign sign,
-    Inventory metaRecipeInventory,
-    EnumSet<AutoCrafterFlag> flags,
-    RecipeCache recipeCache
-  ) {
+  public AutoCrafterInstance(Sign sign, RecipeCache recipeCache) {
     super(sign);
 
-    this.metaRecipes = new ArrayList<>();
-
-    if (flags.contains(AutoCrafterFlag.ENABLE_META_RECIPE)) {
-      var metaMatrixContents = new MatrixContent[MATRIX_SIZE];
-
-      for (var index = 0; index < metaMatrixContents.length; ++index) {
-        var currentItem = metaRecipeInventory.getItem(index);
-
-        metaMatrixContents[index] = new MatrixContent(
-          ItemUtil.isStackValid(currentItem)
-            ? recipeCache.expandMetaMaterial(currentItem.getType())
-            : null
-        );
-      }
-
-      for (var cachedRecipe : recipeCache.getRecipes()) {
-        if (areMatrixContentsSatisfyingRecipe(metaMatrixContents, cachedRecipe))
-          this.metaRecipes.add(cachedRecipe);
-      }
-    }
-
-    this.metaRecipeInventory = metaRecipeInventory;
-    this.flags = flags;
     this.recipeCache = recipeCache;
-  }
-
-  public boolean hasFlag(AutoCrafterFlag flag) {
-    return flags.contains(flag);
   }
 
   @Override
@@ -171,10 +133,6 @@ public class AutoCrafterInstance extends SISOInstance {
 
     var hasVacantSlots = false;
     var nonDisabledSlotCount = 0;
-    var totalAmount = 0;
-
-    var maxItemAmount = -1;
-    var maxAmountSlot = -1;
 
     for (var matrixSlot = 0; matrixSlot < matrixContents.length; ++matrixSlot) {
       if (crafter.isSlotDisabled(matrixSlot))
@@ -191,58 +149,12 @@ public class AutoCrafterInstance extends SISOInstance {
 
       var itemAmount = matrixItem.getAmount();
 
-      if (itemAmount > maxItemAmount) {
-        maxItemAmount = itemAmount;
-        maxAmountSlot = matrixSlot;
-      }
-
-      totalAmount += itemAmount;
-
-      if (!flags.contains(AutoCrafterFlag.USE_SLOT_STATE_AS_PATTERN)) {
-        if (itemAmount < 2)
-          return;
-      }
+      if (itemAmount < 2)
+        return;
     }
 
-    if (nonDisabledSlotCount == 0)
+    if (nonDisabledSlotCount == 0 || hasVacantSlots)
       return;
-
-    if (hasVacantSlots) {
-      // We always expect there to be an item in a non-disabled slot before crafting,
-      // as to avoid producing undesired results with other partial recipes.
-      if (!flags.contains(AutoCrafterFlag.USE_SLOT_STATE_AS_PATTERN))
-        return;
-
-      // Try to redistribute currently available items as to avoid stalling.
-
-      // Not enough to redistribute.
-      if (totalAmount < nonDisabledSlotCount || maxAmountSlot < 0)
-        return;
-
-      // Distribute the biggest stack into the inventory.
-
-      var maxAmountItem = crafterInventory.getItem(maxAmountSlot);
-
-      if (!ItemUtil.isStackValid(maxAmountItem))
-        return;
-
-      crafterInventory.setItem(maxAmountSlot, null);
-
-      var remainingAmount = distributeIntoCrafterToMakeEvenAndGetRemainingAmount(crafter, maxAmountItem);
-
-      // Unreachable, seeing how we're just redistributing one slot at a time, and it should always
-      // fit back into itself in the worst case, plus we've ensured that there are other vacant ones.
-      if (remainingAmount > 0) {
-        var remainderStack = new ItemStack(maxAmountItem);
-        remainderStack.setAmount(remainingAmount);
-        var crafterBlock = crafter.getBlock();
-        crafterBlock.getWorld().dropItem(crafterBlock.getLocation(), remainderStack);
-      }
-
-      // Always retry after redistribution, as it may be necessary to carry out multiple times.
-      // This way, we also re-fetch the matrix-contents and re-evaluate the rules above.
-      return;
-    }
 
     if (cachedRecipe == null)
       tryRecomputeCachedRecipe(matrixContents);
@@ -428,107 +340,5 @@ public class AutoCrafterInstance extends SISOInstance {
     }
 
     return false;
-  }
-
-  // ================================================================================
-  // Forked from my CB3 pipe-implementation - not ideal, as it's a lot of code-duplication.
-
-  // We want to have bottles, buckets, etc. stack as efficiently as possible, such that
-  // the crafter can operate at its full speed without having to await another pipe-refill.
-  private static final int CRAFTER_MAX_STACK_SIZE = 64;
-
-  private static int distributeIntoCrafterToMakeEvenAndGetRemainingAmount(Crafter crafter, ItemStack itemToAdd) {
-    var inventory = crafter.getInventory();
-    var inventorySize = inventory.getSize();
-
-    var spaceByIndex = new int[inventorySize];
-    var addedAmountByIndex = new int[inventorySize];
-
-    for (var index = 0; index < inventorySize; ++index) {
-      if (crafter.isSlotDisabled(index))
-        continue;
-
-      var currentItem = inventory.getItem(index);
-
-      if (!ItemUtil.isStackValid(currentItem)) {
-        spaceByIndex[index] = CRAFTER_MAX_STACK_SIZE;
-        continue;
-      }
-
-      if (!itemToAdd.isSimilar(currentItem))
-        continue;
-
-      var currentAmount = currentItem.getAmount();
-      var currentSpace = CRAFTER_MAX_STACK_SIZE - currentAmount;
-
-      if (currentSpace <= 0)
-        continue;
-
-      spaceByIndex[index] = currentSpace;
-    }
-
-    var simulatedRemainingAmount = itemToAdd.getAmount();
-
-    while (simulatedRemainingAmount > 0) {
-      var maxSpace = 0;
-      var maxSpaceIndex = -1;
-
-      for (var index = 0; index < spaceByIndex.length; ++index) {
-        var currentSpace = spaceByIndex[index];
-
-        if (currentSpace <= 0)
-          continue;
-
-        if (maxSpaceIndex < 0 || currentSpace > maxSpace) {
-          maxSpaceIndex = index;
-          maxSpace = currentSpace;
-        }
-      }
-
-      if (maxSpaceIndex < 0)
-        break;
-
-      ++addedAmountByIndex[maxSpaceIndex];
-      --spaceByIndex[maxSpaceIndex];
-      --simulatedRemainingAmount;
-    }
-
-    var actualRemainingAmount = itemToAdd.getAmount();
-
-    for (var index = 0; index < addedAmountByIndex.length; ++index) {
-      var simulatedAddedAmount = addedAmountByIndex[index];
-
-      if (simulatedAddedAmount <= 0)
-        continue;
-
-      var currentItem = inventory.getItem(index);
-
-      if (!ItemUtil.isStackValid(currentItem)) {
-        var newItem = new ItemStack(itemToAdd);
-        newItem.setAmount(simulatedAddedAmount);
-        inventory.setItem(index, newItem);
-        actualRemainingAmount -= simulatedAddedAmount;
-        continue;
-      }
-
-      if (!currentItem.isSimilar(itemToAdd))
-        continue;
-
-      var remainingSpace = CRAFTER_MAX_STACK_SIZE - currentItem.getAmount();
-
-      if (remainingSpace <= 0)
-        return 0;
-
-      var addedAmount = Math.min(remainingSpace, simulatedAddedAmount);
-
-      currentItem.setAmount(currentItem.getAmount() + addedAmount);
-
-      actualRemainingAmount -= addedAmount;
-
-      if (actualRemainingAmount <= 0)
-        break;
-    }
-
-    return Math.max(0, actualRemainingAmount);
   }
 }
