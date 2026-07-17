@@ -16,6 +16,9 @@ public class BlockUtil {
     if (!isBlockLoaded(block))
       return false;
 
+    if (blockData == null)
+      blockData = block.getBlockData();
+
     if (blockData instanceof org.bukkit.block.data.type.Chest chest) {
       var otherChestBlock = BlockUtil.getOtherChestBlock(block, chest.getType(), chest.getFacing());
       return otherChestBlock == null || isBlockLoaded(otherChestBlock);

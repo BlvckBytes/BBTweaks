@@ -59,7 +59,7 @@ public class AutoCrafterInstance extends SISOInstance {
 
     var containerBlock = getMountBlock().getRelative(outputFace);
 
-    if (!BlockUtil.areAllContainerBlocksLoaded(containerBlock, blockData))
+    if (!BlockUtil.areAllContainerBlocksLoaded(containerBlock, null))
       return true;
 
     if (!(getMountBlock().getState(false) instanceof Crafter crafterState))

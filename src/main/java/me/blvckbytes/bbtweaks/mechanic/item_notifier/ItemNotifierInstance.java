@@ -49,7 +49,7 @@ public class ItemNotifierInstance extends SISOInstance {
 
     var block = getMountBlock();
 
-    if (!BlockUtil.areAllContainerBlocksLoaded(block, block.getBlockData()))
+    if (!BlockUtil.areAllContainerBlocksLoaded(block, null))
       return true;
 
     if (!(getMountBlock().getState(false) instanceof Container container))
