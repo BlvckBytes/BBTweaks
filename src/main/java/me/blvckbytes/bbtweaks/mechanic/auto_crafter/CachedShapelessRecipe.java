@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
 
 public class CachedShapelessRecipe implements CachedRecipe {
 
@@ -56,7 +55,7 @@ public class CachedShapelessRecipe implements CachedRecipe {
   }
 
   @Override
-  public <T> boolean areMatrixContentsSatisfyingRecipe(T[] matrixContents, Function<T, MatrixContent> contentMapper) {
+  public boolean areMatrixContentsSatisfyingRecipe(MatrixContent[] matrixContents) {
     var remainingIngredients = new ArrayList<>(choiceList);
 
     // If it's empty already, something is wrong with the recipe.
@@ -64,9 +63,7 @@ public class CachedShapelessRecipe implements CachedRecipe {
       return false;
 
     for (var matrixContent : matrixContents) {
-      var mappedMatrixContent = contentMapper.apply(matrixContent);
-
-      if (!mappedMatrixContent.isPresent())
+      if (!matrixContent.isPresent())
         continue;
 
       // No more required ingredients left, but there are still additional items in the crafting-matrix => mismatch.
@@ -76,7 +73,7 @@ public class CachedShapelessRecipe implements CachedRecipe {
       for (var iterator = remainingIngredients.iterator(); iterator.hasNext();) {
         var requiredChoice = iterator.next();
 
-        if (mappedMatrixContent.test(requiredChoice)) {
+        if (matrixContent.test(requiredChoice)) {
           iterator.remove();
           break;
         }

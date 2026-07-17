@@ -8,7 +8,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.Objects;
-import java.util.function.Function;
 
 public class CachedShapedRecipe implements CachedRecipe {
 
@@ -101,14 +100,14 @@ public class CachedShapedRecipe implements CachedRecipe {
   }
 
   @Override
-  public <T> boolean areMatrixContentsSatisfyingRecipe(T[] matrixContents, Function<T, MatrixContent> contentMapper) {
+  public boolean areMatrixContentsSatisfyingRecipe(MatrixContent[] matrixContents) {
     for (int rowOffset = 0; rowOffset <= 3 - height; ++rowOffset) {
       for (int columnOffset = 0; columnOffset <= 3 - width; ++columnOffset) {
-        if (doesRecipeMatchAtOffset(rowOffset, columnOffset, false, matrixContents, contentMapper))
+        if (doesRecipeMatchAtOffset(rowOffset, columnOffset, false, matrixContents))
           return true;
 
         if (horizontallyAsymmetrical) {
-          if (doesRecipeMatchAtOffset(rowOffset, columnOffset, true, matrixContents, contentMapper))
+          if (doesRecipeMatchAtOffset(rowOffset, columnOffset, true, matrixContents))
             return true;
         }
       }
@@ -117,19 +116,18 @@ public class CachedShapedRecipe implements CachedRecipe {
     return false;
   }
 
-  private <T> boolean doesRecipeMatchAtOffset(
+  private boolean doesRecipeMatchAtOffset(
     int rowOffset, int columnOffset, boolean mirrorHorizontally,
-    T[] matrixContents, Function<T, MatrixContent> contentMapper
+    MatrixContent[] matrixContents
   ) {
     for (int rowIndex = 0; rowIndex < 3; ++rowIndex) {
       for (int columnIndex = 0; columnIndex < 3; ++columnIndex) {
         var matrixContent = matrixContents[columnIndex + rowIndex * 3];
-        var mappedMatrixContent = contentMapper.apply(matrixContent);
 
         // Recipes are always trimmed and aligned to the top left corner, i.e. (0, 0). If we now seek
         // to slide the window of the choices-matrix, all slots prior to the offset need to be vacant.
         if (rowIndex < rowOffset || columnIndex < columnOffset) {
-          if (mappedMatrixContent.isPresent())
+          if (matrixContent.isPresent())
             return false;
 
           continue;
@@ -144,13 +142,13 @@ public class CachedShapedRecipe implements CachedRecipe {
 
         // The shaped recipe has a hole at this location, meaning we expect a vacant slot.
         if (choice == null) {
-          if (mappedMatrixContent.isPresent())
+          if (matrixContent.isPresent())
             return false;
 
           continue;
         }
 
-        if (!mappedMatrixContent.test(choice))
+        if (!matrixContent.test(choice))
           return false;
       }
     }

@@ -1,6 +1,5 @@
 package me.blvckbytes.bbtweaks.mechanic.auto_crafter;
 
-import at.blvckbytes.component_markup.util.TriState;
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.bbtweaks.util.BlockUtil;
 import me.blvckbytes.bbtweaks.util.ItemUtil;
@@ -19,16 +18,15 @@ public class AutoCrafterInstance extends SISOInstance {
   private static final int MATRIX_SIZE = 9;
 
   private final RecipeCache recipeCache;
+  private final MatrixCacheHelper matrixCacheHelper;
 
   private @Nullable CachedRecipe cachedRecipe;
-  private long cachedRecipeMatrixMsb;
-  private long cachedRecipeMatrixLsb;
-  private TriState wasMatrixInvalid = TriState.NULL;
 
   public AutoCrafterInstance(Sign sign, RecipeCache recipeCache) {
     super(sign);
 
     this.recipeCache = recipeCache;
+    this.matrixCacheHelper = new MatrixCacheHelper();
   }
 
   @Override
@@ -74,56 +72,20 @@ public class AutoCrafterInstance extends SISOInstance {
     return true;
   }
 
-  private long getSlotTypeOrdinal(ItemStack[] matrixContents, int slot) {
-    ItemStack item;
-
-    if (slot < 0 || slot >= matrixContents.length || !ItemUtil.isStackValid(item = matrixContents[slot]))
-      return Material.AIR.ordinal();
-
-    return item.getType().ordinal();
-  }
-
-  private long computeMatrixMsb(ItemStack[] matrixContents) {
-    return (
-      getSlotTypeOrdinal(matrixContents, 5)
-        | (getSlotTypeOrdinal(matrixContents, 6) << 12)
-        | (getSlotTypeOrdinal(matrixContents, 7) << (12 * 2))
-        | (getSlotTypeOrdinal(matrixContents, 8) << (12 * 3))
-    );
-  }
-
-  private long computeMatrixLsb(ItemStack[] matrixContents) {
-    return (
-      getSlotTypeOrdinal(matrixContents, 0)
-        | (getSlotTypeOrdinal(matrixContents, 1) << 12)
-        | (getSlotTypeOrdinal(matrixContents, 2) << (12 * 2))
-        | (getSlotTypeOrdinal(matrixContents, 3) << (12 * 3))
-        | (getSlotTypeOrdinal(matrixContents, 4) << (12 * 4))
-    );
-  }
-
   private void tryRecomputeCachedRecipe(ItemStack[] matrixContents) {
-    var priorRecipeMatrixMsb = this.cachedRecipeMatrixMsb;
-    var priorRecipeMatrixLsb = this.cachedRecipeMatrixLsb;
+    matrixCacheHelper.runIfMatrixChanged(matrixContents, () -> {
+      var mappedContents = MatrixItem.map(matrixContents);
 
-    this.cachedRecipeMatrixMsb = computeMatrixMsb(matrixContents);
-    this.cachedRecipeMatrixLsb = computeMatrixLsb(matrixContents);
+      for (var cachedRecipe : recipeCache.getRecipes()) {
+        if (!cachedRecipe.areMatrixContentsSatisfyingRecipe(mappedContents))
+          continue;
 
-    // Do not retry malformed matrix-constellations over and over again - remember the failure and only retry after a reconfiguration.
-    if (wasMatrixInvalid == TriState.TRUE && priorRecipeMatrixMsb == cachedRecipeMatrixMsb && priorRecipeMatrixLsb == cachedRecipeMatrixLsb)
-      return;
+        this.cachedRecipe = cachedRecipe;
+        return;
+      }
 
-    for (var cachedRecipe : recipeCache.getRecipes()) {
-      if (!cachedRecipe.areMatrixContentsSatisfyingRecipe(matrixContents, MatrixItem::new))
-        continue;
-
-      this.cachedRecipe = cachedRecipe;
-      this.wasMatrixInvalid = TriState.FALSE;
-      return;
-    }
-
-    this.cachedRecipe = null;
-    this.wasMatrixInvalid = TriState.TRUE;
+      this.cachedRecipe = null;
+    });
   }
 
   private void craft(Crafter crafter, Block outputBlock, @Nullable Inventory outputInventory) {
@@ -161,9 +123,7 @@ public class AutoCrafterInstance extends SISOInstance {
     if (cachedRecipe == null)
       return;
 
-    var didMatrixChange = cachedRecipeMatrixMsb != computeMatrixMsb(matrixContents) || cachedRecipeMatrixLsb != computeMatrixLsb(matrixContents);
-
-    if (didMatrixChange && !cachedRecipe.areMatrixContentsSatisfyingRecipe(matrixContents, MatrixItem::new)) {
+    if (matrixCacheHelper.didMatrixChange(matrixContents) && !cachedRecipe.areMatrixContentsSatisfyingRecipe(MatrixItem.map(matrixContents))) {
       tryRecomputeCachedRecipe(matrixContents);
 
       if (cachedRecipe == null)

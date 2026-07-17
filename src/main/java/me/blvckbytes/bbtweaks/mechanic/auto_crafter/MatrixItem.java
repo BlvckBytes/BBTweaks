@@ -13,6 +13,15 @@ public class MatrixItem implements MatrixContent {
     this.itemStack = itemStack;
   }
 
+  public static MatrixItem[] map(ItemStack[] matrixContents) {
+    var mappedContents = new MatrixItem[matrixContents.length];
+
+    for (var index = 0; index < mappedContents.length; ++index)
+      mappedContents[index] = new MatrixItem(matrixContents[index]);
+
+    return mappedContents;
+  }
+
   @Override
   public boolean test(RecipeChoice.MaterialChoice materialChoice) {
     if (itemStack == null)
