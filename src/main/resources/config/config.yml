@@ -2653,6 +2653,8 @@ pipes:
   maxTubeBlockCount: -1
   maxPistonBlockCount: -1
   maxCacheLoadCount: 600
+  predicates:
+    manualEditWhileInPredicateMode: '{lut.pipes_prefix} <&c>Du kannst das Schild im Prädikat-Modus nicht manuell bearbeiten!'
 
 blockFacing:
   command:

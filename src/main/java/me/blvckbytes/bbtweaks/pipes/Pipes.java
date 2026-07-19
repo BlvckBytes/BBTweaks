@@ -35,6 +35,8 @@ import java.util.logging.Level;
 
 public class Pipes implements PipesApi, Listener {
 
+  public static final String PIPE_MARKER = "[Pipe]";
+
   private static final BlockFace[] DROP_ITEM_FACES = new BlockFace[] {
     BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST,
     BlockFace.NORTH_EAST, BlockFace.NORTH_WEST, BlockFace.SOUTH_EAST, BlockFace.SOUTH_WEST,
@@ -80,7 +82,7 @@ public class Pipes implements PipesApi, Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void onSignChange(SignChangeEvent event) {
-    if (!ComponentUtil.asTrimmedText(event.line(1)).equalsIgnoreCase("[Pipe]"))
+    if (!ComponentUtil.asTrimmedText(event.line(1)).equalsIgnoreCase(PIPE_MARKER))
       return;
 
     var player = event.getPlayer();
@@ -123,7 +125,7 @@ public class Pipes implements PipesApi, Listener {
       return;
     }
 
-    event.line(1, Component.text("[Pipe]"));
+    event.line(1, Component.text(PIPE_MARKER));
     config.rootSection.pipes.signCreated.sendMessage(player);
   }
 
