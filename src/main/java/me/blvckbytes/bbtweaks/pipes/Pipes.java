@@ -243,18 +243,11 @@ public class Pipes implements PipesApi, Listener {
         var pipeBlock = hasPistons ? pistonQueue.poll() : searchQueue.poll();
         var cachedPipeBlock = currentBlockCache.getCachedBlock(pipeBlock);
 
-        if (CachedBlock.isTube(cachedPipeBlock)) {
+        if (CachedBlock.isTube(cachedPipeBlock))
           ++currentTubeBlockCounter;
-
-          if (getMaxTubeBlockCount() > 0 && currentTubeBlockCounter > getMaxTubeBlockCount())
-            return EnumerationResult.EXCEEDED_TUBE_COUNT_LIMIT;
-        }
 
         if (CachedBlock.isMaterial(cachedPipeBlock, Material.PISTON)) {
           ++currentPistonBlockCounter;
-
-          if (getMaxPistonBlockCount() > 0 && currentPistonBlockCounter > getMaxPistonBlockCount())
-            return EnumerationResult.EXCEEDED_PISTON_COUNT_LIMIT;
 
           if (behaviorFlags.contains(EnumerationBehavior.LOAD_PISTON_SIGNS))
             currentBlockCache.getSignOnPiston(pipeBlock, cachedPipeBlock, null);
@@ -341,16 +334,6 @@ public class Pipes implements PipesApi, Listener {
     } catch (LoadingChunkException e) {
       return EnumerationResult.NEEDS_CHUNK_LOADING;
     }
-  }
-
-  @Override
-  public int getMaxTubeBlockCount() {
-    return config.rootSection.pipes.maxTubeBlockCount;
-  }
-
-  @Override
-  public int getMaxPistonBlockCount() {
-    return config.rootSection.pipes.maxPistonBlockCount;
   }
 
   @Override
@@ -446,13 +429,10 @@ public class Pipes implements PipesApi, Listener {
     switch (enumerationResult) {
       case COMPLETED -> {}
       case NEEDS_CHUNK_LOADING, EXCEEDED_CACHE_LOAD_LIMIT -> notificationOutput.add(new WarmupNotification(currentPistonBlockCounter, currentTubeBlockCounter));
-      case EXCEEDED_PISTON_COUNT_LIMIT -> notificationOutput.add(new PistonLimitNotification(getMaxPistonBlockCount()));
-      case EXCEEDED_TUBE_COUNT_LIMIT -> notificationOutput.add(new TubeLimitNotification(getMaxTubeBlockCount()));
       case null -> {}
     }
 
-    var exceededLimits = enumerationResult == EnumerationResult.EXCEEDED_TUBE_COUNT_LIMIT || enumerationResult == EnumerationResult.EXCEEDED_PISTON_COUNT_LIMIT;
-    var shouldDropItems = (config.rootSection.pipes.dropNoSign && missedSign) || (config.rootSection.pipes.dropExceededLimits && exceededLimits) || threwError;
+    var shouldDropItems = (config.rootSection.pipes.dropNoSign && missedSign) || threwError;
 
     if (shouldDropItems) {
       pipeItems.forEachRemainingItem((_, item) -> dropItemAtBlock(item, containerBlock));

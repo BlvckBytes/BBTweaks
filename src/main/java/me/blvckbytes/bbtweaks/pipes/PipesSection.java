@@ -22,10 +22,7 @@ public class PipesSection extends ConfigSection {
   public PipeNotificationsSection notifications;
 
   public boolean requireSign;
-  public boolean dropExceededLimits;
   public boolean dropNoSign;
-  public int maxTubeBlockCount;
-  public int maxPistonBlockCount;
   public int maxCacheLoadCount;
 
   @CSAlways

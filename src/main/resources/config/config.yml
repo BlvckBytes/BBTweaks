@@ -2644,14 +2644,9 @@ pipes:
     debounceSeconds: 15
     malformedSignToken: '{lut.pipes_prefix} <&c>Der Begriff "<&4>{token}</>" auf <&4>Zeile {line}</> am Schild bei <&4>{sign_coordinates}</> auf dem Rohr bei <&4>{coordinates}</> ist ungültig!'
     noSignEncountered: '{lut.pipes_prefix} <&c>Konnte kein erforderliches <&4>[Pipe]</>-Schild auf dem Rohr bei <&4>{coordinates}</> finden; <&4>werfe Items</> am Eingang!'
-    pistonLimitExceeded: '{lut.pipes_prefix} <&c>Kolben-Obergrenze von <&4>{limit}</> bei <&4>{coordinates}</> überschritten; <&4>werfe Items</> am Eingang!'
-    tubeLimitExceeded: '{lut.pipes_prefix} <&c>Rohrblock-Obergrenze von <&4>{limit}</> bei <&4>{coordinates}</> überschritten; <&4>werfe Items</> am Eingang!'
     warmingUp: '<&6>Pipe wärmt auf... {tubes} Rohre, {pistons} Kolben'
   requireSign: true
-  dropExceededLimits: true
   dropNoSign: true
-  maxTubeBlockCount: -1
-  maxPistonBlockCount: -1
   maxCacheLoadCount: 600
   predicates:
     manualEditWhileInPredicateMode: '{lut.pipes_prefix} <&c>Du kannst das Schild im Prädikat-Modus nicht manuell bearbeiten!'
