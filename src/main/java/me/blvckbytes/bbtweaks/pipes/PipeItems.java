@@ -64,19 +64,11 @@ public class PipeItems {
   }
 
   public boolean isEmptyOrNoneActive() {
-    if (contents.isEmpty())
-      return true;
-
-    var reducedIndex = reducedContentIndex.value;
-
-    if (reducedIndex >= 0)
-      return contents.get(reducedIndex).item == null;
-
-    return false;
+    return !forEachActiveItemAndGetIfAny((_, _) -> false);
   }
 
   public void forEachActiveItemAndBreakAfterReduce(PipeItemReduceHandler handler) {
-    forEachActiveItem((contentIndex, itemAndSlot) -> {
+    forEachActiveItemAndGetIfAny((contentIndex, itemAndSlot) -> {
       assert itemAndSlot.item != null;
 
       var previousAmount = itemAndSlot.item.getAmount();
@@ -106,7 +98,7 @@ public class PipeItems {
   public PipeItems filterAndMakeSub(Predicate<ItemStack> predicate) {
     var subItems = new PipeItems(contents, filteredOutContentIndices, reducedContentIndex);
 
-    forEachActiveItem((contentIndex, itemAndOriginSlot) -> {
+    forEachActiveItemAndGetIfAny((contentIndex, itemAndOriginSlot) -> {
       if (itemAndOriginSlot.item != null && !predicate.test(itemAndOriginSlot.item))
         subItems.filteredOutContentIndices |= 1L << contentIndex;
 
@@ -116,20 +108,24 @@ public class PipeItems {
     return subItems;
   }
 
-  private void forEachActiveItem(ActiveItemIterationHandler handler) {
+  private boolean forEachActiveItemAndGetIfAny(ActiveItemIterationHandler handler) {
     var reducedIndex = reducedContentIndex.value;
 
     if (reducedIndex >= 0) {
       if ((filteredOutContentIndices & (1L << reducedIndex)) != 0)
-        return;
+        return false;
 
       var reducedItem = contents.get(reducedIndex);
 
-      if (reducedItem.item != null)
+      if (reducedItem.item != null) {
         handler.handleAndGetIfContinue(reducedIndex, reducedItem);
+        return true;
+      }
 
-      return;
+      return false;
     }
+
+    var encounteredAnyActive = false;
 
     for (var index = 0; index < contents.size(); ++index) {
       if ((filteredOutContentIndices & (1L << index)) != 0)
@@ -137,12 +133,15 @@ public class PipeItems {
 
       var itemAndSlot = contents.get(index);
 
-      // Unreachable, as we only set it to null after a reduction to zero.
       if (itemAndSlot.item == null)
         continue;
+
+      encounteredAnyActive = true;
 
       if (!handler.handleAndGetIfContinue(index, itemAndSlot))
         break;
     }
+
+    return encounteredAnyActive;
   }
 }
