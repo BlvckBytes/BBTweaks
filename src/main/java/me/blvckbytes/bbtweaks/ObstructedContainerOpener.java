@@ -9,6 +9,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.Plugin;
 
@@ -52,7 +53,7 @@ public class ObstructedContainerOpener implements Listener {
     if (!SUPPORTED_CONTAINER_TYPES.contains(blockType))
       return;
 
-    if (!(clickedBlock.getState() instanceof Container container))
+    if (!(clickedBlock.getState(false) instanceof Container container))
       return;
 
     var containerInventory = container.getInventory();
@@ -61,7 +62,10 @@ public class ObstructedContainerOpener implements Listener {
       var topInventory = player.getOpenInventory().getTopInventory();
 
       // Assume that opening the container succeeded.
-      if (topInventory.getHolder() instanceof Container)
+      if (
+        topInventory.getHolder(false) instanceof Container
+          || topInventory instanceof DoubleChestInventory
+      )
         return;
 
       player.openInventory(containerInventory);
