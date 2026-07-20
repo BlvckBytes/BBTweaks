@@ -2660,6 +2660,18 @@ pipes:
       playersOnly: '{lut.pipes_prefix} <&c>Dieser Befehl ist nur für Spieler zugänglich!'
       noPermission: '{lut.pipes_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
       actionUsage: '{lut.pipes_prefix} <&c>Benutzung: /{label} \<<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>>!'
+      generateNotLookingAtPipeBlock: '{lut.pipes_prefix} <&c>Du schaust aktuell keine Pipe-Blöcke an; bitte schaue auf einen Kolben, einen Behälter oder ein Schild!'
+      generateNoContainer: '{lut.pipes_prefix} <&c>Am angesehenen Kolben befindet sich kein Behälter an der Ausgangsseite!'
+      generateEmptyContainer: '{lut.pipes_prefix} <&c>Der Behälter des zugehörigen Kolben ist leer - bitte lege zuerst Items hinein, für die du den Filter generieren möchtest!'
+      generateNoSign: '{lut.pipes_prefix} <&c>Am Kolben befindet sich kein valides Pipe-Schild, an welches der Filter gebunden werden könnte!'
+      generateCannotEditSign: '{lut.pipes_prefix} <&c>Dir fehlen die nötigen Rechte, um das zugehörige Schild zu bearbeiten!'
+      generatePredicateSet: |
+        {lut.pipes_prefix} <&7>Das generierte Prädikat<space/>
+        <hover-text value={<&a>Klicke, um einen Set-Befehl vorzuschlagen}>
+          <suggest-command value=`{set_command}`>
+          <&a><u>{predicate}
+        </hover-text>
+        <space/>wurde am Schild bei <&a>{sign_x} {sign_y} {sign_z} <&7>gesetzt.
     manualEditWhileInPredicateMode: '{lut.pipes_prefix} <&c>Du kannst das Schild im Prädikat-Modus nicht manuell bearbeiten!'
   search:
     command:

@@ -13,6 +13,13 @@ public class PipePredicatesCommandSection extends CommandSection {
   public ComponentMarkup noPermission;
   public ComponentMarkup actionUsage;
 
+  public ComponentMarkup generateNotLookingAtPipeBlock;
+  public ComponentMarkup generateNoContainer;
+  public ComponentMarkup generateEmptyContainer;
+  public ComponentMarkup generateNoSign;
+  public ComponentMarkup generateCannotEditSign;
+  public ComponentMarkup generatePredicateSet;
+
   public PipePredicatesCommandSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(INITIAL_NAME, baseEnvironment, interpreterLogger);
   }

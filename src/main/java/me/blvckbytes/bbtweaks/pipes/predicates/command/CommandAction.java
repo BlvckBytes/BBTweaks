@@ -9,6 +9,7 @@ public enum CommandAction implements MatchableEnum {
   SET,
   SET_LANGUAGE,
   REMOVE,
+  GENERATE,
   ;
 
   public static final EnumMatcher<CommandAction> matcher = new EnumMatcher<>(values());

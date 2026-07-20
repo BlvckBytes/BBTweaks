@@ -96,7 +96,7 @@ public class PipePredicateEventHandler implements PipePredicateRegistry, Listene
     }
   }
 
-  private boolean canEditSign(Player player, Sign sign) {
+  public boolean canEditSign(Player player, Sign sign) {
     var signSide = sign.getSide(Side.FRONT);
     //noinspection UnstableApiUsage
     var fakeChangeEvent = new SignChangeEvent(sign.getBlock(), player, signSide.lines(), Side.FRONT);
@@ -255,7 +255,7 @@ public class PipePredicateEventHandler implements PipePredicateRegistry, Listene
     setPredicate(sign, event.getValue());
   }
 
-  private void setPredicate(Sign sign, PredicateAndLanguage predicateAndLanguage) {
+  public void setPredicate(Sign sign, PredicateAndLanguage predicateAndLanguage) {
     var oldPredicateData = dataHandler.access(sign);
     PredicateData newPredicateData;
 
