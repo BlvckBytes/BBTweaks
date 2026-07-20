@@ -38,6 +38,9 @@ public class InvFilterCommand implements CommandHandler, Listener {
   private final ConfigKeeper<MainSection> config;
   private final IPPIntegration ippIntegration;
 
+  // TODO: Have, like on MultiBreak, separate profiles that can be selected; maybe 9.
+  //       Also have a Select-Slot sub-command.
+
   private final NamespacedKey filterPredicateKey;
   private final NamespacedKey filterLanguageKey;
   private final NamespacedKey filterEnabledKey;
