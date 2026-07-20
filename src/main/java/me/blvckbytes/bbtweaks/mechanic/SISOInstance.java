@@ -147,6 +147,11 @@ public abstract class SISOInstance implements MechanicInstance {
     lastOutputState = state;
     isInitialWrite = false;
 
+    // The lever is already in the correct state, so we either forced the mount-block state
+    // already, or the chunk loaded with the correct state, having it had propagate naturally.
+    if (cachedOutputBlockData.isPowered() == state)
+      return false;
+
     cachedOutputBlockData.setPowered(state);
     cachedOutputBlock.setBlockData(cachedOutputBlockData);
 

@@ -13,8 +13,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-// TODO: Why does it take so much CPU-time here? https://spark.lucko.me/FURVPaBMkT
-
 public class LeverArrayMechanic extends BaseMechanic<LeverArrayInstance> {
 
   private static final int PROPAGATION_SPEED_ENABLE_LINE_INDEX = 2;
