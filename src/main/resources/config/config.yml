@@ -549,6 +549,10 @@ mechanic:
         <&a *for-key="recipe_result_type_keys" *for-separator={,<space/>}><translate [key] /></>
         .
       </container>
+  pipeFetch:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um ein PipeFetch zu erstellen!'
+    notOnAPiston: '{lut.mechanic_prefix} <&c>Ein PipeFetch kann nur an einem Kolben angebracht werden!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Das <&a>PipeFetch</> bei <&a>{x} {y} {z}</> wurde erfolgreich erstellt!'
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'

@@ -15,6 +15,7 @@ import me.blvckbytes.bbtweaks.mechanic.item_notifier.ItemNotifierMechanic;
 import me.blvckbytes.bbtweaks.mechanic.lever_array.LeverArrayMechanic;
 import me.blvckbytes.bbtweaks.mechanic.magnet.command.MagnetVisualizeCommand;
 import me.blvckbytes.bbtweaks.mechanic.magnet.MagnetMechanic;
+import me.blvckbytes.bbtweaks.mechanic.pipe_fetch.PipeFetchMechanic;
 import me.blvckbytes.bbtweaks.mechanic.planter.PlanterMechanic;
 import me.blvckbytes.bbtweaks.mechanic.pool_crafter.PoolCrafterMechanic;
 import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderMechanic;
@@ -82,6 +83,7 @@ public class SignMechanicManager implements Disableable, Listener {
     registerMechanic(autoWirer.withSingletonAndGet(ShowcaseMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(ItemNotifierMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(PoolCrafterMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(PipeFetchMechanic.class));
   }
 
   @Override

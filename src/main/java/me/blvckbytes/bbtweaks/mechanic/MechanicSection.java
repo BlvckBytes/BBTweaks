@@ -13,6 +13,7 @@ import me.blvckbytes.bbtweaks.mechanic.inv_move.InvMoveSection;
 import me.blvckbytes.bbtweaks.mechanic.item_notifier.ItemNotifierSection;
 import me.blvckbytes.bbtweaks.mechanic.lever_array.LeverArraySection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.config.MagnetSection;
+import me.blvckbytes.bbtweaks.mechanic.pipe_fetch.PipeFetchSection;
 import me.blvckbytes.bbtweaks.mechanic.planter.PlanterSection;
 import me.blvckbytes.bbtweaks.mechanic.pool_crafter.PoolCrafterSection;
 import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderSection;
@@ -39,6 +40,7 @@ public class MechanicSection extends ConfigSection {
   public ShowcaseSection showcase;
   public ItemNotifierSection itemNotifier;
   public PoolCrafterSection poolCrafter;
+  public PipeFetchSection pipeFetch;
 
   public ComponentMarkup noWallSign;
 
