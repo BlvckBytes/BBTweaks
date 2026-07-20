@@ -24,8 +24,6 @@ public class PipeNotificationsSection extends ConfigSection {
 
   public ComponentMarkup malformedSignToken;
   public ComponentMarkup noSignEncountered;
-  public ComponentMarkup pistonLimitExceeded;
-  public ComponentMarkup tubeLimitExceeded;
   public ComponentMarkup warmingUp;
 
   public PipeNotificationsSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {

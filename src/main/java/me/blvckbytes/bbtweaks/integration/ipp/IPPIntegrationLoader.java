@@ -15,6 +15,10 @@ public class IPPIntegrationLoader {
     if (!Bukkit.getServer().getPluginManager().isPluginEnabled("ItemPredicateParser") || (ipp = ItemPredicateParserPlugin.getInstance()) == null)
       throw new IllegalStateException("Expected plugin ItemPredicateParser to have been loaded at this point");
 
-    ippIntegration = new IPPIntegration(ipp.getPredicateHelper(), ipp.getTranslationLanguageRegistry());
+    ippIntegration = new IPPIntegration(
+      ipp.getPredicateHelper(),
+      ipp.getTranslationLanguageRegistry(),
+      ipp.getMainCommand()
+    );
   }
 }

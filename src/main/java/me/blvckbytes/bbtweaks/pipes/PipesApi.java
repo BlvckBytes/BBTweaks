@@ -23,20 +23,6 @@ public interface PipesApi {
   EnumerationResult enumeratePipeBlocks(Block firstBlock, @Nullable LongSet visitedBlocks, EnumSet<EnumerationBehavior> behaviorFlags, PipeEnumerationHandler enumerationHandler);
 
   /**
-   * The currently configured maximum number of tubes (glass) after which the pipe-block enumerator will
-   * stop automatically with a result of {@link EnumerationResult#EXCEEDED_TUBE_COUNT_LIMIT}.
-   * @return Limit, or a negative number if unlimited
-   */
-  int getMaxTubeBlockCount();
-
-  /**
-   * The currently configured maximum number of pistons after which the pipe-block enumerator will
-   * stop automatically with a result of {@link EnumerationResult#EXCEEDED_PISTON_COUNT_LIMIT}.
-   * @return Limit, or a negative number if unlimited
-   */
-  int getMaxPistonBlockCount();
-
-  /**
    * The currently configured maximum number of blocks to load into the cache at once after wich the
    * pipe-block enumerator will stop automatically with a result of {@link EnumerationResult#EXCEEDED_CACHE_LOAD_LIMIT}.
    * @return Limit, or a negative number if unlimited
