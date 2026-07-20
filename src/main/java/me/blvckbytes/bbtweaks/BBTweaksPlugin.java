@@ -55,8 +55,12 @@ import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommand;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.pipes.*;
+import me.blvckbytes.bbtweaks.pipes.enumeration_session.PipeEnumerationSessionHandler;
 import me.blvckbytes.bbtweaks.pipes.predicates.PipePredicateEventHandler;
 import me.blvckbytes.bbtweaks.pipes.predicates.PipePredicateDataHandler;
+import me.blvckbytes.bbtweaks.pipes.predicates.command.PipePredicatesCommand;
+import me.blvckbytes.bbtweaks.pipes.search.command.PipeSearchCommand;
+import me.blvckbytes.bbtweaks.pipes.search.display.PipeSearchDisplayHandler;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerListener;
 import me.blvckbytes.bbtweaks.seed.SeedOverrideCommand;
 import me.blvckbytes.bbtweaks.shulker_accessor.change_detection.InventoryChangeDetector;
@@ -183,6 +187,10 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(Pipes.class)
         .withSingleton(PipePredicateDataHandler.class)
         .withSingleton(PipePredicateEventHandler.class)
+        .withSingleton(PipeEnumerationSessionHandler.class)
+        .withSingleton(PipeSearchDisplayHandler.class)
+        .withSingleton(PipeSearchCommand.class)
+        .withSingleton(PipePredicatesCommand.class)
         .withSingleton(FrameLockingHandler.class)
         .withSingleton(HotbarRandomizerSettingsStore.class)
         .withSingleton(HotbarRandomizerSettingsDisplayHandler.class)

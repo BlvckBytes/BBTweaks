@@ -7,6 +7,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import me.blvckbytes.bbtweaks.pipes.notification.PipeNotificationsSection;
 import me.blvckbytes.bbtweaks.pipes.predicates.PipePredicatesSection;
+import me.blvckbytes.bbtweaks.pipes.search.PipeSearchSection;
 
 public class PipesSection extends ConfigSection {
 
@@ -18,6 +19,11 @@ public class PipesSection extends ConfigSection {
   public ComponentMarkup unsupportedSignType;
   public ComponentMarkup signCreated;
 
+  public ComponentMarkup enumerationExceededRetries;
+  public ComponentMarkup enumerationNotAPipeBlock;
+  public ComponentMarkup enumerationCannotBuildThere;
+  public ComponentMarkup enumerationAlreadyInASession;
+
   @CSAlways
   public PipeNotificationsSection notifications;
 
@@ -27,6 +33,9 @@ public class PipesSection extends ConfigSection {
 
   @CSAlways
   public PipePredicatesSection predicates;
+
+  @CSAlways
+  public PipeSearchSection search;
 
   public PipesSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

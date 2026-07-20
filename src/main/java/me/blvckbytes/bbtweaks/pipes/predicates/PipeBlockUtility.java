@@ -1,7 +1,9 @@
 package me.blvckbytes.bbtweaks.pipes.predicates;
 
+import me.blvckbytes.bbtweaks.pipes.CachedBlock;
 import me.blvckbytes.bbtweaks.pipes.Pipes;
 import me.blvckbytes.bbtweaks.util.ComponentUtil;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -12,6 +14,7 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.WallSign;
 import org.bukkit.block.sign.Side;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.jetbrains.annotations.Nullable;
 
@@ -173,5 +176,51 @@ public class PipeBlockUtility {
     }
 
     return null;
+  }
+
+  public static Block resolveFacedTargetBlock(Player player) {
+    var rayTraceResult = player.getWorld().rayTraceBlocks(
+      player.getEyeLocation(),
+      player.getEyeLocation().getDirection(),
+      10.0,
+      FluidCollisionMode.NEVER,
+      true
+    );
+
+    if (rayTraceResult == null || rayTraceResult.getHitBlock() == null)
+      return player.getEyeLocation().getBlock();
+
+    var targetBlock = rayTraceResult.getHitBlock();
+
+    // Handle pistons, signs on pistons as well as containers
+    var pistonBlock = PipeBlockUtility.resolvePistonBlock(targetBlock);
+
+    if (pistonBlock != null)
+      return pistonBlock;
+
+    // Handle signs on tube-blocks, possibly with one wall-block in-between (as that allows
+    // to make things look nicer for shortcut-commands bound to signs on walls, behind which
+    // a pipe is running along).
+
+    var blockData = targetBlock.getBlockData();
+    var signMountingFace = BlockFace.SELF;
+
+    if (blockData instanceof WallSign wallSign)
+      signMountingFace = wallSign.getFacing().getOppositeFace();
+    else if (blockData instanceof org.bukkit.block.data.type.Sign)
+      signMountingFace = BlockFace.DOWN;
+
+    if (signMountingFace != BlockFace.SELF) {
+      targetBlock = targetBlock.getRelative(signMountingFace);
+
+      if (!CachedBlock.isValidPipeBlock(CachedBlock.fromBlock(targetBlock))) {
+        var nextBlockInDirection = targetBlock.getRelative(signMountingFace);
+
+        if (CachedBlock.isValidPipeBlock(CachedBlock.fromBlock(nextBlockInDirection)))
+          targetBlock = nextBlockInDirection;
+      }
+    }
+
+    return targetBlock;
   }
 }

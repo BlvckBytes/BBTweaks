@@ -2636,6 +2636,10 @@ pipes:
   signCreateNoPistonFound: '{lut.pipes_prefix} <&c>Ein Pipe-Schild muss an einem Kolben montiert werden!'
   unsupportedSignType: '{lut.pipes_prefix} <&c>Pipe-Schilder können nur Wand- oder Steheschilder sein!'
   signCreated: '{lut.pipes_prefix} <&7>Das Pipe-Schild wurde erfolgreich erstellt!'
+  enumerationExceededRetries: '{lut.pipes_prefix} <&e>Das Limit von <&6>{limit} Ladeversuchen</> wurde überschritten; breche vorzeitig ab!'
+  enumerationNotAPipeBlock: '{lut.pipes_prefix} <&c>Du schaust aktuell keine Pipe-Blöcke an; bitte schaue auf einen Kolben, einen Behälter, ein Schild oder ein Rohr!'
+  enumerationCannotBuildThere: '{lut.pipes_prefix} <&c>Dir fehlen die nötigen Rechte, um auf die Blöcke zuzugreifen!'
+  enumerationAlreadyInASession: '{lut.pipes_prefix} <&c>Es ist bereits ein Pipe-Vorgang aktiv! Bitte warte, bis dieser beendet wurde.'
   notifications:
     notificationRadius: 10
     notifyOwnersOfRegion: true
@@ -2649,7 +2653,157 @@ pipes:
   dropNoSign: true
   maxCacheLoadCount: 600
   predicates:
+    command:
+      name: 'pipepredicates'
+      aliases:
+        - pipr
+      playersOnly: '{lut.pipes_prefix} <&c>Dieser Befehl ist nur für Spieler zugänglich!'
+      noPermission: '{lut.pipes_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+      actionUsage: '{lut.pipes_prefix} <&c>Benutzung: /{label} \<<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>>!'
     manualEditWhileInPredicateMode: '{lut.pipes_prefix} <&c>Du kannst das Schild im Prädikat-Modus nicht manuell bearbeiten!'
+  search:
+    command:
+      name: 'pipesearch'
+      aliases:
+        - pps
+      playersOnly: '{lut.pipes_prefix} <&c>Dieser Befehl ist nur für Spieler zugänglich!'
+      noPermission: '{lut.pipes_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+    getItemNoSpace: '{lut.pipes_prefix} <&c>Du hast nicht den nötigen Platz im Inventar!'
+    getItemSuccess: '{lut.pipes_prefix} <&7>Vom Item <&a><tr key=`{item_type_key}`/></> wurden insgesamt <&a>{lut.pipes.amount_display}</> ausgehändigt.'
+    getItemContainerAbsent: '{lut.pipes_prefix} <&c>Der zugehörige Behälter existiert inzwischen nicht mehr; breche ab!'
+    getItemContainerSizeChanged: '{lut.pipes_prefix} <&c>Die Größe des zugehörigen Behälters hat sich inzwischen geändert; breche ab!'
+    getItemMoved: '{lut.pipes_prefix} <&c>Das Item <&4><tr key=`{item_type_key}`/></> wurde inzwischen bewegt; breche ab!'
+    containerTeleportObstructed: '{lut.pipes_prefix} <&c>Der zugehörige Behälter ist an allen Seiten durch unpassierbare Blöcke versperrt!'
+    containerTeleported: '{lut.pipes_prefix} <&7>Du wurdest zum zugehörigen Behälter bei <&a>{container_x} {container_y} {container_z}</> teleportiert.'
+    containerOpened: '{lut.pipes_prefix} <&7>Du hast nun Einsicht in den zugehörigen Behälter bei <&a>{container_x} {container_y} {container_z}</>.'
+    searchNoResults: |
+      {lut.pipes_prefix} <&c>Die Suche <&4>{predicate}</> ergab bei <&4>{item_count} Items</> keine Ergebnisse (<&4>{piston_count} Kolben</>, <&4>{tube_count} Rohrblöcke</>, <u><hover-text value={
+        <&c *for-entry="container_counts" *for-separator={<&7>,<space/>}>{entry.count}x <translate key=`{entry.translation_key}`/>
+      }><&4>{total_container_count} Behälter</u>)!
+    searchNoContainers: '{lut.pipes_prefix} <&c>Es konnten keine Behälter an Ausgangskolben gefunden werden (<&4>{piston_count} Kolben</>, <&4>{tube_count} Rohrblöcke</>)!'
+    searchShowingResults: |
+      {lut.pipes_prefix} <&7>Die Suche <&a>{predicate}</> lieferte bei insgesamt <&a>{item_count}</> Items <&a>{match_count}</> Übereinstimmungen (<&a>{piston_count} Kolben</>, <&a>{tube_count} Rohrblöcke</>, <u><hover-text value={
+        <&a *for-entry="container_counts" *for-separator={<&7>,<space/>}>{entry.count}x <translate key=`{entry.translation_key}`/>
+      }><&a>{total_container_count} Behälter</u>).
+    predicateError: '{lut.pipes_prefix} <&c>Fehlerhaftes Prädikat: <&4>{error_message}'
+    display:
+      title: '<&8>Pipesuche <&e>{current_page}<&8>/<&e>{number_pages}'
+      rows: 6
+      paginationSlots: '0..44'
+      items:
+        previousPage:
+          slots: 'last_slot - 8'
+          type: PLAYER_HEAD
+          textures: '{lut.textures[current_page > 1 then "ARROW_LEFT" else "ARROW_LEFT_RED"]}'
+          name: |
+            <reset>
+              <container *if="current_page > 1"><&8>» <&6>Vorherige Seite <&8>«</container>
+              <container *else><&8>» <&c>Keine vorherige Seite <&8>«</container>
+          lore: |
+            <reset *let-spacer="is_floodgate then lut.spacer_bedrock else lut.spacer">
+              <br/>
+              {lut.spacer}<br/>
+              <&8>➥ <&e>Linksklick <&7>Navigiere zur vorherigen Seite<br/>
+              <&8>➥ <&e>Rechtsklick <&7>Springe zur ersten Seite<br/>
+              {lut.spacer}
+        searchDetails:
+          slots: 'last_slot - 4'
+          type: OAK_SIGN
+          name: |
+            <reset>
+              <&8>» <&6>Aktuelle Suche <&8>«
+          lore: |
+            <reset *let-spacer="is_floodgate then lut.spacer_bedrock else lut.spacer">
+              {lut.spacer}<br/>
+              <&8>♦ <&7>Angegebenes Prädikat: <&e>{predicate}<br/>
+              {lut.spacer}
+        backToCollectionsButton:
+          slots: 'last_slot - 4'
+          type: PLAYER_HEAD
+          textures: '{lut.textures["ARROW_LEFT_BLACK"]}'
+          name: |
+            <reset>
+              <&8>» <&6>Zurück <&8>«
+          lore: |
+            <reset *let-spacer="is_floodgate then lut.spacer_bedrock else lut.spacer">
+              {lut.spacer}<br/>
+              <&8>➥ <&e>Linksklick <&7>Gelange zurück zur Übersicht<br/>
+              {lut.spacer}
+        nextPage:
+          slots: 'last_slot'
+          type: PLAYER_HEAD
+          textures: '{lut.textures[current_page < number_pages then "ARROW_RIGHT" else "ARROW_RIGHT_RED"]}'
+          name: |
+            <reset>
+              <container *if="current_page < number_pages"><&8>» <&6>Nächste Seite <&8>«</container>
+              <container *else><&8>» <&c>Keine nächste Seite <&8>«</container>
+          lore: |
+            <reset *let-spacer="is_floodgate then lut.spacer_bedrock else lut.spacer">
+              <br/>
+              {lut.spacer}<br/>
+              <&8>➥ <&e>Linksklick <&7>Navigiere zur nächsten Seite<br/>
+              <&8>➥ <&e>Rechtsklick <&7>Springe zur letzten Seite<br/>
+              {lut.spacer}
+        stackRepresentativePatch:
+          lore: |
+            <reset>
+              <br/>
+              {lut.spacer}<br/>
+              <&8>♦ <&7>Koordinaten: <&e>{container_x} {container_y} {container_z}<br/>
+              <&8>♦ <&7>Slot: <&e>{slot}<br/>
+              {lut.spacer}<br/>
+              <container *if="has(stack_actions)">
+                <&8>♦ <&7>Aktuelle Aktion:<br/>
+                <br/>
+                <container *for-stack_action="stack_actions" *for-separator={<br/>}>
+                  <&8>➥ <&7><&e *use="stack_action.enabled">
+                    {lut.pipes.stack_action[stack_action.name] ?? "Unbekannte Aktion"}
+                  <&7>
+                </container>
+                <br/>
+                {lut.spacer}<br/>
+                <&8>➥ <&e>Linksklick <&7>Aktuelle Aktion ausführen<br/>
+                <&8>➥ <&e>Werfen <&7>Nächste Aktion wählen
+              </container>
+              <container *else>
+                <&8>➥ <&e>Linksklick <&7>{lut.pipes.stack_action["TELEPORT_TO_CONTAINER"]}<br/>
+                <&8>➥ <&e>Werfen <&7>{lut.pipes.stack_action["MOVE_TO_INVENTORY"]}<br/>
+                <&8>➥ <&e>Alle Werfen <&7>{lut.pipes.stack_action["OPEN_CONTAINER"]}
+              </container>
+              <br/>
+              {lut.spacer}
+        collectionRepresentativePatch:
+          lore: |
+            <reset *let-spacer="is_floodgate then lut.spacer_bedrock else lut.spacer">
+              <br/>
+              {lut.spacer}<br/>
+              <&8>♦ <&7>Anzahl: <&e *let-display_dks>{lut.pipes.amount_display}</><br/>
+              {lut.spacer}<br/>
+              <container *if="has(collection_actions)">
+                <&8>♦ <&7>Aktuelle Aktion:<br/>
+                <br/>
+                <container *for-collection_action="collection_actions" *for-separator={<br/>}>
+                  <&8>➥ <&7><&e *use="collection_action.enabled">
+                    {lut.pipes.collection_action[collection_action.name] ?? "Unbekannte Aktion"}
+                  <&7>
+                </container>
+                <br/>
+                {lut.spacer}<br/>
+                <&8>➥ <&e>Linksklick <&7>Aktuelle Aktion ausführen<br/>
+                <&8>➥ <&e>Werfen <&7>Nächste Aktion wählen
+              </container>
+              <container *else>
+                <&8>➥ <&e>Linksklick <&7>{lut.pipes.collection_action["SHOW_STACKS"]}<br/>
+                <&8>➥ <&e>Rechtsklick <&7>{lut.pipes.collection_action["GET_FOUR_STACKS"]}<br/>
+                <&8>➥ <&e>Werfen <&7>{lut.pipes.collection_action["GET_ONE_STACK"]}<br/>
+                <&8>➥ <&e>Alle Werfen <&7>{lut.pipes.collection_action["FILL_INVENTORY"]}
+              </container>
+              <br/>
+              {lut.spacer}
+        filler:
+          slots: '(last_slot - 7)..(last_slot - 1)'
+          type: BLACK_STAINED_GLASS_PANE
+          name: " "
 
 blockFacing:
   command:
@@ -3034,3 +3188,27 @@ cLut:
               <br/>\}
         }
       />
+  pipes:
+    amount_display: |
+      <container *if="number_stacks > 0">
+        {number_stacks}x {stack_size}
+        <container *if="has(display_dks) and number_stacks > 1">
+          <container *if="number_double_chests eq 1"><&7> (</>eine DK<&7>)</container>
+          <container *else-if="number_double_chests > 0">
+            <&7> (</><number [value]="number_double_chests" format="0.0" locale="de_DE" rounding="UP"/> DKs<&7>)
+          </container>
+        </container>
+      </container>
+      <container *if="single_items > 0">
+        <&7 *if="number_stacks > 0"> und </>
+        {single_items} Stück
+      </container>
+    collection_action:
+      GET_FOUR_STACKS: '4 Stacks ins Inventar bewegen'
+      GET_ONE_STACK: 'Einen Stack ins Inventar bewegen'
+      FILL_INVENTORY: 'Inventar mit Items befüllen'
+      SHOW_STACKS: 'Einzelstacks anzeigen'
+    stack_action:
+      TELEPORT_TO_CONTAINER: 'Zum Behälter teleportieren'
+      MOVE_TO_INVENTORY: 'Ins Inventar bewegen'
+      OPEN_CONTAINER: 'Behälter öffnen'

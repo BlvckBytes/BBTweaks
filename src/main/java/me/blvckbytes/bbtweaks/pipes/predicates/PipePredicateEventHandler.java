@@ -12,6 +12,7 @@ import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import me.blvckbytes.item_predicate_parser.translation.PredicateSourcesReloadEvent;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
@@ -31,7 +32,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public class PipePredicateEventHandler implements Listener {
+public class PipePredicateEventHandler implements PipePredicateRegistry, Listener {
 
   private record CachedSign(@Nullable ItemPredicate predicate, int x, int y, int z) {}
 
@@ -53,15 +54,31 @@ public class PipePredicateEventHandler implements Listener {
     this.cachedSignByPistonIdByWorldId = new HashMap<>();
   }
 
-  private void callFakeEvent(Event event) {
-    for(var listener : event.getHandlers().getRegisteredListeners()) {
-      if(!listener.getPlugin().isEnabled())
-        continue;
+  @Override
+  public @Nullable ItemPredicate getPredicateForPiston(Block block) {
+    var worldBucket = cachedSignByPistonIdByWorldId.get(block.getWorld().getUID());
 
-      if (listener.getListener().equals(this))
+    if (worldBucket == null)
+      return null;
+
+    var cachedSign = worldBucket.get(CompactId.computeWorldlessBlockId(block));
+
+    if (cachedSign == null)
+      return null;
+
+    return cachedSign.predicate;
+  }
+
+  public void callFakeEvent(Event event) {
+    for (var listener : event.getHandlers().getRegisteredListeners()) {
+      if (!listener.getPlugin().isEnabled())
         continue;
 
       var listenerClass = listener.getListener().getClass();
+
+      // Ignore self
+      if (listenerClass == PipePredicateEventHandler.class)
+        continue;
 
       // Avoid the "pipe created"-message
       if (listenerClass == Pipes.class)

@@ -92,6 +92,12 @@ commands:
   hotbarrandomizer:
     description: 'Allows to randomize the selected slot of your hotbar'
     permission: bbtweaks.hotbar-randomizer
+  pipepredicates:
+    description: 'Allows to interact with predicates on pipes'
+    permission: bbtweaks.pipes
+  pipesearch:
+    description: 'Allows to search a pipe using a predicate'
+    permission: bbtweaks.pipes
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
