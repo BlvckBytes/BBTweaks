@@ -31,8 +31,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.logging.Level;
 
-// TODO: https://medal.tv/games/minecraft/clips/n800mL1gJ-hvNlG7o?invite=cr-MSxLMHksMjExNjgwMTI2
-
 public class Pipes implements PipesApi, Listener {
 
   public static final String PIPE_MARKER = "[Pipe]";
