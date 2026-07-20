@@ -41,7 +41,7 @@ public class BacktrackSession {
     }
 
     if (!locations.isEmpty())
-      teleportNoBack(locations.get(0));
+      teleportNoBack(locations.getFirst());
   }
 
   public static BacktrackSession captureHistoryAndStartAtOrigin(Plugin plugin, Player player, String commandLabel, LocationHistory history) {

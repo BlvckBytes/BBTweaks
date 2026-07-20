@@ -149,7 +149,7 @@ public class BacktrackCommand implements CommandHandler, Tickable, Listener {
           hasTitleOrSubtitle = true;
           session.player.sendTitlePart(
             TitlePart.TITLE,
-            markup.interpret(SlotType.SINGLE_LINE_CHAT, environment).get(0)
+            markup.interpret(SlotType.SINGLE_LINE_CHAT, environment).getFirst()
           );
         }
 
@@ -157,7 +157,7 @@ public class BacktrackCommand implements CommandHandler, Tickable, Listener {
           hasTitleOrSubtitle = true;
           session.player.sendTitlePart(
             TitlePart.SUBTITLE,
-            markup.interpret(SlotType.SINGLE_LINE_CHAT, environment).get(0)
+            markup.interpret(SlotType.SINGLE_LINE_CHAT, environment).getFirst()
           );
         }
 

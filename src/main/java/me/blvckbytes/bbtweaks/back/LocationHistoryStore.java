@@ -60,7 +60,7 @@ public class LocationHistoryStore implements Tickable, Disableable {
 
   public LocationHistory accessHistory(Player player) {
     var playerId = player.getUniqueId();
-    return historyByPlayerId.computeIfAbsent(playerId, k -> new LocationHistory(playerId));
+    return historyByPlayerId.computeIfAbsent(playerId, _ -> new LocationHistory(playerId));
   }
 
   private void loadAsync() {

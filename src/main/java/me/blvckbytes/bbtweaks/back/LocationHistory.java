@@ -15,7 +15,7 @@ import java.util.UUID;
 
 public class LocationHistory {
 
-  private static final int HISTORY_SIZE = 5;
+  private static final int HISTORY_SIZE = 10;
 
   private static final DecimalFormatSymbols DECIMAL_SYMBOLS = DecimalFormatSymbols.getInstance(Locale.ENGLISH);
   private static final DecimalFormat DECIMAL_FORMAT = new DecimalFormat("#.##", DECIMAL_SYMBOLS);
