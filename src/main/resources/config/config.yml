@@ -2651,7 +2651,8 @@ pipes:
     warmingUp: '<&6>Pipe wärmt auf... {tubes} Rohre, {pistons} Kolben'
   requireSign: true
   dropNoSign: true
-  maxCacheLoadCount: 600
+  maxCacheLoadCount: 1000
+  chunkTicketDurationTicks: 20 * 10
   predicates:
     command:
       name: 'pipepredicates'

@@ -258,7 +258,7 @@ public class Pipes implements PipesApi, Listener {
 
         // While we could check for exceeding the load-counter at countless call-sites, and while there already have been
         // a few cache-lookups prior to enumerating, a hand-full blocks more don't matter in the grand scheme of things.
-        if (getMaxCacheLoadCount() > 0 && currentBlockCache.getCacheLoadCounter() >= getMaxCacheLoadCount())
+        if (currentBlockCache.getCacheLoadCounter() >= getMaxCacheLoadCount())
           return EnumerationResult.EXCEEDED_CACHE_LOAD_LIMIT;
 
         for (var neighborFace : PIPE_NEIGHBOR_FACES) {

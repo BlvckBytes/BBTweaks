@@ -1,5 +1,7 @@
 package me.blvckbytes.bbtweaks.pipes;
 
+import at.blvckbytes.cm_mapper.ConfigKeeper;
+import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import org.bukkit.Material;
@@ -28,14 +30,19 @@ public class PipeBlockCacheRegistry implements Listener, Disableable, Tickable {
   }
 
   private final Plugin plugin;
+  private final ConfigKeeper<MainSection> config;
+
   private final Map<UUID, PipeBlockCache> blockCacheByWorldUid;
 
   private long relativeTimeTicks;
 
   public PipeBlockCacheRegistry(
-    Plugin plugin
+    Plugin plugin,
+    ConfigKeeper<MainSection> config
   ) {
     this.plugin = plugin;
+    this.config = config;
+
     this.blockCacheByWorldUid = new HashMap<>();
   }
 
@@ -54,7 +61,7 @@ public class PipeBlockCacheRegistry implements Listener, Disableable, Tickable {
   }
 
   public PipeBlockCache getBlockCache(World world) {
-    return blockCacheByWorldUid.computeIfAbsent(world.getUID(), _ -> new PipeBlockCache(plugin, world, this));
+    return blockCacheByWorldUid.computeIfAbsent(world.getUID(), _ -> new PipeBlockCache(plugin, config, world, this));
   }
 
   @Override

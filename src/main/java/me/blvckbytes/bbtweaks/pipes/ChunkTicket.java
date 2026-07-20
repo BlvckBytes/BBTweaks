@@ -10,12 +10,12 @@ public class ChunkTicket {
     private @Nullable Chunk chunk;
     private long expiryTicksStamp;
 
-    public void setChunk(Plugin plugin, @NotNull Chunk chunk, long relativeTime, ChunkLoadReason loadReason) {
+    public void setChunk(Plugin plugin, @NotNull Chunk chunk, long relativeTime, long durationTicks) {
         if (this.chunk != null)
             throw new IllegalStateException("Tried to override an already set chunk");
 
         this.chunk = chunk;
-        this.expiryTicksStamp = relativeTime + loadReason.expiryTimeTicks;
+        this.expiryTicksStamp = relativeTime + durationTicks;
 
         if (!chunk.addPluginChunkTicket(plugin))
             plugin.getLogger().warning("Could not add plugin-ticket to chunk at " + chunk.getX() + " " + chunk.getZ());

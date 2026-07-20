@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.pipes;
 
+import at.blvckbytes.cm_mapper.ConfigKeeper;
 import it.unimi.dsi.fastutil.longs.*;
+import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.pipes.notification.PipeNotification;
 import me.blvckbytes.bbtweaks.util.AddOnlyInventory;
 import me.blvckbytes.bbtweaks.util.CompactId;
@@ -39,6 +41,8 @@ public class PipeBlockCache implements CachedBlockResolver {
     };
 
     private final Plugin plugin;
+    private final ConfigKeeper<MainSection> config;
+
     private final World world;
     private final PipeBlockCacheRegistry registry;
 
@@ -53,10 +57,13 @@ public class PipeBlockCache implements CachedBlockResolver {
 
     public PipeBlockCache(
       Plugin plugin,
+      ConfigKeeper<MainSection> config,
       World world,
       PipeBlockCacheRegistry registry
     ) {
         this.plugin = plugin;
+        this.config = config;
+
         this.world = world;
         this.registry = registry;
 
@@ -193,7 +200,7 @@ public class PipeBlockCache implements CachedBlockResolver {
 
         var otherChestBlock = CachedBlock.getOtherChestBlock(block, CachedBlock.getChestType(cachedBlock), CachedBlock.getFacing(cachedBlock));
 
-        ensureBlockIsLoaded(ChunkLoadReason.ACCESS_BLOCK_INVENTORY, block, otherChestBlock);
+        ensureBlockIsLoaded(block, otherChestBlock);
 
         if (!(block.getState(false) instanceof InventoryHolder holder)) {
             plugin.getLogger().warning("Expected an inventory-holder, but found none at block " + block);
@@ -227,7 +234,7 @@ public class PipeBlockCache implements CachedBlockResolver {
         if (cachedBlock != CachedBlock.NULL_SENTINEL)
             return cachedBlock;
 
-        ensureBlockIsLoaded(ChunkLoadReason.UPDATE_BLOCK_CACHE, block);
+        ensureBlockIsLoaded(block);
 
         var loadedBlock = CachedBlock.fromBlock(block);
 
@@ -296,7 +303,7 @@ public class PipeBlockCache implements CachedBlockResolver {
         return cachedSign;
     }
 
-    private void ensureBlockIsLoaded(ChunkLoadReason loadReason, @Nullable Block... blocks) throws LoadingChunkException {
+    private void ensureBlockIsLoaded(@Nullable Block... blocks) throws LoadingChunkException {
         var encounteredUnloaded = false;
 
         for (var block : blocks) {
@@ -320,7 +327,7 @@ public class PipeBlockCache implements CachedBlockResolver {
                 chunkTicketByCompactId.put(chunkId, newTicket);
 
                 world.getChunkAtAsync(chunkX, chunkZ, true, chunk -> {
-                    newTicket.setChunk(plugin, chunk, registry.getRelativeTimeTicks(), loadReason);
+                    newTicket.setChunk(plugin, chunk, registry.getRelativeTimeTicks(), config.rootSection.pipes.chunkTicketDurationTicks);
                 });
             }
         }
