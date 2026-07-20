@@ -23,6 +23,7 @@ public class InvMagnetParametersStore implements Disableable, Listener {
   private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
 
+  // TODO: Scope per config-definable world-group, where each group has a permission.
   private final Map<UUID, InvMagnetParameters> parametersByPlayerId;
 
   private final List<World> worlds;

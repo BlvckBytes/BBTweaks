@@ -22,6 +22,8 @@ public class LocationHistory {
 
   public final UUID playerId;
   private final Location[] historyRingbuffer;
+  // TODO: We should store the lastLocation separately, because somehow, increasing HISTORY_SIZE
+  //       made us loose /back for some players... Try to reproduce, maybe?
   private int nextWriteIndex;
 
   public LocationHistory(UUID playerId) {
