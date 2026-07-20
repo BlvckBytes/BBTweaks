@@ -1,6 +1,5 @@
 package me.blvckbytes.bbtweaks.pipes.enumeration_session;
 
-import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.blvckbytes.bbtweaks.pipes.*;
 import me.blvckbytes.bbtweaks.util.CompactId;
@@ -33,19 +32,18 @@ public abstract class PipeEnumerationSession<T extends PipeEnumerationSession<T>
   private int pistonCount;
   private int tubeCount;
 
-  protected PipeEnumerationSession(
+  public PipeEnumerationSession(
     Block origin, PipesApi pipesApi, Plugin plugin,
+    LongSet visitedBlocks,
     Consumer<T> warmupHandler,
     Consumer<T> completionHandler
   ) {
     this.origin = origin;
-
     this.pipesApi = pipesApi;
     this.plugin = plugin;
+    this.visitedBlocks = visitedBlocks;
     this.warmupHandler = warmupHandler;
     this.completionHandler = completionHandler;
-
-    this.visitedBlocks = new LongOpenHashSet();
   }
 
   public boolean didExceedRetryCount() {

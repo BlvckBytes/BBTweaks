@@ -47,14 +47,15 @@ public class PipeSearchSession extends PipeEnumerationSession<PipeSearchSession>
 
   private final EnumMap<Material, MutableInt> containerCountByType;
 
-  private PipeSearchSession(
+  public PipeSearchSession(
     Block origin, PipesApi pipesApi, Plugin plugin,
+    LongSet visitedBlocks,
     PipePredicateRegistry predicateRegistry,
     EnumSet<EnumerationBehavior> behaviorFlags,
     Consumer<PipeSearchSession> warmupHandler,
     Consumer<PipeSearchSession> completionHandler
   ) {
-    super(origin, pipesApi, plugin, warmupHandler, completionHandler);
+    super(origin, pipesApi, plugin, visitedBlocks, warmupHandler, completionHandler);
 
     this.predicateRegistry = predicateRegistry;
     this.behaviorFlags = behaviorFlags;
@@ -78,6 +79,7 @@ public class PipeSearchSession extends PipeEnumerationSession<PipeSearchSession>
           origin,
           pipesApi,
           plugin,
+          new LongOpenHashSet(),
           predicateRegistry,
           behaviorFlags,
           warmupHandler, completionHandler
