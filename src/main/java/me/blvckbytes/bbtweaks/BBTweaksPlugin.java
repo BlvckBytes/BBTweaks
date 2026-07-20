@@ -31,8 +31,11 @@ import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegrationLoader;
-import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
+import me.blvckbytes.bbtweaks.inv_filter.InvFilterListener;
+import me.blvckbytes.bbtweaks.inv_filter.command.InvFilterCommand;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
+import me.blvckbytes.bbtweaks.inv_filter.InvFilterProfileStore;
+import me.blvckbytes.bbtweaks.inv_filter.display.InvFilterDisplayHandler;
 import me.blvckbytes.bbtweaks.inv_magnet.InvMagnetCommand;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import me.blvckbytes.bbtweaks.itemdata.ItemDataCommand;
@@ -140,7 +143,10 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(SignMechanicManager.class)
         .withSingleton(SeedOverrideCommand.class)
         .withSingleton(CustomCommandsManager.class)
+        .withSingleton(InvFilterProfileStore.class)
+        .withSingleton(InvFilterDisplayHandler.class)
         .withSingleton(InvFilterCommand.class)
+        .withSingleton(InvFilterListener.class)
         .withSingleton(MarkerDisplayHandler.class)
         .withSingleton(MarkersCommand.class)
         .withSingleton(SetMarkerCommand.class)
