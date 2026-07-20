@@ -147,3 +147,5 @@ permissions:
     description: 'Allows to use an optional parameter to hand out exp as an orb'
   bbtweaks.pipes:
     description: 'Allows to create pipe-signs, used to activate pipes'
+  bbtweaks.pipes.auto-init-signs:
+    description: 'Allows to automatically initialize blank signs to pipe-signs'
