@@ -3,7 +3,6 @@ package me.blvckbytes.bbtweaks.inv_filter.display;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
-import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
@@ -12,18 +11,15 @@ import org.bukkit.plugin.Plugin;
 public class InvFilterDisplayHandler extends DisplayHandler<InvFilterDisplay, InvFilterDisplayData> {
 
   private final FloodgateIntegration floodgateIntegration;
-  private final IPPIntegration ippIntegration;
 
   public InvFilterDisplayHandler(
     ConfigKeeper<MainSection> config,
     Plugin plugin,
-    FloodgateIntegration floodgateIntegration,
-    IPPIntegration ippIntegration
+    FloodgateIntegration floodgateIntegration
   ) {
     super(config, plugin, InvFilterDisplay.class);
 
     this.floodgateIntegration = floodgateIntegration;
-    this.ippIntegration = ippIntegration;
   }
 
   @Override
@@ -37,7 +33,7 @@ public class InvFilterDisplayHandler extends DisplayHandler<InvFilterDisplay, In
       if (clickType != ClickType.LEFT)
         return;
 
-      display.displayData.profile().setEnabledAndMessage(null);
+      display.displayData.profile().setEnabledAndMessage(display.displayData.commandLabel(), null);
       display.renderItems();
       return;
     }
@@ -48,13 +44,13 @@ public class InvFilterDisplayHandler extends DisplayHandler<InvFilterDisplay, In
       return;
 
     if (clickType == ClickType.LEFT) {
-      display.displayData.profile().setSelectedSlotIndexAndMessage(filterSlotIndex);
+      display.displayData.profile().setSelectedSlotIndexAndMessage(display.displayData.commandLabel(), filterSlotIndex);
       display.renderItems();
       return;
     }
 
     if (clickType == ClickType.DROP) {
-      display.displayData.profile().removeCurrentFilterIfSetAndMessage(ippIntegration, display.displayData.commandLabel());
+      display.displayData.profile().removeCurrentFilterIfSetAndMessage(display.displayData.commandLabel());
       display.renderItems();
     }
   }

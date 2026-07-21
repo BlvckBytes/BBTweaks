@@ -574,12 +574,13 @@ invFilter:
     {lut.inv_filter_prefix} <&c>Benutzung: /{label} \<
     <&4 *for-action="actions" *for-separator={<&c>,<space/>}>{action}</>
     >
+  usageGetFilter: '{lut.inv_filter_prefix} <&c>Benutzung: /{label} {action} [Filterslot]'
   getFilterNoneSet: '{lut.inv_filter_prefix} <&c>Der Filterslot <&4>{slot}</> hat aktuell keinen Filter gesetzt!'
   getFilter: |
     {lut.inv_filter_prefix} <&7>Aktueller Filter auf Slot <&a>{slot}</>:<space/>
     <hover-text value={<&a>Klicke, um einen Befehl zum editieren vorzuschlagen.}>
       <suggest-command value=`{set_filter_command}`>
-        <&a><u>{current_filter}
+        <&a><u>{filter}
     </hover-text>
     .
   removeFilterNoneSet: '{lut.inv_filter_prefix} <&c>Der Filterslot <&4>{slot}</> hat aktuell keinen Filter gesetzt, der entfernt werden könnte!'
@@ -587,7 +588,7 @@ invFilter:
     {lut.inv_filter_prefix} <&7>Der Filter<space/>
     <hover-text value={<&a>Klicke, um einen Befehl zum editieren vorzuschlagen.}>
       <suggest-command value=`{set_filter_command}`>
-        <&a><u>{current_filter}
+        <&a><u>{filter}
     </hover-text>
     <space/>auf Slot <&a>{slot}</> wurde <&a>entfernt</>.
   usageLanguage: |
@@ -600,12 +601,22 @@ invFilter:
   alreadyEnabled: '{lut.inv_filter_prefix} <&c>Der Inventarfilter ist bereits eingeschalten!'
   nowEnabled: |
     {lut.inv_filter_prefix} <&7>Der Inventarfilter ist nun <&a>eingeschalten</> (Filterslot <&a>{slot}</>, Filter<space/>
-    <&a *if="filter neq null">{filter}</>
+    <hover-text *if="filter neq null" value={<&a>Klicke, um einen Befehl zum editieren vorzuschlagen.}>
+      <suggest-command value=`{set_filter_command}`>
+        <&a><u>{filter}
+    </hover-text>
     <&c *else>/</>
     ).
   alreadyDisabled: '{lut.inv_filter_prefix} <&c>Der Inventarfilter ist bereits ausgeschalten!'
   nowDisabled: '{lut.inv_filter_prefix} <&7>Der Inventarfilter ist nun <&c>ausgeschalten</>.'
-  slotNowSelected: '{lut.inv_filter_prefix} <&7>Der Filterslot <&a>{slot}</> ist nun ausgewählt.'
+  slotNowSelected: |
+    {lut.inv_filter_prefix} <&7>Der Filterslot <&a>{slot}</> (Filter<space/>
+    <hover-text *if="filter neq null" value={<&a>Klicke, um einen Befehl zum editieren vorzuschlagen.}>
+      <suggest-command value=`{set_filter_command}`>
+        <&a><u>{filter}
+    </hover-text>
+    <&c *else>/</>
+    ) ist nun ausgewählt.
   slotAlreadySelected: '{lut.inv_filter_prefix} <&c>Der Filterslot <&4>{slot}</> ist bereits ausgewählt!'
   filterSet: |
     {lut.inv_filter_prefix} <&7>Der Filterslot <&a>{slot}</> wurde auf<space/>
@@ -664,16 +675,18 @@ invFilter:
           <reset>
             <br/>
             {lut.spacer}<br/>
-            <&8>♦ <&e>Filter: <&c *if="filter eq null">/</><&6 *else>{filter}</><br/>
+            <&6><&c *use="filter eq null"><word-wrap value=`{filter ?? '/'}` width=50 prefix={<&8>♦ <&e>Filter:<space/>} /><br/>
             {lut.spacer}<br/>
             <container *if="not enabled">
               <&8>➥ <&e>Linksklick <&7>Slot auswählen<br/>
             </container>
-            <container *if="enabled">
-              <&8>➥ <&e>/{label} {set_command_action} <&7>Filter setzen<br/>
-            </container>
-            <container *if="filter neq null">
-              <&8>➥ <&e>Werfen <&7>Filter entfernen<br/>
+            <container *else>
+              <container *if="enabled">
+                <&8>➥ <&e>/{label} {set_command_action} <&7>Filter setzen<br/>
+              </container>
+              <container *if="filter neq null">
+                <&8>➥ <&e>Werfen <&7>Filter entfernen<br/>
+              </container>
             </container>
             {lut.spacer}
 

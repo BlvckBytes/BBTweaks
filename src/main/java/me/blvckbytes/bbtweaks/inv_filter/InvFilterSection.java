@@ -21,6 +21,7 @@ public class InvFilterSection extends ConfigSection {
   public ComponentMarkup usageSelectSlot;
   public ComponentMarkup invalidFilterSlot;
   public ComponentMarkup usageAction;
+  public ComponentMarkup usageGetFilter;
   public ComponentMarkup getFilterNoneSet;
   public ComponentMarkup getFilter;
   public ComponentMarkup removeFilterNoneSet;

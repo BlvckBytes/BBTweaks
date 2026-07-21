@@ -15,7 +15,9 @@ import java.util.List;
 public class InvFilterProfile {
 
   public final Player player;
+
   private final ConfigKeeper<MainSection> config;
+  private final IPPIntegration ippIntegration;
 
   private final List<@Nullable PredicateAndLanguage> filterBySlotIndex;
 
@@ -25,14 +27,18 @@ public class InvFilterProfile {
   public InvFilterProfile(
     Player player,
     ConfigKeeper<MainSection> config,
+    IPPIntegration ippIntegration,
     List<@Nullable PredicateAndLanguage> filterBySlotIndex
   ) {
     this.player = player;
+
     this.config = config;
+    this.ippIntegration = ippIntegration;
+
     this.filterBySlotIndex = filterBySlotIndex;
   }
 
-  public void removeCurrentFilterIfSetAndMessage(IPPIntegration ippIntegration, String label) {
+  public void removeCurrentFilterIfSetAndMessage(String label) {
     var currentFilter = filterBySlotIndex.get(selectedSlotIndex);
 
     if (currentFilter == null) {
@@ -52,11 +58,11 @@ public class InvFilterProfile {
       new InterpretationEnvironment()
         .withVariable("slot", selectedSlotIndex + 1)
         .withVariable("filter", currentFilter.getTokenPredicateString())
-        .withVariable("set_filter_command", makeSetFilterCommand(ippIntegration, label, currentFilter))
+        .withVariable("set_filter_command", makeSetFilterCommand(label, currentFilter))
     );
   }
 
-  public String makeSetFilterCommand(IPPIntegration ippIntegration, String label, PredicateAndLanguage filter) {
+  public String makeSetFilterCommand(String label, PredicateAndLanguage filter) {
     var selectedLanguage = ippIntegration.predicateHelper.getSelectedLanguage(player);
     var filterString = filter.getTokenPredicateString();
 
@@ -88,7 +94,7 @@ public class InvFilterProfile {
     return filterBySlotIndex.get(selectedSlotIndex);
   }
 
-  public void setEnabledAndMessage(@Nullable Boolean value) {
+  public void setEnabledAndMessage(String label, @Nullable Boolean value) {
     var newValue = value == null ? !enabled : value;
 
     if (newValue == enabled) {
@@ -111,6 +117,7 @@ public class InvFilterProfile {
         new InterpretationEnvironment()
           .withVariable("slot", selectedSlotIndex + 1)
           .withVariable("filter", selectedFilter == null ? null : selectedFilter.getTokenPredicateString())
+          .withVariable("set_filter_command", selectedFilter == null ? null : makeSetFilterCommand(label, selectedFilter))
       );
 
       return;
@@ -119,7 +126,7 @@ public class InvFilterProfile {
     config.rootSection.invFilter.nowDisabled.sendMessage(player);
   }
 
-  public void setSelectedSlotIndexAndMessage(int index) {
+  public void setSelectedSlotIndexAndMessage(String label, int index) {
     var environment = new InterpretationEnvironment().withVariable("slot", index + 1);
 
     if (index == selectedSlotIndex) {
@@ -127,16 +134,25 @@ public class InvFilterProfile {
       return;
     }
 
-    setSelectedSlotIndex(index);
-
-    config.rootSection.invFilter.slotNowSelected.sendMessage(player, environment);
-  }
-
-  public void setSelectedSlotIndex(int index) {
-    if (index < 0 || index >= filterBySlotIndex.size())
+    if (!setSelectedSlotIndex(index))
       return;
 
+    var filter = filterBySlotIndex.get(index);
+
+    config.rootSection.invFilter.slotNowSelected.sendMessage(
+      player,
+      environment
+        .withVariable("filter", filter == null ? null : filter.getTokenPredicateString())
+        .withVariable("set_filter_command", filter == null ? null : makeSetFilterCommand(label, filter))
+    );
+  }
+
+  public boolean setSelectedSlotIndex(int index) {
+    if (index < 0 || index >= filterBySlotIndex.size())
+      return false;
+
     selectedSlotIndex = index;
+    return true;
   }
 
   public boolean isEnabled() {

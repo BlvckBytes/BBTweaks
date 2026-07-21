@@ -81,7 +81,7 @@ public class InvFilterProfileStore implements Listener {
     for (var slotIndex = 0; slotIndex < FILTER_SLOT_COUNT; ++slotIndex)
       filterBySlotIndex.add(loadFilterAtIndex(pdc, slotIndex));
 
-    var profile = new InvFilterProfile(player, config, filterBySlotIndex);
+    var profile = new InvFilterProfile(player, config, ippIntegration, filterBySlotIndex);
 
     var enabledValue = pdc.get(keyEnabled, PersistentDataType.BOOLEAN);
 

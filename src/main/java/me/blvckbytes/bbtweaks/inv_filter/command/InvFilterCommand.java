@@ -6,6 +6,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
+import me.blvckbytes.bbtweaks.inv_filter.InvFilterProfile;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterProfileStore;
 import me.blvckbytes.bbtweaks.inv_filter.display.InvFilterDisplayData;
 import me.blvckbytes.bbtweaks.inv_filter.display.InvFilterDisplayHandler;
@@ -80,9 +81,9 @@ public class InvFilterCommand implements CommandHandler, Listener {
     }
 
     switch (normalizedAction.constant) {
-      case OFF -> profile.setEnabledAndMessage(false);
-      case ON -> profile.setEnabledAndMessage(true);
-      case TOGGLE -> profile.setEnabledAndMessage(null);
+      case OFF -> profile.setEnabledAndMessage(label, false);
+      case ON -> profile.setEnabledAndMessage(label, true);
+      case TOGGLE -> profile.setEnabledAndMessage(label, null);
       case SELECT_SLOT -> {
         if (args.length != 2) {
           config.rootSection.invFilter.usageSelectSlot.sendMessage(
@@ -95,35 +96,47 @@ public class InvFilterCommand implements CommandHandler, Listener {
           return true;
         }
 
-        int slot;
+        var slot = tryParseSlotNumberOrMessage(player, args[1], profile);
 
-        try {
-          slot = Integer.parseInt(args[1]);
+        if (slot == null)
+          return true;
 
-          if (slot <= 0 || slot > profile.getSlotCount())
-            throw new IllegalArgumentException();
-        } catch (Throwable _) {
-          config.rootSection.invFilter.invalidFilterSlot.sendMessage(
+        profile.setSelectedSlotIndexAndMessage(label, slot - 1);
+
+        if (!profile.isEnabled())
+          profile.setEnabledAndMessage(label, true);
+      }
+
+      case GET_FILTER -> {
+        int slotIndex;
+
+        if (args.length == 1) {
+          slotIndex = profile.getSelectedSlotIndex();
+        } else if (args.length == 2) {
+          var slot = tryParseSlotNumberOrMessage(player, args[1], profile);
+
+          if (slot == null)
+            return true;
+
+          slotIndex = slot - 1;
+        } else {
+          config.rootSection.invFilter.usageGetFilter.sendMessage(
             player,
             new InterpretationEnvironment()
-              .withVariable("input", args[1])
-              .withVariable("slot_count", profile.getSlotCount())
+              .withVariable("label", label)
+              .withVariable("action", normalizedAction.getNormalizedName())
           );
 
           return true;
         }
 
-        profile.setSelectedSlotIndexAndMessage(slot - 1);
-      }
-
-      case GET_FILTER -> {
-        var currentFilter = profile.getFilter(profile.getSelectedSlotIndex());
+        var currentFilter = profile.getFilter(slotIndex);
 
         if (currentFilter == null) {
           config.rootSection.invFilter.getFilterNoneSet.sendMessage(
             player,
             new InterpretationEnvironment()
-              .withVariable("slot", profile.getSelectedSlotIndex() + 1)
+              .withVariable("slot", slotIndex + 1)
           );
 
           return true;
@@ -132,14 +145,14 @@ public class InvFilterCommand implements CommandHandler, Listener {
         config.rootSection.invFilter.getFilter.sendMessage(
           player,
           new InterpretationEnvironment()
-            .withVariable("slot", profile.getSelectedSlotIndex() + 1)
-            .withVariable("current_filter", currentFilter.getTokenPredicateString())
-            .withVariable("set_filter_command", profile.makeSetFilterCommand(ippIntegration, label, currentFilter))
+            .withVariable("slot", slotIndex + 1)
+            .withVariable("filter", currentFilter.getTokenPredicateString())
+            .withVariable("set_filter_command", profile.makeSetFilterCommand(label, currentFilter))
         );
       }
 
       case REMOVE_FILTER -> {
-        profile.removeCurrentFilterIfSetAndMessage(ippIntegration, label);
+        profile.removeCurrentFilterIfSetAndMessage(label);
       }
 
       case SET_FILTER, SET_FILTER_WITH_LANGUAGE -> {
@@ -217,12 +230,13 @@ public class InvFilterCommand implements CommandHandler, Listener {
           new InterpretationEnvironment()
             .withVariable("slot", profile.getSelectedSlotIndex() + 1)
             .withVariable("filter", newFilter.getTokenPredicateString())
-            .withVariable("set_filter_command", profile.makeSetFilterCommand(ippIntegration, label, newFilter))
+            .withVariable("set_filter_command", profile.makeSetFilterCommand(label, newFilter))
         );
 
         if (!profile.isEnabled())
-          profile.setEnabledAndMessage(true);
+          profile.setEnabledAndMessage(label, true);
       }
+
       default -> throw new IllegalStateException("Unaccounted-for command-action: " + normalizedAction.constant.name());
     }
 
@@ -248,7 +262,7 @@ public class InvFilterCommand implements CommandHandler, Listener {
     if (action.constant == CommandAction.SET_FILTER || action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE)
       return PredicateUtils.tabCompletePredicate(player, args, 1, ippIntegration, action.constant == CommandAction.SET_FILTER_WITH_LANGUAGE);
 
-    if (action.constant == CommandAction.SELECT_SLOT) {
+    if (action.constant == CommandAction.SELECT_SLOT || action.constant == CommandAction.GET_FILTER) {
       var profile = profileStore.access(player);
 
       return IntStream.range(1, profile.getSlotCount() + 1)
@@ -268,5 +282,25 @@ public class InvFilterCommand implements CommandHandler, Listener {
   @Override
   public @Nullable CommandSection getCommandSection() {
     return config.rootSection.invFilter.command;
+  }
+
+  private @Nullable Integer tryParseSlotNumberOrMessage(Player player, String input, InvFilterProfile profile) {
+    try {
+      var slot = Integer.parseInt(input);
+
+      if (slot <= 0 || slot > profile.getSlotCount())
+        throw new IllegalArgumentException();
+
+      return slot;
+    } catch (Throwable _) {
+      config.rootSection.invFilter.invalidFilterSlot.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("input", input)
+          .withVariable("slot_count", profile.getSlotCount())
+      );
+
+      return null;
+    }
   }
 }
