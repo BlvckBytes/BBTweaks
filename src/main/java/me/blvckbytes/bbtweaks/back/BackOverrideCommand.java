@@ -64,7 +64,7 @@ public class BackOverrideCommand implements CommandHandler, Listener, Tickable {
       return true;
     }
 
-    var lastLocation = locationHistoryStore.accessHistory(player).getNthLastLocation(0);
+    var lastLocation = locationHistoryStore.accessHistory(player).getLastLocation();
 
     if (lastLocation == null) {
       config.rootSection.backOverride.noLastLocation.sendMessage(player);
@@ -84,7 +84,7 @@ public class BackOverrideCommand implements CommandHandler, Listener, Tickable {
   @EventHandler(priority = EventPriority.LOWEST)
   public void onPreProcess(PlayerCommandPreprocessEvent event) {
     // Do not override if we have no last location yet (initial case).
-    if (locationHistoryStore.accessHistory(event.getPlayer()).getNthLastLocation(0) == null)
+    if (locationHistoryStore.accessHistory(event.getPlayer()).getLastLocation() == null)
       return;
 
     var message = event.getMessage();

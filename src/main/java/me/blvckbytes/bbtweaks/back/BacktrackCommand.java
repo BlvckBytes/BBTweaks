@@ -63,9 +63,8 @@ public class BacktrackCommand implements CommandHandler, Tickable, Listener {
     }
 
     var history = locationHistoryStore.accessHistory(player);
-    var lastLocation = history.getNthLastLocation(0);
 
-    if (lastLocation == null) {
+    if (history.getLastLocation() == null) {
       config.rootSection.backOverride.noLastLocation.sendMessage(player);
       return true;
     }

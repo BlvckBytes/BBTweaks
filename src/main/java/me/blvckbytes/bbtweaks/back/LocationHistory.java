@@ -22,8 +22,7 @@ public class LocationHistory {
 
   public final UUID playerId;
   private final Location[] historyRingbuffer;
-  // TODO: We should store the lastLocation separately, because somehow, increasing HISTORY_SIZE
-  //       made us loose /back for some players... Try to reproduce, maybe?
+  private @Nullable Location lastLocation;
   private int nextWriteIndex;
 
   public LocationHistory(UUID playerId) {
@@ -33,6 +32,7 @@ public class LocationHistory {
 
   public void add(Location location) {
     historyRingbuffer[nextWriteIndex++] = location;
+    lastLocation = location;
 
     if (nextWriteIndex >= historyRingbuffer.length)
       nextWriteIndex = 0;
@@ -40,6 +40,13 @@ public class LocationHistory {
 
   public int maxSize() {
     return historyRingbuffer.length;
+  }
+
+  public @Nullable Location getLastLocation() {
+    if (lastLocation == null)
+      return getNthLastLocation(0);
+
+    return lastLocation;
   }
 
   public @Nullable Location getNthLastLocation(int index) {
@@ -56,13 +63,16 @@ public class LocationHistory {
 
     result.addProperty("nextWriteIndex", nextWriteIndex);
 
+    if (lastLocation != null)
+      result.add("lastLocation", locationToJsonPrimitive(lastLocation));
+
     var history = new JsonArray();
     result.add("history", history);
 
     for (var location : historyRingbuffer) {
       JsonPrimitive locationJson;
 
-      if (location == null || (locationJson = locationToJson(location)) == null) {
+      if (location == null || (locationJson = locationToJsonPrimitive(location)) == null) {
         history.add(JsonNull.INSTANCE);
         continue;
       }
@@ -113,7 +123,7 @@ public class LocationHistory {
         break;
 
       if (history.get(historyIndex) instanceof JsonPrimitive locationPrimitive)
-        result.historyRingbuffer[historyIndex] = locationFromJson(locationPrimitive);
+        result.historyRingbuffer[historyIndex] = locationFromJsonPrimitive(locationPrimitive);
     }
 
     if (!(json.get("nextWriteIndex") instanceof JsonPrimitive indexPrimitive))
@@ -126,10 +136,13 @@ public class LocationHistory {
         result.nextWriteIndex = 0;
     } catch (Throwable ignored) {}
 
+    if (json.get("lastLocation") instanceof JsonPrimitive lastLocationPrimitive)
+      result.lastLocation = locationFromJsonPrimitive(lastLocationPrimitive);
+
     return result;
   }
 
-  private static @Nullable JsonPrimitive locationToJson(Location location) {
+  private static @Nullable JsonPrimitive locationToJsonPrimitive(Location location) {
     var world = location.getWorld();
 
     if (world == null)
@@ -145,7 +158,7 @@ public class LocationHistory {
     );
   }
 
-  private static @Nullable Location locationFromJson(JsonPrimitive json) {
+  private static @Nullable Location locationFromJsonPrimitive(JsonPrimitive json) {
     var parts = json.getAsString().split(" ");
 
     if (parts.length != 6)
