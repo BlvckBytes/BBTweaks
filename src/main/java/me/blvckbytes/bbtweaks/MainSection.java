@@ -40,6 +40,7 @@ import me.blvckbytes.bbtweaks.seed.SeedOverrideSection;
 import me.blvckbytes.bbtweaks.shulker_accessor.config.ShulkerAccessorSection;
 import me.blvckbytes.bbtweaks.sidebar.config.SidebarSection;
 import me.blvckbytes.bbtweaks.sign_copier.SignCopierSection;
+import me.blvckbytes.bbtweaks.teleporter_sign.TeleporterSignSection;
 import me.blvckbytes.bbtweaks.un_craft.config.UnCraftSection;
 
 @CSAlways
@@ -82,6 +83,7 @@ public class MainSection extends ConfigSection {
   public BlockFacingSection blockFacing;
   public FrameLockingSection frameLocking;
   public HotbarRandomizerSection hotbarRandomizer;
+  public TeleporterSignSection teleporterSign;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
