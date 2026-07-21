@@ -4,6 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
+import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import org.bukkit.Bukkit;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
@@ -18,14 +19,22 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
-public class BackOverrideCommand implements CommandHandler, Listener {
+public class BackOverrideCommand implements CommandHandler, Listener, Tickable {
 
   private final PluginCommand command;
   private final LocationHistoryStore locationHistoryStore;
   private final ConfigKeeper<MainSection> config;
+
+  private long time;
+
+  private record IgnoredId(UUID playerId, long addStamp) {}
+
+  private final List<IgnoredId> ignoredIds;
 
   public BackOverrideCommand(
     JavaPlugin plugin,
@@ -35,6 +44,12 @@ public class BackOverrideCommand implements CommandHandler, Listener {
     this.command = Objects.requireNonNull(plugin.getCommand("back"));
     this.locationHistoryStore = locationHistoryStore;
     this.config = config;
+
+    this.ignoredIds = new ArrayList<>();
+  }
+
+  public void temporarilyIgnore(Player player) {
+    ignoredIds.add(new IgnoredId(player.getUniqueId(), time));
   }
 
   @Override
@@ -102,6 +117,9 @@ public class BackOverrideCommand implements CommandHandler, Listener {
     if (player.getMetadata("essentials:ignore-teleport").stream().anyMatch(MetadataValue::asBoolean))
       return;
 
+    if (isIgnored(player))
+      return;
+
     var history = locationHistoryStore.accessHistory(player);
     var addEvent = new LocationHistoryAddEvent(player, history, player.getLocation());
 
@@ -129,5 +147,28 @@ public class BackOverrideCommand implements CommandHandler, Listener {
   @Override
   public @Nullable CommandSection getCommandSection() {
     return null;
+  }
+
+  @Override
+  public void tick(long relativeTime) {
+    time = relativeTime;
+
+    for (var index = ignoredIds.size() - 1; index >= 0; --index) {
+      var ignoredId = ignoredIds.get(index);
+
+      if (relativeTime - ignoredId.addStamp > 0)
+        ignoredIds.remove(index);
+    }
+  }
+
+  private boolean isIgnored(Player player) {
+    var playerId = player.getUniqueId();
+
+    for (var ignoredId : ignoredIds) {
+      if (playerId.equals(ignoredId.playerId))
+        return true;
+    }
+
+    return false;
   }
 }
