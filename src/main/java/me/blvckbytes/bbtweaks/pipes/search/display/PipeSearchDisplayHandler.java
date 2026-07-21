@@ -236,7 +236,6 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     // Exhausted the collection - make it vanish altogether
     if (collectionEntry.isEmpty()) {
       display.removeEntry(collectionEntry);
-      display.show();
       return;
     }
 
@@ -276,7 +275,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
       }
 
       if (display.displayData.backToDisplay() != null && config.rootSection.pipes.search.display.items.backToCollectionsButton.getDisplaySlots().contains(slot)) {
-        reopen(display.displayData.backToDisplay());
+        display.displayData.backToDisplay().showNextTick();
         return;
       }
     }

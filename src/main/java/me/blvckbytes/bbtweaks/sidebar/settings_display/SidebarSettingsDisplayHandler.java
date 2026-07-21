@@ -9,7 +9,6 @@ import me.blvckbytes.bbtweaks.sidebar.sorting_display.SidebarSortingDisplayHandl
 import me.blvckbytes.bbtweaks.sidebar.sorting_display.SortingDisplayData;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;
@@ -114,7 +113,7 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
 
       var displayData = new ColorDisplayData(
         display.displayData, null,
-        () -> Bukkit.getScheduler().runTaskLater(plugin, () -> reopen(display), 1L)
+        display::showNextTick
       );
 
       sidebarColorDisplayHandler.show(player, displayData);
@@ -127,7 +126,7 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
 
       sidebarSortingDisplayHandler.show(player, new SortingDisplayData(
         display.displayData,
-        () -> Bukkit.getScheduler().runTaskLater(plugin, () -> reopen(display), 1L)
+        display::showNextTick
       ));
 
       return;
@@ -154,7 +153,7 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
 
       var displayData = new ColorDisplayData(
         display.displayData, statistic,
-        () -> Bukkit.getScheduler().runTaskLater(plugin, () -> reopen(display), 1L)
+        display::showNextTick
       );
 
       sidebarColorDisplayHandler.show(player, displayData);

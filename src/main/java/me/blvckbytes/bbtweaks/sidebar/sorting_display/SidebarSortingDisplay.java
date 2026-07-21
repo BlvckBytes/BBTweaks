@@ -31,8 +31,6 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
 
     this.statisticBySlotIndex = new Int2ObjectOpenHashMap<>();
-
-    show();
   }
 
   @Override

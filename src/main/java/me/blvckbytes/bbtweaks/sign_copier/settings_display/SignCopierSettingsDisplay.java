@@ -25,8 +25,6 @@ public class SignCopierSettingsDisplay extends Display<SignCopierSettings> {
     super(player, displayData, config, plugin);
 
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
-
-    show();
   }
 
   @Override

@@ -24,8 +24,6 @@ public class MagnetEditDisplay extends Display<EditSession> {
     super(player, displayData, config, plugin);
 
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
-
-    show();
   }
 
   @Override

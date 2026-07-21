@@ -31,6 +31,10 @@ public abstract class Display<DisplayDataType> implements InventoryHolder {
     this.plugin = plugin;
   }
 
+  public void showNextTick() {
+    Bukkit.getScheduler().runTaskLater(plugin, this::show, 1);
+  }
+
   public void show() {
     inventory = makeInventoryParameters().makeInventory(this);
 

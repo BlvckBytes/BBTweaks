@@ -22,8 +22,6 @@ public class ShowcaseDisplay extends Display<ShowcaseDisplayData> {
     Plugin plugin
   ) {
     super(player, displayData, config, plugin);
-
-    show();
   }
 
   @Override

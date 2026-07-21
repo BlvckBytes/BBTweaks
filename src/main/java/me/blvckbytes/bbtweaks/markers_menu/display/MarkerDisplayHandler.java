@@ -58,7 +58,7 @@ public class MarkerDisplayHandler extends DisplayHandler<MarkerDisplay, MarkerDi
       var previousDisplay = display.displayData.previousDisplay();
 
       if (previousDisplay != null)
-        reopen(previousDisplay);
+        previousDisplay.showNextTick();
 
       return;
     }

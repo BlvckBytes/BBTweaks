@@ -43,7 +43,7 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
     this.displayTypeClass = displayTypeClass;
   }
 
-  public abstract DisplayType instantiateDisplay(Player player, DisplayDataType displayData);
+  protected abstract DisplayType instantiateDisplay(Player player, DisplayDataType displayData);
 
   public @Nullable DisplayType getDisplay(Player player) {
     if (!(player.getOpenInventory().getTopInventory().getHolder(false) instanceof Display<?> display))
@@ -56,13 +56,7 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
   }
 
   public void show(Player player, DisplayDataType displayData) {
-    // TODO: We should really call show here and not rely on show() being present in the display-constructor
-    instantiateDisplay(player, displayData);
-  }
-
-  public void reopen(DisplayType display) {
-    // TODO: This could really be replaced with just an invocation of show() at all call-sites
-    display.show();
+    instantiateDisplay(player, displayData).show();
   }
 
   public void closeIfOpen(Player player) {

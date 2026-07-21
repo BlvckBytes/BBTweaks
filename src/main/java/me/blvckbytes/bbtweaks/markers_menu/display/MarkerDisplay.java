@@ -42,8 +42,6 @@ public class MarkerDisplay extends Display<MarkerDisplayData> {
 
     var numberOfDisplaySlots = config.rootSection.markersMenu.display.getPaginationSlots().size();
     this.numberOfPages = Math.max(1, (int) Math.ceil(displayItems.size() / (double) numberOfDisplaySlots));
-
-    show();
   }
 
   public @Nullable MarkerDisplayItem getDisplayItemForSlot(int slot) {
@@ -58,7 +56,7 @@ public class MarkerDisplay extends Display<MarkerDisplayData> {
       return;
 
     ++currentPage;
-    show();
+    showNextTick();
   }
 
   public void previousPage() {
@@ -66,7 +64,7 @@ public class MarkerDisplay extends Display<MarkerDisplayData> {
       return;
 
     --currentPage;
-    show();
+    showNextTick();
   }
 
   @Override

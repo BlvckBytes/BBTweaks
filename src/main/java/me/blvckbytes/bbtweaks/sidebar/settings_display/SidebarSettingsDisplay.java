@@ -32,8 +32,6 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
 
     this.statisticBySlotIndex = new Int2ObjectOpenHashMap<>();
-
-    show();
   }
 
   @Override

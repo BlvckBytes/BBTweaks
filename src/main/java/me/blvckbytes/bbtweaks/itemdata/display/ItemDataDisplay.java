@@ -26,8 +26,6 @@ public class ItemDataDisplay extends Display<EmptyObject> {
     super(player, displayData, config, plugin);
 
     isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
-
-    show();
   }
 
   @Override

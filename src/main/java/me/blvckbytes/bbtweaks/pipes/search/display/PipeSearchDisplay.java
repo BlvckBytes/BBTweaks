@@ -36,8 +36,6 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
     this.slotMap = new SearchDisplayEntry[9 * 6];
 
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
-
-    show();
   }
 
   @Override
@@ -62,7 +60,7 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
       return;
     }
 
-    show();
+    showNextTick();
   }
 
   private void clearSlotMap() {
@@ -75,7 +73,7 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
       return;
 
     ++currentPage;
-    show();
+    showNextTick();
   }
 
   public void previousPage() {
@@ -83,7 +81,7 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
       return;
 
     --currentPage;
-    show();
+    showNextTick();
   }
 
   public void firstPage() {
@@ -91,7 +89,7 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
       return;
 
     currentPage = 1;
-    show();
+    showNextTick();
   }
 
   public void lastPage() {
@@ -99,7 +97,7 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
       return;
 
     currentPage = numberOfPages;
-    show();
+    showNextTick();
   }
 
   public void nextCollectionAction() {

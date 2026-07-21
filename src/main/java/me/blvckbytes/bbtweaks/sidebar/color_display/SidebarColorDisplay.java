@@ -45,8 +45,6 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
     this.commonFormatStates = new boolean[Format.ALL_VALUES.size()];
 
     setSelectingLabelColor(true);
-
-    show();
   }
 
   public void setSelectingLabelColor(boolean value) {
