@@ -18,7 +18,7 @@ import me.blvckbytes.bbtweaks.auto_tool.AutoToolCommand;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.block_facing.settings.BlockFacingSettingsStore;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
-import me.blvckbytes.bbtweaks.inv_filter.InvFilterCommand;
+import me.blvckbytes.bbtweaks.inv_filter.InvFilterProfileStore;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import me.blvckbytes.bbtweaks.multi_break.BlockDirections;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
@@ -57,7 +57,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
   private final Plugin plugin;
   private final MultiBreakParametersStore multiBreakParametersStore;
   private final InvMagnetParametersStore invMagnetParametersStore;
-  private final InvFilterCommand invFilterCommand;
+  private final InvFilterProfileStore invFilterProfileStore;
   private final AutoToolCommand autoToolCommand;
   private final ArmIntegration armIntegration;
   private final FloodgateIntegration floodgateIntegration;
@@ -80,7 +80,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     Plugin plugin,
     MultiBreakParametersStore multiBreakParametersStore,
     InvMagnetParametersStore invMagnetParametersStore,
-    InvFilterCommand invFilterCommand,
+    InvFilterProfileStore invFilterProfileStore,
     AutoToolCommand autoToolCommand,
     ArmIntegration armIntegration,
     FloodgateIntegration floodgateIntegration,
@@ -91,7 +91,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
   ) {
     this.multiBreakParametersStore = multiBreakParametersStore;
     this.invMagnetParametersStore = invMagnetParametersStore;
-    this.invFilterCommand = invFilterCommand;
+    this.invFilterProfileStore = invFilterProfileStore;
     this.autoToolCommand = autoToolCommand;
     this.armIntegration = armIntegration;
     this.floodgateIntegration = floodgateIntegration;
@@ -507,8 +507,11 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       }
 
       case INV_FILTER_STATUS -> {
+        var profile = invFilterProfileStore.access(player);
+
         return environment
-          .withVariable("enabled", invFilterCommand.getOrLoadFilter(player).enabled);
+          .withVariable("enabled", profile.enabled)
+          .withVariable("slot", profile.getSelectedSlotIndex() + 1);
       }
 
       case AUTOTOOL_STATUS -> {

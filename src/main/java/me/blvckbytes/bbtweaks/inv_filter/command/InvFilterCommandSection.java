@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.inv_filter;
+package me.blvckbytes.bbtweaks.inv_filter.command;
 
 import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
