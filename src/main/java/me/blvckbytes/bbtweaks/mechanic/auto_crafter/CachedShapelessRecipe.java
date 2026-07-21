@@ -57,6 +57,7 @@ public class CachedShapelessRecipe implements CachedRecipe {
     if (remainingIngredients.isEmpty())
       return false;
 
+    contentLoop:
     for (var matrixContent : matrixContents) {
       if (!matrixContent.isPresent())
         continue;
@@ -70,9 +71,12 @@ public class CachedShapelessRecipe implements CachedRecipe {
 
         if (matrixContent.test(requiredChoice)) {
           iterator.remove();
-          break;
+          continue contentLoop;
         }
       }
+
+      // The current matrix-content found no remaining ingredient, so we're dealing with an excess.
+      return false;
     }
 
     return remainingIngredients.isEmpty();
