@@ -91,7 +91,7 @@ public class AutoFlyCommand implements CommandHandler, Listener {
     handleAutoFly(player);
 
     var message = switch (normalizedMode.constant) {
-      case OFF -> config.rootSection.autoFly.newModeOff;
+      case DISABLED -> config.rootSection.autoFly.newModeOff;
       case ENABLED -> config.rootSection.autoFly.newModeEnabled;
       case ENABLED_SET_FLYING -> config.rootSection.autoFly.newModeEnabledSetFlying;
     };
@@ -132,7 +132,7 @@ public class AutoFlyCommand implements CommandHandler, Listener {
 
     var mode = readModeFor(player);
 
-    if (mode == AutoMode.OFF)
+    if (mode == AutoMode.DISABLED)
       return;
 
     applyAutoFlyMode(player, mode, false);
@@ -177,7 +177,7 @@ public class AutoFlyCommand implements CommandHandler, Listener {
 
   private AutoMode readModeFor(Player player) {
     var modeValue = player.getPersistentDataContainer().get(keyMode, PersistentDataType.STRING);
-    var result = AutoMode.OFF;
+    var result = AutoMode.DISABLED;
 
     if (modeValue != null) {
       try {

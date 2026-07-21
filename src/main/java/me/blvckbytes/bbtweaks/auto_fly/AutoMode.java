@@ -6,7 +6,7 @@ import me.blvckbytes.syllables_matcher.MatchableEnum;
 public enum AutoMode implements MatchableEnum {
   ENABLED,
   ENABLED_SET_FLYING,
-  OFF,
+  DISABLED,
   ;
 
   public static final EnumMatcher<AutoMode> matcher = new EnumMatcher<>(values());
