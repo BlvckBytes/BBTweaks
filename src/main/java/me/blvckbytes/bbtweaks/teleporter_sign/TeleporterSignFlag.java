@@ -9,6 +9,10 @@ public enum TeleporterSignFlag implements FlagEnum {
   EAST("east"),
   SOUTH("south"),
   WEST("west"),
+  NORTH_EAST("north-east"),
+  NORTH_WEST("north-west"),
+  SOUTH_EAST("south-east"),
+  SOUTH_WEST("south-west")
   ;
 
   private final String shorthand;

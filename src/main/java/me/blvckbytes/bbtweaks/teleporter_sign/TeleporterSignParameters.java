@@ -32,6 +32,18 @@ public record TeleporterSignParameters(
     if (flags.contains(TeleporterSignFlag.WEST))
       return BlockFace.WEST;
 
+    if (flags.contains(TeleporterSignFlag.NORTH_EAST))
+      return BlockFace.NORTH_EAST;
+
+    if (flags.contains(TeleporterSignFlag.NORTH_WEST))
+      return BlockFace.NORTH_WEST;
+
+    if (flags.contains(TeleporterSignFlag.SOUTH_EAST))
+      return BlockFace.SOUTH_EAST;
+
+    if (flags.contains(TeleporterSignFlag.SOUTH_WEST))
+      return BlockFace.SOUTH_WEST;
+
     return BlockFace.NORTH;
   }
 
@@ -45,10 +57,14 @@ public record TeleporterSignParameters(
 
   private float facingToYaw(BlockFace facing) {
     return switch (facing) {
-      case NORTH -> 180F;
-      case EAST -> -90F;
-      case SOUTH -> 0F;
-      case WEST -> 90F;
+      case NORTH -> 180;
+      case NORTH_EAST -> -135;
+      case NORTH_WEST -> 135;
+      case EAST -> -90;
+      case SOUTH -> 0;
+      case SOUTH_EAST -> -45;
+      case SOUTH_WEST -> 45;
+      case WEST -> 90;
       default -> throw new IllegalArgumentException();
     };
   }

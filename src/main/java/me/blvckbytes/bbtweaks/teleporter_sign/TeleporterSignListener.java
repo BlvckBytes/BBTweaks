@@ -187,12 +187,30 @@ public class TeleporterSignListener implements Listener {
   private void preProcessLines(List<Component> lines) {
     var flagsContent = ComponentUtil.asTrimmedText(lines.get(FLAGS_LINE));
 
+    // Well... This should really almost be procedurally generated :^)
     flagsContent = flagsContent
       .toLowerCase()
       .replace("norden", "north")
       .replace("osten", "east")
       .replace("süden", "south")
-      .replace("westen", "west");
+      .replace("westen", "west")
+      .replace("nord-ost", "north-east")
+      .replace("nordost", "north-east")
+      .replace("nord-osten", "north-east")
+      .replace("nordosten", "north-east")
+      .replace("nord-west", "north-west")
+      .replace("nordwest", "north-west")
+      .replace("nord-westen", "north-west")
+      .replace("nordwesten", "north-west")
+      .replace("süd-ost", "south-east")
+      .replace("südost", "south-east")
+      .replace("süd-osten", "south-east")
+      .replace("südosten", "south-east")
+      .replace("süd-west", "south-west")
+      .replace("südwest", "south-west")
+      .replace("süd-westen", "south-west")
+      .replace("südwesten", "south-west")
+    ;
 
     lines.set(FLAGS_LINE, Component.text(flagsContent));
   }
