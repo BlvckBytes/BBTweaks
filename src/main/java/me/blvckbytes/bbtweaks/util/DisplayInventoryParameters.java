@@ -22,10 +22,17 @@ public record DisplayInventoryParameters(
       return Bukkit.createInventory(display, size, title);
     }
 
-    if (title == null)
-      return Bukkit.createInventory(display, inventoryType);
+    var usedInventoryType = inventoryType;
 
-    return Bukkit.createInventory(display, inventoryType, title);
+    // Sadly, a crafter-inventory with a non-null holder is currently completely
+    // unusable on Paper, seeing how it does not show any items whatsoever.
+    if (usedInventoryType == InventoryType.CRAFTER)
+      usedInventoryType = InventoryType.DROPPER;
+
+    if (title == null)
+      return Bukkit.createInventory(display, usedInventoryType);
+
+    return Bukkit.createInventory(display, usedInventoryType, title);
   }
 
   public static DisplayInventoryParameters fromSection(GuiSection<?> guiSection, InterpretationEnvironment environment) {
