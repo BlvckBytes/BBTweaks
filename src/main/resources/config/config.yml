@@ -2747,7 +2747,7 @@ pipes:
   unsupportedSignType: '{lut.pipes_prefix} <&c>Pipe-Schilder können nur Wand- oder Steheschilder sein!'
   signCreated: '{lut.pipes_prefix} <&7>Das Pipe-Schild wurde erfolgreich erstellt!'
   enumerationExceededRetries: '{lut.pipes_prefix} <&e>Das Limit von <&6>{limit} Ladeversuchen</> wurde überschritten; breche vorzeitig ab!'
-  enumerationNotAPipeBlock: '{lut.pipes_prefix} <&c>Du schaust aktuell keine Pipe-Blöcke an; bitte schaue auf einen Kolben, einen Behälter, ein Schild oder ein Rohr!'
+  enumerationNotAPipeBlock: '{lut.pipes_prefix} <&c>Der Block bei <&4>{x} {y} {z}</> ist kein Pipe-Block; bitte schaue auf einen Kolben, einen Behälter, ein Schild oder ein Rohr!'
   enumerationCannotBuildThere: '{lut.pipes_prefix} <&c>Dir fehlen die nötigen Rechte, um auf die Blöcke zuzugreifen!'
   enumerationAlreadyInASession: '{lut.pipes_prefix} <&c>Es ist bereits ein Pipe-Vorgang aktiv! Bitte warte, bis dieser beendet wurde.'
   notifications:

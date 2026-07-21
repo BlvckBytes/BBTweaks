@@ -87,7 +87,13 @@ public class PipeEnumerationSessionHandler implements Listener {
 
     if (!enumerationSession.didEncounterPipeBlocks()) {
       enumerationSessionByPlayerId.remove(player.getUniqueId());
-      config.rootSection.pipes.enumerationNotAPipeBlock.sendMessage(player);
+      config.rootSection.pipes.enumerationNotAPipeBlock.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("x", targetBlock.getX())
+          .withVariable("y", targetBlock.getY())
+          .withVariable("z", targetBlock.getZ())
+      );
     }
   }
 
