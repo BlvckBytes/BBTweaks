@@ -5,11 +5,13 @@ import me.blvckbytes.bbtweaks.MainSection;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 
-public abstract class Display<DisplayDataType> {
+public abstract class Display<DisplayDataType> implements InventoryHolder {
 
   public final Player player;
   protected final ConfigKeeper<MainSection> config;
@@ -31,7 +33,7 @@ public abstract class Display<DisplayDataType> {
 
   public void show() {
     var priorInventory = inventory;
-    inventory = makeInventory();
+    inventory = makeInventoryParameters().makeInventory(this);
 
     renderItems();
 
@@ -48,7 +50,7 @@ public abstract class Display<DisplayDataType> {
 
   protected abstract void renderItems();
 
-  protected abstract Inventory makeInventory();
+  protected abstract DisplayInventoryParameters makeInventoryParameters();
 
   public abstract void onConfigReload();
 
@@ -67,5 +69,10 @@ public abstract class Display<DisplayDataType> {
 
   public boolean isInventory(Inventory inventory) {
     return Objects.equals(this.inventory, inventory);
+  }
+
+  @Override
+  public @NotNull Inventory getInventory() {
+    return inventory;
   }
 }

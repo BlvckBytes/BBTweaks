@@ -9,8 +9,8 @@ import me.blvckbytes.bbtweaks.sidebar.config.StatisticSection;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
 import me.blvckbytes.bbtweaks.util.Display;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -89,8 +89,8 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
   }
 
   @Override
-  protected Inventory makeInventory() {
-    return config.rootSection.sidebar.settingsDisplay.createInventory(makeEnvironment());
+  protected DisplayInventoryParameters makeInventoryParameters() {
+    return DisplayInventoryParameters.fromSection(config.rootSection.sidebar.settingsDisplay, makeEnvironment());
   }
 
   @Override

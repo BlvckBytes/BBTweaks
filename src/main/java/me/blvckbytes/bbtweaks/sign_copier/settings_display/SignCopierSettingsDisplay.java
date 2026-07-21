@@ -7,8 +7,8 @@ import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.sign_copier.settings.SettingFlag;
 import me.blvckbytes.bbtweaks.sign_copier.settings.SignCopierSettings;
 import me.blvckbytes.bbtweaks.util.Display;
+import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
 public class SignCopierSettingsDisplay extends Display<SignCopierSettings> {
@@ -43,8 +43,8 @@ public class SignCopierSettingsDisplay extends Display<SignCopierSettings> {
   }
 
   @Override
-  protected Inventory makeInventory() {
-    return config.rootSection.signCopier.settingsDisplay.createInventory(makeEnvironment());
+  protected DisplayInventoryParameters makeInventoryParameters() {
+    return DisplayInventoryParameters.fromSection(config.rootSection.signCopier.settingsDisplay, makeEnvironment());
   }
 
   @Override

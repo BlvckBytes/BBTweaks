@@ -6,8 +6,8 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.EditSession;
 import me.blvckbytes.bbtweaks.util.Display;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
 public class MagnetEditDisplay extends Display<EditSession> {
@@ -49,8 +49,8 @@ public class MagnetEditDisplay extends Display<EditSession> {
   }
 
   @Override
-  protected Inventory makeInventory() {
-    return config.rootSection.mechanic.magnet.editDisplay.createInventory(createEnvironment());
+  protected DisplayInventoryParameters makeInventoryParameters() {
+    return DisplayInventoryParameters.fromSection(config.rootSection.mechanic.magnet.editDisplay, createEnvironment());
   }
 
   @Override

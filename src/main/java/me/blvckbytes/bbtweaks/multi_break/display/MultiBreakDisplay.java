@@ -6,8 +6,8 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.multi_break.command.CommandAction;
 import me.blvckbytes.bbtweaks.util.Display;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
 public class MultiBreakDisplay extends Display<MultiBreakDisplayData> {
@@ -66,8 +66,8 @@ public class MultiBreakDisplay extends Display<MultiBreakDisplayData> {
   }
 
   @Override
-  protected Inventory makeInventory() {
-    return config.rootSection.multiBreak.display.createInventory(createEnvironment());
+  protected DisplayInventoryParameters makeInventoryParameters() {
+    return DisplayInventoryParameters.fromSection(config.rootSection.multiBreak.display, createEnvironment());
   }
 
   @Override

@@ -5,9 +5,9 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.Display;
+import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import me.blvckbytes.item_predicate_parser.predicate.stringify.PlainStringifier;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -203,8 +203,8 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
   }
 
   @Override
-  protected Inventory makeInventory() {
-    return config.rootSection.pipes.search.display.createInventory(makeEnvironment());
+  protected DisplayInventoryParameters makeInventoryParameters() {
+    return DisplayInventoryParameters.fromSection(config.rootSection.pipes.search.display, makeEnvironment());
   }
 
   private InterpretationEnvironment makeEnvironment() {

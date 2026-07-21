@@ -6,9 +6,9 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.itemdata.ItemDataAccessor;
 import me.blvckbytes.bbtweaks.util.Display;
+import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import me.blvckbytes.bbtweaks.util.EmptyObject;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
@@ -67,8 +67,8 @@ public class ItemDataDisplay extends Display<EmptyObject> {
   }
 
   @Override
-  protected Inventory makeInventory() {
-    return config.rootSection.itemData.infoDisplay.createInventory(makeEnvironment());
+  protected DisplayInventoryParameters makeInventoryParameters() {
+    return DisplayInventoryParameters.fromSection(config.rootSection.itemData.infoDisplay, makeEnvironment());
   }
 
   @Override

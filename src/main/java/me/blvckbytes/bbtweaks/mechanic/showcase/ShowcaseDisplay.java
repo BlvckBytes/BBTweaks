@@ -5,12 +5,13 @@ import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.util.Display;
-import org.bukkit.Bukkit;
+import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 public class ShowcaseDisplay extends Display<ShowcaseDisplayData> {
 
@@ -26,7 +27,19 @@ public class ShowcaseDisplay extends Display<ShowcaseDisplayData> {
   }
 
   @Override
-  protected void renderItems() {}
+  protected void renderItems() {
+    var containerInventory = getContainerInventory();
+
+    if (containerInventory == null) {
+      inventory.setItem(13, displayData.frameItem());
+      return;
+    }
+
+    var containerSize = containerInventory.getSize();
+
+    for (var index = 0; index < containerSize; ++index)
+      inventory.setItem(index, containerInventory.getItem(index));
+  }
 
   @Override
   public void show() {
@@ -42,37 +55,35 @@ public class ShowcaseDisplay extends Display<ShowcaseDisplayData> {
   }
 
   @Override
-  protected Inventory makeInventory() {
+  protected DisplayInventoryParameters makeInventoryParameters() {
     var title = (
       displayData.instance() == null || displayData.instance().inventoryTitle == null
         ? config.rootSection.mechanic.showcase.defaultInventoryTitle
         : displayData.instance().inventoryTitle
     ).interpret(SlotType.INVENTORY_TITLE, null).getFirst();
 
-    Inventory inventory;
+    var containerInventory = getContainerInventory();
 
-    if (displayData.instance() == null || displayData.instance().containerPosition == null || !(displayData.instance().containerPosition.getBlock().getState(false) instanceof Container container)) {
-      inventory = Bukkit.createInventory(null, 9 * 3, title);
-      inventory.setItem(13, displayData.frameItem());
-      return inventory;
-    }
+    if (containerInventory == null)
+      return new DisplayInventoryParameters(title, InventoryType.CHEST, 9 * 3);
 
-    var containerInventory = container.getInventory();
-    var containerSize = containerInventory.getSize();
-
-    if (containerInventory.getType() == InventoryType.CHEST)
-      inventory = Bukkit.createInventory(null, containerSize, title);
-    else
-      inventory = Bukkit.createInventory(null, containerInventory.getType(), title);
-
-    for (var index = 0; index < containerSize; ++index)
-      inventory.setItem(index, containerInventory.getItem(index));
-
-    return inventory;
+    return new DisplayInventoryParameters(title, containerInventory.getType(), containerInventory.getSize());
   }
 
   @Override
   public void onConfigReload() {
     show();
+  }
+
+  private @Nullable Inventory getContainerInventory() {
+    if (displayData.instance() == null || displayData.instance().containerPosition == null)
+      return null;
+
+    var containerBlock = displayData.instance().containerPosition.getBlock();
+
+    if (containerBlock.getState(false) instanceof Container container)
+      return container.getInventory();
+
+    return null;
   }
 }

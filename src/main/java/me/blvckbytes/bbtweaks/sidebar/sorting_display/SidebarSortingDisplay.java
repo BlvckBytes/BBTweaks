@@ -8,8 +8,8 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
 import me.blvckbytes.bbtweaks.util.Display;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,8 +73,8 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
   }
 
   @Override
-  protected Inventory makeInventory() {
-    return config.rootSection.sidebar.sortingDisplay.createInventory(makeEnvironment());
+  protected DisplayInventoryParameters makeInventoryParameters() {
+    return DisplayInventoryParameters.fromSection(config.rootSection.sidebar.sortingDisplay, makeEnvironment());
   }
 
   @Override

@@ -6,8 +6,8 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerSettings;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.Display;
+import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
@@ -73,8 +73,8 @@ public class HotbarRandomizerSettingsDisplay extends Display<HotbarRandomizerSet
   }
 
   @Override
-  protected Inventory makeInventory() {
-    return config.rootSection.hotbarRandomizer.settingsDisplay.createInventory(makeEnvironment());
+  protected DisplayInventoryParameters makeInventoryParameters() {
+    return DisplayInventoryParameters.fromSection(config.rootSection.hotbarRandomizer.settingsDisplay, makeEnvironment());
   }
 
   @Override

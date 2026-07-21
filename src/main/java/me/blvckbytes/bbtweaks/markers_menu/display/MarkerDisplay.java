@@ -5,8 +5,8 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.util.Display;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -99,8 +99,8 @@ public class MarkerDisplay extends Display<MarkerDisplayData> {
   }
 
   @Override
-  protected Inventory makeInventory() {
-    return config.rootSection.markersMenu.display.createInventory(getEnvironment());
+  protected DisplayInventoryParameters makeInventoryParameters() {
+    return DisplayInventoryParameters.fromSection(config.rootSection.markersMenu.display, getEnvironment());
   }
 
   @Override
