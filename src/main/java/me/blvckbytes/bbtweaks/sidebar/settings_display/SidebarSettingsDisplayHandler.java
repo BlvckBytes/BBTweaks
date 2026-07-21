@@ -34,7 +34,7 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
   }
 
   @Override
-  public SidebarSettingsDisplay instantiateDisplay(Player player, SidebarPreferences displayData) {
+  protected SidebarSettingsDisplay instantiateDisplay(Player player, SidebarPreferences displayData) {
     return new SidebarSettingsDisplay(player, displayData, config, floodgateIntegration, plugin);
   }
 

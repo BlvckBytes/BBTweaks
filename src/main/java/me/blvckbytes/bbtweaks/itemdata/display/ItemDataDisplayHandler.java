@@ -28,7 +28,7 @@ public class ItemDataDisplayHandler extends DisplayHandler<ItemDataDisplay, Empt
   }
 
   @Override
-  public ItemDataDisplay instantiateDisplay(Player player, EmptyObject displayData) {
+  protected ItemDataDisplay instantiateDisplay(Player player, EmptyObject displayData) {
     return new ItemDataDisplay(player, displayData, floodgateIntegration, config, plugin);
   }
 

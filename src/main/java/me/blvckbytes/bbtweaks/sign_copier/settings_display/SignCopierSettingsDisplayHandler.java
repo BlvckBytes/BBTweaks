@@ -26,7 +26,7 @@ public class SignCopierSettingsDisplayHandler extends DisplayHandler<SignCopierS
   }
 
   @Override
-  public SignCopierSettingsDisplay instantiateDisplay(Player player, SignCopierSettings displayData) {
+  protected SignCopierSettingsDisplay instantiateDisplay(Player player, SignCopierSettings displayData) {
     return new SignCopierSettingsDisplay(player, displayData, floodgateIntegration, config, plugin);
   }
 

@@ -28,7 +28,7 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
   }
 
   @Override
-  public MultiBreakDisplay instantiateDisplay(Player player, MultiBreakDisplayData displayData) {
+  protected MultiBreakDisplay instantiateDisplay(Player player, MultiBreakDisplayData displayData) {
     return new MultiBreakDisplay(player, displayData, floodgateIntegration, config, plugin);
   }
 

@@ -17,7 +17,7 @@ public class ShowcaseDisplayHandler extends DisplayHandler<ShowcaseDisplay, Show
   }
 
   @Override
-  public ShowcaseDisplay instantiateDisplay(Player player, ShowcaseDisplayData displayData) {
+  protected ShowcaseDisplay instantiateDisplay(Player player, ShowcaseDisplayData displayData) {
     return new ShowcaseDisplay(player, displayData, config, plugin);
   }
 

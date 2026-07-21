@@ -27,7 +27,7 @@ public class HotbarRandomizerSettingsDisplayHandler extends DisplayHandler<Hotba
   }
 
   @Override
-  public HotbarRandomizerSettingsDisplay instantiateDisplay(Player player, HotbarRandomizerSettings displayData) {
+  protected HotbarRandomizerSettingsDisplay instantiateDisplay(Player player, HotbarRandomizerSettings displayData) {
     return new HotbarRandomizerSettingsDisplay(player, displayData, floodgateIntegration, config, plugin);
   }
 

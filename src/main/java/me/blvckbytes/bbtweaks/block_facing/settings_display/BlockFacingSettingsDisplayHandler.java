@@ -24,7 +24,7 @@ public class BlockFacingSettingsDisplayHandler extends DisplayHandler<BlockFacin
   }
 
   @Override
-  public BlockFacingSettingsDisplay instantiateDisplay(Player player, BlockFacingSettings displayData) {
+  protected BlockFacingSettingsDisplay instantiateDisplay(Player player, BlockFacingSettings displayData) {
     return new BlockFacingSettingsDisplay(player, displayData, floodgateIntegration, config, plugin);
   }
 

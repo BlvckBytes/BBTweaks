@@ -26,7 +26,7 @@ public class SidebarSortingDisplayHandler extends DisplayHandler<SidebarSortingD
   }
 
   @Override
-  public SidebarSortingDisplay instantiateDisplay(Player player, SortingDisplayData displayData) {
+  protected SidebarSortingDisplay instantiateDisplay(Player player, SortingDisplayData displayData) {
     return new SidebarSortingDisplay(player, displayData, config, floodgateIntegration, plugin);
   }
 

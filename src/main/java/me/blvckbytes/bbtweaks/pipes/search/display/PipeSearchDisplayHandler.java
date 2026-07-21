@@ -55,7 +55,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
   }
 
   @Override
-  public PipeSearchDisplay instantiateDisplay(Player player, SearchDisplayData displayData) {
+  protected PipeSearchDisplay instantiateDisplay(Player player, SearchDisplayData displayData) {
     return new PipeSearchDisplay(player, floodgateIntegration, displayData, config, plugin);
   }
 

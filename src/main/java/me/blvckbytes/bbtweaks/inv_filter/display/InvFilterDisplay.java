@@ -6,8 +6,8 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.inv_filter.command.CommandAction;
 import me.blvckbytes.bbtweaks.util.Display;
+import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 
 public class InvFilterDisplay extends Display<InvFilterDisplayData> {
@@ -24,8 +24,6 @@ public class InvFilterDisplay extends Display<InvFilterDisplayData> {
     super(player, displayData, config, plugin);
 
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
-
-    show();
   }
 
   @Override
@@ -68,8 +66,8 @@ public class InvFilterDisplay extends Display<InvFilterDisplayData> {
   }
 
   @Override
-  protected Inventory makeInventory() {
-    return config.rootSection.invFilter.display.createInventory(makeEnvironment());
+  protected DisplayInventoryParameters makeInventoryParameters() {
+    return DisplayInventoryParameters.fromSection(config.rootSection.invFilter.display, makeEnvironment());
   }
 
   @Override

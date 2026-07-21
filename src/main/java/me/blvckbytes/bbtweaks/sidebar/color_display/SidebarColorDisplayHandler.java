@@ -23,7 +23,7 @@ public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDispl
     this.floodgateIntegration = floodgateIntegration;
   }
 
-  public SidebarColorDisplay instantiateDisplay(Player player, ColorDisplayData displayData) {
+  protected SidebarColorDisplay instantiateDisplay(Player player, ColorDisplayData displayData) {
     return new SidebarColorDisplay(player, displayData, config, floodgateIntegration, plugin);
   }
 

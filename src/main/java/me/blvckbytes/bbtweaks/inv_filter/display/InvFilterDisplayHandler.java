@@ -20,14 +20,14 @@ public class InvFilterDisplayHandler extends DisplayHandler<InvFilterDisplay, In
     FloodgateIntegration floodgateIntegration,
     IPPIntegration ippIntegration
   ) {
-    super(config, plugin);
+    super(config, plugin, InvFilterDisplay.class);
 
     this.floodgateIntegration = floodgateIntegration;
     this.ippIntegration = ippIntegration;
   }
 
   @Override
-  public InvFilterDisplay instantiateDisplay(Player player, InvFilterDisplayData displayData) {
+  protected InvFilterDisplay instantiateDisplay(Player player, InvFilterDisplayData displayData) {
     return new InvFilterDisplay(player, displayData, floodgateIntegration, config, plugin);
   }
 

@@ -26,7 +26,7 @@ public class MagnetEditDisplayHandler extends DisplayHandler<MagnetEditDisplay, 
   }
 
   @Override
-  public MagnetEditDisplay instantiateDisplay(Player player, EditSession displayData) {
+  protected MagnetEditDisplay instantiateDisplay(Player player, EditSession displayData) {
     return new MagnetEditDisplay(player, displayData, config, floodgateIntegration, plugin);
   }
 

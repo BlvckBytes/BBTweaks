@@ -28,7 +28,7 @@ public class MarkerDisplayHandler extends DisplayHandler<MarkerDisplay, MarkerDi
   }
 
   @Override
-  public MarkerDisplay instantiateDisplay(Player player, MarkerDisplayData displayData) {
+  protected MarkerDisplay instantiateDisplay(Player player, MarkerDisplayData displayData) {
     return new MarkerDisplay(player, displayData, config, floodgateIntegration, plugin);
   }
 
