@@ -45,6 +45,7 @@ public enum SidebarStatistic {
   AUTO_PICKUP_CONTAINER_USAGE_ABSOLUTE,
   AUTO_PICKUP_CONTAINER_USAGE_RELATIVE,
   BLOCK_FACING_STATUS,
+  HOTBAR_RANDOMIZER_STATUS,
   ;
 
   public final boolean isSpacer;

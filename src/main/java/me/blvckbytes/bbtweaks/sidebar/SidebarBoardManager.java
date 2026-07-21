@@ -17,6 +17,7 @@ import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.auto_tool.AutoToolCommand;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.block_facing.settings.BlockFacingSettingsStore;
+import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerSettingsStore;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterProfileStore;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
@@ -64,6 +65,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
   private final SidebarPreferencesStore sidebarPreferencesStore;
   private final AutoPickupContainerListener autoPickupContainerListener;
   private final BlockFacingSettingsStore blockFacingSettingsStore;
+  private final HotbarRandomizerSettingsStore hotbarRandomizerSettingsStore;
   private final PlaytimeRewardsAPI playtimeRewards;
   private final LuckPerms luckPerms;
   private final IEssentials essentials;
@@ -87,6 +89,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     SidebarPreferencesStore sidebarPreferencesStore,
     AutoPickupContainerListener autoPickupContainerListener,
     BlockFacingSettingsStore blockFacingSettingsStore,
+    HotbarRandomizerSettingsStore hotbarRandomizerSettingsStore,
     ConfigKeeper<MainSection> config
   ) {
     this.multiBreakParametersStore = multiBreakParametersStore;
@@ -98,6 +101,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     this.sidebarPreferencesStore = sidebarPreferencesStore;
     this.autoPickupContainerListener = autoPickupContainerListener;
     this.blockFacingSettingsStore = blockFacingSettingsStore;
+    this.hotbarRandomizerSettingsStore = hotbarRandomizerSettingsStore;
 
     var playtimeRegistration = Bukkit.getServicesManager().getRegistration(PlaytimeRewardsAPI.class);
 
@@ -559,6 +563,13 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
         return environment
           .withVariable("enabled", settings.enabled)
           .withVariable("facing", settings.facingOverride.sidebarShorthand);
+      }
+
+      case HOTBAR_RANDOMIZER_STATUS -> {
+        var settings = hotbarRandomizerSettingsStore.accessSettings(player);
+
+        return environment
+          .withVariable("enabled", settings.enabled);
       }
     }
 
