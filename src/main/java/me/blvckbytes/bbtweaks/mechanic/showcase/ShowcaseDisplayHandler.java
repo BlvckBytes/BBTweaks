@@ -13,7 +13,7 @@ public class ShowcaseDisplayHandler extends DisplayHandler<ShowcaseDisplay, Show
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(config, plugin);
+    super(config, plugin, ShowcaseDisplay.class);
   }
 
   @Override

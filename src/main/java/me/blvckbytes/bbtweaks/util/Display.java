@@ -32,20 +32,11 @@ public abstract class Display<DisplayDataType> implements InventoryHolder {
   }
 
   public void show() {
-    var priorInventory = inventory;
     inventory = makeInventoryParameters().makeInventory(this);
 
     renderItems();
 
-    Bukkit.getScheduler().runTask(plugin, () -> {
-      // Make sure to open the newly rendered inventory first as to avoid flicker
-      player.openInventory(inventory);
-
-      // Avoid the case of the client not accepting opening the new inventory
-      // and then being able to take items out of there. This way, we're safe.
-      if (priorInventory != null)
-        priorInventory.clear();
-    });
+    Bukkit.getScheduler().runTask(plugin, () -> player.openInventory(inventory));
   }
 
   protected abstract void renderItems();
@@ -54,19 +45,6 @@ public abstract class Display<DisplayDataType> implements InventoryHolder {
 
   public abstract void onConfigReload();
 
-  public void onInventoryClose() {
-    if (this.inventory != null)
-      this.inventory.clear();
-  }
-
-  public void disable() {
-    if (inventory != null)
-      inventory.clear();
-
-    if (player.getOpenInventory().getTopInventory() == inventory)
-      player.closeInventory();
-  }
-
   public boolean isInventory(Inventory inventory) {
     return Objects.equals(this.inventory, inventory);
   }
@@ -74,5 +52,9 @@ public abstract class Display<DisplayDataType> implements InventoryHolder {
   @Override
   public @NotNull Inventory getInventory() {
     return inventory;
+  }
+
+  public int getSize() {
+    return inventory == null ? 0 : inventory.getSize();
   }
 }

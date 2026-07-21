@@ -46,7 +46,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     Plugin plugin,
     FloodgateIntegration floodgateIntegration
   ) {
-    super(config, plugin);
+    super(config, plugin, PipeSearchDisplay.class);
 
     this.logger = plugin.getLogger();
     this.viewCountByChunkHashByWorldId = new HashMap<>();

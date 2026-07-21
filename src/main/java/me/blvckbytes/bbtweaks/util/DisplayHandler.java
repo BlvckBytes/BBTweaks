@@ -9,7 +9,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.*;
-import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,40 +28,46 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
 
   protected final ConfigKeeper<MainSection> config;
   protected final Plugin plugin;
+  private final Class<DisplayType> displayTypeClass;
 
-  private final Map<UUID, DisplayType> displayByPlayerId;
   private final Map<UUID, Long> lastMoveToOwnInventoryStampByPlayerId;
 
   protected DisplayHandler(
     ConfigKeeper<MainSection> config,
-    Plugin plugin
+    Plugin plugin,
+    Class<DisplayType> displayTypeClass
   ) {
-    this.displayByPlayerId = new HashMap<>();
     this.lastMoveToOwnInventoryStampByPlayerId = new HashMap<>();
     this.config = config;
     this.plugin = plugin;
+    this.displayTypeClass = displayTypeClass;
   }
 
   public abstract DisplayType instantiateDisplay(Player player, DisplayDataType displayData);
 
   public @Nullable DisplayType getDisplay(Player player) {
-    return displayByPlayerId.get(player.getUniqueId());
+    if (!(player.getOpenInventory().getTopInventory().getHolder(false) instanceof Display<?> display))
+      return null;
+
+    if (!displayTypeClass.isInstance(display))
+      return null;
+
+    return displayTypeClass.cast(display);
   }
 
   public void show(Player player, DisplayDataType displayData) {
-    displayByPlayerId.put(player.getUniqueId(), instantiateDisplay(player, displayData));
+    // TODO: We should really call show here and not rely on show() being present in the display-constructor
+    instantiateDisplay(player, displayData);
   }
 
   public void reopen(DisplayType display) {
-    displayByPlayerId.put(display.player.getUniqueId(), display);
+    // TODO: This could really be replaced with just an invocation of show() at all call-sites
     display.show();
   }
 
-  public void close(Player player) {
-    var display = displayByPlayerId.remove(player.getUniqueId());
-
-    if (display != null)
-      display.disable();
+  public void closeIfOpen(Player player) {
+    if (getDisplay(player) != null)
+      player.closeInventory();
   }
 
   protected abstract void handleClick(Player player, DisplayType display, ClickType clickType, int slot);
@@ -73,9 +78,9 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
 
   @Override
   public void disable() {
-    for (var displayIterator = displayByPlayerId.entrySet().iterator(); displayIterator.hasNext();) {
-      displayIterator.next().getValue().disable();
-      displayIterator.remove();
+    for (var player : Bukkit.getOnlinePlayers()) {
+      if (getDisplay(player) != null)
+        player.closeInventory();
     }
   }
 
@@ -84,8 +89,12 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
     if (event.configKeeper != config)
       return;
 
-    for (var display : displayByPlayerId.values())
-      display.onConfigReload();
+    for (var player : Bukkit.getOnlinePlayers()) {
+      var display = getDisplay(player);
+
+      if (display != null)
+        display.onConfigReload();
+    }
   }
 
   @EventHandler
@@ -93,19 +102,17 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
     if (!(event.getWhoClicked() instanceof Player player))
       return;
 
-    var display = displayByPlayerId.get(player.getUniqueId());
+    var display = getDisplay(player);
 
     if (display == null)
       return;
 
     event.setCancelled(true);
 
-    var displayInventory = player.getOpenInventory().getTopInventory();
-
-    if (!display.isInventory(displayInventory))
+    if (!display.isInventory(player.getOpenInventory().getTopInventory()))
       return;
 
-    var displaySize = displayInventory.getSize();
+    var displaySize = display.getSize();
     var rawSlots = event.getRawSlots();
 
     for (var rawSlot : rawSlots) {
@@ -121,27 +128,15 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
   }
 
   @EventHandler
-  public void onQuit(PlayerQuitEvent event) {
-    var display = displayByPlayerId.remove(event.getPlayer().getUniqueId());
-
-    if (display != null)
-      display.onInventoryClose();
-  }
-
-  @EventHandler
   public void onInventoryClose(InventoryCloseEvent event) {
     if (!(event.getPlayer() instanceof Player player))
       return;
 
-    var playerId = player.getUniqueId();
-    var display = displayByPlayerId.get(playerId);
+    var display = getDisplay(player);
 
     // Only remove on inventory match, as to prevent removal on title update
     if (display != null && display.isInventory(event.getInventory())) {
-      display.onInventoryClose();
-      displayByPlayerId.remove(playerId);
-
-      var lastMoveToOwnInventoryStamp = lastMoveToOwnInventoryStampByPlayerId.remove(playerId);
+      var lastMoveToOwnInventoryStamp = lastMoveToOwnInventoryStampByPlayerId.remove(player.getUniqueId());
 
       if (
         lastMoveToOwnInventoryStamp != null &&
@@ -166,7 +161,7 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
     if (!(event.getWhoClicked() instanceof Player player))
       return;
 
-    var display = displayByPlayerId.get(player.getUniqueId());
+    var display = getDisplay(player);
 
     if (display == null)
       return;
@@ -178,9 +173,7 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
     if (action == InventoryAction.MOVE_TO_OTHER_INVENTORY && event.getClickedInventory() != player.getInventory())
       lastMoveToOwnInventoryStampByPlayerId.put(player.getUniqueId(), System.currentTimeMillis());
 
-    var displayInventory = player.getOpenInventory().getTopInventory();
-
-    if (!display.isInventory(displayInventory))
+    if (!display.isInventory(player.getOpenInventory().getTopInventory()))
       return;
 
     var clickType = event.getClick();
@@ -194,7 +187,7 @@ public abstract class DisplayHandler<DisplayType extends Display<DisplayDataType
       return;
     }
 
-    var displaySize = displayInventory.getSize();
+    var displaySize = display.getSize();
 
     // Clicked somewhere inside own inventory
     if (slot >= displaySize) {

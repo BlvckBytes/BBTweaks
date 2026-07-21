@@ -22,7 +22,7 @@ public class MarkerDisplayHandler extends DisplayHandler<MarkerDisplay, MarkerDi
     FloodgateIntegration floodgateIntegration,
     Plugin plugin
   ) {
-    super(config, plugin);
+    super(config, plugin, MarkerDisplay.class);
 
     this.floodgateIntegration = floodgateIntegration;
   }

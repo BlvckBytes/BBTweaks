@@ -22,7 +22,7 @@ public class ItemDataDisplayHandler extends DisplayHandler<ItemDataDisplay, Empt
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(config, plugin);
+    super(config, plugin, ItemDataDisplay.class);
 
     this.floodgateIntegration = floodgateIntegrationLoader.floodgateIntegration;
   }

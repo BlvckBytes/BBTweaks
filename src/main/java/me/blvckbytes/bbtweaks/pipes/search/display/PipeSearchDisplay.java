@@ -49,18 +49,6 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
     return slotMap[slot];
   }
 
-  @Override
-  public void onInventoryClose() {
-    clearSlotMap();
-    super.onInventoryClose();
-  }
-
-  @Override
-  public void disable() {
-    super.disable();
-    clearSlotMap();
-  }
-
   public void removeEntry(SearchDisplayEntry entry) {
     displayData.entries().remove(entry);
 

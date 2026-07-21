@@ -27,7 +27,7 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(config, plugin);
+    super(config, plugin, SidebarSettingsDisplay.class);
 
     this.sidebarColorDisplayHandler = sidebarColorDisplayHandler;
     this.sidebarSortingDisplayHandler = sidebarSortingDisplayHandler;

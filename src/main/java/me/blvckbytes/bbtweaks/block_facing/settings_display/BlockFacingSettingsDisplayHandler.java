@@ -18,7 +18,7 @@ public class BlockFacingSettingsDisplayHandler extends DisplayHandler<BlockFacin
     FloodgateIntegration floodgateIntegration,
     Plugin plugin
   ) {
-    super(config, plugin);
+    super(config, plugin, BlockFacingSettingsDisplay.class);
 
     this.floodgateIntegration = floodgateIntegration;
   }

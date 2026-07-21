@@ -18,7 +18,7 @@ public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDispl
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(config, plugin);
+    super(config, plugin, SidebarColorDisplay.class);
 
     this.floodgateIntegration = floodgateIntegration;
   }

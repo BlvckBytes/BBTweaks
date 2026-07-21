@@ -20,7 +20,7 @@ public class MagnetEditDisplayHandler extends DisplayHandler<MagnetEditDisplay, 
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(config, plugin);
+    super(config, plugin, MagnetEditDisplay.class);
 
     this.floodgateIntegration = floodgateIntegration;
   }

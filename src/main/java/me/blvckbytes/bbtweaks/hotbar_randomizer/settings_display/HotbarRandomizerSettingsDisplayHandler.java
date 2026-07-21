@@ -21,7 +21,7 @@ public class HotbarRandomizerSettingsDisplayHandler extends DisplayHandler<Hotba
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(config, plugin);
+    super(config, plugin, HotbarRandomizerSettingsDisplay.class);
 
     this.floodgateIntegration = floodgateIntegration;
   }
@@ -54,16 +54,12 @@ public class HotbarRandomizerSettingsDisplayHandler extends DisplayHandler<Hotba
 
   @EventHandler
   public void onSlotChange(PlayerInventorySlotChangeEvent event) {
-    var player = event.getPlayer();
-    var display = getDisplay(player);
+    var display = getDisplay(event.getPlayer());
 
     if (display == null)
       return;
 
-    var topInventorySize = player.getOpenInventory().getTopInventory().getSize();
-    var rawChangedSlot = event.getRawSlot();
-
-    if (rawChangedSlot < topInventorySize + 9 * 3)
+    if (event.getRawSlot() < display.getSize() + 9 * 3)
       return;
 
     Bukkit.getScheduler().runTaskLater(plugin, display::renderItems, 1L);

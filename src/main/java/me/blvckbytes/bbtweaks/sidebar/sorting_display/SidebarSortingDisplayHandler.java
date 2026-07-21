@@ -20,7 +20,7 @@ public class SidebarSortingDisplayHandler extends DisplayHandler<SidebarSortingD
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(config, plugin);
+    super(config, plugin, SidebarSortingDisplay.class);
 
     this.floodgateIntegration = floodgateIntegration;
   }

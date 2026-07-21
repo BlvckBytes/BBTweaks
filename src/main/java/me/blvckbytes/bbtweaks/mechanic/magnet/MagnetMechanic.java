@@ -211,7 +211,7 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
       (float) config.rootSection.mechanic.magnet.visualization.dustSize
     );
 
-    cuboid.forEachLine(false, (minX, minY, minZ, maxX, maxY, maxZ, axis) -> {
+    cuboid.forEachLine(false, (minX, minY, minZ, maxX, maxY, maxZ, _) -> {
       for (double x = minX; x <= maxX; x += stepSize) {
         for (double y = minY; y <= maxY; y += stepSize) {
           for (double z = minZ; z <= maxZ; z += stepSize) {
@@ -364,7 +364,7 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
 
   public void visualizeInstance(Player player, MagnetInstance instance, boolean displayMessage) {
     var sign = instance.getSign();
-    var visualizations = visualizationsByPlayerId.computeIfAbsent(player.getUniqueId(), k -> new VisualizationsBucket(player, config));
+    var visualizations = visualizationsByPlayerId.computeIfAbsent(player.getUniqueId(), _ -> new VisualizationsBucket(player, config));
 
     visualizations.add(instance, getCurrentTime());
 
@@ -431,7 +431,7 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
       },
       () -> {
         // Seeing how we're also using this branch if the mechanic is destroyed; make sure the UI is getting closed also.
-        magnetEditDisplayHandler.close(player);
+        magnetEditDisplayHandler.closeIfOpen(player);
         config.rootSection.mechanic.magnet.editModeCancelled.sendMessage(player, environment);
       }
     ));

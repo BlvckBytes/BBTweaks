@@ -20,7 +20,7 @@ public class SignCopierSettingsDisplayHandler extends DisplayHandler<SignCopierS
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(config, plugin);
+    super(config, plugin, SignCopierSettingsDisplay.class);
 
     this.floodgateIntegration = floodgateIntegration;
   }

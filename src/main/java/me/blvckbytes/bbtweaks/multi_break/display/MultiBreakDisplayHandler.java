@@ -21,7 +21,7 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(config, plugin);
+    super(config, plugin, MultiBreakDisplay.class);
 
     this.floodgateIntegration = floodgateIntegration;
     this.ippIntegration = ippIntegration;
