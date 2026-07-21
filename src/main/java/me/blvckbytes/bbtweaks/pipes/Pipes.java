@@ -197,7 +197,7 @@ public class Pipes implements PipesApi, Listener {
         return EnumerationDecision.CONTINUE;
       }
 
-      var blockInventory = currentBlockCache.tryAccessPossiblyUnloadedBlockInventory(putBlock, cachedPutBlock);
+      var blockInventory = currentBlockCache.tryAccessBlockInventory(putBlock, cachedPutBlock);
 
       if (blockInventory == null)
         return EnumerationDecision.CONTINUE;

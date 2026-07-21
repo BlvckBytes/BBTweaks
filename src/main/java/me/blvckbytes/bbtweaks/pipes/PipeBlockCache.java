@@ -194,7 +194,7 @@ public class PipeBlockCache implements CachedBlockResolver {
             Bukkit.getPluginManager().callEvent(new PipeSignCacheInvalidedEvent(pistonBlock));
     }
 
-    public @Nullable AddOnlyInventory tryAccessPossiblyUnloadedBlockInventory(Block block, int cachedBlock) throws LoadingChunkException {
+    public @Nullable AddOnlyInventory tryAccessBlockInventory(Block block, int cachedBlock) throws LoadingChunkException {
         if (!CachedBlock.hasHandledOutputInventory(cachedBlock))
             return null;
 
