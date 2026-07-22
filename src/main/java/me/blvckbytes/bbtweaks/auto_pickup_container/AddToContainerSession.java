@@ -11,6 +11,8 @@ import java.util.List;
 
 public class AddToContainerSession {
 
+  public final long createdAt;
+
   private final PlayerInventory inventory;
   private final ItemStack[] storageContents;
 
@@ -21,8 +23,11 @@ public class AddToContainerSession {
   public AddToContainerSession(
     Player player,
     FilterPredicateAccessor filterPredicateAccessor,
+    long createdAt,
     ShulkerPredicate shulkerPredicate
   ) {
+    this.createdAt = createdAt;
+
     this.inventory = player.getInventory();
     this.storageContents = inventory.getStorageContents();
     this.containers = new ArrayList<>();

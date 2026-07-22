@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.auto_pickup_container;
 
 import me.blvckbytes.bbtweaks.mechanic.util.IntTuple;
 import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
+import me.blvckbytes.bbtweaks.util.SimulatingAddOnlyInventory;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.Tag;
 import org.bukkit.block.Container;
@@ -73,6 +74,9 @@ public class LazyContainer {
 
     if (filter != null && !filter.test(itemToAdd))
       return 0;
+
+    if (flags.contains(AddFlag.DRY_RUN))
+      return new SimulatingAddOnlyInventory(inventory, null, null).addItemAndGetAddedAmount(itemToAdd, amount);
 
     var remainingAmount = InventoryUtil.addItemToInventoryAndGetRemainingAmount(itemToAdd, amount, inventory);
 
