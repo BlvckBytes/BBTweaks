@@ -13,6 +13,10 @@ public class PipeSearchSection extends ConfigSection {
   @CSAlways
   public PipeSearchCommandSection command;
 
+  public ComponentMarkup playersOnly;
+  public ComponentMarkup noPermission;
+  public ComponentMarkup unknownFlag;
+
   public ComponentMarkup getItemNoSpace;
   public ComponentMarkup getItemSuccess;
   public ComponentMarkup getItemContainerAbsent;

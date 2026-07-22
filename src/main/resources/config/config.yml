@@ -2814,9 +2814,9 @@ pipes:
       name: 'pipesearch'
       aliases:
         - pps
-      playersOnly: '{lut.pipes_prefix} <&c>Dieser Befehl ist nur für Spieler zugänglich!'
-      noPermission: '{lut.pipes_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
-      unknownFlag: '{lut.pipes_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="known_flags" *for-separator={,<space/>}>-{flag}</>.'
+    playersOnly: '{lut.pipes_prefix} <&c>Dieser Befehl ist nur für Spieler zugänglich!'
+    noPermission: '{lut.pipes_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+    unknownFlag: '{lut.pipes_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="known_flags" *for-separator={,<space/>}>-{flag}</>.'
     getItemNoSpace: '{lut.pipes_prefix} <&c>Du hast nicht den nötigen Platz im Inventar!'
     getItemSuccess: '{lut.pipes_prefix} <&7>Vom Item <&a><tr key=`{item_type_key}`/></> wurden insgesamt <&a>{lut.pipes.amount_display}</> ausgehändigt.'
     getItemContainerAbsent: '{lut.pipes_prefix} <&c>Der zugehörige Behälter existiert inzwischen nicht mehr; breche ab!'

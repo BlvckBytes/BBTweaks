@@ -6,7 +6,6 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.Display;
 import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
-import me.blvckbytes.item_predicate_parser.predicate.stringify.PlainStringifier;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -195,9 +194,9 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
 
   private InterpretationEnvironment makeEnvironment() {
     var environment = config.rootSection.pipes.search.display.inventoryEnvironment.copy()
-      .withVariable("predicate", this.displayData.predicate() == null ? null : PlainStringifier.stringify(this.displayData.predicate(), true))
-      .withVariable("current_page", this.currentPage)
-      .withVariable("number_pages", this.numberOfPages)
+      .withVariable("predicate", displayData.predicate() == null ? null : displayData.predicate().getTokenPredicateString())
+      .withVariable("current_page", currentPage)
+      .withVariable("number_pages", numberOfPages)
       .withVariable("is_floodgate", isFloodgate);
 
     if (isFloodgate) {
