@@ -614,7 +614,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   @EventHandler
   public void onPredicateGet(PredicateGetEvent event) {
     tryAccessShulkerPdcAndAcknowledge(event, pdc -> {
-      var predicate = loadFilterFromPdc(pdc, null, ((p, l, exception) -> event.setError(exception)));
+      var predicate = loadFilterFromPdc(pdc, null, ((_, _, exception) -> event.setError(exception)));
 
       if (predicate != null)
         event.setResult(predicate);
@@ -644,7 +644,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   public void onPredicateHandGet(PredicateHandGetEvent event) {
     checkStackIsMarkedAndAcknowledge(event, targetItem -> {
       var pdc = targetItem.getPersistentDataContainer();
-      var predicate = loadFilterFromPdc(pdc, null, ((p, l, exception) -> event.setError(exception)));
+      var predicate = loadFilterFromPdc(pdc, null, ((_, _, exception) -> event.setError(exception)));
 
       if (predicate != null)
         event.setResult(predicate);
@@ -902,7 +902,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
   private void markSlotRequiringUpdate(Player player, int slot) {
     slotChangesByPlayerId
-      .computeIfAbsent(player.getUniqueId(), k -> new SlotChanges(player))
+      .computeIfAbsent(player.getUniqueId(), _ -> new SlotChanges(player))
       .markRequiringUpdate(slot);
   }
 
