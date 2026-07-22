@@ -538,7 +538,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     if (settings.didFailAttemptRecently(attractedItem, relativeTime))
       return;
 
-    var session = makePickupSession(event.getPlayer());
+    var session = makePickupSession(event.getPlayer(), true);
 
     if (session.tryAddItemToContainersAndGetAddedAmount(attractedItem, AddFlag.DRY_RUN) <= 0) {
       settings.submitFailedAttempt(attractedItem, relativeTime);
@@ -562,7 +562,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     if (settings.didFailAttemptRecently(pickedUpStack, relativeTime))
       return;
 
-    var session = makePickupSession(player);
+    var session = makePickupSession(player, true);
 
     var availableAmount = pickedUpStack.getAmount();
     var addedAmount = session.tryAddItemToContainersAndGetAddedAmount(pickedUpStack);
@@ -888,14 +888,20 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   }
 
   public AddToContainerSession makePickupSession(Player player) {
-    var existingSession = perTickAddSessionByPlayerId.get(player.getUniqueId());
+    return makePickupSession(player, false);
+  }
 
-    // This makes one crucial assumption - namely that all pickup-related events are fired in a burst within
-    // the same tick; as long as that holds true, and nobody else will modify the shulkers during these events,
-    // we can cache meta and state, as to avoid creating separate snapshots for each event individually. As for
-    // our server, that should, all things considered, be a valid (albeit application-specific) optimization.
-    if (existingSession != null && existingSession.createdAt == relativeTime)
-      return existingSession;
+  private AddToContainerSession makePickupSession(Player player, boolean allowReuse) {
+    if (allowReuse) {
+      var existingSession = perTickAddSessionByPlayerId.get(player.getUniqueId());
+
+      // This makes one crucial assumption - namely that all pickup-related events are fired in a burst within
+      // the same tick; as long as that holds true, and nobody else will modify the shulkers during these events,
+      // we can cache meta and state, as to avoid creating separate snapshots for each event individually. As for
+      // our server, that should, all things considered, be a valid (albeit application-specific) optimization.
+      if (existingSession != null && existingSession.createdAt == relativeTime)
+        return existingSession;
+    }
 
     var newSession = new AddToContainerSession(player, this, relativeTime, (inventory, slot, item) -> {
       var disableReasons = EnumSet.noneOf(DisableReason.class);
@@ -910,7 +916,8 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
       return disableReasons;
     });
 
-    perTickAddSessionByPlayerId.put(player.getUniqueId(), newSession);
+    if (allowReuse)
+      perTickAddSessionByPlayerId.put(player.getUniqueId(), newSession);
 
     return newSession;
   }
