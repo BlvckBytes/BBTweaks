@@ -538,6 +538,10 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     if (settings.didFailAttemptRecently(attractedItem, relativeTime))
       return;
 
+    // This does not necessarily run in one burst with the pickups, but since we're only executing
+    // a dry-run, it's fine to also allow reuse here, as no harm's done and the chance of somebody
+    // sliding in an item in the very same tick that the pickup occurs is so slim that I'm rather
+    // taking the benefit of the optimization, which is making a large difference.
     var session = makePickupSession(event.getPlayer(), true);
 
     if (session.tryAddItemToContainersAndGetAddedAmount(attractedItem, AddFlag.DRY_RUN) <= 0) {
