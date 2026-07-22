@@ -19,8 +19,6 @@ public class ItemCollectionEntry implements SearchDisplayEntry {
   private final Material material;
   private final int stackSize;
 
-  private @Nullable ItemAndSlot lastNextMember;
-
   private ItemCollectionEntry(List<ItemAndSlot> members, ItemStack type) {
     this.members = members;
 
@@ -45,31 +43,14 @@ public class ItemCollectionEntry implements SearchDisplayEntry {
     return members.isEmpty();
   }
 
-  public @Nullable ItemAndSlot getNextMember() {
+  public @Nullable ItemAndSlot getFirstMember() {
     if (members.isEmpty())
       return null;
 
-    // Return the last result until it has been used up completely, as to avoid
-    // taking only a little bit from all the full stacks when handing out in the loop.
-    if (lastNextMember != null) {
-      if (lastNextMember.item().getAmount() > 0)
-        return lastNextMember;
-
-      lastNextMember = null;
-    }
-
-    for (var member : members) {
-      if (member.item().getAmount() >= stackSize)
-        return (lastNextMember = member);
-    }
-
-    return (lastNextMember = members.getFirst());
+    return members.getFirst();
   }
 
   public void removeMember(ItemAndSlot member) {
-    if (member == lastNextMember)
-      lastNextMember = null;
-
     members.remove(member);
   }
 
@@ -88,18 +69,11 @@ public class ItemCollectionEntry implements SearchDisplayEntry {
 
     var totalAmount = 0;
 
-    for (var memberIterator = members.iterator(); memberIterator.hasNext();) {
-      var member = memberIterator.next();
+    for (var member : members) {
       var amount = member.item().getAmount();
 
-      if (amount <= 0) {
-        memberIterator.remove();
-
-        if (member == lastNextMember)
-          lastNextMember = null;
-      }
-
-      totalAmount += amount;
+      if (amount > 0)
+        totalAmount += amount;
     }
 
     var numberStacks = totalAmount / stackSize;

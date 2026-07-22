@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
 import me.blvckbytes.bbtweaks.pipes.search.*;
 import me.blvckbytes.bbtweaks.util.CompactId;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
@@ -68,7 +69,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
 
     if (stackAction == StackAction.MOVE_TO_INVENTORY) {
       var amountBefore = itemEntry.itemAndSlot.item().getAmount();
-      var moveResult = moveItemIntoInventory(player, itemEntry.itemAndSlot);
+      var moveResult = moveItemIntoInventory(player, itemEntry.itemAndSlot, Integer.MAX_VALUE);
 
       if (moveResult == MoveResult.NO_SPACE) {
         config.rootSection.pipes.search.getItemNoSpace.sendMessage(player);
@@ -168,7 +169,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     }
 
     if (action == CollectionAction.GET_ONE_STACK) {
-      handleMovingItems(player, display, collectionEntry, 1);
+      handleMovingItems(player, display, collectionEntry, collectionEntry.getStackSize());
       return;
     }
 
@@ -178,7 +179,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     }
 
     if (action == CollectionAction.GET_FOUR_STACKS)
-      handleMovingItems(player, display, collectionEntry, 4);
+      handleMovingItems(player, display, collectionEntry, collectionEntry.getStackSize() * 4);
   }
 
   private void sendHandOutMessage(Player player, int totalHandOutAmount, int stackSize, Material type) {
@@ -197,33 +198,36 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     );
   }
 
-  // TODO: Move four stacks will get four partial stacks => in the worst case less than a full stack
-  private void handleMovingItems(Player player, PipeSearchDisplay display, ItemCollectionEntry collectionEntry, int maxMoveCount) {
+  private void handleMovingItems(Player player, PipeSearchDisplay display, ItemCollectionEntry collectionEntry, int maximumAmount) {
     var totalHandOutAmount = 0;
     var ranOutOfSpace = false;
 
     ItemAndSlot nextMember;
 
-    while ((nextMember = collectionEntry.getNextMember()) != null) {
+    while ((nextMember = collectionEntry.getFirstMember()) != null) {
       var amountBefore = nextMember.item().getAmount();
-      var moveResult = moveItemIntoInventory(player, nextMember);
+      var moveResult = moveItemIntoInventory(player, nextMember, maximumAmount - totalHandOutAmount);
 
       if (moveResult == MoveResult.NO_SPACE) {
         ranOutOfSpace = true;
         break;
       }
 
+      var movedAmount = 0;
+
       if (moveResult == MoveResult.DID_MOVE)
-        totalHandOutAmount += amountBefore;
+        movedAmount = amountBefore;
       else if (moveResult == MoveResult.DID_DECREMENT) {
         var amountAfter = nextMember.item().getAmount();
-        totalHandOutAmount += amountBefore - amountAfter;
+        movedAmount = amountBefore - amountAfter;
       }
+
+      totalHandOutAmount += movedAmount;
 
       if (moveResult == MoveResult.INVALID_ITEM || moveResult == MoveResult.DID_MOVE)
         collectionEntry.removeMember(nextMember);
 
-      if (--maxMoveCount <= 0)
+      if (totalHandOutAmount >= maximumAmount)
         break;
     }
 
@@ -373,10 +377,10 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     return true;
   }
 
-  private MoveResult moveItemIntoInventory(Player player, ItemAndSlot item) {
+  private MoveResult moveItemIntoInventory(Player player, ItemAndSlot item, int maximumAmount) {
     var block = item.block();
 
-    if (!(block.getState() instanceof Container container)) {
+    if (!(block.getState(false) instanceof Container container)) {
       var environment = getBlockEnvironment(block);
       config.rootSection.pipes.search.getItemContainerAbsent.sendMessage(player, environment);
       return MoveResult.INVALID_ITEM;
@@ -403,39 +407,22 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
       return MoveResult.INVALID_ITEM;
     }
 
-    var playerInventory = player.getInventory();
-    var didDecrement = false;
+    var amountToAdd = Math.min(targetItem.getAmount(), maximumAmount);
+    var amountNotAdded = InventoryUtil.addItemToInventoryAndGetRemainingAmount(targetItem, amountToAdd, player.getInventory());
+    var addedAmount = amountToAdd - amountNotAdded;
+    var remainingAmount = targetItem.getAmount() - addedAmount;
 
-    for (var slot = 0; slot < 9 * 4; ++slot) {
-      var playerItem = playerInventory.getItem(slot);
-
-      if (playerItem == null || playerItem.getType().isAir()) {
-        playerInventory.setItem(slot, targetItem);
-        containerInventory.setItem(item.slot(), null);
-        return MoveResult.DID_MOVE;
-      }
-
-      if (!targetItem.isSimilar(playerItem))
-        continue;
-
-      var remainingSpace = playerItem.getMaxStackSize() - playerItem.getAmount();
-      var amountToAdd = Math.min(remainingSpace, targetItem.getAmount());
-
-      if (amountToAdd <= 0)
-        continue;
-
-      playerItem.setAmount(playerItem.getAmount() + amountToAdd);
-      targetItem.setAmount(targetItem.getAmount() - amountToAdd);
-
-      didDecrement = true;
-
-      if (targetItem.getAmount() <= 0) {
-        containerInventory.setItem(item.slot(), null);
-        return MoveResult.DID_MOVE;
-      }
+    if (remainingAmount <= 0) {
+      containerInventory.setItem(item.slot(), null);
+      return MoveResult.DID_MOVE;
     }
 
-    return didDecrement ? MoveResult.DID_DECREMENT : MoveResult.NO_SPACE;
+    if (amountNotAdded >= amountToAdd)
+      return MoveResult.NO_SPACE;
+
+    targetItem.setAmount(remainingAmount);
+
+    return MoveResult.DID_DECREMENT;
   }
 
   private void openContainer(Player player, ItemAndSlot item) {

@@ -10,6 +10,7 @@ import me.blvckbytes.bbtweaks.pipes.enumeration_session.PipeEnumerationSessionHa
 import me.blvckbytes.bbtweaks.pipes.enumeration_session.PipeSearchSession;
 import me.blvckbytes.bbtweaks.pipes.predicates.PipeBlockUtility;
 import me.blvckbytes.bbtweaks.pipes.search.ItemAndSlot;
+import me.blvckbytes.bbtweaks.util.ItemUtil;
 import me.blvckbytes.item_predicate_parser.event.PredicateAndLanguage;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
@@ -158,7 +159,7 @@ public abstract class PipeSearchCommandBase<ParameterType extends PipeSearchPara
         for (var slotIndex = 0; slotIndex < blockContents.length; ++slotIndex) {
           var item = blockContents[slotIndex];
 
-          if (item == null || item.getType().isAir())
+          if (!ItemUtil.isStackValid(item))
             continue;
 
           ++totalItemCount;
