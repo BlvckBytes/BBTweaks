@@ -8,6 +8,7 @@ import org.bukkit.block.Container;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.IntPredicate;
@@ -65,12 +66,12 @@ public class InventoryUtil {
       var movedAmount = initialAmount - remainingAmount;
 
       if (movedAmount > 0) {
-        counters.totalTransferredCountByType.computeIfAbsent(currentItem.getType(), k -> new MutableInt()).value += movedAmount;
+        counters.totalTransferredCountByType.computeIfAbsent(currentItem.getType(), _ -> new MutableInt()).value += movedAmount;
         movedAnyItems = true;
       }
 
       if (remainingAmount > 0) {
-        counters.totalExcessCountByType.computeIfAbsent(currentItem.getType(), k -> new MutableInt()).value += remainingAmount;
+        counters.totalExcessCountByType.computeIfAbsent(currentItem.getType(), _ -> new MutableInt()).value += remainingAmount;
         currentItem.setAmount(remainingAmount);
         continue;
       }
@@ -85,9 +86,15 @@ public class InventoryUtil {
     var firstVacantSlotIndex = -1;
     var remainingAmount = amount;
 
+    var inventorySize = inventory.getSize();
+
+    // Only add to storage-contents of the player-inventory.
+    if (inventory instanceof PlayerInventory)
+      inventorySize = Math.min(inventorySize, 9 * 4);
+
     // 1. Fill up all partial stacks
 
-    for (var slotIndex = 0; slotIndex < inventory.getSize(); ++slotIndex) {
+    for (var slotIndex = 0; slotIndex < inventorySize; ++slotIndex) {
       var currentItem = inventory.getItem(slotIndex);
 
       if (currentItem == null || currentItem.getType().isAir()) {
@@ -140,7 +147,7 @@ public class InventoryUtil {
     //    a rather seldom, special case, we don't keep a list of vacant slots but rather just
     //    iterate again - that's plenty fast.
 
-    for (var slotIndex = 0; slotIndex < inventory.getSize(); ++slotIndex) {
+    for (var slotIndex = 0; slotIndex < inventorySize; ++slotIndex) {
       var currentItem = inventory.getItem(slotIndex);
 
       if (currentItem == null || currentItem.getType().isAir()) {
