@@ -72,11 +72,11 @@ public abstract class PipeSearchCommandBase<ParameterType extends PipeSearchPara
       return true;
     }
 
-    handleCommand(player, flags, remainingArgs.toArray(String[]::new));
+    handleCommand(player, flags, label, remainingArgs.toArray(String[]::new));
     return true;
   }
 
-  protected abstract void handleCommand(Player player, EnumSet<CommandFlag> flags, String[] remainingArgs);
+  protected abstract void handleCommand(Player player, EnumSet<CommandFlag> flags, String label, String[] remainingArgs);
 
   @Override
   public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
@@ -191,13 +191,13 @@ public abstract class PipeSearchCommandBase<ParameterType extends PipeSearchPara
     });
   }
 
-  protected @Nullable PredicateAndLanguage tryParsePredicate(Player executor, String[] args) {
+  protected @Nullable PredicateAndLanguage tryParsePredicate(Player executor, String[] args, int argsOffset) {
     var language = ippIntegration.predicateHelper.getSelectedLanguage(executor);
 
     ItemPredicate predicate;
 
     try {
-      var tokens = ippIntegration.predicateHelper.parseTokens(args, 0);
+      var tokens = ippIntegration.predicateHelper.parseTokens(args, argsOffset);
       predicate = ippIntegration.predicateHelper.parsePredicate(language, tokens);
     } catch (ItemPredicateParseException e) {
       config.rootSection.pipes.search.predicateError.sendMessage(

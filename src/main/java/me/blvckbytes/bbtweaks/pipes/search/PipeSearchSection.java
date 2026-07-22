@@ -5,6 +5,7 @@ import at.blvckbytes.cm_mapper.mapper.section.CSAlways;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
+import me.blvckbytes.bbtweaks.pipes.search.command.PipeFetchCommandSection;
 import me.blvckbytes.bbtweaks.pipes.search.command.PipeSearchCommandSection;
 import me.blvckbytes.bbtweaks.pipes.search.display.SearchDisplaySection;
 
@@ -12,6 +13,9 @@ public class PipeSearchSection extends ConfigSection {
 
   @CSAlways
   public PipeSearchCommandSection command;
+
+  @CSAlways
+  public PipeFetchCommandSection fetchCommand;
 
   public ComponentMarkup playersOnly;
   public ComponentMarkup noPermission;

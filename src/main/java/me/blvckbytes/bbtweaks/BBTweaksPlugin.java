@@ -63,6 +63,7 @@ import me.blvckbytes.bbtweaks.pipes.enumeration_session.PipeEnumerationSessionHa
 import me.blvckbytes.bbtweaks.pipes.predicates.PipePredicateEventHandler;
 import me.blvckbytes.bbtweaks.pipes.predicates.PipePredicateDataHandler;
 import me.blvckbytes.bbtweaks.pipes.predicates.command.PipePredicatesCommand;
+import me.blvckbytes.bbtweaks.pipes.search.command.PipeFetchCommand;
 import me.blvckbytes.bbtweaks.pipes.search.command.PipeSearchCommand;
 import me.blvckbytes.bbtweaks.pipes.search.display.PipeSearchDisplayHandler;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerListener;
@@ -193,6 +194,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(PipeEnumerationSessionHandler.class)
         .withSingleton(PipeSearchDisplayHandler.class)
         .withSingleton(PipeSearchCommand.class)
+        .withSingleton(PipeFetchCommand.class)
         .withSingleton(PipePredicatesCommand.class)
         .withSingleton(FrameLockingHandler.class)
         .withSingleton(HotbarRandomizerSettingsStore.class)

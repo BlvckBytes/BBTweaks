@@ -98,6 +98,9 @@ commands:
   pipesearch:
     description: 'Allows to search a pipe using a predicate'
     permission: bbtweaks.pipes
+  pipefetch:
+    description: 'Allows to search a pipe using a predicate and retrieve items immediately'
+    permission: bbtweaks.pipes
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

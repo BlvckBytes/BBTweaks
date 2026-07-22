@@ -2814,6 +2814,13 @@ pipes:
       name: 'pipesearch'
       aliases:
         - pps
+    fetchCommand:
+      name: 'pipefetch'
+      aliases:
+        - ppf
+      usage: '{lut.pipes_prefix} <&c>Benutzung: /{label} \<<container *for-mode="modes" *for-separator={,<space/>} [mode] />> \<Maximalanzahl> \<Prädikat>'
+      malformedMaximumAmount: '{lut.pipes_prefix} <&c>Der Wert bzw. Ausdruck der Maximalanzahl <&4>{input}</> ist ungültig!'
+      nonPositiveMaximumAmount: '{lut.pipes_prefix} <&c>Die Maximalanzahl muss positiv (größer Null) sein!'
     playersOnly: '{lut.pipes_prefix} <&c>Dieser Befehl ist nur für Spieler zugänglich!'
     noPermission: '{lut.pipes_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
     unknownFlag: '{lut.pipes_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="known_flags" *for-separator={,<space/>}>-{flag}</>.'

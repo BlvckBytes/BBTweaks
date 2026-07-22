@@ -51,11 +51,11 @@ public class PipeSearchCommand extends PipeSearchCommandBase<PipeSearchParameter
   }
 
   @Override
-  protected void handleCommand(Player player, EnumSet<CommandFlag> flags, String[] remainingArgs) {
+  protected void handleCommand(Player player, EnumSet<CommandFlag> flags, String label, String[] remainingArgs) {
     PredicateAndLanguage predicateAndLanguage = null;
 
     if (remainingArgs.length > 0) {
-      predicateAndLanguage = tryParsePredicate(player, remainingArgs);
+      predicateAndLanguage = tryParsePredicate(player, remainingArgs, 0);
 
       if (predicateAndLanguage == null)
         return;
