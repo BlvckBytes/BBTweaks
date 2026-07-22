@@ -154,3 +154,5 @@ permissions:
     description: 'Allows to automatically initialize blank signs to pipe-signs'
   bbtweaks.teleporter:
     description: 'Create a teleporter-sign'
+  bbtweaks.command-sign:
+    description: 'Create a command-sign'

@@ -3112,6 +3112,17 @@ teleporterSign:
   teleporterCreated: '{lut.teleporter_prefix} <&7>Der Teleporter zu <&a><number format="#.#" [x] /> <number format="#.#" [y] /> <number format="#.#" [z] /></> in Blickrichtung <&a>{lut.teleporter.facing[facing]}</> wurde erstellt.'
   teleported: '{lut.teleporter_prefix} <&7>Du wurdest zu <&a><number format="#.#" [x] /> <number format="#.#" [y] /> <number format="#.#" [z] /></> teleportiert.'
 
+commandSign:
+  noPermission: '{lut.command_sign_prefix} <&c>Dir fehlen die Zugriffsrechte um ein Befehlsschild zu erstellen!'
+  missingCommand: '{lut.command_sign_prefix} <&c>Bitte gib den auszuführenden Befehl in dritter Zeile an!'
+  signCreated: |
+    {lut.command_sign_prefix} <&7>Das Befehlsschild bei <&a>{x} {y} {z}</> mit dem Befehl<space/>
+    <hover-text value={<&a>Klicke, um den Befehl vorzuschlagen.}>
+      <suggest-command [command]>
+        <&a><u>{command}
+    </hover-text>
+    <space/>wurde erstellt.
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -3147,6 +3158,7 @@ cLut:
   hotbar_randomizer_prefix: '<&7>[<&6>HotbarRandomizer<&7>]'
   item_notifier_prefix: '<&7>[<&6>ItemNotifier<&7>]'
   teleporter_prefix: '<&7>[<&6>Teleporter<&7>]'
+  command_sign_prefix: '<&7>[<&6>CommandSign<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}
