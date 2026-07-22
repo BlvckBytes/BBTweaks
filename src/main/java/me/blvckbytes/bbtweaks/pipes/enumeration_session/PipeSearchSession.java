@@ -33,6 +33,8 @@ public class PipeSearchSession extends PipeEnumerationSession<PipeSearchSession>
     CHECK_ONLY_FOR_HOPPERS,
   }
 
+  private final boolean ignoreNonStorage;
+
   private final PipePredicateRegistry predicateRegistry;
   private final EnumSet<EnumerationBehavior> behaviorFlags;
   private final World world;
@@ -48,7 +50,10 @@ public class PipeSearchSession extends PipeEnumerationSession<PipeSearchSession>
   private final EnumMap<Material, MutableInt> containerCountByType;
 
   public PipeSearchSession(
-    Block origin, PipesApi pipesApi, Plugin plugin,
+    Block origin,
+    boolean ignoreNonStorage,
+    PipesApi pipesApi,
+    Plugin plugin,
     LongSet visitedBlocks,
     PipePredicateRegistry predicateRegistry,
     EnumSet<EnumerationBehavior> behaviorFlags,
@@ -57,6 +62,7 @@ public class PipeSearchSession extends PipeEnumerationSession<PipeSearchSession>
   ) {
     super(origin, pipesApi, plugin, visitedBlocks, warmupHandler, completionHandler);
 
+    this.ignoreNonStorage = ignoreNonStorage;
     this.predicateRegistry = predicateRegistry;
     this.behaviorFlags = behaviorFlags;
     this.world = origin.getWorld();
@@ -69,6 +75,7 @@ public class PipeSearchSession extends PipeEnumerationSession<PipeSearchSession>
     PipeEnumerationSessionHandler enumerationSessionHandler,
     Player player,
     Block targetBlock,
+    boolean ignoreNonStorage,
     EnumSet<EnumerationBehavior> behaviorFlags,
     Consumer<PipeSearchSession> handler
   ) {
@@ -77,6 +84,7 @@ public class PipeSearchSession extends PipeEnumerationSession<PipeSearchSession>
       (origin, pipesApi, plugin, predicateRegistry, warmupHandler, completionHandler) -> (
         new PipeSearchSession(
           origin,
+          ignoreNonStorage,
           pipesApi,
           plugin,
           new LongOpenHashSet(),
@@ -242,13 +250,16 @@ public class PipeSearchSession extends PipeEnumerationSession<PipeSearchSession>
     }
 
     var blockType = block.getType();
+    var containerInventory = container.getSnapshotInventory();
 
-    // Do not count individual double-chest halves; if we're not checking for double-chests,
-    // that means we're coming from one (as to prevent recursion), so don't increment again.
-    if (!ignoreOtherChestHalf)
-      containerCountByType.computeIfAbsent(blockType, _ -> new MutableInt()).value++;
+    if (!ignoreNonStorage || containerInventory.getSize() >= 9 * 3) {
+      // Do not count individual double-chest halves; if we're not checking for double-chests,
+      // that means we're coming from one (as to prevent recursion), so don't increment again.
+      if (!ignoreOtherChestHalf)
+        containerCountByType.computeIfAbsent(blockType, _ -> new MutableInt()).value++;
 
-    searchedInventories.add(new SearchedInventory(container.getSnapshotInventory(), block, otherChestBlock, blockType, slotOffset, pistonPredicate));
+      searchedInventories.add(new SearchedInventory(containerInventory, block, otherChestBlock, blockType, slotOffset, pistonPredicate));
+    }
 
     // Hoppers are only funneling out of containers if they sit right below them, which makes
     // them become part of the chain items may travel down, so they are also walked into.

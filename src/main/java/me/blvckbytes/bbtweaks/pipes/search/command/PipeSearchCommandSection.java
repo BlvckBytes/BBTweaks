@@ -11,6 +11,7 @@ public class PipeSearchCommandSection extends CommandSection {
 
   public ComponentMarkup playersOnly;
   public ComponentMarkup noPermission;
+  public ComponentMarkup unknownFlag;
 
   public PipeSearchCommandSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(INITIAL_NAME, baseEnvironment, interpreterLogger);

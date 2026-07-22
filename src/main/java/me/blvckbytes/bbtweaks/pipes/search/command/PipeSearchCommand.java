@@ -29,10 +29,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class PipeSearchCommand implements CommandHandler {
 
@@ -82,10 +79,27 @@ public class PipeSearchCommand implements CommandHandler {
       return true;
     }
 
+    var remainingArgs = new ArrayList<>(Arrays.asList(args));
+
+    EnumSet<CommandFlag> flags;
+
+    try {
+      flags = CommandFlag.consumeLeadingFlags(remainingArgs);
+    } catch (UnknownCommandFlagException e) {
+      config.rootSection.pipes.search.command.unknownFlag.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("unknown_flag", e.flagValue)
+          .withVariable("known_flags", CommandFlag.matcher.createCompletions(null))
+      );
+
+      return true;
+    }
+
     PredicateAndLanguage predicateAndLanguage = null;
 
-    if (args.length > 0) {
-      predicateAndLanguage = tryParsePredicate(player, args);
+    if (!remainingArgs.isEmpty()) {
+      predicateAndLanguage = tryParsePredicate(player, remainingArgs.toArray(new String[0]));
 
       if (predicateAndLanguage == null)
         return true;
@@ -97,7 +111,12 @@ public class PipeSearchCommand implements CommandHandler {
 
     PipeSearchSession.tryStartSessionOrNotify(
       enumerationSessionHandler, player, targetBlock,
-      EnumSet.of(EnumerationBehavior.IGNORE_CHECK_VALVES),
+      flags.contains(CommandFlag.IGNORE_NON_STORAGE),
+      (
+        flags.contains(CommandFlag.HONOR_CHECK_VALVES)
+          ? EnumSet.noneOf(EnumerationBehavior.class)
+          : EnumSet.of(EnumerationBehavior.IGNORE_CHECK_VALVES)
+      ),
       searchSession -> handleSearchCompletion(searchSession, player, predicate)
     );
 
@@ -109,8 +128,21 @@ public class PipeSearchCommand implements CommandHandler {
     if (!(sender instanceof Player player))
       return List.of();
 
-    if (!command.testPermission(player))
+    if (!command.testPermission(player) || args.length == 0)
       return List.of();
+
+    var lastArg = args[args.length - 1];
+
+    if (lastArg.startsWith("-")) {
+      for (var priorIndex = args.length - 2; priorIndex >= 0; --priorIndex) {
+        if (!args[priorIndex].startsWith("-"))
+          return List.of();
+      }
+
+      return CommandFlag.matcher.createCompletions(lastArg.substring(1)).stream()
+        .map(flag -> "-" + flag)
+        .toList();
+    }
 
     return PredicateUtils.tabCompletePredicate(player, args, 0, ippIntegration, false);
   }
