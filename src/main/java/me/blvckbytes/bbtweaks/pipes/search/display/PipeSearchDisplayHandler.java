@@ -23,6 +23,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -198,7 +199,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     );
   }
 
-  private void handleMovingItems(Player player, PipeSearchDisplay display, ItemCollectionEntry collectionEntry, int maximumAmount) {
+  public void handleMovingItems(Player player, @Nullable PipeSearchDisplay display, ItemCollectionEntry collectionEntry, int maximumAmount) {
     var totalHandOutAmount = 0;
     var ranOutOfSpace = false;
 
@@ -239,12 +240,14 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
 
     // Exhausted the collection - make it vanish altogether
     if (collectionEntry.isEmpty()) {
-      display.removeEntry(collectionEntry);
+      if (display != null)
+        display.removeEntry(collectionEntry);
+
       return;
     }
 
     // Synchronize the displayed counts
-    if (totalHandOutAmount > 0)
+    if (totalHandOutAmount > 0 && display != null)
       display.renderItems();
   }
 

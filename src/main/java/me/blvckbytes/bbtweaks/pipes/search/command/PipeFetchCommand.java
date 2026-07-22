@@ -14,9 +14,12 @@ import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.pipes.enumeration_session.PipeEnumerationSessionHandler;
 import me.blvckbytes.bbtweaks.pipes.enumeration_session.PipeSearchSession;
 import me.blvckbytes.bbtweaks.pipes.search.ItemAndSlot;
+import me.blvckbytes.bbtweaks.pipes.search.ItemCollectionEntry;
+import me.blvckbytes.bbtweaks.pipes.search.display.PipeSearchDisplayHandler;
 import me.blvckbytes.bbtweaks.util.MutableInt;
 import me.blvckbytes.bbtweaks.util.PredicateUtils;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -31,15 +34,20 @@ public class PipeFetchCommand extends PipeSearchCommandBase<PipeFetchParameter> 
 
   private final PluginCommand command;
 
+  private final PipeSearchDisplayHandler pipeSearchDisplayHandler;
+
   public PipeFetchCommand(
     JavaPlugin plugin,
     IPPIntegration ippIntegration,
     ConfigKeeper<MainSection> config,
-    PipeEnumerationSessionHandler enumerationSessionHandler
+    PipeEnumerationSessionHandler enumerationSessionHandler,
+    PipeSearchDisplayHandler pipeSearchDisplayHandler
   ) {
     super(plugin, ippIntegration, config, enumerationSessionHandler);
 
     this.command = Objects.requireNonNull(plugin.getCommand(PipeFetchCommandSection.INITIAL_NAME));
+
+    this.pipeSearchDisplayHandler = pipeSearchDisplayHandler;
   }
 
   @Override
@@ -125,8 +133,18 @@ public class PipeFetchCommand extends PipeSearchCommandBase<PipeFetchParameter> 
     List<ItemAndSlot> matches,
     InterpretationEnvironment environment
   ) {
-    // If maximumAmount <= 0, fill inventory
-    player.sendMessage("§aTODO: Hand out (" + parameter.fetchMode + " " + parameter.maximumAmount + ")");
+    var collections = ItemCollectionEntry.collectEntries(matches);
+
+    Bukkit.getScheduler().runTask(plugin, () -> {
+      var maximumAmount = parameter.maximumAmount <= 0 ? Integer.MAX_VALUE : parameter.maximumAmount;
+
+      for (var collection : collections) {
+        pipeSearchDisplayHandler.handleMovingItems(player, null, collection, maximumAmount);
+
+        if (parameter.fetchMode == FetchMode.FIRST)
+          break;
+      }
+    });
   }
 
   private @Nullable Long parseNumericExpression(String expression) {
