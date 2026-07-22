@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.teleporter_sign;
+package me.blvckbytes.bbtweaks.passive_sign.teleporter;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;

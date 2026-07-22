@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.teleporter_sign;
+package me.blvckbytes.bbtweaks.passive_sign.teleporter;
 
 import me.blvckbytes.bbtweaks.mechanic.common.FlagEnum;
 

@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.teleporter_sign;
+package me.blvckbytes.bbtweaks.passive_sign.teleporter;
 
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import org.bukkit.Location;
