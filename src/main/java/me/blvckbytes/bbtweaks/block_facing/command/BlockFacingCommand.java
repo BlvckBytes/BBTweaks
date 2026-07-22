@@ -148,13 +148,20 @@ public class BlockFacingCommand implements CommandHandler, Listener {
     if (settings.doesLackPermission())
       return;
 
+    var priorType = event.getBlockReplacedState().getType();
     var placedBlock = event.getBlock();
     var placedBlockData = placedBlock.getBlockData();
     var desiredFacing = settings.facingOverride.getFace(player);
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      var newType = placedBlock.getType();
+
+      // Block was already there - likely a fake event to be ignored.
+      if (priorType == newType)
+        return;
+
       // Just to make sure that the block really has been placed.
-      if (placedBlockData.getMaterial() == placedBlock.getType())
+      if (placedBlockData.getMaterial() == newType)
         trySetBlockFacing(placedBlock, desiredFacing);
     }, 1);
   }
