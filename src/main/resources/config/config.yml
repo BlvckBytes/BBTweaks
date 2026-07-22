@@ -1156,16 +1156,41 @@ autoTool:
 invMagnet:
   command:
     name: invmagnet
-  worlds:
-    - world
-  limitsByTierName:
+    aliases:
+      - invmag
+  preExistingWorldGroupName: 'bauwelt'
+  worldGroupByName:
+    bauwelt:
+      displayName: '<&6>Bauwelt'
+      worlds:
+        - world
+      maxRadiusByTierName:
+        siedler: 5
+        buerger: 6
+        aristokrat: 7
+        urgestein: 8
+    farmwelt:
+      displayName: '<&2>Farmwelt'
+      worlds:
+        - world_farm
+        - world_nether
+        - world_the_end
+      maxRadiusByTierName:
+        siedler: 2
+        buerger: 3
+  playersOnly: '{lut.inv_magnet_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
   missingPermission: '{lut.inv_magnet_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
-  unallowedWorld: '{lut.inv_magnet_prefix} <&c>Du befindest dich aktuell in einer Welt, in der die Funktion deaktiviert ist!'
-  nowEnabled: '{lut.inv_magnet_prefix} <&7>Die Funktion ist nun <&a>aktiviert <&7>(<&a>Radius {radius}<&7>).'
-  nowDisabled: '{lut.inv_magnet_prefix} <&7>Die Funktion ist nun <&c>deaktiviert<&7>.'
+  currentlyHasNoAccess: '{lut.inv_magnet_prefix} <&c>Du hast aktuell keinen Zugriff auf diese Funktion (aktuelle Rechte bzw. aktuelle Welt)!'
+  actionUsage: '{lut.inv_magnet_prefix} <&c>Benutzung: /{label} \<<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>>'
+  radiusUsage: '{lut.inv_magnet_prefix} <&c>Benutzung: /{label} {action} \<<&4>Radius</>>'
+  nowEnabled: '{lut.inv_magnet_prefix} <&7>Die Funktion ({world_group_name}) ist nun <&a>aktiviert <&7>(<&a>Radius {radius}<&7>).'
+  alreadyEnabled: '{lut.inv_magnet_prefix} <&c>Die Funktion ist bereits aktiviert!'
+  nowDisabled: '{lut.inv_magnet_prefix} <&7>Die Funktion ({world_group_name}) ist nun <&c>deaktiviert<&7>.'
+  alreadyDisabled: '{lut.inv_magnet_prefix} <&c>Die Funktion ist bereits deaktiviert!'
   invalidRadius: '{lut.inv_magnet_prefix} <&c>Ungültiger Radius <&4>{input}<&c> - keine Ganzzahl größer/gleich Null!'
   exceededRadiusLimit: '{lut.inv_magnet_prefix} <&c>Deine Eingabe <&4>{radius} <&c>überschritt den maximalen Radius von <&4>{radius_limit}<&c>; schränke automatisch ein!'
-  updatedRadius: '{lut.inv_magnet_prefix} <&7>Der Inventarmagnet-Radius wurde auf <&a>{radius} <&7>gesetzt.'
+  updatedRadius: '{lut.inv_magnet_prefix} <&7>Der Radius ({world_group_name}) wurde auf <&a>{radius} <&7>gesetzt.'
+  status: '{lut.inv_magnet_prefix} <&7>Die Funktion ({world_group_name}) ist aktuell <&c><&a *use="enabled">{enabled then "aktiviert" else "deaktiviert"}</&c> (Radius <&a>{radius}</>).'
 
 shulkerAccessor:
   openShulkerCooldownTicks: 5

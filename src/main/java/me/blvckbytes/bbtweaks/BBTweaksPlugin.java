@@ -36,7 +36,8 @@ import me.blvckbytes.bbtweaks.inv_filter.command.InvFilterCommand;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterProfileStore;
 import me.blvckbytes.bbtweaks.inv_filter.display.InvFilterDisplayHandler;
-import me.blvckbytes.bbtweaks.inv_magnet.InvMagnetCommand;
+import me.blvckbytes.bbtweaks.inv_magnet.InvMagnetListener;
+import me.blvckbytes.bbtweaks.inv_magnet.command.InvMagnetCommand;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import me.blvckbytes.bbtweaks.itemdata.ItemDataCommand;
 import me.blvckbytes.bbtweaks.itemdata.display.ItemDataDisplayHandler;
@@ -160,6 +161,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(MultiBreakCommand.class)
         .withSingleton(InvMagnetParametersStore.class)
         .withSingleton(InvMagnetCommand.class)
+        .withSingleton(InvMagnetListener.class)
         .withSingleton(GetExpCommand.class)
         .withSingleton(WarningsProfileStore.class)
         .withSingleton(DurabilityWarningCommand.class)

@@ -4,9 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
-import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
-import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,39 +17,38 @@ import java.util.*;
 
 public class InvMagnetParametersStore implements Disableable, Listener {
 
-  private final NamespacedKey keyEnabled, keyRadius;
   private final Plugin plugin;
+
   private final ConfigKeeper<MainSection> config;
 
-  // TODO: Scope per config-definable world-group, where each group has a permission.
   private final Map<UUID, InvMagnetParameters> parametersByPlayerId;
 
-  private final List<World> worlds;
+  private final Map<String, NamespacedKey> keyEnabledByWorldGroupIdentifyingName;
+  private final Map<String, NamespacedKey> keyRadiusByWorldGroupIdentifyingName;
 
   public InvMagnetParametersStore(
     Plugin plugin,
     ConfigKeeper<MainSection> config
   ) {
-    keyEnabled = new NamespacedKey(plugin, "inv-magnet-enabled");
-    keyRadius = new NamespacedKey(plugin, "inv-magnet-radius");
+    this.keyEnabledByWorldGroupIdentifyingName = new HashMap<>();
+    this.keyRadiusByWorldGroupIdentifyingName = new HashMap<>();
 
     this.plugin = plugin;
     this.config = config;
     this.parametersByPlayerId = new HashMap<>();
 
-    this.worlds = new ArrayList<>();
-
-    loadWorldsFromConfig();
-  }
-
-  public List<World> getAllowedWorlds() {
-    return Collections.unmodifiableList(worlds);
+    makeNamespacedKeys();
   }
 
   @EventHandler
   public void onConfigReload(ConfigKeeperReloadEvent event) {
-    if (event.configKeeper == config)
-      loadWorldsFromConfig();
+    if (event.configKeeper != config)
+      return;
+
+    makeNamespacedKeys();
+
+    for (var parameter : parametersByPlayerId.values())
+      parameter.updateLimitsAndConstrain();
   }
 
   @EventHandler
@@ -76,7 +73,7 @@ public class InvMagnetParametersStore implements Disableable, Listener {
   }
 
   public InvMagnetParameters accessParameters(Player player) {
-    return parametersByPlayerId.computeIfAbsent(player.getUniqueId(), k -> load(player));
+    return parametersByPlayerId.computeIfAbsent(player.getUniqueId(), _ -> load(player));
   }
 
   private InvMagnetParameters load(Player player) {
@@ -84,11 +81,19 @@ public class InvMagnetParametersStore implements Disableable, Listener {
 
     var pdc = player.getPersistentDataContainer();
 
-    var enabledValue = pdc.get(keyEnabled, PersistentDataType.BOOLEAN);
-    result.enabled = enabledValue != null && enabledValue;
+    for (var enabledEntry : keyEnabledByWorldGroupIdentifyingName.entrySet()) {
+      var enabledValue = pdc.get(enabledEntry.getValue(), PersistentDataType.BOOLEAN);
 
-    var radiusValue = pdc.get(keyRadius, PersistentDataType.INTEGER);
-    result.setRadiusAndGetIfExceeded(radiusValue == null ? result.getLimits().maxRadius() : radiusValue);
+      if (enabledValue != null)
+        result.enabledByWorldGroupIdentifyingName.put(enabledEntry.getKey(), (boolean) enabledValue);
+    }
+
+    for (var radiusEntry : keyRadiusByWorldGroupIdentifyingName.entrySet()) {
+      var radiusValue = pdc.get(radiusEntry.getValue(), PersistentDataType.INTEGER);
+
+      if (radiusValue != null)
+        result.radiusByWorldGroupIdentifyingName.put(radiusEntry.getKey(), (int) radiusValue);
+    }
 
     return result;
   }
@@ -96,22 +101,31 @@ public class InvMagnetParametersStore implements Disableable, Listener {
   private void save(InvMagnetParameters parameters) {
     var pdc = parameters.player.getPersistentDataContainer();
 
-    pdc.set(keyEnabled, PersistentDataType.BOOLEAN, parameters.enabled);
-    pdc.set(keyRadius, PersistentDataType.INTEGER, parameters.getRadius());
+    for (var enabledEntry : parameters.enabledByWorldGroupIdentifyingName.object2BooleanEntrySet()) {
+      var keyEnabled = keyEnabledByWorldGroupIdentifyingName.get(enabledEntry.getKey());
+
+      if (keyEnabled != null)
+        pdc.set(keyEnabled, PersistentDataType.BOOLEAN, enabledEntry.getBooleanValue());
+    }
+
+    for (var radiusEntry : parameters.radiusByWorldGroupIdentifyingName.object2IntEntrySet()) {
+      var keyRadius = keyRadiusByWorldGroupIdentifyingName.get(radiusEntry.getKey());
+
+      if (keyRadius != null)
+        pdc.set(keyRadius, PersistentDataType.INTEGER, radiusEntry.getIntValue());
+    }
   }
 
-  private void loadWorldsFromConfig() {
-    worlds.clear();
+  private void makeNamespacedKeys() {
+    for (var worldGroup : config.rootSection.invMagnet.worldGroups) {
+      var name = worldGroup.identifyingName;
+      var suffix = "-" + name;
 
-    for (var worldName : config.rootSection.invMagnet.worlds) {
-      var world = Bukkit.getWorld(worldName);
+      if (name.equalsIgnoreCase(config.rootSection.invMagnet.preExistingWorldGroupName))
+        suffix = "";
 
-      if (world == null) {
-        plugin.getLogger().warning("Could not find world for item-magnet called \"" + worldName + "\"");
-        continue;
-      }
-
-      worlds.add(world);
+      keyEnabledByWorldGroupIdentifyingName.put(name, new NamespacedKey(plugin, "inv-magnet-enabled" + suffix));
+      keyRadiusByWorldGroupIdentifyingName.put(name, new NamespacedKey(plugin, "inv-magnet-radius" + suffix));
     }
   }
 }

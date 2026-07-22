@@ -502,10 +502,9 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
 
       case INV_MAGNET_STATUS -> {
         var parameters = invMagnetParametersStore.accessParameters(player);
-        var isInAllowedWorld = invMagnetParametersStore.getAllowedWorlds().contains(player.getWorld());
 
         return environment
-          .withVariable("enabled", isInAllowedWorld && parameters.enabled)
+          .withVariable("enabled", parameters.isEnabled())
           .withVariable("radius", parameters.getRadius())
           .withVariable("max_radius", parameters.getLimits().maxRadius());
       }

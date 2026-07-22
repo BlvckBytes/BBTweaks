@@ -1,6 +1,7 @@
 package me.blvckbytes.bbtweaks.inv_magnet.config;
 
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
+import at.blvckbytes.cm_mapper.mapper.MappingError;
 import at.blvckbytes.cm_mapper.mapper.section.CSAlways;
 import at.blvckbytes.cm_mapper.mapper.section.CSIgnore;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
@@ -16,20 +17,26 @@ public class InvMagnetSection extends ConfigSection {
   @CSAlways
   public InvMagnetCommandSection command;
 
-  public Set<String> worlds = new HashSet<>();
+  public String preExistingWorldGroupName;
 
-  public Map<String, InvMagnetLimitsSection> limitsByTierName = new HashMap<>();
+  public Map<String, InvMagnetWorldGroupSection> worldGroupByName = new HashMap<>();
 
+  @CSIgnore
+  public List<InvMagnetWorldGroupSection> worldGroups = new ArrayList<>();
+
+  public ComponentMarkup playersOnly;
   public ComponentMarkup missingPermission;
-  public ComponentMarkup unallowedWorld;
+  public ComponentMarkup actionUsage;
+  public ComponentMarkup radiusUsage;
+  public ComponentMarkup currentlyHasNoAccess;
   public ComponentMarkup nowEnabled;
+  public ComponentMarkup alreadyEnabled;
   public ComponentMarkup nowDisabled;
+  public ComponentMarkup alreadyDisabled;
   public ComponentMarkup invalidRadius;
   public ComponentMarkup exceededRadiusLimit;
   public ComponentMarkup updatedRadius;
-
-  @CSIgnore
-  public List<InvMagnetLimits> limitsInDescendingOrder = new ArrayList<>();
+  public ComponentMarkup status;
 
   public InvMagnetSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
@@ -39,11 +46,30 @@ public class InvMagnetSection extends ConfigSection {
   public void afterParsing(List<Field> fields) throws Exception {
     super.afterParsing(fields);
 
-    for (var limitEntry : limitsByTierName.entrySet()) {
-      var limits = limitEntry.getValue();
-      limitsInDescendingOrder.add(new InvMagnetLimits(limits.maxRadius, limitEntry.getKey()));
-    }
+    var seenWorldNames = new HashSet<String>();
+    var seenIdentifyingNames = new HashSet<String>();
 
-    limitsInDescendingOrder.sort((a, b) -> -Integer.compare(a.maxRadius(), b.maxRadius()));
+    for (var worldGroupEntry : worldGroupByName.entrySet()) {
+      var worldGroup = worldGroupEntry.getValue();
+
+      worldGroup.identifyingName = worldGroupEntry.getKey().trim().toLowerCase();
+
+      if (!seenIdentifyingNames.add(worldGroup.identifyingName))
+        throw new MappingError("Duplicate identifying-name encountered: \"" + worldGroup.identifyingName + "\"");
+
+      worldGroups.add(worldGroup);
+
+      for (var worldName : worldGroup.worlds) {
+        if (!seenWorldNames.add(worldName))
+          throw new MappingError("Duplicate world-name encountered: \"" + worldName + "\"");
+      }
+
+      for (var limitEntry : worldGroup.maxRadiusByTierName.entrySet()) {
+        var maxRadius = limitEntry.getValue();
+        worldGroup.limitsInDescendingOrder.add(new InvMagnetLimits(maxRadius, limitEntry.getKey(), worldGroup.identifyingName, worldGroup._displayName));
+      }
+
+      worldGroup.limitsInDescendingOrder.sort((a, b) -> -Integer.compare(a.maxRadius(), b.maxRadius()));
+    }
   }
 }
