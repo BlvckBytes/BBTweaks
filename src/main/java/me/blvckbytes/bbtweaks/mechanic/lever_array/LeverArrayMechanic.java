@@ -5,7 +5,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
@@ -43,7 +43,7 @@ public class LeverArrayMechanic extends BaseMechanic<LeverArrayInstance> {
       return null;
     }
 
-    var propagationSpeedEnableExpression = SignUtil.getPlainTextLine(sign, side, PROPAGATION_SPEED_ENABLE_LINE_INDEX);
+    var propagationSpeedEnableExpression = ComponentUtil.asTrimmedText(sign.getSide(side).line(PROPAGATION_SPEED_ENABLE_LINE_INDEX));
     int propagationSpeedEnable = -1;
 
     if (!propagationSpeedEnableExpression.isBlank()) {
@@ -72,7 +72,7 @@ public class LeverArrayMechanic extends BaseMechanic<LeverArrayInstance> {
       }
     }
 
-    var propagationSpeedDisableExpression = SignUtil.getPlainTextLine(sign, side, PROPAGATION_SPEED_DISABLE_LINE_INDEX);
+    var propagationSpeedDisableExpression = ComponentUtil.asTrimmedText(sign.getSide(side).line(PROPAGATION_SPEED_DISABLE_LINE_INDEX));
     int propagationSpeedDisable = -1;
 
     if (!propagationSpeedDisableExpression.isBlank()) {

@@ -8,7 +8,7 @@ import me.blvckbytes.bbtweaks.auto_wirer.LateWired;
 import me.blvckbytes.bbtweaks.mechanic.common.InstanceSession;
 import me.blvckbytes.bbtweaks.mechanic.common.OffsetSelectingMechanic;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -195,12 +195,12 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
 
     loadKeyItemsFromPDC(sign, keysInventory);
 
-    var grantedMessage = tryParseMarkup(SignUtil.getPlainTextLine(sign, side, GRANTED_MESSAGE_LINE_ID), error -> {
+    var grantedMessage = tryParseMarkup(ComponentUtil.asTrimmedText(sign.getSide(side).line(GRANTED_MESSAGE_LINE_ID)), error -> {
       if (creator != null)
         config.rootSection.mechanic.hiddenSwitch.malformedGrantedMessage.sendMessage(creator, addErrorVariables(environment, error));
     });
 
-    var deniedMessage = tryParseMarkup(SignUtil.getPlainTextLine(sign, side, DENIED_MESSAGE_LINE_ID), error -> {
+    var deniedMessage = tryParseMarkup(ComponentUtil.asTrimmedText(sign.getSide(side).line(DENIED_MESSAGE_LINE_ID)), error -> {
       if (creator != null)
         config.rootSection.mechanic.hiddenSwitch.malformedDeniedMessage.sendMessage(creator, addErrorVariables(environment, error));
     });

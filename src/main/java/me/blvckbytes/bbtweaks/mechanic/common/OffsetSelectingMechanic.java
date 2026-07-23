@@ -5,7 +5,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.mechanic.MechanicInstance;
 import me.blvckbytes.bbtweaks.mechanic.MechanicSignInfo;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import me.blvckbytes.bbtweaks.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
@@ -71,7 +71,7 @@ public abstract class OffsetSelectingMechanic<InstanceType extends MechanicInsta
   }
 
   protected InstanceType validateOffsetsAndMakeInstance(@Nullable Player creator, Sign sign, Side side, BiFunction<Sign, Offsets, InstanceType> handler) {
-    var offsetTokens = StringUtil.getTokens(SignUtil.getPlainTextLine(sign, side, offsetsLineIndex));
+    var offsetTokens = StringUtil.getTokens(ComponentUtil.asTrimmedText(sign.getSide(side).line(offsetsLineIndex)));
 
     if (offsetTokens.isEmpty())
       return handler.apply(sign, Offsets.ZERO);

@@ -10,7 +10,7 @@ import me.blvckbytes.bbtweaks.mechanic.common.TransferCounters;
 import me.blvckbytes.bbtweaks.mechanic.common.TypeAndAmount;
 import me.blvckbytes.bbtweaks.mechanic.common.UnknownFlagException;
 import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -145,7 +145,7 @@ public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implemen
     EnumSet<InvMoveFlag> flags;
 
     try {
-      flags = FlagEnum.parse(InvMoveFlag.class, SignUtil.getPlainTextLine(sign, side, FLAGS_LINE));
+      flags = FlagEnum.parse(InvMoveFlag.class, ComponentUtil.asTrimmedText(sign.getSide(side).line(FLAGS_LINE)));
     } catch (UnknownFlagException exception) {
       if (creator != null)
         config.rootSection.mechanic.invMove.unknownFlag.sendMessage(creator, exception.makeEnvironment());

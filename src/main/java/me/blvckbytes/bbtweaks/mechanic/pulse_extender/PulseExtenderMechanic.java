@@ -5,7 +5,8 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
@@ -61,7 +62,7 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
       return null;
     }
 
-    var parameterLine = SignUtil.getPlainTextLine(sign, side, SIGNAL_LENGTH_LINE_INDEX);
+    var parameterLine = ComponentUtil.asTrimmedText(sign.getSide(side).line(SIGNAL_LENGTH_LINE_INDEX));
 
     if (parameterLine.isBlank()) {
       if (creator != null)
@@ -107,7 +108,9 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
       }
 
       signalLength = config.rootSection.mechanic.pulseExtender.minSignalLength;
-      SignUtil.setPlainTextLine(sign, side, SIGNAL_LENGTH_LINE_INDEX, String.valueOf(signalLength), true);
+
+      sign.getSide(side).line(SIGNAL_LENGTH_LINE_INDEX, Component.text(signalLength));
+      sign.update(true, false);
     }
 
     var instance = new PulseExtenderInstance(sign, side, signalLength);

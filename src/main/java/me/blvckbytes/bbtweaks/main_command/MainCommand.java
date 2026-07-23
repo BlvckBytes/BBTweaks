@@ -9,7 +9,7 @@ import me.blvckbytes.bbtweaks.infinite_waterbucket.InfiniteWaterbucketListener;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerListener;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import me.blvckbytes.syllables_matcher.EnumMatcher;
 import me.blvckbytes.syllables_matcher.MatchableEnum;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
@@ -289,9 +289,9 @@ public class MainCommand implements CommandHandler {
 
           for (var lineIndex = 0; lineIndex < expectedLines.size(); ++lineIndex) {
             var expectedLine = expectedLines.get(lineIndex);
-            var actualLine = SignUtil.getPlainTextLine(sign, Side.FRONT, lineIndex);
+            var actualLine = ComponentUtil.asTrimmedText(sign.getSide(Side.FRONT).line(lineIndex));
 
-            if (!(expectedLine.trim().equals(actualLine.trim()))) {
+            if (!(expectedLine.trim().equals(actualLine))) {
               plugin.getLogger().log(Level.WARNING, "Mismatched on expected line " + (lineIndex + 1) + " in json-object at index=" + patchIndex + "; skipping");
               continue entryLoop;
             }

@@ -7,7 +7,8 @@ import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanicFlag;
 import me.blvckbytes.bbtweaks.mechanic.common.FlagEnum;
 import me.blvckbytes.bbtweaks.mechanic.common.UnknownFlagException;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
@@ -62,11 +63,13 @@ public class TeleporterMechanic extends BaseMechanic<TeleporterInstance> {
       return null;
     }
 
-    var flagsLine = SignUtil.getPlainTextLine(sign, side, FLAGS_LINE_ID);
+    var flagsLine = ComponentUtil.asTrimmedText(sign.getSide(side).line(FLAGS_LINE_ID));
     var translatedFlagsLine = translateFlags(flagsLine);
 
-    if (!flagsLine.equalsIgnoreCase(translatedFlagsLine))
-      SignUtil.setPlainTextLine(sign, side, FLAGS_LINE_ID, translatedFlagsLine, true);
+    if (!flagsLine.equalsIgnoreCase(translatedFlagsLine)) {
+      sign.getSide(side).line(FLAGS_LINE_ID, Component.text(translatedFlagsLine));
+      sign.update(true, false);
+    }
 
     EnumSet<TeleporterFlag> flags;
 
@@ -79,7 +82,7 @@ public class TeleporterMechanic extends BaseMechanic<TeleporterInstance> {
       return null;
     }
 
-    var coordinatesContent = SignUtil.getPlainTextLine(sign, side, COORDINATES_LINE_ID);
+    var coordinatesContent = ComponentUtil.asTrimmedText(sign.getSide(side).line(COORDINATES_LINE_ID));
     var coordinates = TeleporterCoordinates.tryParse(coordinatesContent);
 
     if (coordinates == null) {

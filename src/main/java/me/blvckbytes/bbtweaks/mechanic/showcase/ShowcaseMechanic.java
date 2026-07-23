@@ -5,7 +5,6 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.common.OffsetSelectingMechanic;
 import me.blvckbytes.bbtweaks.util.ComponentUtil;
-import me.blvckbytes.bbtweaks.util.SignUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -93,12 +92,12 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
 
     var environment = getSignEnvironment(sign);
 
-    var inventoryTitle = tryParseMarkup(SignUtil.getPlainTextLine(sign, side, INVENTORY_TITLE_LINE_ID), error -> {
+    var inventoryTitle = tryParseMarkup(ComponentUtil.asTrimmedText(sign.getSide(side).line(INVENTORY_TITLE_LINE_ID)), error -> {
       if (creator != null)
         config.rootSection.mechanic.showcase.malformedInventoryTitle.sendMessage(creator, addErrorVariables(environment, error));
     });
 
-    var chatMessage = tryParseMarkup(SignUtil.getPlainTextLine(sign, side, CHAT_MESSAGE_LINE_ID), error -> {
+    var chatMessage = tryParseMarkup(ComponentUtil.asTrimmedText(sign.getSide(side).line(CHAT_MESSAGE_LINE_ID)), error -> {
       if (creator != null)
         config.rootSection.mechanic.showcase.malformedChatMessage.sendMessage(creator, addErrorVariables(environment, error));
     });

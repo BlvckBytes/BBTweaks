@@ -4,7 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
@@ -38,7 +38,7 @@ public class PlanterMechanic extends BaseMechanic<PlanterInstance> {
       return null;
     }
 
-    var radiusString = SignUtil.getPlainTextLine(sign, side, RADIUS_LINE_INDEX).trim();
+    var radiusString = ComponentUtil.asTrimmedText(sign.getSide(side).line(RADIUS_LINE_INDEX));
 
     if (radiusString.isEmpty()) {
       if (creator != null)

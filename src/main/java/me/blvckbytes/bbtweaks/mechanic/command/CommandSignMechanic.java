@@ -4,7 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanicFlag;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
@@ -43,7 +43,7 @@ public class CommandSignMechanic extends BaseMechanic<CommandSignInstance> {
       return null;
     }
 
-    var command = trimWhitespaceAndLeadingSlashes(SignUtil.getPlainTextLine(sign, side, COMMAND_LINE_ID));
+    var command = trimWhitespaceAndLeadingSlashes(ComponentUtil.asTrimmedText(sign.getSide(side).line(COMMAND_LINE_ID)));
 
     if (command.isEmpty()) {
       if (creator != null)

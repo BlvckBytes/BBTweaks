@@ -4,7 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
@@ -89,7 +89,7 @@ public class TransmitterMechanic extends BaseMechanic<TransmitterInstance> imple
       return null;
     }
 
-    var signalName = SignUtil.getPlainTextLine(sign, side, SIGNAL_NAME_LINE_INDEX).trim();
+    var signalName = ComponentUtil.asTrimmedText(sign.getSide(side).line(SIGNAL_NAME_LINE_INDEX));
 
     if (signalName.isBlank()) {
       if (creator != null)
@@ -98,7 +98,7 @@ public class TransmitterMechanic extends BaseMechanic<TransmitterInstance> imple
       return null;
     }
 
-    var namespace = SignUtil.getPlainTextLine(sign, side, NAMESPACE_LINE_INDEX).trim();
+    var namespace = ComponentUtil.asTrimmedText(sign.getSide(side).line(NAMESPACE_LINE_INDEX));
 
     if (namespace.isBlank())
       namespace = null;

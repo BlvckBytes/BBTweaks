@@ -3,8 +3,9 @@ package me.blvckbytes.bbtweaks.mechanic.magnet;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import me.blvckbytes.bbtweaks.util.StringUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 
@@ -72,13 +73,13 @@ public class MagnetParameters {
   }
 
   public void read() {
-    var extentsTokens = StringUtil.getTokens(SignUtil.getPlainTextLine(sign, side, EXTENTS_LINE_INDEX));
+    var extentsTokens = StringUtil.getTokens(ComponentUtil.asTrimmedText(sign.getSide(side).line(EXTENTS_LINE_INDEX)));
 
     extentX.readFromToken(getOrEmpty(extentsTokens, 0));
     extentY.readFromToken(getOrEmpty(extentsTokens, 1));
     extentZ.readFromToken(getOrEmpty(extentsTokens, 2));
 
-    var offsetsTokens = StringUtil.getTokens(SignUtil.getPlainTextLine(sign, side, OFFSETS_LINE_INDEX));
+    var offsetsTokens = StringUtil.getTokens(ComponentUtil.asTrimmedText(sign.getSide(side).line(OFFSETS_LINE_INDEX)));
 
     offsetX.readFromToken(getOrEmpty(offsetsTokens, 0));
     offsetY.readFromToken(getOrEmpty(offsetsTokens, 1));
@@ -89,12 +90,12 @@ public class MagnetParameters {
     var isDirty = false;
 
     if (extentX.isDirtySinceLastRead() || extentY.isDirtySinceLastRead() || extentZ.isDirtySinceLastRead()) {
-      SignUtil.setPlainTextLine(sign, side, EXTENTS_LINE_INDEX, extentX.getValue() + " " + extentY.getValue() + " " + extentZ.getValue(), false);
+      sign.getSide(side).line(EXTENTS_LINE_INDEX, Component.text(extentX.getValue() + " " + extentY.getValue() + " " + extentZ.getValue()));
       isDirty = true;
     }
 
     if (offsetX.isDirtySinceLastRead() || offsetY.isDirtySinceLastRead() || offsetZ.isDirtySinceLastRead()) {
-      SignUtil.setPlainTextLine(sign, side, OFFSETS_LINE_INDEX, offsetX.getValue() + " " + offsetY.getValue() + " " + offsetZ.getValue(), false);
+      sign.getSide(side).line(OFFSETS_LINE_INDEX, Component.text(offsetX.getValue() + " " + offsetY.getValue() + " " + offsetZ.getValue()));
       isDirty = true;
     }
 

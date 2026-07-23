@@ -5,7 +5,8 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import at.blvckbytes.component_markup.expression.interpreter.ValueInterpreter;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
+import net.kyori.adventure.text.Component;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
@@ -61,7 +62,7 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
       return null;
     }
 
-    var parameterLine = SignUtil.getPlainTextLine(sign, side, PERIOD_DURATION_LINE_INDEX);
+    var parameterLine = ComponentUtil.asTrimmedText(sign.getSide(side).line(PERIOD_DURATION_LINE_INDEX));
 
     if (parameterLine.isBlank()) {
       if (creator != null)
@@ -119,7 +120,9 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
       }
 
       periodDuration = config.rootSection.mechanic.clock.minTickPeriod;
-      SignUtil.setPlainTextLine(sign, side, PERIOD_DURATION_LINE_INDEX, String.valueOf(periodDuration), true);
+
+      sign.getSide(side).line(PERIOD_DURATION_LINE_INDEX, Component.text(periodDuration));
+      sign.update(true, false);
     }
 
     var instance = new ClockInstance(sign, side, periodDuration);

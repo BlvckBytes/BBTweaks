@@ -6,7 +6,7 @@ import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.mechanic.PredicateMechanic;
 import me.blvckbytes.bbtweaks.mechanic.common.FlagEnum;
 import me.blvckbytes.bbtweaks.mechanic.common.UnknownFlagException;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -59,7 +59,7 @@ public class ItemNotifierMechanic extends PredicateMechanic<ItemNotifierInstance
       return null;
     }
 
-    var name = SignUtil.getPlainTextLine(sign, side, NAME_LINE).trim();
+    var name = ComponentUtil.asTrimmedText(sign.getSide(side).line(NAME_LINE));
 
     if (name.isEmpty()) {
       if (creator != null)
@@ -92,7 +92,7 @@ public class ItemNotifierMechanic extends PredicateMechanic<ItemNotifierInstance
     EnumSet<ItemNotifierFlag> flags;
 
     try {
-      flags = FlagEnum.parse(ItemNotifierFlag.class, SignUtil.getPlainTextLine(sign, side, FLAGS_LINE));
+      flags = FlagEnum.parse(ItemNotifierFlag.class, ComponentUtil.asTrimmedText(sign.getSide(side).line(FLAGS_LINE)));
     } catch (UnknownFlagException exception) {
       if (creator != null)
         config.rootSection.mechanic.itemNotifier.unknownFlag.sendMessage(creator, exception.makeEnvironment());

@@ -11,7 +11,7 @@ import me.blvckbytes.bbtweaks.mechanic.common.TransferCounters;
 import me.blvckbytes.bbtweaks.mechanic.common.TypeAndAmount;
 import me.blvckbytes.bbtweaks.mechanic.common.UnknownFlagException;
 import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
@@ -238,8 +238,8 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
     try {
       flags = FlagEnum.parse(
         QuickUnloadFlag.class,
-        SignUtil.getPlainTextLine(sign, side, FIRST_FLAGS_LINE),
-        SignUtil.getPlainTextLine(sign, side, SECOND_FLAGS_LINE)
+        ComponentUtil.asTrimmedText(sign.getSide(side).line(FIRST_FLAGS_LINE)),
+        ComponentUtil.asTrimmedText(sign.getSide(side).line(SECOND_FLAGS_LINE))
       );
     } catch (UnknownFlagException exception) {
       if (creator != null)
