@@ -2817,6 +2817,7 @@ pipes:
     <&a *if="is_connected">verbunden</>
     <&c *else>nicht verbunden</>
     .
+  wirelessSignMissingTeleportPermission: '{lut.pipes_prefix} <&c>Dir fehlen die nötigen Zugriffsrechte, um dich an das andere Ende der WirelessPipe zu teleportieren!'
   wirelessSignTeleported: |
     {lut.pipes_prefix} <&7>Du wurdest zum eingetragenen Punkt<space/>
     <hover-text *let-coordinates=`{referenced_x} {referenced_y} {referenced_z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>

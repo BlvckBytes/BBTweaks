@@ -259,6 +259,11 @@ public class Pipes implements PipesApi, Listener {
       return;
     }
 
+    if (!player.hasPermission("bbtweaks.pipes.wireless.teleport")) {
+      config.rootSection.pipes.wirelessSignMissingTeleportPermission.sendMessage(player, environment);
+      return;
+    }
+
     player.teleport(thisWirelessSign.referencedBlock.getLocation());
     config.rootSection.pipes.wirelessSignTeleported.sendMessage(player, environment);
   }

@@ -28,6 +28,7 @@ public class PipesSection extends ConfigSection {
   public ComponentMarkup wirelessSignNotOnGlassBlock;
   public ComponentMarkup wirelessSignCreated;
   public ComponentMarkup wirelessSignInformation;
+  public ComponentMarkup wirelessSignMissingTeleportPermission;
   public ComponentMarkup wirelessSignTeleported;
 
   public ComponentMarkup enumerationExceededRetries;
