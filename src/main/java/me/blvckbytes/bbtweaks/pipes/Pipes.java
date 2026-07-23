@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.longs.LongSet;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
 import me.blvckbytes.bbtweaks.pipes.notification.*;
+import me.blvckbytes.bbtweaks.util.BlockUtil;
 import me.blvckbytes.bbtweaks.util.CompactId;
 import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import net.kyori.adventure.text.Component;
@@ -269,11 +270,22 @@ public class Pipes implements PipesApi, Listener {
       return;
     }
 
-    if (ComponentUtil.asTrimmedText(signSide.line(3)).contains("no-back"))
+    var flagsLine = ComponentUtil.asTrimmedText(signSide.line(3)).toLowerCase();
+
+    if (flagsLine.contains("no-back"))
       backCommand.temporarilyIgnore(player);
 
+    if (!flagsLine.contains("silent"))
+      config.rootSection.pipes.wirelessSignTeleported.sendMessage(player, environment);
+
+    var targetBlock = thisWirelessSign.referencedBlock;
+
+    if (targetBlock.getState(false) instanceof Sign targetSign) {
+      BlockUtil.teleportPlayerToSign(player, targetSign);
+      return;
+    }
+
     player.teleport(thisWirelessSign.referencedBlock.getLocation());
-    config.rootSection.pipes.wirelessSignTeleported.sendMessage(player, environment);
   }
 
   private void cancelAndBreakSign(SignChangeEvent event) {

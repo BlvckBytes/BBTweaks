@@ -1,9 +1,12 @@
 package me.blvckbytes.bbtweaks.util;
 
+import me.blvckbytes.bbtweaks.mechanic.MechanicSignInfo;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Chest;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
 public class BlockUtil {
@@ -12,6 +15,7 @@ public class BlockUtil {
     return block.getWorld().isChunkLoaded(block.getX() >> 4, block.getZ() >> 4);
   }
 
+  @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public static boolean areAllContainerBlocksLoaded(Block block, @Nullable BlockData blockData) {
     if (!isBlockLoaded(block))
       return false;
@@ -52,5 +56,41 @@ public class BlockUtil {
     }
 
     return chestBlock.getRelative(dx, 0, dz);
+  }
+
+  public static void teleportPlayerToSign(Player player, Sign sign) {
+    var signInfo = MechanicSignInfo.createFromSign(sign);
+    var signLocation = sign.getLocation();
+
+    var signCenter = signLocation.clone();
+    var footLocation = signLocation.clone();
+
+    switch (signInfo.signFacing()) {
+      case NORTH -> {
+        footLocation.add(.5, 0, -.1);
+        signCenter.add(.5, .5, .9);
+      }
+
+      case SOUTH -> {
+        footLocation.add(.5, 0, 1);
+        signCenter.add(.5, .5, 0);
+      }
+
+      case WEST -> {
+        footLocation.add(-.1, 0, .5);
+        signCenter.add(.9, .5, .5);
+      }
+
+      case EAST -> {
+        footLocation.add(1, 0, .5);
+        signCenter.add(0, .5, .5);
+      }
+    }
+
+    var eyeLocation = footLocation.clone().add(0, 1.6, 0);
+    var direction = signCenter.toVector().subtract(eyeLocation.toVector()).normalize();
+    footLocation.setDirection(direction);
+
+    player.teleport(footLocation);
   }
 }
