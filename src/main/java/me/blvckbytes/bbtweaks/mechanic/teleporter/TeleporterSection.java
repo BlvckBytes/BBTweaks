@@ -1,19 +1,19 @@
-package me.blvckbytes.bbtweaks.passive_sign.teleporter;
+package me.blvckbytes.bbtweaks.mechanic.teleporter;
 
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 
-public class TeleporterSignSection extends ConfigSection {
+public class TeleporterSection extends ConfigSection {
 
   public ComponentMarkup noPermission;
   public ComponentMarkup malformedCoordinates;
   public ComponentMarkup unknownFlag;
-  public ComponentMarkup teleporterCreated;
+  public ComponentMarkup creationSuccess;
   public ComponentMarkup teleported;
 
-  public TeleporterSignSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
+  public TeleporterSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
   }
 }

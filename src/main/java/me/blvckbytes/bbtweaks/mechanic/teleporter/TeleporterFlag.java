@@ -1,8 +1,8 @@
-package me.blvckbytes.bbtweaks.passive_sign.teleporter;
+package me.blvckbytes.bbtweaks.mechanic.teleporter;
 
 import me.blvckbytes.bbtweaks.mechanic.common.FlagEnum;
 
-public enum TeleporterSignFlag implements FlagEnum {
+public enum TeleporterFlag implements FlagEnum {
   NO_BACK("no-back"),
   SILENT("silent"),
   NORTH("north"),
@@ -17,7 +17,7 @@ public enum TeleporterSignFlag implements FlagEnum {
 
   private final String shorthand;
 
-  TeleporterSignFlag(String shorthand) {
+  TeleporterFlag(String shorthand) {
     this.shorthand = shorthand;
   }
 

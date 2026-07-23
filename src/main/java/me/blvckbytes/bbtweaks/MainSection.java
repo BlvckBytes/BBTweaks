@@ -33,7 +33,6 @@ import me.blvckbytes.bbtweaks.mechanic.MechanicSection;
 import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakSection;
 import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceSection;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportSection;
-import me.blvckbytes.bbtweaks.passive_sign.command.CommandSignSection;
 import me.blvckbytes.bbtweaks.ping.PingSection;
 import me.blvckbytes.bbtweaks.pipes.PipesSection;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerSection;
@@ -41,7 +40,6 @@ import me.blvckbytes.bbtweaks.seed.SeedOverrideSection;
 import me.blvckbytes.bbtweaks.shulker_accessor.config.ShulkerAccessorSection;
 import me.blvckbytes.bbtweaks.sidebar.config.SidebarSection;
 import me.blvckbytes.bbtweaks.sign_copier.SignCopierSection;
-import me.blvckbytes.bbtweaks.passive_sign.teleporter.TeleporterSignSection;
 import me.blvckbytes.bbtweaks.un_craft.config.UnCraftSection;
 
 @CSAlways
@@ -84,8 +82,6 @@ public class MainSection extends ConfigSection {
   public BlockFacingSection blockFacing;
   public FrameLockingSection frameLocking;
   public HotbarRandomizerSection hotbarRandomizer;
-  public TeleporterSignSection teleporterSign;
-  public CommandSignSection commandSign;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

@@ -1,10 +1,10 @@
-package me.blvckbytes.bbtweaks.passive_sign.teleporter;
+package me.blvckbytes.bbtweaks.mechanic.teleporter;
 
 import org.jetbrains.annotations.Nullable;
 
-public record TeleporterSignCoordinates(double x, double y, double z) {
+public record TeleporterCoordinates(double x, double y, double z) {
 
-  public static @Nullable TeleporterSignCoordinates tryParse(String input) {
+  public static @Nullable TeleporterCoordinates tryParse(String input) {
     String[] parts;
 
     if (input.indexOf(':') >= 0)
@@ -16,7 +16,7 @@ public record TeleporterSignCoordinates(double x, double y, double z) {
       return null;
 
     try {
-      return new TeleporterSignCoordinates(
+      return new TeleporterCoordinates(
         Double.parseDouble(parts[0].replace(',', '.')),
         Double.parseDouble(parts[1].replace(',', '.')),
         Double.parseDouble(parts[2].replace(',', '.'))

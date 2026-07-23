@@ -23,6 +23,7 @@ import me.blvckbytes.bbtweaks.mechanic.quick_unload.QuickUnloadMechanic;
 import me.blvckbytes.bbtweaks.mechanic.showcase.ShowcaseDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.showcase.ShowcaseMechanic;
 import me.blvckbytes.bbtweaks.mechanic.sign_flipper.SignFlipperMechanic;
+import me.blvckbytes.bbtweaks.mechanic.teleporter.TeleporterMechanic;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.ReceiverMechanic;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.TransmitterMechanic;
 import me.blvckbytes.bbtweaks.util.BooleanConsumer;
@@ -84,6 +85,7 @@ public class SignMechanicManager implements Disableable, Listener {
     registerMechanic(autoWirer.withSingletonAndGet(ItemNotifierMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(PoolCrafterMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(CommandSignMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(TeleporterMechanic.class));
   }
 
   @Override

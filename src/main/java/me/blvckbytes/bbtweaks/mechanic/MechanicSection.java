@@ -20,6 +20,7 @@ import me.blvckbytes.bbtweaks.mechanic.pulse_extender.PulseExtenderSection;
 import me.blvckbytes.bbtweaks.mechanic.quick_unload.QuickUnloadSection;
 import me.blvckbytes.bbtweaks.mechanic.showcase.ShowcaseSection;
 import me.blvckbytes.bbtweaks.mechanic.sign_flipper.SignFlipperSection;
+import me.blvckbytes.bbtweaks.mechanic.teleporter.TeleporterSection;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.TransmitterReceiverSection;
 
 @CSAlways
@@ -41,6 +42,7 @@ public class MechanicSection extends ConfigSection {
   public ItemNotifierSection itemNotifier;
   public PoolCrafterSection poolCrafter;
   public CommandSignSection commandSign;
+  public TeleporterSection teleporter;
 
   public ComponentMarkup noWallSign;
 

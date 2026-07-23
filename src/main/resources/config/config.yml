@@ -559,6 +559,12 @@ mechanic:
           <&a><u>{command}
       </hover-text>
       <space/>wurde erstellt.
+  teleporter:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte um einen Teleporter zu erstellen!'
+    malformedCoordinates: '{lut.mechanic_prefix} <&c>Ungültige Koordinaten - bitte in dritter Zeile als <&4>x y z</> oder <&4>x:y:z</> mit gültigen Zahlen angeben.'
+    unknownFlag: '{lut.mechanic_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="known_flags" *for-separator={,<space/>}>{flag}</>.'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Der Teleporter bei <&a>{x} {y} {z}</> zu <&a><number format="#.#" [target_x] /> <number format="#.#" [target_y] /> <number format="#.#" [target_z] /></> in Blickrichtung <&a>{lut.teleporter.facing[target_facing]}</> wurde erstellt.'
+    teleported: '{lut.mechanic_prefix} <&7>Du wurdest zu <&a><number format="#.#" [target_x] /> <number format="#.#" [target_y] /> <number format="#.#" [target_z] /></> teleportiert.'
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
@@ -3115,13 +3121,6 @@ hotbarRandomizer:
           <reset>
             <&8>» <&c>Leerer Hotbar-Slot (<&4>{slot}</>) <&8>«
 
-teleporterSign:
-  noPermission: '{lut.teleporter_prefix} <&c>Dir fehlen die Zugriffsrechte um einen Teleporter zu erstellen!'
-  malformedCoordinates: '{lut.teleporter_prefix} <&c>Ungültige Koordinaten - bitte in dritter Zeile als <&4>x y z</> oder <&4>x:y:z</> mit gültigen Zahlen angeben.'
-  unknownFlag: '{lut.teleporter_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="known_flags" *for-separator={,<space/>}>{flag}</>.'
-  teleporterCreated: '{lut.teleporter_prefix} <&7>Der Teleporter zu <&a><number format="#.#" [x] /> <number format="#.#" [y] /> <number format="#.#" [z] /></> in Blickrichtung <&a>{lut.teleporter.facing[facing]}</> wurde erstellt.'
-  teleported: '{lut.teleporter_prefix} <&7>Du wurdest zu <&a><number format="#.#" [x] /> <number format="#.#" [y] /> <number format="#.#" [z] /></> teleportiert.'
-
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -3156,8 +3155,6 @@ cLut:
   frame_locking_prefix: '<&7>[<&6>FrameLocking<&7>]'
   hotbar_randomizer_prefix: '<&7>[<&6>HotbarRandomizer<&7>]'
   item_notifier_prefix: '<&7>[<&6>ItemNotifier<&7>]'
-  teleporter_prefix: '<&7>[<&6>Teleporter<&7>]'
-  command_sign_prefix: '<&7>[<&6>CommandSign<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

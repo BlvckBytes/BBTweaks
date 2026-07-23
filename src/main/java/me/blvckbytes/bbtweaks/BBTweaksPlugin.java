@@ -81,7 +81,6 @@ import me.blvckbytes.bbtweaks.sign_copier.SignCopyCommand;
 import me.blvckbytes.bbtweaks.sign_copier.SignEditCommand;
 import me.blvckbytes.bbtweaks.sign_copier.settings.SignCopierSettingsStore;
 import me.blvckbytes.bbtweaks.sign_copier.settings_display.SignCopierSettingsDisplayHandler;
-import me.blvckbytes.bbtweaks.passive_sign.teleporter.TeleporterSignListener;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegrationLoader;
 import org.bukkit.Bukkit;
@@ -207,7 +206,6 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(SidebarSettingsDisplayHandler.class)
         .withSingleton(SidebarCommand.class)
         .withSingleton(SidebarBoardManager.class)
-        .withSingleton(TeleporterSignListener.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);
