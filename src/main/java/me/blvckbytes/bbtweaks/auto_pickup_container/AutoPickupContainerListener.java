@@ -286,11 +286,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     var doesNewContainMarker = doesContainMarker(newItem.getPersistentDataContainer());
 
     if (doesContainMarker(oldItem.getPersistentDataContainer()) || doesNewContainMarker) {
-      // For some odd reason, there are many calls with old being AIR, even when I just open containers
-      // and do not change any of the actual slots in my inventory. Avoid updating in those cases.
-      if (doesNewContainMarker && newItem.getType() == oldItem.getType())
-        markSlotRequiringUpdate(player, event.getSlot());
-
+      markSlotRequiringUpdate(player, event.getSlot());
       markUsageInfoAsPossiblyChanged(player);
     }
   }
