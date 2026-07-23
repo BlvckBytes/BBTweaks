@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
 import me.blvckbytes.bbtweaks.mechanic.auto_crafter.AutoCrafterMechanic;
 import me.blvckbytes.bbtweaks.mechanic.clock.ClockMechanic;
 import me.blvckbytes.bbtweaks.mechanic.auto_dispose.AutoDisposeMechanic;
+import me.blvckbytes.bbtweaks.mechanic.command.CommandSignMechanic;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchCommand;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchMechanic;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.PasswordCommand;
@@ -82,6 +83,7 @@ public class SignMechanicManager implements Disableable, Listener {
     registerMechanic(autoWirer.withSingletonAndGet(ShowcaseMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(ItemNotifierMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(PoolCrafterMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(CommandSignMechanic.class));
   }
 
   @Override

@@ -549,6 +549,16 @@ mechanic:
         <&a *for-key="recipe_result_type_keys" *for-separator={,<space/>}><translate [key] /></>
         .
       </container>
+  commandSign:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um ein Befehlsschild zu erstellen!'
+    missingCommand: '{lut.mechanic_prefix} <&c>Bitte gib den auszuführenden Befehl in dritter Zeile an!'
+    creationSuccess: |
+      {lut.mechanic_prefix} <&7>Das Befehlsschild bei <&a>{x} {y} {z}</> mit dem Befehl<space/>
+      <hover-text value={<&a>Klicke, um den Befehl vorzuschlagen.}>
+        <suggest-command value=`{command[0] eq "/" then command else `/{command}`}`>
+          <&a><u>{command}
+      </hover-text>
+      <space/>wurde erstellt.
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
@@ -3111,17 +3121,6 @@ teleporterSign:
   unknownFlag: '{lut.teleporter_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="known_flags" *for-separator={,<space/>}>{flag}</>.'
   teleporterCreated: '{lut.teleporter_prefix} <&7>Der Teleporter zu <&a><number format="#.#" [x] /> <number format="#.#" [y] /> <number format="#.#" [z] /></> in Blickrichtung <&a>{lut.teleporter.facing[facing]}</> wurde erstellt.'
   teleported: '{lut.teleporter_prefix} <&7>Du wurdest zu <&a><number format="#.#" [x] /> <number format="#.#" [y] /> <number format="#.#" [z] /></> teleportiert.'
-
-commandSign:
-  noPermission: '{lut.command_sign_prefix} <&c>Dir fehlen die Zugriffsrechte um ein Befehlsschild zu erstellen!'
-  missingCommand: '{lut.command_sign_prefix} <&c>Bitte gib den auszuführenden Befehl in dritter Zeile an!'
-  signCreated: |
-    {lut.command_sign_prefix} <&7>Das Befehlsschild bei <&a>{x} {y} {z}</> mit dem Befehl<space/>
-    <hover-text value={<&a>Klicke, um den Befehl vorzuschlagen.}>
-      <suggest-command [command]>
-        <&a><u>{command}
-    </hover-text>
-    <space/>wurde erstellt.
 
 sLut:
   textures:

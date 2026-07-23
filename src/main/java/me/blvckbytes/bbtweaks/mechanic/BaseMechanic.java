@@ -14,19 +14,25 @@ import at.blvckbytes.component_markup.markup.ast.tag.built_in.BuiltInTagRegistry
 import at.blvckbytes.component_markup.markup.parser.MarkupParseException;
 import at.blvckbytes.component_markup.markup.parser.MarkupParser;
 import at.blvckbytes.component_markup.util.InputView;
-import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import it.unimi.dsi.fastutil.longs.Long2LongMap;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.util.*;
+import org.bukkit.Tag;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,8 +43,15 @@ import java.util.logging.Level;
 
 public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic<InstanceType>, Listener {
 
+  private static final BlockFace[] PRESSURE_PLATE_BELOW_FACES = {
+    BlockFace.SELF, BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
+  };
+
   protected final Plugin plugin;
   protected final ConfigKeeper<MainSection> config;
+
+  private final EnumSet<BaseMechanicFlag> flags;
+  private final long interactionDebounceTicks;
 
   protected final CacheByPosition<InstanceType> instanceBySignPosition;
 
@@ -50,9 +63,27 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
 
   private long currentTime;
 
-  public BaseMechanic(Plugin plugin, ConfigKeeper<MainSection> config) {
+  public BaseMechanic(
+    Plugin plugin,
+    ConfigKeeper<MainSection> config,
+    BaseMechanicFlag... flags
+  ) {
+    this(plugin, config, 2, flags);
+  }
+
+  public BaseMechanic(
+    Plugin plugin,
+    ConfigKeeper<MainSection> config,
+    long interactionDebounceTicks,
+    BaseMechanicFlag... flags
+  ) {
+    if (interactionDebounceTicks < 2)
+      throw new IllegalArgumentException("Interactions should be debounced at least over two ticks");
+
     this.plugin = plugin;
     this.config = config;
+    this.interactionDebounceTicks = interactionDebounceTicks;
+    this.flags = flags.length == 0 ? EnumSet.noneOf(BaseMechanicFlag.class) : EnumSet.of(flags[0], flags);
 
     this.instanceBySignPosition = new CacheByPosition<>();
     this.lastInteractionByPlayerId = new HashMap<>();
@@ -62,7 +93,7 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
   protected boolean shouldDebounceInteraction(Player player, InstanceType instance) {
     var sign = instance.getSign();
 
-    var bucket = debounceTimeByBlockIdByPlayerId.computeIfAbsent(player.getUniqueId(), k -> new Long2LongOpenHashMap());
+    var bucket = debounceTimeByBlockIdByPlayerId.computeIfAbsent(player.getUniqueId(), _ -> new Long2LongOpenHashMap());
     var blockId = CacheByPosition.computeWorldlessBlockId(sign.getX(), sign.getY(), sign.getZ());
 
     var previousInvocationTime = bucket.get(blockId);
@@ -108,22 +139,21 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
   @Override
   public boolean onSignClick(Player player, Sign sign, boolean wasLeftClick) {
     var instance = instanceBySignPosition.get(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ());
+    return instance != null && handleInstanceClick(player, instance, wasLeftClick);
+  }
 
-    if (instance != null) {
-      var lastInteraction = lastInteractionByPlayerId.get(player.getUniqueId());
+  private boolean handleInstanceClick(Player player, InstanceType instance, boolean wasLeftClick) {
+    var lastInteraction = lastInteractionByPlayerId.get(player.getUniqueId());
 
-      // Debounce interaction-spam (break + interact, double-interact, etc. - no idea what's the underlying scheme with that...)
-      if (lastInteraction != null && currentTime - lastInteraction.time <= 2)
-        return lastInteraction.result;
+    // Debounce interaction-spam (break + interact, double-interact, etc. - no idea what's the underlying scheme with that...)
+    if (lastInteraction != null && currentTime - lastInteraction.time <= interactionDebounceTicks)
+      return lastInteraction.result;
 
-      var result = onInstanceClick(player, instance, wasLeftClick);
+    var result = onInstanceClick(player, instance, wasLeftClick);
 
-      lastInteractionByPlayerId.put(player.getUniqueId(), new LastInteraction(currentTime, result));
+    lastInteractionByPlayerId.put(player.getUniqueId(), new LastInteraction(currentTime, result));
 
-      return result;
-    }
-
-    return false;
+    return result;
   }
 
   @EventHandler
@@ -131,6 +161,66 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     var playerId = event.getPlayer().getUniqueId();
     lastInteractionByPlayerId.remove(playerId);
     debounceTimeByBlockIdByPlayerId.remove(playerId);
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+  public void _onInteract(PlayerInteractEvent event) {
+    var player = event.getPlayer();
+    var block = event.getClickedBlock();
+
+    if (block == null)
+      return;
+
+    if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+      if (event.getHand() != EquipmentSlot.HAND)
+        return;
+
+      if (!Tag.BUTTONS.isTagged(block.getType()))
+        return;
+
+      if (!flags.contains(BaseMechanicFlag.RELAY_BUTTON))
+        return;
+
+      if (!(block.getBlockData() instanceof Directional directional))
+        return;
+
+      var signBlock = block.getRelative(directional.getFacing().getOppositeFace(), 2);
+
+      if (signBlock.getState(false) instanceof Sign sign) {
+        if (tryHandleInteraction(player, sign))
+          event.setCancelled(true);
+
+        return;
+      }
+
+      return;
+    }
+
+    if (event.getAction() == Action.PHYSICAL) {
+      if (!Tag.PRESSURE_PLATES.isTagged(block.getType()))
+        return;
+
+      if (!flags.contains(BaseMechanicFlag.RELAY_PRESSURE_PLATE))
+        return;
+
+      var blockBelow = block.getRelative(0, -2, 0);
+
+      for (var face : PRESSURE_PLATE_BELOW_FACES) {
+        var signBlock = blockBelow.getRelative(face);
+
+        if (signBlock.getState(false) instanceof Sign sign) {
+          if (tryHandleInteraction(player, sign)) {
+            event.setCancelled(true);
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  private boolean tryHandleInteraction(Player player, Sign sign) {
+    var instance = instanceBySignPosition.get(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ());
+    return instance != null && handleInstanceClick(player, instance, false);
   }
 
   public boolean isSignRegistered(Sign sign) {
@@ -201,16 +291,12 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     }
 
     var logCount = new MutableInt();
-    var value = ExpressionInterpreter.interpret(expressionNode, environment, makeCountingLogger(logCount));
+    var value = ExpressionInterpreter.interpret(expressionNode, environment, (_, _, _, _) -> ++logCount.value);
 
     if (logCount.value != 0)
       return Optional.empty();
 
     return Optional.of(resultMapper.apply(environment.getValueInterpreter(), value));
-  }
-
-  private InterpreterLogger makeCountingLogger(MutableInt output) {
-    return (view, position, message, e) -> ++output.value;
   }
 
   @SuppressWarnings({"UnstableApiUsage", "BooleanMethodIsAlwaysInverted"})

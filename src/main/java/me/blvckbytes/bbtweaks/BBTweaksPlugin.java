@@ -56,7 +56,6 @@ import me.blvckbytes.bbtweaks.multi_break.display.MultiBreakDisplayHandler;
 import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceHandler;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportCommand;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommand;
-import me.blvckbytes.bbtweaks.passive_sign.command.CommandSignListener;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.pipes.*;
@@ -209,7 +208,6 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(SidebarCommand.class)
         .withSingleton(SidebarBoardManager.class)
         .withSingleton(TeleporterSignListener.class)
-        .withSingleton(CommandSignListener.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);

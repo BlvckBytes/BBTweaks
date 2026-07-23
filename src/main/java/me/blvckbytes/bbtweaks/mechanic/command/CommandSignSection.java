@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.passive_sign.command;
+package me.blvckbytes.bbtweaks.mechanic.command;
 
 import at.blvckbytes.cm_mapper.cm.ComponentMarkup;
 import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
@@ -9,7 +9,7 @@ public class CommandSignSection extends ConfigSection {
 
   public ComponentMarkup noPermission;
   public ComponentMarkup missingCommand;
-  public ComponentMarkup signCreated;
+  public ComponentMarkup creationSuccess;
 
   public CommandSignSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

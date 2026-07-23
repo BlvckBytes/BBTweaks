@@ -8,6 +8,7 @@ import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import me.blvckbytes.bbtweaks.mechanic.auto_crafter.AutoCrafterSection;
 import me.blvckbytes.bbtweaks.mechanic.clock.ClockSection;
 import me.blvckbytes.bbtweaks.mechanic.auto_dispose.AutoDisposeSection;
+import me.blvckbytes.bbtweaks.mechanic.command.CommandSignSection;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchSection;
 import me.blvckbytes.bbtweaks.mechanic.inv_move.InvMoveSection;
 import me.blvckbytes.bbtweaks.mechanic.item_notifier.ItemNotifierSection;
@@ -39,6 +40,7 @@ public class MechanicSection extends ConfigSection {
   public ShowcaseSection showcase;
   public ItemNotifierSection itemNotifier;
   public PoolCrafterSection poolCrafter;
+  public CommandSignSection commandSign;
 
   public ComponentMarkup noWallSign;
 
