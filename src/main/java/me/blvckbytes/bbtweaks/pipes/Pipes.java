@@ -15,14 +15,18 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
 import org.bukkit.block.data.type.WallSign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.HopperInventorySearchEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.plugin.Plugin;
@@ -80,9 +84,18 @@ public class Pipes implements PipesApi, Listener {
 
   @EventHandler(ignoreCancelled = true)
   public void onSignChange(SignChangeEvent event) {
-    if (!ComponentUtil.asTrimmedText(event.line(1)).equalsIgnoreCase(PIPE_MARKER))
-      return;
+    var markerContents = ComponentUtil.asTrimmedText(event.line(1));
 
+    if (markerContents.equalsIgnoreCase(PIPE_MARKER)) {
+      handlePipeSignChange(event);
+      return;
+    }
+
+    if (markerContents.equalsIgnoreCase(WirelessPipeSign.MARKER))
+      handleWirelessPipeSignChange(event);
+  }
+
+  private void handlePipeSignChange(SignChangeEvent event) {
     var player = event.getPlayer();
 
     if (!player.hasPermission("bbtweaks.pipes")) {
@@ -125,6 +138,129 @@ public class Pipes implements PipesApi, Listener {
 
     event.line(1, Component.text(PIPE_MARKER));
     config.rootSection.pipes.signCreated.sendMessage(player);
+  }
+
+  private void handleWirelessPipeSignChange(SignChangeEvent event) {
+    var player = event.getPlayer();
+
+    if (!player.hasPermission("bbtweaks.pipes.wireless")) {
+      cancelAndBreakSign(event);
+      config.rootSection.pipes.wirelessSignCreateNoPermission.sendMessage(player);
+      return;
+    }
+
+    var signBlock = event.getBlock();
+
+    if (!Tag.WALL_SIGNS.isTagged(signBlock.getType())) {
+      config.rootSection.pipes.wirelessSignNotOnGlassBlock.sendMessage(player);
+      cancelAndBreakSign(event);
+      return;
+    }
+
+    if (ComponentUtil.asTrimmedText(event.line(2)).equals("?"))
+      event.line(2, Component.text(signBlock.getX() + " " + signBlock.getY() + " " + signBlock.getZ()));
+
+    var wirelessSign = WirelessPipeSign.fromLines(event.lines(), signBlock);
+
+    if (wirelessSign == WirelessPipeSign.NO_SIGN) {
+      cancelAndBreakSign(event);
+      config.rootSection.pipes.wirelessSignMalformed.sendMessage(player);
+      return;
+    }
+
+    var mountColor = TubeColor.fromMaterial(wirelessSign.mountBlock.getType());
+
+    if (mountColor.isPane() || mountColor.color() == TubeColor.NONE) {
+      config.rootSection.pipes.wirelessSignNotOnGlassBlock.sendMessage(player);
+      cancelAndBreakSign(event);
+      return;
+    }
+
+    event.line(1, Component.text(WirelessPipeSign.MARKER));
+
+    config.rootSection.pipes.wirelessSignCreated.sendMessage(
+      player,
+      new InterpretationEnvironment()
+        .withVariable("x", signBlock.getX())
+        .withVariable("y", signBlock.getY())
+        .withVariable("z", signBlock.getZ())
+        .withVariable("referenced_x", wirelessSign.referencedBlock.getX())
+        .withVariable("referenced_y", wirelessSign.referencedBlock.getY())
+        .withVariable("referenced_z", wirelessSign.referencedBlock.getZ())
+    );
+  }
+
+  @EventHandler
+  public void onInteract(PlayerInteractEvent event) {
+    if (event.getAction() != Action.RIGHT_CLICK_BLOCK && event.getAction() != Action.LEFT_CLICK_BLOCK)
+      return;
+
+    if (event.getHand() != EquipmentSlot.HAND)
+      return;
+
+    var block = event.getClickedBlock();
+
+    if (block == null)
+      return;
+
+    var player = event.getPlayer();
+
+    if (!player.isSneaking())
+      return;
+
+    if (!(block.getState(false) instanceof Sign sign))
+      return;
+
+    var markerContents = ComponentUtil.asTrimmedText(sign.getSide(Side.FRONT).line(1));
+
+    if (!markerContents.equalsIgnoreCase(WirelessPipeSign.MARKER))
+      return;
+
+    var signBlock = sign.getBlock();
+    var blockCache = cacheRegistry.getBlockCache(signBlock.getWorld());
+
+    WirelessPipeSign thisWirelessSign;
+
+    try {
+      thisWirelessSign = blockCache.getWirelessPipeSign(sign.getBlock(), blockCache.getCachedBlock(signBlock));
+    } catch (LoadingChunkException _) {
+      return;
+    }
+
+    event.setCancelled(true);
+
+    if (thisWirelessSign == null) {
+      config.rootSection.pipes.wirelessSignMalformed.sendMessage(player);
+      return;
+    }
+
+    WirelessPipeSign otherWirelessSign;
+
+    try {
+      // Ensure that the sign is loaded - we can afford doing so synchronously for the event.
+      thisWirelessSign.referencedBlock.getState(false);
+
+      otherWirelessSign = blockCache.getWirelessPipeSign(thisWirelessSign.referencedBlock, blockCache.getCachedBlock(thisWirelessSign.referencedBlock));
+    } catch (LoadingChunkException _) {
+      return;
+    }
+
+    var environment = new InterpretationEnvironment()
+      .withVariable("x", signBlock.getX())
+      .withVariable("y", signBlock.getY())
+      .withVariable("z", signBlock.getZ())
+      .withVariable("referenced_x", thisWirelessSign.referencedBlock.getX())
+      .withVariable("referenced_y", thisWirelessSign.referencedBlock.getY())
+      .withVariable("referenced_z", thisWirelessSign.referencedBlock.getZ())
+      .withVariable("is_connected", otherWirelessSign != null);
+
+    if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
+      config.rootSection.pipes.wirelessSignInformation.sendMessage(player, environment);
+      return;
+    }
+
+    player.teleport(thisWirelessSign.referencedBlock.getLocation());
+    config.rootSection.pipes.wirelessSignTeleported.sendMessage(player, environment);
   }
 
   private void cancelAndBreakSign(SignChangeEvent event) {
@@ -240,8 +376,9 @@ public class Pipes implements PipesApi, Listener {
       while ((hasPistons = !pistonQueue.isEmpty()) || !searchQueue.isEmpty()) {
         var pipeBlock = hasPistons ? pistonQueue.poll() : searchQueue.poll();
         var cachedPipeBlock = currentBlockCache.getCachedBlock(pipeBlock);
+        var isPipeBlockTube = CachedBlock.isTube(cachedPipeBlock);
 
-        if (CachedBlock.isTube(cachedPipeBlock))
+        if (isPipeBlockTube)
           ++currentTubeBlockCounter;
 
         if (CachedBlock.isMaterial(cachedPipeBlock, Material.PISTON)) {
@@ -264,6 +401,19 @@ public class Pipes implements PipesApi, Listener {
         for (var neighborFace : PIPE_NEIGHBOR_FACES) {
           var enumeratedBlock = pipeBlock.getRelative(neighborFace);
           var cachedEnumeratedBlock = currentBlockCache.getCachedBlock(enumeratedBlock);
+
+          // Currently on a tube-block and enumerating outwards from it, with the enumerated block facing in the walking-direction.
+          if (isPipeBlockTube && CachedBlock.getFacing(cachedEnumeratedBlock) == neighborFace) {
+            var wirelessDestination = tryResolveWirelessSignDestination(enumeratedBlock, cachedEnumeratedBlock);
+
+            if (wirelessDestination != null) {
+              if (!visitedBlocks.add(CompactId.computeWorldlessBlockId(wirelessDestination)))
+                continue;
+
+              addEnumeratedBlockToQueue(wirelessDestination, searchQueue, behaviorFlags);
+              continue;
+            }
+          }
 
           if (!CachedBlock.isValidPipeBlock(cachedEnumeratedBlock))
             continue;
@@ -296,12 +446,7 @@ public class Pipes implements PipesApi, Listener {
           }
 
           if (!CachedBlock.isPane(cachedEnumeratedBlock)) {
-            if (behaviorFlags.contains(EnumerationBehavior.DEPTH_FIRST)) {
-              searchQueue.addFirst(enumeratedBlock);
-              continue;
-            }
-
-            searchQueue.add(enumeratedBlock);
+            addEnumeratedBlockToQueue(enumeratedBlock, searchQueue, behaviorFlags);
             continue;
           }
 
@@ -319,12 +464,7 @@ public class Pipes implements PipesApi, Listener {
           if (!visitedBlocks.add(CompactId.computeWorldlessBlockId(nextEnumeratedBlock)))
             continue;
 
-          if (behaviorFlags.contains(EnumerationBehavior.DEPTH_FIRST)) {
-            searchQueue.addFirst(nextEnumeratedBlock);
-            continue;
-          }
-
-          searchQueue.add(nextEnumeratedBlock);
+          addEnumeratedBlockToQueue(nextEnumeratedBlock, searchQueue, behaviorFlags);
         }
       }
 
@@ -337,6 +477,44 @@ public class Pipes implements PipesApi, Listener {
   @Override
   public int getMaxCacheLoadCount() {
     return config.rootSection.pipes.maxCacheLoadCount;
+  }
+
+  private void addEnumeratedBlockToQueue(Block enumeratedBlock, Deque<Block> searchQueue, EnumSet<EnumerationBehavior> behaviorFlags) {
+    if (behaviorFlags.contains(EnumerationBehavior.DEPTH_FIRST)) {
+      searchQueue.addFirst(enumeratedBlock);
+      return;
+    }
+
+    searchQueue.add(enumeratedBlock);
+  }
+
+  private @Nullable Block tryResolveWirelessSignDestination(Block enumeratedBlock, int cachedEnumeratedBlock) throws LoadingChunkException {
+    var thisWirelessSign = currentBlockCache.getWirelessPipeSign(enumeratedBlock, cachedEnumeratedBlock);
+
+    if (thisWirelessSign == null)
+      return null;
+
+    var cachedReferencedBlock = currentBlockCache.getCachedBlock(thisWirelessSign.referencedBlock);
+    var otherWirelessSign = currentBlockCache.getWirelessPipeSign(thisWirelessSign.referencedBlock, cachedReferencedBlock);
+
+    if (otherWirelessSign == null)
+      return null;
+
+    if (otherWirelessSign.referencedBlock.getX() != enumeratedBlock.getX())
+      return null;
+
+    if (otherWirelessSign.referencedBlock.getY() != enumeratedBlock.getY())
+      return null;
+
+    if (otherWirelessSign.referencedBlock.getZ() != enumeratedBlock.getZ())
+      return null;
+
+    var cachedMountBlock = currentBlockCache.getCachedBlock(otherWirelessSign.mountBlock);
+
+    if (!CachedBlock.isTube(cachedMountBlock))
+      return null;
+
+    return otherWirelessSign.mountBlock;
   }
 
   private void startPipe(Block inputPistonBlock, @Nullable Block overrideContainerBlock, List<PipeNotification> notificationOutput) {

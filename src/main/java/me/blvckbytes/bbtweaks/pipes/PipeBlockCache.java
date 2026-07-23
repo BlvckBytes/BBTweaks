@@ -49,6 +49,7 @@ public class PipeBlockCache implements CachedBlockResolver {
     private final Long2ObjectMap<ChunkTicket> chunkTicketByCompactId;
     private final Long2ObjectMap<int[]> cachedBlockByRelativeIdByChunkBucketId;
     private final Long2ObjectMap<PipeSign> pipeSignByPistonCompactId;
+    private final Long2ObjectMap<WirelessPipeSign> wirelessPipeSignBySignCompactId;
     private final Long2ObjectMap<BukkitTask> tempPowerResetTaskByCompactId;
     private final Long2LongMap ticketExpiryByCompactId;
     private final Long2LongMap lastRequestTimeByInputPistonCompactId;
@@ -70,6 +71,7 @@ public class PipeBlockCache implements CachedBlockResolver {
         this.chunkTicketByCompactId = new Long2ObjectArrayMap<>();
         this.cachedBlockByRelativeIdByChunkBucketId = new Long2ObjectOpenHashMap<>();
         this.pipeSignByPistonCompactId = new Long2ObjectOpenHashMap<>(15_000, .5f);
+        this.wirelessPipeSignBySignCompactId = new Long2ObjectOpenHashMap<>();
         this.tempPowerResetTaskByCompactId = new Long2ObjectOpenHashMap<>();
         this.ticketExpiryByCompactId = new Long2LongOpenHashMap();
         this.lastRequestTimeByInputPistonCompactId = new Long2LongOpenHashMap();
@@ -143,6 +145,7 @@ public class PipeBlockCache implements CachedBlockResolver {
     public void disable() {
         this.cachedBlockByRelativeIdByChunkBucketId.clear();
         this.pipeSignByPistonCompactId.clear();
+        this.wirelessPipeSignBySignCompactId.clear();
         expireChunkTickets(true);
     }
 
@@ -192,6 +195,8 @@ public class PipeBlockCache implements CachedBlockResolver {
 
         if (pipeSignByPistonCompactId.remove(CompactId.computeWorldlessBlockId(pistonBlock)) != null)
             Bukkit.getPluginManager().callEvent(new PipeSignCacheInvalidedEvent(pistonBlock));
+
+        wirelessPipeSignBySignCompactId.remove(CompactId.computeWorldlessBlockId(signBlock));
     }
 
     public @Nullable AddOnlyInventory tryAccessBlockInventory(Block block, int cachedBlock) throws LoadingChunkException {
@@ -248,6 +253,31 @@ public class PipeBlockCache implements CachedBlockResolver {
         return chunkBucket[relativeId];
     }
 
+    public @Nullable WirelessPipeSign getWirelessPipeSign(Block signBlock, int cachedSignBlock) throws LoadingChunkException {
+        if (!CachedBlock.isWallSign(cachedSignBlock))
+            return null;
+
+        var signCompactId = CompactId.computeWorldlessBlockId(signBlock);
+
+        var cachedSign = wirelessPipeSignBySignCompactId.get(signCompactId);
+
+        if (cachedSign == null) {
+            ensureBlockIsLoaded(signBlock);
+
+            if (signBlock.getState(false) instanceof Sign sign)
+                cachedSign = WirelessPipeSign.fromSign(sign);
+            else
+                cachedSign = WirelessPipeSign.NO_SIGN;
+
+            wirelessPipeSignBySignCompactId.put(signCompactId, cachedSign);
+        }
+
+        if (cachedSign == WirelessPipeSign.NO_SIGN)
+            return null;
+
+        return cachedSign;
+    }
+
     public PipeSign getSignOnPiston(Block pistonBlock, int cachedPistonBlock, @Nullable List<PipeNotification> notificationOutput) throws LoadingChunkException {
         var pistonCompactId = CompactId.computeWorldlessBlockId(pistonBlock);
 
@@ -281,6 +311,8 @@ public class PipeBlockCache implements CachedBlockResolver {
                 // Not a sign at all, do not needlessly try to get its state
                 continue;
             }
+
+            ensureBlockIsLoaded(faceBlock);
 
             if (!(faceBlock.getState(false) instanceof Sign sign))
                 continue;

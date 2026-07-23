@@ -2787,6 +2787,48 @@ pipes:
   signCreateNoPistonFound: '{lut.pipes_prefix} <&c>Ein Pipe-Schild muss an einem Kolben montiert werden!'
   unsupportedSignType: '{lut.pipes_prefix} <&c>Pipe-Schilder können nur Wand- oder Steheschilder sein!'
   signCreated: '{lut.pipes_prefix} <&7>Das Pipe-Schild wurde erfolgreich erstellt!'
+  wirelessSignCreateNoPermission: '{lut.pipes_prefix} <&c>Dir fehlen die nötigen Zugriffsrechte, um ein WirelessPipe-Schild zu erstellen!'
+  wirelessSignMalformed: '{lut.pipes_prefix} <&c>Ungültige Koordinaten des anderen WirelessPipe-Schildes - bitte in dritter Zeile als <&4>x y z</> oder <&4>x:y:z</> mit gültigen Zahlen angeben.'
+  wirelessSignNotOnGlassBlock: '{lut.pipes_prefix} <&c>Ein WirelessPipe-Schild kann nur an einem Glasblock angebracht werden!'
+  wirelessSignCreated: |
+    {lut.pipes_prefix} <&7>Das WirelessPipe-Schild bei<space/>
+    <hover-text *let-coordinates=`{x} {y} {z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
+      <to-clipboard [coordinates]>
+        <&a><u>{coordinates}
+    </hover-text>
+    <space/>zeigend auf<space/>
+    <hover-text *let-coordinates=`{referenced_x} {referenced_y} {referenced_z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
+      <to-clipboard [coordinates]>
+        <&a><u>{coordinates}
+    </hover-text>
+    <space/>wurde erfolgreich erstellt!'
+  wirelessSignInformation: |
+    {lut.pipes_prefix} <&7>Das WirelessPipe-Schild bei<space/>
+    <hover-text *let-coordinates=`{x} {y} {z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
+      <to-clipboard [coordinates]>
+        <&a><u>{coordinates}
+    </hover-text>
+    <space/>zeigt auf<space/>
+    <hover-text *let-coordinates=`{referenced_x} {referenced_y} {referenced_z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
+      <to-clipboard [coordinates]>
+        <&a><u>{coordinates}
+    </hover-text>
+    <space/>und ist<space/>
+    <&a *if="is_connected">verbunden</>
+    <&c *else>nicht verbunden</>
+    .
+  wirelessSignTeleported: |
+    {lut.pipes_prefix} <&7>Du wurdest zum eingetragenen Punkt<space/>
+    <hover-text *let-coordinates=`{referenced_x} {referenced_y} {referenced_z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
+      <to-clipboard [coordinates]>
+        <&a><u>{coordinates}
+    </hover-text>
+    <space/>am WirelessPipe-Schild bei<space/>
+    <hover-text *let-coordinates=`{x} {y} {z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
+      <to-clipboard [coordinates]>
+        <&a><u>{coordinates}
+    </hover-text>
+    <space/>teleportiert.
   enumerationExceededRetries: '{lut.pipes_prefix} <&e>Das Limit von <&6>{limit} Ladeversuchen</> wurde überschritten; breche vorzeitig ab!'
   enumerationNotAPipeBlock: '{lut.pipes_prefix} <&c>Der Block bei <&4>{x} {y} {z}</> ist kein Pipe-Block; bitte schaue auf einen Kolben, einen Behälter, ein Schild oder ein Rohr!'
   enumerationCannotBuildThere: '{lut.pipes_prefix} <&c>Dir fehlen die nötigen Rechte, um auf die Blöcke zuzugreifen!'

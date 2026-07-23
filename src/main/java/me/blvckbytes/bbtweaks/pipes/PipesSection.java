@@ -23,6 +23,13 @@ public class PipesSection extends ConfigSection {
   public ComponentMarkup unsupportedSignType;
   public ComponentMarkup signCreated;
 
+  public ComponentMarkup wirelessSignCreateNoPermission;
+  public ComponentMarkup wirelessSignMalformed;
+  public ComponentMarkup wirelessSignNotOnGlassBlock;
+  public ComponentMarkup wirelessSignCreated;
+  public ComponentMarkup wirelessSignInformation;
+  public ComponentMarkup wirelessSignTeleported;
+
   public ComponentMarkup enumerationExceededRetries;
   public ComponentMarkup enumerationNotAPipeBlock;
   public ComponentMarkup enumerationCannotBuildThere;
