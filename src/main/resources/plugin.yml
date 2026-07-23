@@ -138,6 +138,10 @@ permissions:
     description: 'Use the item-notifier mechanic'
   bbtweaks.mechanic.pool-crafter:
     description: 'Use the pool-crafter mechanic'
+  bbtweaks.mechanic.teleporter:
+    description: 'Create a teleporter-sign'
+  bbtweaks.mechanic.command-sign:
+    description: 'Create a command-sign'
   bbtweaks.markers:
     description: 'Browse all available markers'
   bbtweaks.setmarker:
@@ -152,7 +156,3 @@ permissions:
     description: 'Allows to create pipe-signs, used to activate pipes'
   bbtweaks.pipes.auto-init-signs:
     description: 'Allows to automatically initialize blank signs to pipe-signs'
-  bbtweaks.teleporter:
-    description: 'Create a teleporter-sign'
-  bbtweaks.command-sign:
-    description: 'Create a command-sign'

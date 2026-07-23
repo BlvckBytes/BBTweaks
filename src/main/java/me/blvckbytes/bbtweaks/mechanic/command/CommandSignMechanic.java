@@ -38,7 +38,7 @@ public class CommandSignMechanic extends BaseMechanic<CommandSignInstance> {
 
   @Override
   public @Nullable CommandSignInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
-    if (creator != null && !creator.hasPermission("bbtweaks.mechanic.command")) {
+    if (creator != null && !creator.hasPermission("bbtweaks.mechanic.command-sign")) {
       config.rootSection.mechanic.commandSign.noPermission.sendMessage(creator);
       return null;
     }
