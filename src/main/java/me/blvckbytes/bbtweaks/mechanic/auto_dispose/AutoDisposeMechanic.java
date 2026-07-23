@@ -5,13 +5,11 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.mechanic.PredicateMechanic;
-import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
-import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -51,36 +49,6 @@ public class AutoDisposeMechanic extends PredicateMechanic<AutoDisposeInstance> 
       return null;
     }
 
-    var environment = new InterpretationEnvironment()
-      .withVariable("x", sign.getX())
-      .withVariable("y", sign.getY())
-      .withVariable("z", sign.getZ());
-
-    var signBlock = sign.getBlock();
-    var signFacing = ((Directional) sign.getBlockData()).getFacing();
-    var mountBlock = signBlock.getRelative(signFacing.getOppositeFace());
-
-    if (!(mountBlock.getState() instanceof Container container)) {
-      if (creator != null)
-        config.rootSection.mechanic.autoDispose.noContainer.sendMessage(creator, environment);
-
-      return null;
-    }
-
-    if (SignUtil.checkIfAnyContainerSignMatches(container, this::isSignRegistered)) {
-      if (creator != null) {
-        config.rootSection.mechanic.autoDispose.existingSign.sendMessage(
-          creator,
-          new InterpretationEnvironment()
-            .withVariable("x", mountBlock.getX())
-            .withVariable("y", mountBlock.getY())
-            .withVariable("z", mountBlock.getZ())
-        );
-      }
-
-      return null;
-    }
-
     var predicateAndLanguage = loadPredicateFromSign(sign);
     ItemPredicate predicate = null;
 
@@ -103,11 +71,33 @@ public class AutoDisposeMechanic extends PredicateMechanic<AutoDisposeInstance> 
     }
 
     var instance = new AutoDisposeInstance(sign, predicate, config);
+    var mountBlock = instance.getMountBlock();
+
+    if (!(mountBlock.getState(false) instanceof Container container)) {
+      if (creator != null)
+        config.rootSection.mechanic.autoDispose.noContainer.sendMessage(creator, getSignEnvironment(sign));
+
+      return null;
+    }
+
+    if (checkIfAnyContainerSignMatches(container, this::isSignRegistered)) {
+      if (creator != null) {
+        config.rootSection.mechanic.autoDispose.existingSign.sendMessage(
+          creator,
+          new InterpretationEnvironment()
+            .withVariable("x", mountBlock.getX())
+            .withVariable("y", mountBlock.getY())
+            .withVariable("z", mountBlock.getZ())
+        );
+      }
+
+      return null;
+    }
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
     if (creator != null)
-      config.rootSection.mechanic.autoDispose.creationSuccess.sendMessage(creator, environment);
+      config.rootSection.mechanic.autoDispose.creationSuccess.sendMessage(creator, getSignEnvironment(sign));
 
     return instance;
   }

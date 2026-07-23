@@ -1,11 +1,11 @@
 package me.blvckbytes.bbtweaks.mechanic.pool_crafter;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.mechanic.auto_crafter.RecipeCache;
 import me.blvckbytes.bbtweaks.util.BlockUtil;
-import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Container;
@@ -109,9 +109,16 @@ public class PoolCrafterMechanic extends BaseMechanic<PoolCrafterInstance> imple
         return null;
       }
 
-      if (SignUtil.checkIfAnyContainerSignMatches(container, this::isSignRegistered)) {
-        if (creator != null)
-          config.rootSection.mechanic.poolCrafter.existingSign.sendMessage(creator, getSignEnvironment(sign));
+      if (checkIfAnyContainerSignMatches(container, this::isSignRegistered)) {
+        if (creator != null) {
+          config.rootSection.mechanic.poolCrafter.existingSign.sendMessage(
+            creator,
+            new InterpretationEnvironment()
+              .withVariable("x", dropper.getX())
+              .withVariable("y", dropper.getY())
+              .withVariable("z", dropper.getZ())
+          );
+        }
 
         return null;
       }

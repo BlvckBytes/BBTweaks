@@ -140,7 +140,7 @@ unCraft:
   preferredMaterials:
 
 mechanic:
-  noWallSign: '{lut.mechanic_prefix} <&c>Mechaniken werden nur auf Wandschildern unterstützt, da der Befestigungsblock als Ausgangsvermittler gilt!'
+  noWallOrStandingSign: '{lut.mechanic_prefix} <&c>Mechaniken werden nur auf Wandschildern sowie stehenden Schildern unterstützt!'
   clock:
     minTickPeriod: 4
     noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte, um eine Clock zu erstellen!'

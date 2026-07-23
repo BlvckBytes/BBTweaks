@@ -44,7 +44,7 @@ public class MechanicSection extends ConfigSection {
   public CommandSignSection commandSign;
   public TeleporterSection teleporter;
 
-  public ComponentMarkup noWallSign;
+  public ComponentMarkup noWallOrStandingSign;
 
   public MechanicSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

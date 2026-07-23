@@ -72,7 +72,10 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
       5.0,
       FluidCollisionMode.NEVER,
       false,
-      block -> Tag.WALL_SIGNS.isTagged(block.getType())
+      block -> {
+        var blockType = block.getType();
+        return Tag.WALL_SIGNS.isTagged(blockType) || Tag.STANDING_SIGNS.isTagged(blockType);
+      }
     );
 
     if (rayTraceResult == null || rayTraceResult.getHitBlock() == null)

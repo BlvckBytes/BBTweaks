@@ -12,7 +12,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
-import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -60,24 +59,11 @@ public class ItemNotifierMechanic extends PredicateMechanic<ItemNotifierInstance
       return null;
     }
 
-    var environment = getSignEnvironment(sign);
-
-    var signBlock = sign.getBlock();
-    var signFacing = ((Directional) sign.getBlockData()).getFacing();
-    var mountBlock = signBlock.getRelative(signFacing.getOppositeFace());
-
-    if (!(mountBlock.getState() instanceof Container)) {
-      if (creator != null)
-        config.rootSection.mechanic.itemNotifier.noContainer.sendMessage(creator, environment);
-
-      return null;
-    }
-
     var name = SignUtil.getPlainTextLine(sign, NAME_LINE).trim();
 
     if (name.isEmpty()) {
       if (creator != null)
-        config.rootSection.mechanic.itemNotifier.missingName.sendMessage(creator, environment);
+        config.rootSection.mechanic.itemNotifier.missingName.sendMessage(creator, getSignEnvironment(sign));
 
       return null;
     }
@@ -116,10 +102,17 @@ public class ItemNotifierMechanic extends PredicateMechanic<ItemNotifierInstance
 
     var instance = new ItemNotifierInstance(sign, name, predicate, flags, config);
 
+    if (!(instance.getMountBlock().getState(false) instanceof Container)) {
+      if (creator != null)
+        config.rootSection.mechanic.itemNotifier.noContainer.sendMessage(creator, getSignEnvironment(sign));
+
+      return null;
+    }
+
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
     if (creator != null)
-      config.rootSection.mechanic.itemNotifier.creationSuccess.sendMessage(creator, environment);
+      config.rootSection.mechanic.itemNotifier.creationSuccess.sendMessage(creator, getSignEnvironment(sign));
 
     return instance;
   }

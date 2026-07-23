@@ -98,7 +98,7 @@ public class SignMechanicManager implements Disableable, Listener {
     var block = event.getBlock();
     var blockType = block.getType();
 
-    if (!Tag.WALL_SIGNS.isTagged(blockType))
+    if (!isSupportedSignType(blockType))
       return;
 
     if (!(block.getState() instanceof Sign sign))
@@ -115,7 +115,7 @@ public class SignMechanicManager implements Disableable, Listener {
     var block = event.getBlock();
     var blockType = block.getType();
 
-    if (!Tag.WALL_SIGNS.isTagged(blockType))
+    if (!isSupportedSignType(blockType))
       return;
 
     if (!(block.getState() instanceof Sign sign))
@@ -142,7 +142,7 @@ public class SignMechanicManager implements Disableable, Listener {
     var block = event.getBlock();
     var blockType = block.getType();
 
-    if (!Tag.WALL_SIGNS.isTagged(blockType))
+    if (!isSupportedSignType(blockType))
       return;
 
     if (!(block.getState() instanceof Sign sign))
@@ -170,8 +170,8 @@ public class SignMechanicManager implements Disableable, Listener {
         return;
 
       correspondSign(newSign, mechanic -> {
-        if (!Tag.WALL_SIGNS.isTagged(block.getType())) {
-          config.rootSection.mechanic.noWallSign.sendMessage(event.getPlayer());
+        if (!isSupportedSignType(block.getType())) {
+          config.rootSection.mechanic.noWallOrStandingSign.sendMessage(event.getPlayer());
           block.breakNaturally();
           return;
         }
@@ -186,7 +186,7 @@ public class SignMechanicManager implements Disableable, Listener {
   public void onChunkLoad(ChunkLoadEvent event) {
     forEachSignInChunk(event.getChunk(), sign -> {
       correspondSign(sign, mechanic -> {
-        if (!Tag.WALL_SIGNS.isTagged(sign.getType())) {
+        if (!isSupportedSignType(sign.getType())) {
           sign.getBlock().breakNaturally();
           return;
         }
@@ -205,7 +205,7 @@ public class SignMechanicManager implements Disableable, Listener {
   }
 
   private void forEachSignInChunk(Chunk chunk, Consumer<Sign> handler) {
-    for (var tileEntity : chunk.getTileEntities(block -> Tag.WALL_SIGNS.isTagged(block.getType()), false)) {
+    for (var tileEntity : chunk.getTileEntities(block -> isSupportedSignType(block.getType()), false)) {
       if (tileEntity instanceof Sign sign)
         handler.accept(sign);
     }
@@ -215,7 +215,7 @@ public class SignMechanicManager implements Disableable, Listener {
   public void onInteract(PlayerInteractEvent event) {
     var block = event.getClickedBlock();
 
-    if (block == null || !Tag.WALL_SIGNS.isTagged(block.getType()))
+    if (block == null || !isSupportedSignType(block.getType()))
       return;
 
     if (!(block.getState() instanceof Sign sign))
@@ -271,5 +271,9 @@ public class SignMechanicManager implements Disableable, Listener {
       if (existingHandler != null)
         throw new IllegalArgumentException("Duplicate sign-mechanic for discriminator \"" + discriminator + "\" detected: " + existingHandler.getClass());
     }
+  }
+
+  private boolean isSupportedSignType(Material material) {
+    return Tag.WALL_SIGNS.isTagged(material) || Tag.STANDING_SIGNS.isTagged(material);
   }
 }

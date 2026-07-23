@@ -4,12 +4,12 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.mechanic.MechanicInstance;
+import me.blvckbytes.bbtweaks.mechanic.MechanicSignInfo;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.bbtweaks.util.StringUtil;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
-import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
@@ -107,9 +107,10 @@ public abstract class OffsetSelectingMechanic<InstanceType extends MechanicInsta
       return true;
     }
 
-    var signFacing = ((Directional) sign.getBlockData()).getFacing();
+    var signInfo = MechanicSignInfo.createFromSign(sign);
+    var targetBlock = signInfo.mountBlock().getRelative(xOffset, yOffset, zOffset);
 
-    if (yOffset == 0 && xOffset == signFacing.getModX() && zOffset == signFacing.getModZ()) {
+    if (targetBlock.equals(sign.getBlock())) {
       if (player != null)
         sectionAccessor.get().triedBindingToSign().sendMessage(player, getSignEnvironment(sign));
 

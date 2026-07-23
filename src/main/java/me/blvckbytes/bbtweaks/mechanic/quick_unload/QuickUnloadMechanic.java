@@ -18,7 +18,6 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
-import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -213,36 +212,6 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
       return null;
     }
 
-    var environment = new InterpretationEnvironment()
-      .withVariable("x", sign.getX())
-      .withVariable("y", sign.getY())
-      .withVariable("z", sign.getZ());
-
-    var signBlock = sign.getBlock();
-    var signFacing = ((Directional) sign.getBlockData()).getFacing();
-    var mountBlock = signBlock.getRelative(signFacing.getOppositeFace());
-
-    if (!(mountBlock.getState() instanceof Container container)) {
-      if (creator != null)
-        config.rootSection.mechanic.quickUnload.noContainer.sendMessage(creator, environment);
-
-      return null;
-    }
-
-    if (SignUtil.checkIfAnyContainerSignMatches(container, this::isSignRegistered)) {
-      if (creator != null) {
-        config.rootSection.mechanic.quickUnload.existingSign.sendMessage(
-          creator,
-          new InterpretationEnvironment()
-            .withVariable("x", mountBlock.getX())
-            .withVariable("y", mountBlock.getY())
-            .withVariable("z", mountBlock.getZ())
-        );
-      }
-
-      return null;
-    }
-
     var predicateAndLanguage = loadPredicateFromSign(sign);
     ItemPredicate predicate = null;
 
@@ -280,11 +249,33 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
     }
 
     var instance = new QuickUnloadInstance(sign, flags, predicate);
+    var mountBlock = instance.getMountBlock();
+
+    if (!(mountBlock.getState(false) instanceof Container container)) {
+      if (creator != null)
+        config.rootSection.mechanic.quickUnload.noContainer.sendMessage(creator, getSignEnvironment(sign));
+
+      return null;
+    }
+
+    if (checkIfAnyContainerSignMatches(container, this::isSignRegistered)) {
+      if (creator != null) {
+        config.rootSection.mechanic.quickUnload.existingSign.sendMessage(
+          creator,
+          new InterpretationEnvironment()
+            .withVariable("x", mountBlock.getX())
+            .withVariable("y", mountBlock.getY())
+            .withVariable("z", mountBlock.getZ())
+        );
+      }
+
+      return null;
+    }
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
     if (creator != null)
-      config.rootSection.mechanic.quickUnload.creationSuccess.sendMessage(creator, environment);
+      config.rootSection.mechanic.quickUnload.creationSuccess.sendMessage(creator, getSignEnvironment(sign));
 
     return instance;
   }

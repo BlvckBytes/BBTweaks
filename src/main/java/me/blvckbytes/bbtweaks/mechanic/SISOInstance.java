@@ -32,9 +32,11 @@ public abstract class SISOInstance implements MechanicInstance {
   public SISOInstance(Sign sign, SISOFlag... flags) {
     this.sign = sign;
 
-    this.signFacing = ((Directional) sign.getBlockData()).getFacing();
-    this.mountBlock = sign.getBlock().getRelative(signFacing.getOppositeFace());
-    this.inputBlock = sign.getBlock().getRelative(signFacing);
+    var signInfo = MechanicSignInfo.createFromSign(sign);
+
+    this.signFacing = signInfo.signFacing();
+    this.mountBlock = signInfo.mountBlock();
+    this.inputBlock = signInfo.inputBlock();
 
     this.availableOutputBlocks = new ArrayList<>();
 

@@ -14,15 +14,17 @@ import java.util.ArrayList;
 public class SignFlipperInstance extends SISOInstance {
 
   private final NamespacedKey lastStateKey;
-  private final Block adjacentSignBlock;
+
+  public final Block adjacentSignBlock;
 
   private TriState lastState = TriState.NULL;
 
-  public SignFlipperInstance(Plugin plugin, Sign sign, Block adjacentSignBlock) {
+  public SignFlipperInstance(Plugin plugin, Sign sign) {
     super(sign);
 
     this.lastStateKey = new NamespacedKey(plugin, "last-sign-flipper-state");
-    this.adjacentSignBlock = adjacentSignBlock;
+
+    this.adjacentSignBlock = mountBlock.getRelative(signFacing.getOppositeFace());
 
     if (adjacentSignBlock.getState() instanceof Sign adjacentSign) {
       var lastStoredState = adjacentSign

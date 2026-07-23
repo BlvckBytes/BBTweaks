@@ -19,7 +19,9 @@ import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.util.*;
 import org.bukkit.Tag;
+import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
@@ -32,6 +34,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -39,12 +42,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 
 public abstract class BaseMechanic<InstanceType extends MechanicInstance> implements SignMechanic<InstanceType>, Listener {
 
   private static final BlockFace[] PRESSURE_PLATE_BELOW_FACES = {
     BlockFace.SELF, BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
+  };
+
+  private static final BlockFace[] WALL_SIGN_FACES = new BlockFace[] {
+    BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST
   };
 
   protected final Plugin plugin;
@@ -338,5 +346,53 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
     }
 
     return null;
+  }
+
+  protected boolean checkIfAnyContainerSignMatches(Container container, Predicate<Sign> predicate) {
+    var containerBlocks = new ArrayList<Block>(2);
+
+    if (container.getInventory() instanceof DoubleChestInventory doubleInventory) {
+      if (doubleInventory.getRightSide().getHolder(false) instanceof Container rightContainer)
+        containerBlocks.add(rightContainer.getBlock());
+
+      if (doubleInventory.getLeftSide().getHolder(false) instanceof Container leftContainer)
+        containerBlocks.add(leftContainer.getBlock());
+    }
+
+    else
+      containerBlocks.add(container.getBlock());
+
+    for (var containerBlock : containerBlocks) {
+      for (var signFace : WALL_SIGN_FACES) {
+        var possibleSignBlock = containerBlock.getRelative(signFace);
+
+        if (!BlockUtil.isBlockLoaded(possibleSignBlock))
+          continue;
+
+        var blockData = possibleSignBlock.getBlockData();
+
+        if (!(Tag.WALL_SIGNS.isTagged(blockData.getMaterial())))
+          continue;
+
+        if (((Directional) blockData).getFacing() != signFace)
+          continue;
+
+        if (predicate.test((Sign) possibleSignBlock.getState(false)))
+          return true;
+      }
+
+      var possibleSignBlock = containerBlock.getRelative(BlockFace.UP);
+
+      if (!BlockUtil.isBlockLoaded(possibleSignBlock))
+        continue;
+
+      if (!Tag.STANDING_SIGNS.isTagged(possibleSignBlock.getType()))
+        continue;
+
+      if (predicate.test((Sign) possibleSignBlock.getState(false)))
+        return true;
+    }
+
+    return false;
   }
 }

@@ -9,13 +9,11 @@ import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.MagnetEditDisplayHand
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicRegistry;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
-import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
-import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -271,38 +269,6 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
       return null;
     }
 
-    var environment = new InterpretationEnvironment()
-      .withVariable("x", sign.getX())
-      .withVariable("y", sign.getY())
-      .withVariable("z", sign.getZ());
-
-    var signBlock = sign.getBlock();
-    var signFacing = ((Directional) sign.getBlockData()).getFacing();
-    var mountBlock = signBlock.getRelative(signFacing.getOppositeFace());
-
-    if (!(mountBlock.getState() instanceof Container container)) {
-      if (creator != null)
-        config.rootSection.mechanic.magnet.noContainer.sendMessage(creator, environment);
-
-      return null;
-    }
-
-    if (!config.rootSection.mechanic.magnet.allowMultipleSignsPerContainer) {
-      if (SignUtil.checkIfAnyContainerSignMatches(container, this::isSignRegistered)) {
-        if (creator != null) {
-          config.rootSection.mechanic.magnet.existingSign.sendMessage(
-            creator,
-            new InterpretationEnvironment()
-              .withVariable("x", mountBlock.getX())
-              .withVariable("y", mountBlock.getY())
-              .withVariable("z", mountBlock.getZ())
-          );
-        }
-
-        return null;
-      }
-    }
-
     var parameters = new MagnetParameters(sign, config);
 
     parameters.read();
@@ -338,13 +304,37 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
     var cuboid = parameters.makeCuboid();
 
     var instance = new MagnetInstance(sign, cuboid, predicate);
+    var mountBlock = instance.getMountBlock();
+
+    if (!(mountBlock.getState(false) instanceof Container container)) {
+      if (creator != null)
+        config.rootSection.mechanic.magnet.noContainer.sendMessage(creator, getSignEnvironment(sign));
+
+      return null;
+    }
+
+    if (!config.rootSection.mechanic.magnet.allowMultipleSignsPerContainer) {
+      if (checkIfAnyContainerSignMatches(container, this::isSignRegistered)) {
+        if (creator != null) {
+          config.rootSection.mechanic.magnet.existingSign.sendMessage(
+            creator,
+            new InterpretationEnvironment()
+              .withVariable("x", mountBlock.getX())
+              .withVariable("y", mountBlock.getY())
+              .withVariable("z", mountBlock.getZ())
+          );
+        }
+
+        return null;
+      }
+    }
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
     instanceByMountBlockPosition.put(mountBlock.getWorld(), mountBlock.getX(), mountBlock.getY(), mountBlock.getZ(), instance);
     instanceCuboidRegistry.register(instance);
 
     if (creator != null)
-      config.rootSection.mechanic.magnet.creationSuccess.sendMessage(creator, environment);
+      config.rootSection.mechanic.magnet.creationSuccess.sendMessage(creator, getSignEnvironment(sign));
 
     return instance;
   }

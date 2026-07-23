@@ -6,7 +6,6 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.util.BlockUtil;
 import me.blvckbytes.bbtweaks.util.CacheByPosition;
-import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Crafter;
@@ -73,7 +72,7 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
         return null;
       }
 
-      if (SignUtil.checkIfAnyContainerSignMatches(crafterState, this::isSignRegistered)) {
+      if (checkIfAnyContainerSignMatches(crafterState, this::isSignRegistered)) {
         if (creator != null) {
           config.rootSection.mechanic.autoCrafter.existingSign.sendMessage(
             creator,

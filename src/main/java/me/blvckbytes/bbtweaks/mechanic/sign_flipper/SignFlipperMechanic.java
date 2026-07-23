@@ -6,7 +6,6 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import org.bukkit.Tag;
 import org.bukkit.block.Sign;
-import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -47,34 +46,19 @@ public class SignFlipperMechanic extends BaseMechanic<SignFlipperInstance> {
       return null;
     }
 
-    var environment = new InterpretationEnvironment()
-      .withVariable("x", sign.getX())
-      .withVariable("y", sign.getY())
-      .withVariable("z", sign.getZ());
+    var instance = new SignFlipperInstance(plugin, sign);
 
-    var signBlock = sign.getBlock();
-    var signFacing = ((Directional) sign.getBlockData()).getFacing();
-    var oppositeFacing = signFacing.getOppositeFace();
-
-    var adjacentSign = signBlock.getRelative(
-      oppositeFacing.getModX() * 2,
-      0,
-      oppositeFacing.getModZ() * 2
-    );
-
-    if (!(Tag.WALL_SIGNS.isTagged(adjacentSign.getType()))) {
+    if (!(Tag.ALL_SIGNS.isTagged(instance.adjacentSignBlock.getType()))) {
       if (creator != null)
-        config.rootSection.mechanic.signFlipper.noAdjacentSign.sendMessage(creator, environment);
+        config.rootSection.mechanic.signFlipper.noAdjacentSign.sendMessage(creator, getSignEnvironment(sign));
 
       return null;
     }
 
-    var instance = new SignFlipperInstance(plugin, sign, adjacentSign);
-
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 
     if (creator != null)
-      config.rootSection.mechanic.signFlipper.creationSuccess.sendMessage(creator, environment);
+      config.rootSection.mechanic.signFlipper.creationSuccess.sendMessage(creator, getSignEnvironment(sign));
 
     return instance;
   }
