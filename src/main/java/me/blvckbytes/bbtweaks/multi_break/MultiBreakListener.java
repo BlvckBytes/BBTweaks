@@ -253,8 +253,14 @@ public class MultiBreakListener implements Listener {
       expOrb.setExperience(breakEvent.getExpToDrop());
     }
 
-    if (blockState instanceof Container container) {
-      for (var containerItem : container.getInventory().getContents()) {
+    var blockData = block.getBlockData();
+    var blockType = blockData.getMaterial();
+
+    // Shulkers persist their contents, so there's no need to drop anything.
+    if (!Tag.SHULKER_BOXES.isTagged(blockType) && blockState instanceof Container container) {
+      var containerInventory = container.getInventory();
+
+      for (var containerItem : containerInventory.getContents()) {
         if (containerItem == null || containerItem.getType().isAir())
           continue;
 
@@ -263,11 +269,13 @@ public class MultiBreakListener implements Listener {
         if (pickupDelay >= 0)
           item.setPickupDelay(pickupDelay);
       }
+
+      // Always clear the inventory, in case that it does keep items, like shulkers do, as to avoid duplication.
+      // We never know what types of containers future updates may bring - better safe than sorry.
+      containerInventory.clear();
     }
 
-    var blockData = block.getBlockData();
-
-    player.incrementStatistic(Statistic.MINE_BLOCK, blockData.getMaterial());
+    player.incrementStatistic(Statistic.MINE_BLOCK, blockType);
 
     world.spawnParticle(
       Particle.BLOCK,
