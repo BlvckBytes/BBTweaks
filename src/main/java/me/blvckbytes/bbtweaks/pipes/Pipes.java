@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
 import me.blvckbytes.bbtweaks.pipes.notification.*;
 import me.blvckbytes.bbtweaks.util.CompactId;
 import me.blvckbytes.bbtweaks.util.ComponentUtil;
@@ -63,6 +64,7 @@ public class Pipes implements PipesApi, Listener {
 
   private final PipeTimingsCommand pipeTimingsCommand;
   private final PipesInventoryUtil inventoryUtil;
+  private final BackOverrideCommand backCommand;
 
   private final Map<UUID, Map<String, Long>> lastNotificationSendByDebounceIdByPlayerId;
 
@@ -71,13 +73,15 @@ public class Pipes implements PipesApi, Listener {
     ConfigKeeper<MainSection> config,
     PipeBlockCacheRegistry cacheRegistry,
     PipeTimingsCommand pipeTimingsCommand,
-    PipesInventoryUtil inventoryUtil
+    PipesInventoryUtil inventoryUtil,
+    BackOverrideCommand backCommand
   ) {
     this.plugin = plugin;
     this.config = config;
     this.cacheRegistry = cacheRegistry;
     this.pipeTimingsCommand = pipeTimingsCommand;
     this.inventoryUtil = inventoryUtil;
+    this.backCommand = backCommand;
 
     this.lastNotificationSendByDebounceIdByPlayerId = new HashMap<>();
   }
@@ -211,7 +215,8 @@ public class Pipes implements PipesApi, Listener {
     if (!(block.getState(false) instanceof Sign sign))
       return;
 
-    var markerContents = ComponentUtil.asTrimmedText(sign.getSide(Side.FRONT).line(1));
+    var signSide = sign.getSide(Side.FRONT);
+    var markerContents = ComponentUtil.asTrimmedText(signSide.line(1));
 
     if (!markerContents.equalsIgnoreCase(WirelessPipeSign.MARKER))
       return;
@@ -263,6 +268,9 @@ public class Pipes implements PipesApi, Listener {
       config.rootSection.pipes.wirelessSignMissingTeleportPermission.sendMessage(player, environment);
       return;
     }
+
+    if (ComponentUtil.asTrimmedText(signSide.line(3)).contains("no-back"))
+      backCommand.temporarilyIgnore(player);
 
     player.teleport(thisWirelessSign.referencedBlock.getLocation());
     config.rootSection.pipes.wirelessSignTeleported.sendMessage(player, environment);
