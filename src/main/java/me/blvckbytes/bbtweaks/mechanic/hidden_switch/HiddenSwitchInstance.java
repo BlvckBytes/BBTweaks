@@ -12,6 +12,7 @@ import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -37,6 +38,7 @@ public class HiddenSwitchInstance extends SISOInstance {
 
   public HiddenSwitchInstance(
     Sign sign,
+    Side side,
     Inventory keysInventory,
     Offsets offsets,
     @Nullable ComponentMarkup grantedMessage,
@@ -45,7 +47,7 @@ public class HiddenSwitchInstance extends SISOInstance {
     boolean allowKeyOrPassword,
     ConfigKeeper<MainSection> config
   ) {
-    super(sign, SISOFlag.ALLOW_OUTPUT_ON_SIGN_PLANE);
+    super(sign, side, SISOFlag.ALLOW_OUTPUT_ON_SIGN_PLANE);
 
     this.keysInventory = keysInventory;
     this.interactionPosition = getMountBlock().getLocation().add(offsets.x(), offsets.y(), offsets.z());

@@ -206,7 +206,7 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
   }
 
   @Override
-  public @Nullable QuickUnloadInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable QuickUnloadInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.quick-unload")) {
       config.rootSection.mechanic.quickUnload.noPermission.sendMessage(creator);
       return null;
@@ -215,11 +215,11 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
     var predicateAndLanguage = loadPredicateFromSign(sign);
     ItemPredicate predicate = null;
 
-    var frontSide = sign.getSide(Side.FRONT);
+    var targetSide = sign.getSide(side);
 
     if (predicateAndLanguage != null) {
-      if (!frontSide.line(0).equals(COMPONENT_PREDICATE_MODE_ON)) {
-        frontSide.line(0, COMPONENT_PREDICATE_MODE_ON);
+      if (!targetSide.line(0).equals(COMPONENT_PREDICATE_MODE_ON)) {
+        targetSide.line(0, COMPONENT_PREDICATE_MODE_ON);
         sign.update(true, false);
       }
 
@@ -227,8 +227,8 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
     }
 
     else {
-      if (!frontSide.line(0).equals(COMPONENT_PREDICATE_MODE_OFF)) {
-        frontSide.line(0, COMPONENT_PREDICATE_MODE_OFF);
+      if (!targetSide.line(0).equals(COMPONENT_PREDICATE_MODE_OFF)) {
+        targetSide.line(0, COMPONENT_PREDICATE_MODE_OFF);
         sign.update(true, false);
       }
     }
@@ -238,8 +238,8 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
     try {
       flags = FlagEnum.parse(
         QuickUnloadFlag.class,
-        SignUtil.getPlainTextLine(sign, FIRST_FLAGS_LINE),
-        SignUtil.getPlainTextLine(sign, SECOND_FLAGS_LINE)
+        SignUtil.getPlainTextLine(sign, side, FIRST_FLAGS_LINE),
+        SignUtil.getPlainTextLine(sign, side, SECOND_FLAGS_LINE)
       );
     } catch (UnknownFlagException exception) {
       if (creator != null)
@@ -248,7 +248,7 @@ public class QuickUnloadMechanic extends PredicateMechanic<QuickUnloadInstance> 
       return null;
     }
 
-    var instance = new QuickUnloadInstance(sign, flags, predicate);
+    var instance = new QuickUnloadInstance(sign, side, flags, predicate);
     var mountBlock = instance.getMountBlock();
 
     if (!(mountBlock.getState(false) instanceof Container container)) {

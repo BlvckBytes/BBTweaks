@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.*;
 import org.bukkit.block.data.*;
+import org.bukkit.block.sign.Side;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -17,6 +18,7 @@ public abstract class SISOInstance implements MechanicInstance {
   };
 
   protected final Sign sign;
+  protected final Side side;
   protected final BlockFace signFacing;
   protected final Block mountBlock;
   protected final Block inputBlock;
@@ -29,8 +31,9 @@ public abstract class SISOInstance implements MechanicInstance {
   private boolean lastOutputState;
   private boolean isInitialWrite = true;
 
-  public SISOInstance(Sign sign, SISOFlag... flags) {
+  public SISOInstance(Sign sign, Side side, SISOFlag... flags) {
     this.sign = sign;
+    this.side = side;
 
     var signInfo = MechanicSignInfo.createFromSign(sign);
 
@@ -57,6 +60,11 @@ public abstract class SISOInstance implements MechanicInstance {
         availableOutputBlocks.add(sign.getBlock().getRelative(BlockFace.SOUTH));
       }
     }
+  }
+
+  @Override
+  public Side getSide() {
+    return side;
   }
 
   @Override

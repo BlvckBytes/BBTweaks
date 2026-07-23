@@ -2,8 +2,11 @@ package me.blvckbytes.bbtweaks.mechanic;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 
 public interface MechanicInstance {
+
+  Side getSide();
 
   Sign getSign();
 

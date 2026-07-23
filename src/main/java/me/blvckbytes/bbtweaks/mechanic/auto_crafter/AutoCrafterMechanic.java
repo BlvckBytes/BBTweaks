@@ -10,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Crafter;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.block.CrafterCraftEvent;
@@ -54,13 +55,13 @@ public class AutoCrafterMechanic extends BaseMechanic<AutoCrafterInstance> imple
   }
 
   @Override
-  public @Nullable AutoCrafterInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable AutoCrafterInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.auto-crafter")) {
       config.rootSection.mechanic.autoCrafter.noPermission.sendMessage(creator);
       return null;
     }
 
-    var instance = new AutoCrafterInstance(sign, this);
+    var instance = new AutoCrafterInstance(sign, side, this);
 
     var crafter = instance.getMountBlock();
 

@@ -115,7 +115,7 @@ public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implemen
   }
 
   @Override
-  public @Nullable InvMoveInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable InvMoveInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.inv-move")) {
       config.rootSection.mechanic.invMove.noPermission.sendMessage(creator);
       return null;
@@ -124,11 +124,11 @@ public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implemen
     var predicateAndLanguage = loadPredicateFromSign(sign);
     ItemPredicate predicate = null;
 
-    var frontSide = sign.getSide(Side.FRONT);
+    var targetSide = sign.getSide(side);
 
     if (predicateAndLanguage != null) {
-      if (!frontSide.line(0).equals(COMPONENT_PREDICATE_MODE_ON)) {
-        frontSide.line(0, COMPONENT_PREDICATE_MODE_ON);
+      if (!targetSide.line(0).equals(COMPONENT_PREDICATE_MODE_ON)) {
+        targetSide.line(0, COMPONENT_PREDICATE_MODE_ON);
         sign.update(true, false);
       }
 
@@ -136,8 +136,8 @@ public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implemen
     }
 
     else {
-      if (!frontSide.line(0).equals(COMPONENT_PREDICATE_MODE_OFF)) {
-        frontSide.line(0, COMPONENT_PREDICATE_MODE_OFF);
+      if (!targetSide.line(0).equals(COMPONENT_PREDICATE_MODE_OFF)) {
+        targetSide.line(0, COMPONENT_PREDICATE_MODE_OFF);
         sign.update(true, false);
       }
     }
@@ -145,7 +145,7 @@ public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implemen
     EnumSet<InvMoveFlag> flags;
 
     try {
-      flags = FlagEnum.parse(InvMoveFlag.class, SignUtil.getPlainTextLine(sign, FLAGS_LINE));
+      flags = FlagEnum.parse(InvMoveFlag.class, SignUtil.getPlainTextLine(sign, side, FLAGS_LINE));
     } catch (UnknownFlagException exception) {
       if (creator != null)
         config.rootSection.mechanic.invMove.unknownFlag.sendMessage(creator, exception.makeEnvironment());
@@ -153,7 +153,7 @@ public class InvMoveMechanic extends PredicateMechanic<InvMoveInstance> implemen
       return null;
     }
 
-    var instance = new InvMoveInstance(sign, flags, predicate);
+    var instance = new InvMoveInstance(sign, side, flags, predicate);
     var mountBlock = instance.getMountBlock();
 
     if (!(mountBlock.getState(false) instanceof Container container)) {

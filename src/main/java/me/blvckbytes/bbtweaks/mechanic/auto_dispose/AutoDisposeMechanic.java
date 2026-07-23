@@ -43,7 +43,7 @@ public class AutoDisposeMechanic extends PredicateMechanic<AutoDisposeInstance> 
   }
 
   @Override
-  public @Nullable AutoDisposeInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable AutoDisposeInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.auto-dispose")) {
       config.rootSection.mechanic.autoDispose.noPermission.sendMessage(creator);
       return null;
@@ -52,11 +52,11 @@ public class AutoDisposeMechanic extends PredicateMechanic<AutoDisposeInstance> 
     var predicateAndLanguage = loadPredicateFromSign(sign);
     ItemPredicate predicate = null;
 
-    var frontSide = sign.getSide(Side.FRONT);
+    var targetSide = sign.getSide(side);
 
     if (predicateAndLanguage != null) {
-      if (!frontSide.line(0).equals(COMPONENT_PREDICATE_MODE_ON)) {
-        frontSide.line(0, COMPONENT_PREDICATE_MODE_ON);
+      if (!targetSide.line(0).equals(COMPONENT_PREDICATE_MODE_ON)) {
+        targetSide.line(0, COMPONENT_PREDICATE_MODE_ON);
         sign.update(true, false);
       }
 
@@ -64,13 +64,13 @@ public class AutoDisposeMechanic extends PredicateMechanic<AutoDisposeInstance> 
     }
 
     else {
-      if (!frontSide.line(0).equals(COMPONENT_PREDICATE_MODE_OFF)) {
-        frontSide.line(0, COMPONENT_PREDICATE_MODE_OFF);
+      if (!targetSide.line(0).equals(COMPONENT_PREDICATE_MODE_OFF)) {
+        targetSide.line(0, COMPONENT_PREDICATE_MODE_OFF);
         sign.update(true, false);
       }
     }
 
-    var instance = new AutoDisposeInstance(sign, predicate, config);
+    var instance = new AutoDisposeInstance(sign, side, predicate, config);
     var mountBlock = instance.getMountBlock();
 
     if (!(mountBlock.getState(false) instanceof Container container)) {

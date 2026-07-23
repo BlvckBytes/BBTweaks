@@ -9,6 +9,7 @@ import me.blvckbytes.bbtweaks.mechanic.common.FlagEnum;
 import me.blvckbytes.bbtweaks.mechanic.common.UnknownFlagException;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -55,17 +56,17 @@ public class TeleporterMechanic extends BaseMechanic<TeleporterInstance> {
   }
 
   @Override
-  public @Nullable TeleporterInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable TeleporterInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.teleporter")) {
       config.rootSection.mechanic.teleporter.noPermission.sendMessage(creator);
       return null;
     }
 
-    var flagsLine = SignUtil.getPlainTextLine(sign, FLAGS_LINE_ID);
+    var flagsLine = SignUtil.getPlainTextLine(sign, side, FLAGS_LINE_ID);
     var translatedFlagsLine = translateFlags(flagsLine);
 
     if (!flagsLine.equalsIgnoreCase(translatedFlagsLine))
-      SignUtil.setPlainTextLine(sign, FLAGS_LINE_ID, translatedFlagsLine, true);
+      SignUtil.setPlainTextLine(sign, side, FLAGS_LINE_ID, translatedFlagsLine, true);
 
     EnumSet<TeleporterFlag> flags;
 
@@ -78,7 +79,7 @@ public class TeleporterMechanic extends BaseMechanic<TeleporterInstance> {
       return null;
     }
 
-    var coordinatesContent = SignUtil.getPlainTextLine(sign, COORDINATES_LINE_ID);
+    var coordinatesContent = SignUtil.getPlainTextLine(sign, side, COORDINATES_LINE_ID);
     var coordinates = TeleporterCoordinates.tryParse(coordinatesContent);
 
     if (coordinates == null) {
@@ -88,7 +89,7 @@ public class TeleporterMechanic extends BaseMechanic<TeleporterInstance> {
       return null;
     }
 
-    var instance = new TeleporterInstance(sign, flags, coordinates);
+    var instance = new TeleporterInstance(sign, side, flags, coordinates);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 

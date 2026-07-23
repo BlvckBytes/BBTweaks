@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.jetbrains.annotations.Nullable;
 
 public class AutoDisposeInstance extends SISOInstance {
@@ -15,10 +16,11 @@ public class AutoDisposeInstance extends SISOInstance {
 
   public AutoDisposeInstance(
     Sign sign,
+    Side side,
     @Nullable ItemPredicate predicate,
     ConfigKeeper<MainSection> config
   ) {
-    super(sign);
+    super(sign, side);
 
     this.predicate = predicate;
     this.config = config;

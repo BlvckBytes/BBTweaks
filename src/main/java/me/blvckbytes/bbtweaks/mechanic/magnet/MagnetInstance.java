@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.mechanic.util.CuboidMechanicInstance;
 import org.bukkit.Material;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -30,8 +31,13 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
 
   private boolean enabled;
 
-  public MagnetInstance(Sign sign, Cuboid cuboid, @Nullable Predicate<ItemStack> filter) {
-    super(sign);
+  public MagnetInstance(
+    Sign sign,
+    Side side,
+    Cuboid cuboid,
+    @Nullable Predicate<ItemStack> filter
+  ) {
+    super(sign, side);
 
     this.cuboid = cuboid;
     this.filter = filter;

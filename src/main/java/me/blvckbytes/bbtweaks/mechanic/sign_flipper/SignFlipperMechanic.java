@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import org.bukkit.Tag;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -40,13 +41,13 @@ public class SignFlipperMechanic extends BaseMechanic<SignFlipperInstance> {
   }
 
   @Override
-  public @Nullable SignFlipperInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable SignFlipperInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.sign-flipper")) {
       config.rootSection.mechanic.signFlipper.noPermission.sendMessage(creator);
       return null;
     }
 
-    var instance = new SignFlipperInstance(plugin, sign);
+    var instance = new SignFlipperInstance(sign, side, plugin);
 
     if (!(Tag.ALL_SIGNS.isTagged(instance.adjacentSignBlock.getType()))) {
       if (creator != null)

@@ -5,6 +5,7 @@ import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import me.blvckbytes.bbtweaks.mechanic.common.Offsets;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.jetbrains.annotations.Nullable;
 
 public class ShowcaseInstance extends SISOInstance {
@@ -17,11 +18,12 @@ public class ShowcaseInstance extends SISOInstance {
 
   public ShowcaseInstance(
     Sign sign,
+    Side side,
     @Nullable ComponentMarkup inventoryTitle,
     @Nullable ComponentMarkup chatMessage,
     Offsets offsets
   ) {
-    super(sign);
+    super(sign, side);
 
     this.inventoryTitle = inventoryTitle;
     this.chatMessage = chatMessage;

@@ -7,6 +7,7 @@ import org.bukkit.Tag;
 import org.bukkit.block.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Cocoa;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Item;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -28,8 +29,12 @@ public class PlanterInstance extends SISOInstance {
 
   private @Nullable BlockData lastKnownContainerData;
 
-  public PlanterInstance(Sign sign, int radius) {
-    super(sign);
+  public PlanterInstance(
+    Sign sign,
+    Side side,
+    int radius
+  ) {
+    super(sign, side);
 
     this.searchArea = new SearchArea(getMountBlock().getLocation(), radius);
   }

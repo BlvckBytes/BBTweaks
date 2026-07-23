@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
@@ -82,13 +83,13 @@ public class TransmitterMechanic extends BaseMechanic<TransmitterInstance> imple
   }
 
   @Override
-  public @Nullable TransmitterInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable TransmitterInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.transmitter-receiver")) {
       config.rootSection.mechanic.transmitterReceiver.noPermission.sendMessage(creator);
       return null;
     }
 
-    var signalName = SignUtil.getPlainTextLine(sign, SIGNAL_NAME_LINE_INDEX).trim();
+    var signalName = SignUtil.getPlainTextLine(sign, side, SIGNAL_NAME_LINE_INDEX).trim();
 
     if (signalName.isBlank()) {
       if (creator != null)
@@ -97,14 +98,14 @@ public class TransmitterMechanic extends BaseMechanic<TransmitterInstance> imple
       return null;
     }
 
-    var namespace = SignUtil.getPlainTextLine(sign, NAMESPACE_LINE_INDEX).trim();
+    var namespace = SignUtil.getPlainTextLine(sign, side, NAMESPACE_LINE_INDEX).trim();
 
     if (namespace.isBlank())
       namespace = null;
 
     var finalName = namespace == null ? signalName : namespace + ":" + signalName;
 
-    var instance = new TransmitterInstance(signalName, namespace, finalName, sign);
+    var instance = new TransmitterInstance(sign, side, signalName, namespace, finalName);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
     bucketByFinalName.computeIfAbsent(finalName, TransmitterBucket::new).add(instance);

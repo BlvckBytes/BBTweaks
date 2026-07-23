@@ -53,13 +53,13 @@ public class ItemNotifierMechanic extends PredicateMechanic<ItemNotifierInstance
   }
 
   @Override
-  public @Nullable ItemNotifierInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable ItemNotifierInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.item-notifier")) {
       config.rootSection.mechanic.itemNotifier.noPermission.sendMessage(creator);
       return null;
     }
 
-    var name = SignUtil.getPlainTextLine(sign, NAME_LINE).trim();
+    var name = SignUtil.getPlainTextLine(sign, side, NAME_LINE).trim();
 
     if (name.isEmpty()) {
       if (creator != null)
@@ -71,11 +71,11 @@ public class ItemNotifierMechanic extends PredicateMechanic<ItemNotifierInstance
     var predicateAndLanguage = loadPredicateFromSign(sign);
     ItemPredicate predicate = null;
 
-    var frontSide = sign.getSide(Side.FRONT);
+    var targetSide = sign.getSide(side);
 
     if (predicateAndLanguage != null) {
-      if (!frontSide.line(0).equals(COMPONENT_PREDICATE_MODE_ON)) {
-        frontSide.line(0, COMPONENT_PREDICATE_MODE_ON);
+      if (!targetSide.line(0).equals(COMPONENT_PREDICATE_MODE_ON)) {
+        targetSide.line(0, COMPONENT_PREDICATE_MODE_ON);
         sign.update(true, false);
       }
 
@@ -83,8 +83,8 @@ public class ItemNotifierMechanic extends PredicateMechanic<ItemNotifierInstance
     }
 
     else {
-      if (!frontSide.line(0).equals(COMPONENT_PREDICATE_MODE_OFF)) {
-        frontSide.line(0, COMPONENT_PREDICATE_MODE_OFF);
+      if (!targetSide.line(0).equals(COMPONENT_PREDICATE_MODE_OFF)) {
+        targetSide.line(0, COMPONENT_PREDICATE_MODE_OFF);
         sign.update(true, false);
       }
     }
@@ -92,7 +92,7 @@ public class ItemNotifierMechanic extends PredicateMechanic<ItemNotifierInstance
     EnumSet<ItemNotifierFlag> flags;
 
     try {
-      flags = FlagEnum.parse(ItemNotifierFlag.class, SignUtil.getPlainTextLine(sign, FLAGS_LINE));
+      flags = FlagEnum.parse(ItemNotifierFlag.class, SignUtil.getPlainTextLine(sign, side, FLAGS_LINE));
     } catch (UnknownFlagException exception) {
       if (creator != null)
         config.rootSection.mechanic.itemNotifier.unknownFlag.sendMessage(creator, exception.makeEnvironment());
@@ -100,7 +100,7 @@ public class ItemNotifierMechanic extends PredicateMechanic<ItemNotifierInstance
       return null;
     }
 
-    var instance = new ItemNotifierInstance(sign, name, predicate, flags, config);
+    var instance = new ItemNotifierInstance(sign, side, name, predicate, flags, config);
 
     if (!(instance.getMountBlock().getState(false) instanceof Container)) {
       if (creator != null)

@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -31,13 +32,13 @@ public class PlanterMechanic extends BaseMechanic<PlanterInstance> {
   }
 
   @Override
-  public @Nullable PlanterInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable PlanterInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.planter")) {
       config.rootSection.mechanic.planter.noPermission.sendMessage(creator);
       return null;
     }
 
-    var radiusString = SignUtil.getPlainTextLine(sign, RADIUS_LINE_INDEX).trim();
+    var radiusString = SignUtil.getPlainTextLine(sign, side, RADIUS_LINE_INDEX).trim();
 
     if (radiusString.isEmpty()) {
       if (creator != null)
@@ -77,7 +78,7 @@ public class PlanterMechanic extends BaseMechanic<PlanterInstance> {
       return null;
     }
 
-    var instance = new PlanterInstance(sign, radius);
+    var instance = new PlanterInstance(sign, side, radius);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 

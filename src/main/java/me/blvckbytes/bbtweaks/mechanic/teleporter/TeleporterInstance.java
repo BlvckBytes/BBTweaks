@@ -5,6 +5,7 @@ import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 
 import java.util.EnumSet;
@@ -16,10 +17,11 @@ public class TeleporterInstance extends SISOInstance {
 
   public TeleporterInstance(
     Sign sign,
+    Side side,
     EnumSet<TeleporterFlag> flags,
     TeleporterCoordinates coordinates
   ) {
-    super(sign);
+    super(sign, side);
 
     this.flags = flags;
     this.coordinates = coordinates;

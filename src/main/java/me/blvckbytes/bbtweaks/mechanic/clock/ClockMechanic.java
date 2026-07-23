@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -54,13 +55,13 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
   }
 
   @Override
-  public @Nullable ClockInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable ClockInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.clock")) {
       config.rootSection.mechanic.clock.noPermission.sendMessage(creator);
       return null;
     }
 
-    var parameterLine = SignUtil.getPlainTextLine(sign, PERIOD_DURATION_LINE_INDEX);
+    var parameterLine = SignUtil.getPlainTextLine(sign, side, PERIOD_DURATION_LINE_INDEX);
 
     if (parameterLine.isBlank()) {
       if (creator != null)
@@ -118,10 +119,10 @@ public class ClockMechanic extends BaseMechanic<ClockInstance> {
       }
 
       periodDuration = config.rootSection.mechanic.clock.minTickPeriod;
-      SignUtil.setPlainTextLine(sign, PERIOD_DURATION_LINE_INDEX, String.valueOf(periodDuration), true);
+      SignUtil.setPlainTextLine(sign, side, PERIOD_DURATION_LINE_INDEX, String.valueOf(periodDuration), true);
     }
 
-    var instance = new ClockInstance(periodDuration, sign);
+    var instance = new ClockInstance(sign, side, periodDuration);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 

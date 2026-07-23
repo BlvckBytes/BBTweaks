@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.mechanic.clock;
 
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 
 public class ClockInstance extends SISOInstance {
 
@@ -10,8 +11,12 @@ public class ClockInstance extends SISOInstance {
   private long lastTickTime = -1;
   private long initTickTime = -1;
 
-  public ClockInstance(int periodDuration, Sign sign) {
-    super(sign);
+  public ClockInstance(
+    Sign sign,
+    Side side,
+    int periodDuration
+  ) {
+    super(sign, side);
 
     this.toggleDuration = periodDuration / 2;
   }

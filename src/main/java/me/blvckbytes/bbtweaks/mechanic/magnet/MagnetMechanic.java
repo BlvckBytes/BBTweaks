@@ -263,13 +263,13 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
   }
 
   @Override
-  public @Nullable MagnetInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable MagnetInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.magnet")) {
       config.rootSection.mechanic.magnet.noPermission.sendMessage(creator);
       return null;
     }
 
-    var parameters = new MagnetParameters(sign, config);
+    var parameters = new MagnetParameters(sign, side, config);
 
     parameters.read();
 
@@ -278,11 +278,11 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
 
     ItemPredicate predicate = null;
 
-    var frontSide = sign.getSide(Side.FRONT);
+    var targetSide = sign.getSide(side);
 
     if (predicateAndLanguage != null) {
-      if (!frontSide.line(0).equals(COMPONENT_PREDICATE_MODE_ON)) {
-        frontSide.line(0, COMPONENT_PREDICATE_MODE_ON);
+      if (!targetSide.line(0).equals(COMPONENT_PREDICATE_MODE_ON)) {
+        targetSide.line(0, COMPONENT_PREDICATE_MODE_ON);
         isDirty = true;
       }
 
@@ -290,8 +290,8 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
     }
 
     else {
-      if (!frontSide.line(0).equals(COMPONENT_PREDICATE_MODE_OFF)) {
-        frontSide.line(0, COMPONENT_PREDICATE_MODE_OFF);
+      if (!targetSide.line(0).equals(COMPONENT_PREDICATE_MODE_OFF)) {
+        targetSide.line(0, COMPONENT_PREDICATE_MODE_OFF);
         isDirty = true;
       }
     }
@@ -303,7 +303,7 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
 
     var cuboid = parameters.makeCuboid();
 
-    var instance = new MagnetInstance(sign, cuboid, predicate);
+    var instance = new MagnetInstance(sign, side, cuboid, predicate);
     var mountBlock = instance.getMountBlock();
 
     if (!(mountBlock.getState(false) instanceof Container container)) {
@@ -403,7 +403,7 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
       return true;
     }
 
-    var parameters = new MagnetParameters(sign, config);
+    var parameters = new MagnetParameters(sign, instance.getSide(), config);
     parameters.read();
 
     editSessionByPlayerId.put(playerId, new EditSession(

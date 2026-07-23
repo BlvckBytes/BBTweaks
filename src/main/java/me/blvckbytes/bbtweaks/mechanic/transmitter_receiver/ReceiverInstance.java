@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.mechanic.transmitter_receiver;
 
 import me.blvckbytes.bbtweaks.mechanic.SISOInstance;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.jetbrains.annotations.Nullable;
 
 public class ReceiverInstance extends SISOInstance {
@@ -13,12 +14,13 @@ public class ReceiverInstance extends SISOInstance {
   private boolean state;
 
   public ReceiverInstance(
+    Sign sign,
+    Side side,
     String signalName,
     @Nullable String namespace,
-    String finalName,
-    Sign sign
+    String finalName
   ) {
-    super(sign);
+    super(sign, side);
 
     this.signalName = signalName;
     this.namespace = namespace;

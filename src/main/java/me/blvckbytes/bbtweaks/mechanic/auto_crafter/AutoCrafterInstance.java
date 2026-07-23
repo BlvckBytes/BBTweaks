@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.util.ItemUtil;
 import me.blvckbytes.bbtweaks.util.SimulatingAddOnlyInventory;
 import me.blvckbytes.bbtweaks.util.SlotItemAddition;
 import org.bukkit.block.*;
+import org.bukkit.block.sign.Side;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -22,8 +23,12 @@ public class AutoCrafterInstance extends SISOInstance {
 
   private @Nullable CachedRecipe cachedRecipe;
 
-  public AutoCrafterInstance(Sign sign, RecipeCache recipeCache) {
-    super(sign);
+  public AutoCrafterInstance(
+    Sign sign,
+    Side side,
+    RecipeCache recipeCache
+  ) {
+    super(sign, side);
 
     this.recipeCache = recipeCache;
     this.matrixCacheHelper = new MatrixCacheHelper();

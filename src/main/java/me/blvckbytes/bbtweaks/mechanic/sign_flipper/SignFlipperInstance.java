@@ -19,8 +19,12 @@ public class SignFlipperInstance extends SISOInstance {
 
   private TriState lastState = TriState.NULL;
 
-  public SignFlipperInstance(Plugin plugin, Sign sign) {
-    super(sign);
+  public SignFlipperInstance(
+    Sign sign,
+    Side side,
+    Plugin plugin
+  ) {
+    super(sign, side);
 
     this.lastStateKey = new NamespacedKey(plugin, "last-sign-flipper-state");
 

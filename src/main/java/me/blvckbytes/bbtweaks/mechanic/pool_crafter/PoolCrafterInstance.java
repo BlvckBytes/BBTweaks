@@ -10,6 +10,7 @@ import me.blvckbytes.bbtweaks.util.ItemUtil;
 import org.bukkit.Material;
 import org.bukkit.block.*;
 import org.bukkit.block.data.Directional;
+import org.bukkit.block.sign.Side;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
@@ -48,10 +49,11 @@ public class PoolCrafterInstance extends SISOInstance {
 
   public PoolCrafterInstance(
     Sign sign,
+    Side side,
     RecipeCache recipeCache,
     SimilarMaterialsResolver similarMaterialsResolver
   ) {
-    super(sign);
+    super(sign, side);
 
     this.recipeCache = recipeCache;
     this.similarMaterialsResolver = similarMaterialsResolver;

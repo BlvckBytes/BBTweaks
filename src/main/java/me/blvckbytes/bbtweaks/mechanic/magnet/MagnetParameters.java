@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import me.blvckbytes.bbtweaks.util.StringUtil;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -17,6 +18,7 @@ public class MagnetParameters {
   private static final int OFFSETS_LINE_INDEX = 3;
 
   public final Sign sign;
+  public final Side side;
 
   private final MagnetParameter[] parameters;
 
@@ -28,8 +30,9 @@ public class MagnetParameters {
   public final MagnetParameter offsetY;
   public final MagnetParameter offsetZ;
 
-  public MagnetParameters(Sign sign, ConfigKeeper<MainSection> config) {
+  public MagnetParameters(Sign sign, Side side, ConfigKeeper<MainSection> config) {
     this.sign = sign;
+    this.side = side;
 
     this.extentX = new MagnetParameter("EXTENT_X", config.rootSection.mechanic.magnet.defaultWidthAndDepth, clampMinOneMaxValue(config.rootSection.mechanic.magnet.maxWidthOrDepth));
     this.extentY = new MagnetParameter("EXTENT_Y", config.rootSection.mechanic.magnet.defaultHeight, clampMinOneMaxValue(config.rootSection.mechanic.magnet.maxHeight));
@@ -69,13 +72,13 @@ public class MagnetParameters {
   }
 
   public void read() {
-    var extentsTokens = StringUtil.getTokens(SignUtil.getPlainTextLine(sign, EXTENTS_LINE_INDEX));
+    var extentsTokens = StringUtil.getTokens(SignUtil.getPlainTextLine(sign, side, EXTENTS_LINE_INDEX));
 
     extentX.readFromToken(getOrEmpty(extentsTokens, 0));
     extentY.readFromToken(getOrEmpty(extentsTokens, 1));
     extentZ.readFromToken(getOrEmpty(extentsTokens, 2));
 
-    var offsetsTokens = StringUtil.getTokens(SignUtil.getPlainTextLine(sign, OFFSETS_LINE_INDEX));
+    var offsetsTokens = StringUtil.getTokens(SignUtil.getPlainTextLine(sign, side, OFFSETS_LINE_INDEX));
 
     offsetX.readFromToken(getOrEmpty(offsetsTokens, 0));
     offsetY.readFromToken(getOrEmpty(offsetsTokens, 1));
@@ -86,12 +89,12 @@ public class MagnetParameters {
     var isDirty = false;
 
     if (extentX.isDirtySinceLastRead() || extentY.isDirtySinceLastRead() || extentZ.isDirtySinceLastRead()) {
-      SignUtil.setPlainTextLine(sign, EXTENTS_LINE_INDEX, extentX.getValue() + " " + extentY.getValue() + " " + extentZ.getValue(), false);
+      SignUtil.setPlainTextLine(sign, side, EXTENTS_LINE_INDEX, extentX.getValue() + " " + extentY.getValue() + " " + extentZ.getValue(), false);
       isDirty = true;
     }
 
     if (offsetX.isDirtySinceLastRead() || offsetY.isDirtySinceLastRead() || offsetZ.isDirtySinceLastRead()) {
-      SignUtil.setPlainTextLine(sign, OFFSETS_LINE_INDEX, offsetX.getValue() + " " + offsetY.getValue() + " " + offsetZ.getValue(), false);
+      SignUtil.setPlainTextLine(sign, side, OFFSETS_LINE_INDEX, offsetX.getValue() + " " + offsetY.getValue() + " " + offsetZ.getValue(), false);
       isDirty = true;
     }
 

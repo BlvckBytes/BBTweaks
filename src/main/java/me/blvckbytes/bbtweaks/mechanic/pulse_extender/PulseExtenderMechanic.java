@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -54,13 +55,13 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
   }
 
   @Override
-  public @Nullable PulseExtenderInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable PulseExtenderInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.pulse-extender")) {
       config.rootSection.mechanic.pulseExtender.noPermission.sendMessage(creator);
       return null;
     }
 
-    var parameterLine = SignUtil.getPlainTextLine(sign, SIGNAL_LENGTH_LINE_INDEX);
+    var parameterLine = SignUtil.getPlainTextLine(sign, side, SIGNAL_LENGTH_LINE_INDEX);
 
     if (parameterLine.isBlank()) {
       if (creator != null)
@@ -106,10 +107,10 @@ public class PulseExtenderMechanic extends BaseMechanic<PulseExtenderInstance> {
       }
 
       signalLength = config.rootSection.mechanic.pulseExtender.minSignalLength;
-      SignUtil.setPlainTextLine(sign, SIGNAL_LENGTH_LINE_INDEX, String.valueOf(signalLength), true);
+      SignUtil.setPlainTextLine(sign, side, SIGNAL_LENGTH_LINE_INDEX, String.valueOf(signalLength), true);
     }
 
-    var instance = new PulseExtenderInstance(signalLength, sign);
+    var instance = new PulseExtenderInstance(sign, side, signalLength);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 

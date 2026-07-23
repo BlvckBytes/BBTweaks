@@ -9,6 +9,7 @@ import me.blvckbytes.bbtweaks.util.BlockUtil;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.Nullable;
@@ -29,12 +30,13 @@ public class ItemNotifierInstance extends SISOInstance {
 
   public ItemNotifierInstance(
     Sign sign,
+    Side side,
     String name,
     @Nullable ItemPredicate predicate,
     EnumSet<ItemNotifierFlag> flags,
     ConfigKeeper<MainSection> config
   ) {
-    super(sign);
+    super(sign, side);
 
     this.name = name;
     this.predicate = predicate;

@@ -10,6 +10,7 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -88,13 +89,13 @@ public class PoolCrafterMechanic extends BaseMechanic<PoolCrafterInstance> imple
   }
 
   @Override
-  public @Nullable PoolCrafterInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable PoolCrafterInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.pool-crafter")) {
       config.rootSection.mechanic.poolCrafter.noPermission.sendMessage(creator);
       return null;
     }
 
-    var instance = new PoolCrafterInstance(sign, recipeCache, this);
+    var instance = new PoolCrafterInstance(sign, side, recipeCache, this);
 
     var dropper = instance.getMountBlock();
 

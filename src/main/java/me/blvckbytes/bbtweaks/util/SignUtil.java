@@ -6,16 +6,16 @@ import org.bukkit.block.sign.Side;
 
 public class SignUtil {
 
-  public static void setPlainTextLine(Sign sign, int lineIndex, String value, boolean update) {
-    var front = sign.getSide(Side.FRONT);
+  public static void setPlainTextLine(Sign sign, Side side, int lineIndex, String value, boolean update) {
+    var front = sign.getSide(side);
     front.line(lineIndex, Component.text(value));
 
     if (update)
       sign.update(true, false);
   }
 
-  public static String getPlainTextLine(Sign sign, int lineIndex) {
-    var frontLines = sign.getSide(Side.FRONT).lines();
+  public static String getPlainTextLine(Sign sign, Side side, int lineIndex) {
+    var frontLines = sign.getSide(side).lines();
 
     if (frontLines.size() <= lineIndex)
       return "";

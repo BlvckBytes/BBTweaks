@@ -14,6 +14,7 @@ import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.WallSign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.ItemFrame;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -84,7 +85,7 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
   }
 
   @Override
-  public @Nullable ShowcaseInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable ShowcaseInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.showcase")) {
       config.rootSection.mechanic.showcase.noPermission.sendMessage(creator);
       return null;
@@ -92,21 +93,21 @@ public class ShowcaseMechanic extends OffsetSelectingMechanic<ShowcaseInstance> 
 
     var environment = getSignEnvironment(sign);
 
-    var inventoryTitle = tryParseMarkup(SignUtil.getPlainTextLine(sign, INVENTORY_TITLE_LINE_ID), error -> {
+    var inventoryTitle = tryParseMarkup(SignUtil.getPlainTextLine(sign, side, INVENTORY_TITLE_LINE_ID), error -> {
       if (creator != null)
         config.rootSection.mechanic.showcase.malformedInventoryTitle.sendMessage(creator, addErrorVariables(environment, error));
     });
 
-    var chatMessage = tryParseMarkup(SignUtil.getPlainTextLine(sign, CHAT_MESSAGE_LINE_ID), error -> {
+    var chatMessage = tryParseMarkup(SignUtil.getPlainTextLine(sign, side, CHAT_MESSAGE_LINE_ID), error -> {
       if (creator != null)
         config.rootSection.mechanic.showcase.malformedChatMessage.sendMessage(creator, addErrorVariables(environment, error));
     });
 
-    var instance = validateOffsetsAndMakeInstance(creator, sign, (newSign, offsets) -> {
+    var instance = validateOffsetsAndMakeInstance(creator, sign, side, (newSign, offsets) -> {
       if (sign != newSign)
         newSign.update(true, false);
 
-      return new ShowcaseInstance(newSign, inventoryTitle, chatMessage, offsets);
+      return new ShowcaseInstance(newSign, side, inventoryTitle, chatMessage, offsets);
     });
 
     if (instance == null)

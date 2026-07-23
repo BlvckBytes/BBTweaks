@@ -70,8 +70,8 @@ public abstract class OffsetSelectingMechanic<InstanceType extends MechanicInsta
     );
   }
 
-  protected InstanceType validateOffsetsAndMakeInstance(@Nullable Player creator, Sign sign, BiFunction<Sign, Offsets, InstanceType> handler) {
-    var offsetTokens = StringUtil.getTokens(SignUtil.getPlainTextLine(sign, offsetsLineIndex));
+  protected InstanceType validateOffsetsAndMakeInstance(@Nullable Player creator, Sign sign, Side side, BiFunction<Sign, Offsets, InstanceType> handler) {
+    var offsetTokens = StringUtil.getTokens(SignUtil.getPlainTextLine(sign, side, offsetsLineIndex));
 
     if (offsetTokens.isEmpty())
       return handler.apply(sign, Offsets.ZERO);
@@ -87,7 +87,7 @@ public abstract class OffsetSelectingMechanic<InstanceType extends MechanicInsta
       return handler.apply(sign, new Offsets(xOffset, yOffset, zOffset));
     } catch (Throwable e) {
       var newSign = (Sign) sign.getBlock().getState();
-      newSign.getSide(Side.FRONT).line(offsetsLineIndex, Component.text("0 0 0"));
+      newSign.getSide(side).line(offsetsLineIndex, Component.text("0 0 0"));
       return handler.apply(newSign, Offsets.ZERO);
     }
   }
@@ -137,7 +137,7 @@ public abstract class OffsetSelectingMechanic<InstanceType extends MechanicInsta
     if (areOffsetsInvalid(player, sign, xOffset, yOffset, zOffset))
       return true;
 
-    sign.getSide(Side.FRONT).line(offsetsLineIndex, Component.text(xOffset + " " + yOffset + " " + zOffset));
+    sign.getSide(offsetSelecting.instance().getSide()).line(offsetsLineIndex, Component.text(xOffset + " " + yOffset + " " + zOffset));
     sign.update(true, false);
     reloadInstanceBySign(sign);
 

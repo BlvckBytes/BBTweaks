@@ -130,8 +130,8 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
   }
 
   @Override
-  public @Nullable InstanceType onSignLoad(Sign sign) {
-    return onSignCreate(null, sign);
+  public @Nullable InstanceType onSignLoad(Sign sign, Side side) {
+    return onSignCreate(null, sign, side);
   }
 
   @Override
@@ -236,10 +236,13 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
   }
 
   public void reloadInstanceBySign(Sign sign) {
-    onSignUnload(sign);
+    var instance = onSignUnload(sign);
+
+    if (instance == null)
+      return;
 
     if (sign.getBlock().getState() instanceof Sign newSign)
-      onSignLoad(newSign);
+      onSignLoad(newSign, instance.getSide());
   }
 
   public abstract boolean onInstanceClick(Player player, InstanceType instance, boolean wasLeftClick);
@@ -269,20 +272,20 @@ public abstract class BaseMechanic<InstanceType extends MechanicInstance> implem
   }
 
   private void reloadAllInstances() {
-    var mechanicSigns = new ArrayList<Sign>();
+    var mechanics = new ArrayList<InstanceType>();
 
-    instanceBySignPosition.forEachValue(instance -> mechanicSigns.add(instance.getSign()));
+    instanceBySignPosition.forEachValue(mechanics::add);
 
-    for (var sign : mechanicSigns)
-      onSignUnload(sign);
+    for (var mechanic : mechanics)
+      onSignUnload(mechanic.getSign());
 
-    for (var sign : mechanicSigns) {
-      var signBlock = sign.getBlock();
+    for (var mechanic : mechanics) {
+      var signBlock = mechanic.getSign().getBlock();
 
       if (!(signBlock.getState() instanceof Sign newSign))
         continue;
 
-      if (onSignLoad(newSign) == null)
+      if (onSignLoad(newSign, mechanic.getSide()) == null)
         signBlock.breakNaturally();
     }
   }

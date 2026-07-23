@@ -12,6 +12,7 @@ import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -179,7 +180,7 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
   }
 
   @Override
-  public @Nullable HiddenSwitchInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable HiddenSwitchInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.hidden-switch")) {
       config.rootSection.mechanic.hiddenSwitch.noPermission.sendMessage(creator);
       return null;
@@ -194,12 +195,12 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
 
     loadKeyItemsFromPDC(sign, keysInventory);
 
-    var grantedMessage = tryParseMarkup(SignUtil.getPlainTextLine(sign, GRANTED_MESSAGE_LINE_ID), error -> {
+    var grantedMessage = tryParseMarkup(SignUtil.getPlainTextLine(sign, side, GRANTED_MESSAGE_LINE_ID), error -> {
       if (creator != null)
         config.rootSection.mechanic.hiddenSwitch.malformedGrantedMessage.sendMessage(creator, addErrorVariables(environment, error));
     });
 
-    var deniedMessage = tryParseMarkup(SignUtil.getPlainTextLine(sign, DENIED_MESSAGE_LINE_ID), error -> {
+    var deniedMessage = tryParseMarkup(SignUtil.getPlainTextLine(sign, side, DENIED_MESSAGE_LINE_ID), error -> {
       if (creator != null)
         config.rootSection.mechanic.hiddenSwitch.malformedDeniedMessage.sendMessage(creator, addErrorVariables(environment, error));
     });
@@ -208,12 +209,12 @@ public class HiddenSwitchMechanic extends OffsetSelectingMechanic<HiddenSwitchIn
     var password = pdc.get(passwordKey, PersistentDataType.STRING);
     var allowKeyOrPassword = pdc.get(allowKeyOrPasswordKey, PersistentDataType.BOOLEAN);
 
-    var instance = validateOffsetsAndMakeInstance(creator, sign, (newSign, offsets) -> {
+    var instance = validateOffsetsAndMakeInstance(creator, sign, side, (newSign, offsets) -> {
       if (sign != newSign)
         newSign.update(true, false);
 
       return new HiddenSwitchInstance(
-        newSign, keysInventory,
+        newSign, side, keysInventory,
         offsets,
         grantedMessage, deniedMessage,
         password, allowKeyOrPassword != null && allowKeyOrPassword,

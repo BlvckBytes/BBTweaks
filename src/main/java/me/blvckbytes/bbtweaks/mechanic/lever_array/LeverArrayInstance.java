@@ -11,6 +11,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.Powerable;
+import org.bukkit.block.sign.Side;
 import org.jetbrains.annotations.Nullable;
 
 public class LeverArrayInstance extends SISOInstance {
@@ -27,10 +28,11 @@ public class LeverArrayInstance extends SISOInstance {
 
   public LeverArrayInstance(
     Sign sign,
+    Side side,
     int propagationSpeedEnable,
     int propagationSpeedDisable
   ) {
-    super(sign, SISOFlag.ALLOW_OUTPUT_ON_SIGN_PLANE);
+    super(sign, side, SISOFlag.ALLOW_OUTPUT_ON_SIGN_PLANE);
 
     this.propagationSpeedEnable = propagationSpeedEnable;
     this.propagationSpeedDisable = propagationSpeedDisable;

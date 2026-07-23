@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanicFlag;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -36,13 +37,13 @@ public class CommandSignMechanic extends BaseMechanic<CommandSignInstance> {
   }
 
   @Override
-  public @Nullable CommandSignInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable CommandSignInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.command")) {
       config.rootSection.mechanic.commandSign.noPermission.sendMessage(creator);
       return null;
     }
 
-    var command = trimWhitespaceAndLeadingSlashes(SignUtil.getPlainTextLine(sign, COMMAND_LINE_ID));
+    var command = trimWhitespaceAndLeadingSlashes(SignUtil.getPlainTextLine(sign, side, COMMAND_LINE_ID));
 
     if (command.isEmpty()) {
       if (creator != null)
@@ -51,7 +52,7 @@ public class CommandSignMechanic extends BaseMechanic<CommandSignInstance> {
       return null;
     }
 
-    var instance = new CommandSignInstance(sign, command);
+    var instance = new CommandSignInstance(sign, side, command);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 

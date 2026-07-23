@@ -27,12 +27,13 @@ import me.blvckbytes.bbtweaks.mechanic.teleporter.TeleporterMechanic;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.ReceiverMechanic;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.TransmitterMechanic;
 import me.blvckbytes.bbtweaks.util.BooleanConsumer;
-import me.blvckbytes.bbtweaks.util.SignUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -45,9 +46,14 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 public class SignMechanicManager implements Disableable, Listener {
+
+  private static final Side[] SIGN_SIDES = { Side.FRONT, Side.BACK };
+
+  private static final int DISCRIMINATOR_LINE_ID = 1;
 
   private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
@@ -104,7 +110,7 @@ public class SignMechanicManager implements Disableable, Listener {
     if (!(block.getState() instanceof Sign sign))
       return;
 
-    correspondSign(sign, mechanic -> {
+    correspondSign(sign, (mechanic, _) -> {
       if (mechanic.onSignClick(event.getPlayer(), sign, false))
         event.setCancelled(true);
     });
@@ -121,7 +127,7 @@ public class SignMechanicManager implements Disableable, Listener {
     if (!(block.getState() instanceof Sign sign))
       return;
 
-    correspondSign(sign, mechanic -> {
+    correspondSign(sign, (mechanic, _) -> {
       if (mechanic.onSignClick(event.getPlayer(), sign, true)) {
         event.setCancelled(true);
         return;
@@ -152,7 +158,7 @@ public class SignMechanicManager implements Disableable, Listener {
       if (block.getType() == blockType)
         return;
 
-      correspondSign(sign, mechanic -> mechanic.onSignDestroy(null, sign));
+      correspondSign(sign, (mechanic, _) -> mechanic.onSignDestroy(null, sign));
     }, 1);
   }
 
@@ -163,20 +169,20 @@ public class SignMechanicManager implements Disableable, Listener {
     if (!(block.getState() instanceof Sign oldSign))
       return;
 
-    correspondSign(oldSign, mechanic -> mechanic.onSignDestroy(event.getPlayer(), oldSign));
+    correspondSign(oldSign, (mechanic, _) -> mechanic.onSignDestroy(event.getPlayer(), oldSign));
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       if (!(event.getBlock().getState() instanceof Sign newSign))
         return;
 
-      correspondSign(newSign, mechanic -> {
+      correspondSign(newSign, (mechanic, side) -> {
         if (!isSupportedSignType(block.getType())) {
           config.rootSection.mechanic.noWallOrStandingSign.sendMessage(event.getPlayer());
           block.breakNaturally();
           return;
         }
 
-        if (mechanic.onSignCreate(event.getPlayer(), newSign) == null)
+        if (mechanic.onSignCreate(event.getPlayer(), newSign, side) == null)
           block.breakNaturally();
       });
     }, 1);
@@ -185,13 +191,13 @@ public class SignMechanicManager implements Disableable, Listener {
   @EventHandler
   public void onChunkLoad(ChunkLoadEvent event) {
     forEachSignInChunk(event.getChunk(), sign -> {
-      correspondSign(sign, mechanic -> {
+      correspondSign(sign, (mechanic, side) -> {
         if (!isSupportedSignType(sign.getType())) {
           sign.getBlock().breakNaturally();
           return;
         }
 
-        if (mechanic.onSignLoad(sign) == null)
+        if (mechanic.onSignLoad(sign, side) == null)
           sign.getBlock().breakNaturally();
       });
     });
@@ -200,7 +206,7 @@ public class SignMechanicManager implements Disableable, Listener {
   @EventHandler
   public void onChunkUnload(ChunkUnloadEvent event) {
     forEachSignInChunk(event.getChunk(), sign -> {
-      correspondSign(sign, mechanic -> mechanic.onSignUnload(sign));
+      correspondSign(sign, (mechanic, _) -> mechanic.onSignUnload(sign));
     });
   }
 
@@ -223,7 +229,7 @@ public class SignMechanicManager implements Disableable, Listener {
 
     var wasLeftClick = event.getAction() == Action.LEFT_CLICK_BLOCK;
 
-    correspondSign(sign, mechanic -> {
+    correspondSign(sign, (mechanic, _) -> {
       if (mechanic.onSignClick(event.getPlayer(), sign, wasLeftClick))
         event.setCancelled(true);
     });
@@ -246,21 +252,24 @@ public class SignMechanicManager implements Disableable, Listener {
       mechanic.onLeverToggle(block, event.getNewCurrent() != 0, stateSetter);
   }
 
-  private void correspondSign(Sign sign, Consumer<SignMechanic<?>> handler) {
-    var discriminator = SignUtil.getPlainTextLine(sign, 1);
-    var length = discriminator.length();
+  private void correspondSign(Sign sign, BiConsumer<SignMechanic<?>, Side> handler) {
+    for (var side : SIGN_SIDES) {
+      var discriminator = ComponentUtil.asTrimmedText(sign.getSide(side).line(DISCRIMINATOR_LINE_ID));
+      var length = discriminator.length();
 
-    if (length <= 2 || !(discriminator.charAt(0) == '[' && discriminator.charAt(length - 1) == ']'))
+      if (length <= 2 || !(discriminator.charAt(0) == '[' && discriminator.charAt(length - 1) == ']'))
+        continue;
+
+      discriminator = discriminator.substring(1, length - 1).toLowerCase();
+
+      var mechanic = signMechanicByDiscriminatorLower.get(discriminator);
+
+      if (mechanic == null)
+        continue;
+
+      handler.accept(mechanic, side);
       return;
-
-    discriminator = discriminator.substring(1, length - 1).toLowerCase();
-
-    var mechanic = signMechanicByDiscriminatorLower.get(discriminator);
-
-    if (mechanic == null)
-      return;
-
-    handler.accept(mechanic);
+    }
   }
 
   private void registerMechanic(SignMechanic<?> mechanic) {

@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.util.SignUtil;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -36,13 +37,13 @@ public class LeverArrayMechanic extends BaseMechanic<LeverArrayInstance> {
   }
 
   @Override
-  public @Nullable LeverArrayInstance onSignCreate(@Nullable Player creator, Sign sign) {
+  public @Nullable LeverArrayInstance onSignCreate(@Nullable Player creator, Sign sign, Side side) {
     if (creator != null && !creator.hasPermission("bbtweaks.mechanic.lever-array")) {
       config.rootSection.mechanic.leverArray.noPermission.sendMessage(creator);
       return null;
     }
 
-    var propagationSpeedEnableExpression = SignUtil.getPlainTextLine(sign, PROPAGATION_SPEED_ENABLE_LINE_INDEX);
+    var propagationSpeedEnableExpression = SignUtil.getPlainTextLine(sign, side, PROPAGATION_SPEED_ENABLE_LINE_INDEX);
     int propagationSpeedEnable = -1;
 
     if (!propagationSpeedEnableExpression.isBlank()) {
@@ -71,7 +72,7 @@ public class LeverArrayMechanic extends BaseMechanic<LeverArrayInstance> {
       }
     }
 
-    var propagationSpeedDisableExpression = SignUtil.getPlainTextLine(sign, PROPAGATION_SPEED_DISABLE_LINE_INDEX);
+    var propagationSpeedDisableExpression = SignUtil.getPlainTextLine(sign, side, PROPAGATION_SPEED_DISABLE_LINE_INDEX);
     int propagationSpeedDisable = -1;
 
     if (!propagationSpeedDisableExpression.isBlank()) {
@@ -100,7 +101,7 @@ public class LeverArrayMechanic extends BaseMechanic<LeverArrayInstance> {
       }
     }
 
-    var instance = new LeverArrayInstance(sign, propagationSpeedEnable, propagationSpeedDisable);
+    var instance = new LeverArrayInstance(sign, side, propagationSpeedEnable, propagationSpeedDisable);
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
 

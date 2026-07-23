@@ -289,7 +289,7 @@ public class MainCommand implements CommandHandler {
 
           for (var lineIndex = 0; lineIndex < expectedLines.size(); ++lineIndex) {
             var expectedLine = expectedLines.get(lineIndex);
-            var actualLine = SignUtil.getPlainTextLine(sign, lineIndex);
+            var actualLine = SignUtil.getPlainTextLine(sign, Side.FRONT, lineIndex);
 
             if (!(expectedLine.trim().equals(actualLine.trim()))) {
               plugin.getLogger().log(Level.WARNING, "Mismatched on expected line " + (lineIndex + 1) + " in json-object at index=" + patchIndex + "; skipping");
