@@ -323,10 +323,10 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
       var blocks = new Block[]{ block, null };
 
       if (container.getInventory() instanceof DoubleChestInventory doubleInventory) {
-        if (doubleInventory.getRightSide().getHolder() instanceof Container rightContainer)
+        if (doubleInventory.getRightSide().getHolder(false) instanceof Container rightContainer)
           blocks[0] = rightContainer.getBlock();
 
-        if (doubleInventory.getLeftSide().getHolder() instanceof Container leftContainer)
+        if (doubleInventory.getLeftSide().getHolder(false) instanceof Container leftContainer)
           blocks[1] = leftContainer.getBlock();
       }
 
@@ -448,16 +448,16 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
 
   private void modifyInventoryViewCounter(Inventory inventory, boolean increment) {
     if (inventory instanceof DoubleChestInventory doubleInventory) {
-      if (doubleInventory.getRightSide().getHolder() instanceof Container rightContainer)
+      if (doubleInventory.getRightSide().getHolder(false) instanceof Container rightContainer)
         modifyBlockViewCounter(rightContainer.getBlock(), increment);
 
-      if (doubleInventory.getLeftSide().getHolder() instanceof Container leftContainer)
+      if (doubleInventory.getLeftSide().getHolder(false) instanceof Container leftContainer)
         modifyBlockViewCounter(leftContainer.getBlock(), increment);
 
       return;
     }
 
-    if (inventory.getHolder() instanceof Container container)
+    if (inventory.getHolder(false) instanceof Container container)
       modifyBlockViewCounter(container.getBlock(), increment);
   }
 
