@@ -1225,6 +1225,9 @@ autoPickupContainer:
     functionalityAlreadyEnabled: '{lut.auto_pickup_container_prefix} <&c>Die Funktion ist bereits aktiviert!'
     functionalityNowDisabled: '{lut.auto_pickup_container_prefix} <&7>Aufgehobene Items <&c>werden nicht mehr</> in Sammelboxen hineinbewegt.'
     functionalityAlreadyDisabled: '{lut.auto_pickup_container_prefix} <&c>Die Funktion ist bereits deaktiviert!'
+    capacityWarningUsage: '{lut.auto_pickup_container_prefix} <&c>Benutzung: /{label} {action} \<<&4 *for-mode="warning_modes" *for-separator={,<space/>}>{mode}</>>'
+    capacityWarningNowSelected: '{lut.auto_pickup_container_prefix} <&7>Der Kapazitätswarnungsmodus <&a>{mode}</> ist nun ausgewählt!'
+    capacityWarningAlreadySelected: '{lut.auto_pickup_container_prefix} <&c>Der Kapazitätswarnungsmodus <&4>{mode}</> ist bereits ausgewählt!'
   loreToSetOnUpdate: |
     <reset>
       <br/>
@@ -1267,6 +1270,12 @@ autoPickupContainer:
       </container>
     </container>
     <br/>
+  capacityWarningTitle: '<&c>⚠ <&6>Sammelboxen</> ⚠'
+  capacityWarningSubtitle: '<&7>{used_slots}/{used_slots} Slots belegt'
+  capacityWarningChat: |
+    {lut.auto_pickup_container_prefix} <&7>Alle <&e>{used_slots}/{used_slots} Slots</> der <&e>{container_count} Sammelbox{container_count > 1 then "en"}</> in deinem Inventar <&e>sind nun belegt</>!
+  capacityWarningSound: 'BLOCK_NOTE_BLOCK_PLING'
+  capacityWarningTitleStayMs: 2500
 
 getExp:
   command:

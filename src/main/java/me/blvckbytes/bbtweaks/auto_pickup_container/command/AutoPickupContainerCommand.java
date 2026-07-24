@@ -64,26 +64,37 @@ public class AutoPickupContainerCommand implements CommandHandler {
       return true;
     }
 
-    NormalizedConstant<CommandAction> action;
+    NormalizedConstant<CommandAction> normalizedAction;
 
-    if (args.length != 1 || (action = CommandAction.matcher.matchFirst(args[0])) == null) {
-      config.rootSection.autoPickupContainer.command.commandUsage.sendMessage(
-        sender,
-        new InterpretationEnvironment()
-          .withVariable("label", label)
-          .withVariable("actions", CommandAction.matcher.createCompletions(null))
-      );
-
+    if (args.length == 0 || (normalizedAction = CommandAction.matcher.matchFirst(args[0])) == null) {
+      sendActionUsage(player, label);
       return true;
     }
 
     var settings = settingsStore.accessSettings(player);
 
-    switch (action.constant) {
-      case ENABLE -> settings.setEnabled(true);
-      case DISABLE -> settings.setEnabled(false);
-      case TOGGLE -> settings.setEnabled(null);
+    switch (normalizedAction.constant) {
+      case ON, OFF, TOGGLE -> {
+        if (args.length != 1) {
+          sendActionUsage(player, label);
+          return true;
+        }
+
+        settings.setEnabled(switch (normalizedAction.constant) {
+          case ON -> true;
+          case OFF -> false;
+          default -> null;
+        });
+      }
+
       case OVERVIEW -> {
+        if (args.length != 1) {
+          sendActionUsage(player, label);
+          return true;
+        }
+
+        // TODO: Would be really nice to use stackability as a count-key instead and then display in a readonly pageable UI
+
         var totalCounts = new MaterialCounts(new HashMap<>());
         var containerCount = 0;
 
@@ -122,6 +133,24 @@ public class AutoPickupContainerCommand implements CommandHandler {
 
         config.rootSection.autoPickupContainer.overviewScreen.sendMessage(player, environment);
       }
+
+      case CAPACITY_WARNING -> {
+        NormalizedConstant<CapacityWarningMode> normalizedMode;
+
+        if (args.length != 2 || (normalizedMode = CapacityWarningMode.matcher.matchFirst(args[1])) == null) {
+          config.rootSection.autoPickupContainer.command.capacityWarningUsage.sendMessage(
+            player,
+            new InterpretationEnvironment()
+              .withVariable("label", label)
+              .withVariable("action", normalizedAction.getNormalizedName())
+              .withVariable("warning_modes", CapacityWarningMode.matcher.createCompletions(null))
+          );
+
+          return true;
+        }
+
+        settings.selectCapacityWarningMode(normalizedMode.constant);
+      }
     }
 
     return true;
@@ -129,12 +158,29 @@ public class AutoPickupContainerCommand implements CommandHandler {
 
   @Override
   public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-    if (!(sender instanceof Player))
+    if (!(sender instanceof Player) || args.length == 0)
       return List.of();
 
     if (args.length == 1)
       return CommandAction.matcher.createCompletions(args[0]);
 
+    var normalizedAction = CommandAction.matcher.matchFirst(args[0]);
+
+    if (normalizedAction == null)
+      return List.of();
+
+    if (args.length == 2 && normalizedAction.constant == CommandAction.CAPACITY_WARNING)
+      return CapacityWarningMode.matcher.createCompletions(args[1]);
+
     return List.of();
+  }
+
+  private void sendActionUsage(Player player, String label) {
+    config.rootSection.autoPickupContainer.command.commandUsage.sendMessage(
+      player,
+      new InterpretationEnvironment()
+        .withVariable("label", label)
+        .withVariable("actions", CommandAction.matcher.createCompletions(null))
+    );
   }
 }

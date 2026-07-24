@@ -15,6 +15,9 @@ public class AutoPickupContainerCommandSection extends CommandSection {
   public ComponentMarkup functionalityAlreadyEnabled;
   public ComponentMarkup functionalityNowDisabled;
   public ComponentMarkup functionalityAlreadyDisabled;
+  public ComponentMarkup capacityWarningUsage;
+  public ComponentMarkup capacityWarningNowSelected;
+  public ComponentMarkup capacityWarningAlreadySelected;
 
   public AutoPickupContainerCommandSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(INITIAL_NAME, baseEnvironment, interpreterLogger);

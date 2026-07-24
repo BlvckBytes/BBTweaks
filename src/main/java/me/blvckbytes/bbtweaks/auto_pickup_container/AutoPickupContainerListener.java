@@ -169,9 +169,15 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
       if (updateAge < USAGE_INFO_MAX_UPDATE_AGE_T)
         continue;
 
-      usageInfo.lastKnownCounts = makePickupSession(usageInfo.player).calculateMarkedUsageCounts();
+      var priorCounts = usageInfo.lastKnownCounts;
+      var newCounts = makePickupSession(usageInfo.player).calculateMarkedUsageCounts();
+
+      usageInfo.lastKnownCounts = newCounts;
       usageInfo.lastUpdateTime = relativeTime;
       usageInfo.possiblyChanged = false;
+
+      if (priorCounts.vacantSlots() > 0 && newCounts.vacantSlots() == 0)
+        settingsStore.accessSettings(usageInfo.player).capacityWarningMode.display(usageInfo, config);
     }
 
     for (var slotChanges : slotChangesByPlayerId.values()) {

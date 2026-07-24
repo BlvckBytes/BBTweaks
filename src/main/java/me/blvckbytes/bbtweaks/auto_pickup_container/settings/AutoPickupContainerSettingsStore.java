@@ -2,6 +2,7 @@ package me.blvckbytes.bbtweaks.auto_pickup_container.settings;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_pickup_container.command.CapacityWarningMode;
 import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
@@ -19,6 +20,7 @@ import java.util.UUID;
 public class AutoPickupContainerSettingsStore implements Listener, Disableable {
 
   private final NamespacedKey keyEnabled;
+  private final NamespacedKey keyCapacityWarningMode;
 
   private final ConfigKeeper<MainSection> config;
 
@@ -29,6 +31,7 @@ public class AutoPickupContainerSettingsStore implements Listener, Disableable {
     ConfigKeeper<MainSection> config
   ) {
     this.keyEnabled = new NamespacedKey(plugin, "auto-pickup-container-enabled");
+    this.keyCapacityWarningMode = new NamespacedKey(plugin, "auto-pickup-container-capacity-warning-mode");
 
     this.config = config;
 
@@ -36,7 +39,7 @@ public class AutoPickupContainerSettingsStore implements Listener, Disableable {
   }
 
   public AutoPickupContainerSettings accessSettings(Player player) {
-    return settingsByPlayerId.computeIfAbsent(player.getUniqueId(), k -> load(player));
+    return settingsByPlayerId.computeIfAbsent(player.getUniqueId(), _ -> load(player));
   }
 
   @EventHandler
@@ -67,6 +70,11 @@ public class AutoPickupContainerSettingsStore implements Listener, Disableable {
     if (enabledValue != null)
       result.enabled = enabledValue;
 
+    var capacityWarningModeValue = pdc.get(keyCapacityWarningMode, PersistentDataType.INTEGER);
+
+    if (capacityWarningModeValue != null)
+      result.capacityWarningMode = CapacityWarningMode.byOrdinalOrDefault(capacityWarningModeValue);
+
     return result;
   }
 
@@ -74,5 +82,6 @@ public class AutoPickupContainerSettingsStore implements Listener, Disableable {
     var pdc = settings.player.getPersistentDataContainer();
 
     pdc.set(keyEnabled, PersistentDataType.BOOLEAN, settings.enabled);
+    pdc.set(keyCapacityWarningMode, PersistentDataType.INTEGER, settings.capacityWarningMode.ordinal());
   }
 }
