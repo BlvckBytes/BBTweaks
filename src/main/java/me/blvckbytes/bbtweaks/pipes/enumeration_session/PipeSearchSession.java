@@ -240,8 +240,8 @@ public class PipeSearchSession extends PipeEnumerationSession<PipeSearchSession>
         otherChestBlock = block.getRelative(dx, 0, dz);
 
         if (!ignoreOtherChestHalf) {
-          // Avoid calling completion if the piston-loop is already done and this block is within
-          // the same chunk; simply don't allow; simply don't allow other-halves to call completion.
+          // [1] Avoid calling completion if the piston-loop is already done and this block is within
+          // the same chunk; simply don't allow other-halves to call completion.
           ++chunksWaitingOn;
           handleBlock(otherChestBlock, pistonPredicate, EnumSet.of(HandleFlag.IGNORE_OTHER_CHEST_HALF));
           --chunksWaitingOn;
@@ -261,9 +261,12 @@ public class PipeSearchSession extends PipeEnumerationSession<PipeSearchSession>
       searchedInventories.add(new SearchedInventory(containerInventory, block, otherChestBlock, blockType, slotOffset, pistonPredicate));
     }
 
+    // Same reasoning as with [1]
+    ++chunksWaitingOn;
     // Hoppers are only funneling out of containers if they sit right below them, which makes
     // them become part of the chain items may travel down, so they are also walked into.
     handleBlock(block.getRelative(BlockFace.DOWN), pistonPredicate, EnumSet.of(HandleFlag.CHECK_ONLY_FOR_HOPPERS));
+    --chunksWaitingOn;
   }
 
   private void ensureChunkIsLoaded(Block block, Runnable handler) {
