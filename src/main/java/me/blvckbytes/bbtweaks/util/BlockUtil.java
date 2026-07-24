@@ -3,11 +3,18 @@ package me.blvckbytes.bbtweaks.util;
 import me.blvckbytes.bbtweaks.mechanic.MechanicSignInfo;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.DoubleChestInventory;
+import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class BlockUtil {
 
@@ -92,5 +99,43 @@ public class BlockUtil {
     footLocation.setDirection(direction);
 
     player.teleport(footLocation);
+  }
+
+  public static @Nullable Inventory tryAccessBlockInventory(Block block) {
+    var blockData = block.getBlockData();
+
+    // Make sure that both halves are loaded as otherwise, paper may just return an
+    // inventory with half the size - yes, actually, despite calling #getState and
+    // accessing the live and block-backed inventory, instead of the snapshot.
+    if (blockData instanceof Chest chest) {
+      var otherChestBlock = BlockUtil.getOtherChestBlock(block, chest.getType(), chest.getFacing());
+
+      if (otherChestBlock != null && !isBlockLoaded(otherChestBlock))
+        otherChestBlock.getWorld().loadChunk(otherChestBlock.getX() >> 4, otherChestBlock.getZ() >> 4);
+    }
+
+    if (!(block.getState(false) instanceof Container container))
+      return null;
+
+    return container.getInventory();
+  }
+
+  public static List<Block> getInventoryBackingBlocks(Inventory inventory) {
+    if (inventory instanceof DoubleChestInventory doubleInventory) {
+      var result = new ArrayList<Block>();
+
+      if (doubleInventory.getRightSide().getHolder(false) instanceof Container rightContainer)
+        result.add(rightContainer.getBlock());
+
+      if (doubleInventory.getLeftSide().getHolder(false) instanceof Container leftContainer)
+        result.add(leftContainer.getBlock());
+
+      return result;
+    }
+
+    if (inventory.getHolder(false) instanceof Container container)
+      return Collections.singletonList(container.getBlock());
+
+    return Collections.emptyList();
   }
 }

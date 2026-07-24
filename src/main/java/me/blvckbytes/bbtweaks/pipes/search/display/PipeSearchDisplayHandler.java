@@ -2,33 +2,25 @@ package me.blvckbytes.bbtweaks.pipes.search.display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import it.unimi.dsi.fastutil.longs.Long2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.container_ticket.PreRemoteContainerOpenEvent;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.mechanic.util.InventoryUtil;
 import me.blvckbytes.bbtweaks.pipes.search.*;
-import me.blvckbytes.bbtweaks.util.CompactId;
+import me.blvckbytes.bbtweaks.util.BlockUtil;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
-import org.apache.commons.lang3.mutable.MutableInt;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.data.Directional;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.DoubleChestInventory;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, SearchDisplayData> {
@@ -38,7 +30,6 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     BlockFace.UP, BlockFace.DOWN
   };
 
-  private final Map<UUID, Long2ObjectMap<MutableInt>> viewCountByChunkHashByWorldId;
   private final Logger logger;
 
   private final FloodgateIntegration floodgateIntegration;
@@ -51,7 +42,6 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     super(config, plugin, PipeSearchDisplay.class);
 
     this.logger = plugin.getLogger();
-    this.viewCountByChunkHashByWorldId = new HashMap<>();
 
     this.floodgateIntegration = floodgateIntegration;
   }
@@ -96,8 +86,10 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
       return;
     }
 
-    if (stackAction == StackAction.OPEN_CONTAINER)
-      openContainer(player, itemEntry.itemAndSlot);
+    if (stackAction == StackAction.OPEN_CONTAINER) {
+      if (!openContainer(player, itemEntry.itemAndSlot))
+        display.removeEntry(itemEntry);
+    }
   }
 
   private void handleStackClick(Player player, PipeSearchDisplay display, ClickType clickType, ItemStackEntry itemEntry) {
@@ -298,14 +290,6 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     }
   }
 
-  @EventHandler
-  public void onInventoryClose(InventoryCloseEvent event) {
-    // DisplayHandler - of utmost importance to call it as well!
-    super.onInventoryClose(event);
-
-    modifyInventoryViewCounter(event.getPlayer().getOpenInventory().getTopInventory(), false);
-  }
-
   public static boolean teleportPlayerToContainer(Player player, Block block, ConfigKeeper<MainSection> config) {
     var destinationBlock = block;
     var targetContainer = block;
@@ -428,68 +412,20 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     return MoveResult.DID_DECREMENT;
   }
 
-  private void openContainer(Player player, ItemAndSlot item) {
-    var block = item.block();
+  private boolean openContainer(Player player, ItemAndSlot item) {
+    var containerBlock = item.block();
+    var containerInventory = BlockUtil.tryAccessBlockInventory(containerBlock);
 
-    if (!(block.getState() instanceof Container container)) {
-      var environment = getBlockEnvironment(block);
-      config.rootSection.pipes.search.getItemContainerAbsent.sendMessage(player, environment);
-      return;
+    if (containerInventory == null) {
+      config.rootSection.pipes.search.getItemContainerAbsent.sendMessage(player, getBlockEnvironment(containerBlock));
+      return false;
     }
 
-    var containerInventory = container.getInventory();
-    var environment = getBlockEnvironment(item.block());
-
-    config.rootSection.pipes.search.containerOpened.sendMessage(player, environment);
+    Bukkit.getPluginManager().callEvent(new PreRemoteContainerOpenEvent(containerBlock, containerInventory));
     player.openInventory(containerInventory);
 
-    modifyInventoryViewCounter(containerInventory, true);
-  }
-
-  private void modifyInventoryViewCounter(Inventory inventory, boolean increment) {
-    if (inventory instanceof DoubleChestInventory doubleInventory) {
-      if (doubleInventory.getRightSide().getHolder(false) instanceof Container rightContainer)
-        modifyBlockViewCounter(rightContainer.getBlock(), increment);
-
-      if (doubleInventory.getLeftSide().getHolder(false) instanceof Container leftContainer)
-        modifyBlockViewCounter(leftContainer.getBlock(), increment);
-
-      return;
-    }
-
-    if (inventory.getHolder(false) instanceof Container container)
-      modifyBlockViewCounter(container.getBlock(), increment);
-  }
-
-  private void modifyBlockViewCounter(Block block, boolean increment) {
-    var worldBucket = viewCountByChunkHashByWorldId.computeIfAbsent(block.getWorld().getUID(), _ -> new Long2ObjectOpenHashMap<>());
-    var chunkId = CompactId.computeWorldlessChunkId(block.getX() >> 4, block.getZ() >> 4);
-
-    var viewCount = worldBucket.get(chunkId);
-
-    if (viewCount == null) {
-      if (increment) {
-        worldBucket.put(chunkId, new MutableInt(1));
-
-        if (!block.getChunk().addPluginChunkTicket(plugin))
-          plugin.getLogger().log(Level.WARNING, "Could not add chunk-ticket for block at " + block.getLocation());
-      }
-
-      return;
-    }
-
-    if (increment) {
-      viewCount.increment();
-      return;
-    }
-
-    if (viewCount.decrementAndGet() > 0)
-      return;
-
-    worldBucket.remove(chunkId);
-
-    if (!block.getChunk().removePluginChunkTicket(plugin))
-      plugin.getLogger().log(Level.WARNING, "Could not remove chunk-ticket for block at " + block.getLocation());
+    config.rootSection.pipes.search.containerOpened.sendMessage(player, getBlockEnvironment(containerBlock));
+    return true;
   }
 
   public static InterpretationEnvironment getBlockEnvironment(Block block) {

@@ -15,6 +15,7 @@ import me.blvckbytes.bbtweaks.block_facing.settings.BlockFacingSettingsStore;
 import me.blvckbytes.bbtweaks.block_facing.settings_display.BlockFacingSettingsDisplayHandler;
 import me.blvckbytes.bbtweaks.bottlexp.BottleXpCommand;
 import me.blvckbytes.bbtweaks.command_items.CommandItemListener;
+import me.blvckbytes.bbtweaks.container_ticket.RemoteOpenContainerTicketHandler;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.durability_warnings.DurabilityWarningsListener;
 import me.blvckbytes.bbtweaks.durability_warnings.WarningsProfileStore;
@@ -206,6 +207,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(SidebarSettingsDisplayHandler.class)
         .withSingleton(SidebarCommand.class)
         .withSingleton(SidebarBoardManager.class)
+        .withSingleton(RemoteOpenContainerTicketHandler.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);
