@@ -64,7 +64,7 @@ public class ItemCollectionEntry implements SearchDisplayEntry {
   }
 
   @Override
-  public ItemStack makeRepresentative(InterpretationEnvironment baseEnvironment, ConfigKeeper<MainSection> config) {
+  public @Nullable ItemStack makeRepresentative(InterpretationEnvironment baseEnvironment, ConfigKeeper<MainSection> config) {
     var representativeItem = new ItemStack(type);
 
     var totalAmount = 0;
@@ -75,6 +75,9 @@ public class ItemCollectionEntry implements SearchDisplayEntry {
       if (amount > 0)
         totalAmount += amount;
     }
+
+    if (totalAmount == 0)
+      return null;
 
     var numberStacks = totalAmount / stackSize;
     var singleItems = totalAmount % stackSize;

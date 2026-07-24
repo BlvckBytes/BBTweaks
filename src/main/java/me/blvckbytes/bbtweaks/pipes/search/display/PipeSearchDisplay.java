@@ -159,6 +159,10 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
 
       try {
         representativeItem = entry.makeRepresentative(environment, config);
+
+        // Just re-using the handler below.
+        if (representativeItem == null)
+          throw new IllegalStateException();
       }
       // java.lang.IllegalStateException: Could not get meta of item
       // The above occurs if the item has been moved; simply remove such items from the UI as well.

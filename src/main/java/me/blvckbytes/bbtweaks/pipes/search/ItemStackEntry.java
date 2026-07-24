@@ -4,7 +4,9 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.pipes.search.display.SearchDisplayEntry;
+import me.blvckbytes.bbtweaks.util.ItemUtil;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.Nullable;
 
 public class ItemStackEntry implements SearchDisplayEntry {
 
@@ -15,7 +17,10 @@ public class ItemStackEntry implements SearchDisplayEntry {
   }
 
   @Override
-  public ItemStack makeRepresentative(InterpretationEnvironment baseEnvironment, ConfigKeeper<MainSection> config) {
+  public @Nullable ItemStack makeRepresentative(InterpretationEnvironment baseEnvironment, ConfigKeeper<MainSection> config) {
+    if (!ItemUtil.isStackValid(itemAndSlot.item()))
+      return null;
+
     var representativeItem = new ItemStack(itemAndSlot.item());
 
     config.rootSection.pipes.search.display.items.stackRepresentativePatch.patch(
