@@ -11,6 +11,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collections;
+
 public class PipeSearchDisplay extends Display<SearchDisplayData> {
 
   private final SearchDisplayEntry[] slotMap;
@@ -35,6 +37,15 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
     this.slotMap = new SearchDisplayEntry[9 * 6];
 
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
+
+    // Sort the data once initially, as to provide a well-defined order. Then, do
+    // not sort after requesting items, to avoid having icons shift around, which
+    // can be quite the nuisance when trying to request the same icon multiple times.
+
+    for (var entry : displayData.entries())
+      entry.updateAmount();
+
+    Collections.sort(displayData.entries());
   }
 
   @Override
@@ -154,6 +165,8 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
       }
 
       var entry = displayData.entries().get(currentSlot);
+
+      entry.updateAmount();
 
       ItemStack representativeItem;
 

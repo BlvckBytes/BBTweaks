@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.pipes.search.display.SearchDisplayEntry;
 import me.blvckbytes.bbtweaks.util.ItemUtil;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class ItemStackEntry implements SearchDisplayEntry {
@@ -33,5 +34,16 @@ public class ItemStackEntry implements SearchDisplayEntry {
     );
 
     return representativeItem;
+  }
+
+  @Override
+  public void updateAmount() {}
+
+  @Override
+  public int compareTo(@NotNull SearchDisplayEntry other) {
+    if (!(other instanceof ItemStackEntry itemStackEntry))
+      return 0;
+
+    return -Integer.compare(itemAndSlot.item().getAmount(), itemStackEntry.itemAndSlot.item().getAmount());
   }
 }

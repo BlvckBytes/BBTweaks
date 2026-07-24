@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.pipes.search.display.SearchDisplayEntry;
 import org.bukkit.Material;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -18,6 +19,8 @@ public class ItemCollectionEntry implements SearchDisplayEntry {
   private final ItemStack type;
   private final Material material;
   private final int stackSize;
+
+  private int totalAmount;
 
   private ItemCollectionEntry(List<ItemAndSlot> members, ItemStack type) {
     this.members = members;
@@ -67,16 +70,7 @@ public class ItemCollectionEntry implements SearchDisplayEntry {
   public @Nullable ItemStack makeRepresentative(InterpretationEnvironment baseEnvironment, ConfigKeeper<MainSection> config) {
     var representativeItem = new ItemStack(type);
 
-    var totalAmount = 0;
-
-    for (var member : members) {
-      var amount = member.item().getAmount();
-
-      if (amount > 0)
-        totalAmount += amount;
-    }
-
-    if (totalAmount == 0)
+    if (totalAmount <= 0)
       return null;
 
     var numberStacks = totalAmount / stackSize;
@@ -93,6 +87,18 @@ public class ItemCollectionEntry implements SearchDisplayEntry {
     );
 
     return representativeItem;
+  }
+
+  @Override
+  public void updateAmount() {
+    totalAmount = 0;
+
+    for (var member : members) {
+      var amount = member.item().getAmount();
+
+      if (amount > 0)
+        totalAmount += amount;
+    }
   }
 
   public static List<ItemCollectionEntry> collectEntries(List<ItemAndSlot> items) {
@@ -119,5 +125,18 @@ public class ItemCollectionEntry implements SearchDisplayEntry {
     }
 
     return null;
+  }
+
+  @Override
+  public int compareTo(@NotNull SearchDisplayEntry other) {
+    if (!(other instanceof ItemCollectionEntry itemCollectionEntry))
+      return 0;
+
+    int result;
+
+    if ((result = -Integer.compare(totalAmount, itemCollectionEntry.totalAmount)) != 0)
+      return result;
+
+    return material.compareTo(itemCollectionEntry.material);
   }
 }
