@@ -365,17 +365,15 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
   }
 
   private MoveResult moveItemIntoInventory(Player player, ItemAndSlot item, int maximumAmount) {
-    var block = item.block();
+    var containerBlock = item.block();
+    var containerInventory = BlockUtil.tryAccessBlockInventory(containerBlock);
 
-    if (!(block.getState(false) instanceof Container container)) {
-      var environment = getBlockEnvironment(block);
+    var environment = getBlockEnvironment(containerBlock);
+
+    if (containerInventory == null) {
       config.rootSection.pipes.search.getItemContainerAbsent.sendMessage(player, environment);
       return MoveResult.INVALID_ITEM;
     }
-
-    var environment = getBlockEnvironment(item.block());
-
-    var containerInventory = container.getInventory();
 
     if (item.slot() < 0 || item.slot() >= containerInventory.getSize()) {
       config.rootSection.pipes.search.getItemContainerSizeChanged.sendMessage(player, environment);
@@ -416,15 +414,17 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     var containerBlock = item.block();
     var containerInventory = BlockUtil.tryAccessBlockInventory(containerBlock);
 
+    var environment = getBlockEnvironment(containerBlock);
+
     if (containerInventory == null) {
-      config.rootSection.pipes.search.getItemContainerAbsent.sendMessage(player, getBlockEnvironment(containerBlock));
+      config.rootSection.pipes.search.getItemContainerAbsent.sendMessage(player, environment);
       return false;
     }
 
     Bukkit.getPluginManager().callEvent(new PreRemoteContainerOpenEvent(containerBlock, containerInventory));
     player.openInventory(containerInventory);
 
-    config.rootSection.pipes.search.containerOpened.sendMessage(player, getBlockEnvironment(containerBlock));
+    config.rootSection.pipes.search.containerOpened.sendMessage(player, environment);
     return true;
   }
 
