@@ -462,16 +462,8 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
   }
 
   private void modifyBlockViewCounter(Block block, boolean increment) {
-    var location = block.getLocation();
-    var world = location.getWorld();
-
-    if (world == null) {
-      plugin.getLogger().log(Level.WARNING, "Could not get world of block within #modifyBlockViewCounter");
-      return;
-    }
-
-    var worldBucket = viewCountByChunkHashByWorldId.computeIfAbsent(world.getUID(), _ -> new Long2ObjectOpenHashMap<>());
-    var chunkId = CompactId.computeWorldlessChunkId(location.getBlockX() >> 4, location.getBlockZ() >> 4);
+    var worldBucket = viewCountByChunkHashByWorldId.computeIfAbsent(block.getWorld().getUID(), _ -> new Long2ObjectOpenHashMap<>());
+    var chunkId = CompactId.computeWorldlessChunkId(block.getX() >> 4, block.getZ() >> 4);
 
     var viewCount = worldBucket.get(chunkId);
 
@@ -491,7 +483,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
       return;
     }
 
-    if (viewCount.decrementAndGet() != 0)
+    if (viewCount.decrementAndGet() > 0)
       return;
 
     worldBucket.remove(chunkId);
