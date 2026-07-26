@@ -2,8 +2,6 @@ package me.blvckbytes.bbtweaks.sidebar.sorting_display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
 import me.blvckbytes.bbtweaks.util.Display;
@@ -15,9 +13,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class SidebarSortingDisplay extends Display<SortingDisplayData> {
 
-  private final Int2ObjectMap<SidebarStatistic> statisticBySlotIndex;
-
   public final boolean isFloodgate;
+
+  private final SidebarStatistic[] slotMap;
+  private int numberOfPages;
+
+  private int currentPage = 1;
 
   public SidebarSortingDisplay(
     Player player,
@@ -30,7 +31,53 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
 
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
 
-    this.statisticBySlotIndex = new Int2ObjectOpenHashMap<>();
+    this.slotMap = new SidebarStatistic[9 * 6];
+  }
+
+  public void nextPage() {
+    if (currentPage >= numberOfPages)
+      return;
+
+    ++currentPage;
+    showNextTick();
+  }
+
+  public void previousPage() {
+    if (currentPage <= 1)
+      return;
+
+    --currentPage;
+    showNextTick();
+  }
+
+  public void firstPage() {
+    if (currentPage <= 1)
+      return;
+
+    currentPage = 1;
+    showNextTick();
+  }
+
+  public void lastPage() {
+    if (currentPage >= numberOfPages)
+      return;
+
+    currentPage = numberOfPages;
+    showNextTick();
+  }
+
+  private void updateNumberOfPages() {
+    var numberOfDisplaySlots = config.rootSection.sidebar.settingsDisplay.getPaginationSlots().size();
+    this.numberOfPages = Math.max(1, (int) Math.ceil(displayData.preferences().statisticsInOrder.size() / (double) numberOfDisplaySlots));
+
+    if (currentPage > numberOfPages)
+      currentPage = numberOfPages;
+  }
+
+  @Override
+  public void show() {
+    updateNumberOfPages();
+    super.show();
   }
 
   @Override
@@ -43,13 +90,22 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
     config.rootSection.sidebar.sortingDisplay.items.backButton.renderInto(inventory, environment);
     config.rootSection.sidebar.sortingDisplay.items.moveDisabledToEnd.renderInto(inventory, environment);
 
-    for (var index = 0; index < inventory.getSize(); ++index) {
-      if (index >= displayData.preferences().statisticsInOrder.size())
-        break;
+    var displaySlots = config.rootSection.sidebar.settingsDisplay.getPaginationSlots();
+    var itemsIndex = (currentPage - 1) * displaySlots.size();
+    var numberOfItems = displayData.preferences().statisticsInOrder.size();
 
-      var statistic = displayData.preferences().statisticsInOrder.get(index);
+    for (var slot : displaySlots) {
+      var currentItemIndex = itemsIndex++;
 
-      statisticBySlotIndex.put(index, statistic);
+      if (currentItemIndex >= numberOfItems) {
+        slotMap[slot] = null;
+        inventory.setItem(slot, null);
+        continue;
+      }
+
+      var statistic = displayData.preferences().statisticsInOrder.get(currentItemIndex);
+
+      slotMap[slot] = statistic;
 
       var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
 
@@ -62,12 +118,12 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
         .withVariable("enabled", enableMode.enabled)
         .withVariable("show_label", enableMode.showLabel);
 
-      inventory.setItem(index, config.rootSection.sidebar.sortingDisplay.items.statisticIcon.build(environment));
+      inventory.setItem(slot, config.rootSection.sidebar.sortingDisplay.items.statisticIcon.build(environment));
     }
   }
 
   public @Nullable SidebarStatistic getStatisticBySlotIndex(int slotIndex) {
-    return statisticBySlotIndex.get(slotIndex);
+    return slotMap[slotIndex];
   }
 
   @Override
@@ -82,6 +138,8 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
 
   private InterpretationEnvironment makeEnvironment() {
     return new InterpretationEnvironment()
+      .withVariable("current_page", currentPage)
+      .withVariable("number_pages", numberOfPages)
       .withVariable("is_floodgate", isFloodgate);
   }
 }

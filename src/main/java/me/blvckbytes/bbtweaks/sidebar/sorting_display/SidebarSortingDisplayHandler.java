@@ -32,83 +32,102 @@ public class SidebarSortingDisplayHandler extends DisplayHandler<SidebarSortingD
 
   @Override
   protected void handleClick(Player player, SidebarSortingDisplay display, ClickType clickType, int slot) {
-    if (config.rootSection.sidebar.sortingDisplay.items.backButton.getDisplaySlots().contains(slot)) {
-      if (clickType != ClickType.LEFT)
-        return;
-
-      display.displayData.backHandler().run();
-      return;
-    }
-
-    if (config.rootSection.sidebar.sortingDisplay.items.moveDisabledToEnd.getDisplaySlots().contains(slot)) {
-      if (clickType != ClickType.LEFT)
-        return;
-
-      var list = display.displayData.preferences().statisticsInOrder;
-
-      var newOrder = Stream.concat(
-        list.stream().filter(it -> display.displayData.preferences().enableModeByStatistic.get(it).enabled),
-        list.stream().filter(it -> !display.displayData.preferences().enableModeByStatistic.get(it).enabled)
-      ).toList();
-
-      if (newOrder.equals(list)) {
-        config.rootSection.sidebar.allDeactivatedItemsAlreadyAtEnd.sendMessage(player);
-        return;
-      }
-
-      list.clear();
-      list.addAll(newOrder);
-
-      display.renderItems();
-      return;
-    }
-
     var statistic = display.getStatisticBySlotIndex(slot);
 
-    if (statistic == null)
-      return;
+    if (statistic != null) {
+      if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
+        var list = display.displayData.preferences().statisticsInOrder;
+        var currentIndex = list.indexOf(statistic);
 
-    if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
-      var list = display.displayData.preferences().statisticsInOrder;
-      var currentIndex = list.indexOf(statistic);
+        if (currentIndex >= list.size() - 1) {
+          config.rootSection.sidebar.entryAlreadyAtTheVeryEnd.sendMessage(
+            player,
+            new InterpretationEnvironment()
+              .withVariable("name", config.rootSection.sidebar._statisticsMap.get(statistic).iconData.name.markupNode)
+          );
 
-      if (currentIndex >= list.size() - 1) {
-        config.rootSection.sidebar.entryAlreadyAtTheVeryEnd.sendMessage(
-          player,
-          new InterpretationEnvironment()
-            .withVariable("name", config.rootSection.sidebar._statisticsMap.get(statistic).iconData.name.markupNode)
-        );
+          return;
+        }
 
+        list.remove(currentIndex);
+        list.add(currentIndex + 1, statistic);
+
+        display.renderItems();
         return;
       }
 
-      list.remove(currentIndex);
-      list.add(currentIndex + 1, statistic);
+      if (clickType == ClickType.LEFT) {
+        var list = display.displayData.preferences().statisticsInOrder;
+        var currentIndex = list.indexOf(statistic);
 
-      config.rootSection.sidebar.movedAllDeactivatedItemsToEnd.sendMessage(player);
+        if (currentIndex <= 0) {
+          config.rootSection.sidebar.entryAlreadyAtTheVeryBeginning.sendMessage(
+            player,
+            new InterpretationEnvironment()
+              .withVariable("name", config.rootSection.sidebar._statisticsMap.get(statistic).iconData.name.markupNode)
+          );
 
-      display.renderItems();
+          return;
+        }
+
+        list.remove(currentIndex);
+        list.add(currentIndex - 1, statistic);
+
+        display.renderItems();
+      }
+
       return;
     }
 
     if (clickType == ClickType.LEFT) {
-      var list = display.displayData.preferences().statisticsInOrder;
-      var currentIndex = list.indexOf(statistic);
-
-      if (currentIndex <= 0) {
-        config.rootSection.sidebar.entryAlreadyAtTheVeryBeginning.sendMessage(
-          player,
-          new InterpretationEnvironment()
-            .withVariable("name", config.rootSection.sidebar._statisticsMap.get(statistic).iconData.name.markupNode)
-        );
-
+      if (config.rootSection.sidebar.sortingDisplay.items.previousPage.getDisplaySlots().contains(slot)) {
+        display.previousPage();
         return;
       }
 
-      list.remove(currentIndex);
-      list.add(currentIndex - 1, statistic);
+      if (config.rootSection.sidebar.sortingDisplay.items.nextPage.getDisplaySlots().contains(slot)) {
+        display.nextPage();
+        return;
+      }
 
-      display.renderItems();
+      if (config.rootSection.sidebar.sortingDisplay.items.backButton.getDisplaySlots().contains(slot)) {
+        display.displayData.backHandler().run();
+        return;
+      }
+
+      if (config.rootSection.sidebar.sortingDisplay.items.moveDisabledToEnd.getDisplaySlots().contains(slot)) {
+        var list = display.displayData.preferences().statisticsInOrder;
+
+        var newOrder = Stream.concat(
+          list.stream().filter(it -> display.displayData.preferences().enableModeByStatistic.get(it).enabled),
+          list.stream().filter(it -> !display.displayData.preferences().enableModeByStatistic.get(it).enabled)
+        ).toList();
+
+        if (newOrder.equals(list)) {
+          config.rootSection.sidebar.allDeactivatedItemsAlreadyAtEnd.sendMessage(player);
+          return;
+        }
+
+        list.clear();
+        list.addAll(newOrder);
+
+        config.rootSection.sidebar.movedAllDeactivatedItemsToEnd.sendMessage(player);
+
+        display.renderItems();
+        return;
+      }
+
+      return;
+    }
+
+    if (clickType == ClickType.RIGHT) {
+      if (config.rootSection.sidebar.sortingDisplay.items.previousPage.getDisplaySlots().contains(slot)) {
+        display.firstPage();
+        return;
+      }
+
+      if (config.rootSection.sidebar.sortingDisplay.items.nextPage.getDisplaySlots().contains(slot))
+        display.lastPage();
     }
   }
 }

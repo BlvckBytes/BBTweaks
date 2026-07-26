@@ -9,8 +9,10 @@ import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 public class SidebarSortingDisplayItemsSection extends ConfigSection {
 
   public GuiItemStackSection filler;
+  public GuiItemStackSection previousPage;
   public GuiItemStackSection backButton;
   public GuiItemStackSection moveDisabledToEnd;
+  public GuiItemStackSection nextPage;
   public ItemStackSection statisticIcon;
 
   public SidebarSortingDisplayItemsSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {

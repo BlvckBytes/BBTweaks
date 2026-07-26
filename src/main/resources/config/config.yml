@@ -2468,13 +2468,28 @@ sidebar:
             </container>
             {lut.spacer}
   sortingDisplay:
-    title: '<&8>Sidebar-Sortierung'
+    title: '<&8>Sidebar-Sortierung <&e>{current_page}<&8>/<&e>{number_pages}'
     rows: 6
     items:
       filler:
         type: BLACK_STAINED_GLASS_PANE
         name: ' '
-        slots: '(last_slot - 8)..last_slot'
+        slots: '(last_slot - 17)..last_slot'
+      previousPage:
+        slots: 'last_slot - 8'
+        type: PLAYER_HEAD
+        textures: '{lut.textures[current_page > 1 then "ARROW_LEFT" else "ARROW_LEFT_RED"]}'
+        name: |
+          <reset>
+            <container *if="current_page > 1"><&8>» <&6>Vorherige Seite <&8>«</container>
+            <container *else><&8>» <&c>Keine vorherige Seite <&8>«</container>
+        lore: |
+          <reset *let-spacer="is_floodgate then lut.spacer_bedrock else lut.spacer">
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Navigiere zur vorherigen Seite<br/>
+            <&8>➥ <&e>Rechtsklick <&7>Springe zur ersten Seite<br/>
+            {lut.spacer}
       backButton:
         slots: 'last_slot - 5'
         type: 'PLAYER_HEAD'
@@ -2496,11 +2511,26 @@ sidebar:
         lore: |
           <reset>
             <br/>
-            <&7>Bewege alle aktuell deaktivierte Einträge<br/>
+            <&7>Bewege alle aktuell deaktivierten Einträge<br/>
             ans Ende der Liste, um die Sortierung zu<br/>
             vereinfachen.<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Deaktivierte ans Ende bewegen<br/>
+            {lut.spacer}
+      nextPage:
+        slots: 'last_slot'
+        type: PLAYER_HEAD
+        textures: '{lut.textures[current_page < number_pages then "ARROW_RIGHT" else "ARROW_RIGHT_RED"]}'
+        name: |
+          <reset>
+            <container *if="current_page < number_pages"><&8>» <&6>Nächste Seite <&8>«</container>
+            <container *else><&8>» <&c>Keine nächste Seite <&8>«</container>
+        lore: |
+          <reset *let-spacer="is_floodgate then lut.spacer_bedrock else lut.spacer">
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Navigiere zur nächsten Seite<br/>
+            <&8>➥ <&e>Rechtsklick <&7>Springe zur letzten Seite<br/>
             {lut.spacer}
       statisticIcon:
         type: '{icon_type}'
