@@ -33,7 +33,9 @@ public class SidebarSection extends ConfigSection {
   public ComponentMarkup entryAlreadyAtTheVeryBeginning;
   public ComponentMarkup entryAlreadyAtTheVeryEnd;
   public ComponentMarkup sidebarNowEnabled;
+  public ComponentMarkup sidebarAlreadyEnabled;
   public ComponentMarkup sidebarNowDisabled;
+  public ComponentMarkup sidebarAlreadyDisabled;
   public ComponentMarkup noChangesMadeToReset;
   public ComponentMarkup settingsHaveBeenReset;
 

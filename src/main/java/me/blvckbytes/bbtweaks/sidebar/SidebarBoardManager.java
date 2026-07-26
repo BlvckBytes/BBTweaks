@@ -207,7 +207,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       if (now - lastSneakStamp > config.rootSection.sidebar.doubleSneakMaxDelayMs)
         return;
 
-      preferences.toggleEnabled();
+      preferences.setEnabled(null);
     }
   }
 

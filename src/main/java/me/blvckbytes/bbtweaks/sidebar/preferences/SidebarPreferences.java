@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -101,13 +102,27 @@ public class SidebarPreferences {
     }
   }
 
-  public void toggleEnabled() {
-    enabled ^= true;
+  public void setEnabled(@Nullable Boolean value) {
+    var newValue = value == null ? !enabled : value;
 
-    if (enabled)
+    if (newValue == enabled) {
+      if (newValue) {
+        config.rootSection.sidebar.sidebarAlreadyEnabled.sendMessage(player);
+        return;
+      }
+
+      config.rootSection.sidebar.sidebarAlreadyDisabled.sendMessage(player);
+      return;
+    }
+
+    enabled = newValue;
+
+    if (enabled) {
       config.rootSection.sidebar.sidebarNowEnabled.sendMessage(player);
-    else
-      config.rootSection.sidebar.sidebarNowDisabled.sendMessage(player);
+      return;
+    }
+
+    config.rootSection.sidebar.sidebarNowDisabled.sendMessage(player);
   }
 
   public void onConfigReload() {

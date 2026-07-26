@@ -102,20 +102,6 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
         return;
       }
 
-      // TODO: This most definitely needs a confirmation-UI
-      if (config.rootSection.sidebar.settingsDisplay.items.resetToDefaults.getDisplaySlots().contains(slot)) {
-        if (!display.displayData.divergesFromDefaults()) {
-          config.rootSection.sidebar.noChangesMadeToReset.sendMessage(player);
-          return;
-        }
-
-        display.displayData.resetToDefaults();
-        display.renderItems();
-
-        config.rootSection.sidebar.settingsHaveBeenReset.sendMessage(player);
-        return;
-      }
-
       if (config.rootSection.sidebar.settingsDisplay.items.allColors.getDisplaySlots().contains(slot)) {
         var displayData = new ColorDisplayData(
           display.displayData, null,

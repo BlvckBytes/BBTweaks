@@ -1374,7 +1374,9 @@ sidebar:
   entryAlreadyAtTheVeryBeginning: '{lut.sidebar_prefix} <&c>Der Eintrag <&4>{name}</> befindet sich bereits ganz am Anfang der Liste!'
   entryAlreadyAtTheVeryEnd: '{lut.sidebar_prefix} <&c>Der Eintrag <&4>{name}</> befindet sich bereits ganz am Ende der Liste!'
   sidebarNowEnabled: '{lut.sidebar_prefix} <&7>Die Anzeige der Sidebar ist nun <&a>aktiviert</>.'
+  sidebarAlreadyEnabled: '{lut.sidebar_prefix} <&c>Die Anzeige der Sidebar ist bereits aktiviert!'
   sidebarNowDisabled: '{lut.sidebar_prefix} <&7>Die Anzeige der Sidebar ist nun <&c>deaktiviert</>.'
+  sidebarAlreadyDisabled: '{lut.sidebar_prefix} <&c>Die Anzeige der Sidebar ist bereits deaktiviert!'
   noChangesMadeToReset: '{lut.sidebar_prefix} <&c>Deine aktuellen Einstellungen weichen noch nicht von den Standardwerten ab!'
   settingsHaveBeenReset: '{lut.sidebar_prefix} <&7>Deine Einstellungen wurden auf die <&a>Standardwerte</> zurückgesetzt.'
   doubleSneakMaxDelayMs: 350
@@ -2470,20 +2472,6 @@ sidebar:
             <&8>➥ <&e>Linksklick <&7>Ins Sortiermenü wechseln<br/>
             {lut.spacer}
         slots: 'last_slot - 2'
-      resetToDefaults:
-        type: 'LAVA_BUCKET'
-        name: |
-          <reset>
-            <&8>» <&c>Einstellungen zurücksetzen</> «
-        lore: |
-          <reset>
-            <br/>
-            <&7>Setzt alle gewählten Einstellungen zu den<br/>
-            ursprünglichen Standardwerten zurück.<br/>
-            {lut.spacer}<br/>
-            <&8>➥ <&e>Linksklick <&7>Zurücksetzen<br/>
-            {lut.spacer}
-        slots: 'last_slot - 1'
       nextPage:
         slots: 'last_slot'
         type: PLAYER_HEAD

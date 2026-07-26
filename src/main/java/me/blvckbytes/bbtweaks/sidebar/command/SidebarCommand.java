@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferencesStore;
 import me.blvckbytes.bbtweaks.sidebar.settings_display.SidebarSettingsDisplayHandler;
+import me.blvckbytes.syllables_matcher.NormalizedConstant;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -40,16 +41,9 @@ public class SidebarCommand implements CommandHandler {
     if (!command.testPermission(sender) || !(sender instanceof Player player))
       return false;
 
-    var preferences = sidebarPreferencesStore.accessPreferences(player);
+    NormalizedConstant<CommandAction> normalizedAction;
 
-    if (args.length == 0) {
-      preferences.toggleEnabled();
-      return true;
-    }
-
-    var normalizedAction = CommandAction.matcher.matchFirst(args[0]);
-
-    if (normalizedAction == null) {
+    if (args.length == 0 || (normalizedAction = CommandAction.matcher.matchFirst(args[0])) == null) {
       config.rootSection.sidebar.command.usage.sendMessage(
         player,
         new InterpretationEnvironment()
@@ -60,17 +54,34 @@ public class SidebarCommand implements CommandHandler {
       return true;
     }
 
-    if (normalizedAction.constant == CommandAction.SETTINGS) {
-      sidebarSettingsDisplayHandler.show(player, preferences);
-      return true;
+    var preferences = sidebarPreferencesStore.accessPreferences(player);
+
+    switch (normalizedAction.constant) {
+      case SETTINGS -> sidebarSettingsDisplayHandler.show(player, preferences);
+
+      case RESET_TO_DEFAULTS -> {
+        if (!preferences.divergesFromDefaults()) {
+          config.rootSection.sidebar.noChangesMadeToReset.sendMessage(player);
+          return true;
+        }
+
+        preferences.resetToDefaults();
+        config.rootSection.sidebar.settingsHaveBeenReset.sendMessage(player);
+      }
+
+      case ON -> preferences.setEnabled(true);
+      case OFF -> preferences.setEnabled(false);
+      case TOGGLE -> preferences.setEnabled(null);
+
+      default -> throw new IllegalStateException("Unaccounted-for command-action: " + normalizedAction.constant);
     }
 
-    throw new IllegalStateException("Unaccounted-for command-action: " + normalizedAction.constant);
+    return true;
   }
 
   @Override
   public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
-    if (!command.testPermission(sender) || !(sender instanceof Player player))
+    if (!command.testPermission(sender) || !(sender instanceof Player))
       return List.of();
 
     if (args.length == 1)
