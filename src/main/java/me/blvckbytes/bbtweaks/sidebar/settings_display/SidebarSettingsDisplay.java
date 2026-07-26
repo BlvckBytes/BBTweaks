@@ -2,9 +2,8 @@ package me.blvckbytes.bbtweaks.sidebar.settings_display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
 import me.blvckbytes.bbtweaks.sidebar.config.StatisticSection;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
 import me.blvckbytes.bbtweaks.util.Display;
@@ -16,9 +15,12 @@ import org.jetbrains.annotations.Nullable;
 
 public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
 
-  private final Int2ObjectMap<StatisticSection> statisticBySlotIndex;
-
   public final boolean isFloodgate;
+
+  private final SidebarStatistic[] slotMap;
+  private int numberOfPages;
+
+  private int currentPage = 1;
 
   public SidebarSettingsDisplay(
     Player player,
@@ -31,7 +33,53 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
 
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
 
-    this.statisticBySlotIndex = new Int2ObjectOpenHashMap<>();
+    this.slotMap = new SidebarStatistic[9 * 6];
+  }
+
+  public void nextPage() {
+    if (currentPage >= numberOfPages)
+      return;
+
+    ++currentPage;
+    showNextTick();
+  }
+
+  public void previousPage() {
+    if (currentPage <= 1)
+      return;
+
+    --currentPage;
+    showNextTick();
+  }
+
+  public void firstPage() {
+    if (currentPage <= 1)
+      return;
+
+    currentPage = 1;
+    showNextTick();
+  }
+
+  public void lastPage() {
+    if (currentPage >= numberOfPages)
+      return;
+
+    currentPage = numberOfPages;
+    showNextTick();
+  }
+
+  @Override
+  public void show() {
+    updateNumberOfPages();
+    super.show();
+  }
+
+  private void updateNumberOfPages() {
+    var numberOfDisplaySlots = config.rootSection.sidebar.settingsDisplay.getPaginationSlots().size();
+    this.numberOfPages = Math.max(1, (int) Math.ceil(displayData.statisticsInOrder.size() / (double) numberOfDisplaySlots));
+
+    if (currentPage > numberOfPages)
+      currentPage = numberOfPages;
   }
 
   @Override
@@ -41,7 +89,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
     var environment = makeEnvironment();
 
     config.rootSection.sidebar.settingsDisplay.items.filler.renderInto(inventory, environment);
-    config.rootSection.sidebar.settingsDisplay.items.enabled.renderInto(inventory, environment);
+    config.rootSection.sidebar.settingsDisplay.items.previousPage.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.showTitle.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.showIcons.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.delimitersMode.renderInto(inventory, environment);
@@ -49,22 +97,26 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
     config.rootSection.sidebar.settingsDisplay.items.nextSneakMode.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.openSorting.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.resetToDefaults.renderInto(inventory, environment);
+    config.rootSection.sidebar.settingsDisplay.items.nextPage.renderInto(inventory, environment);
 
-    var nextStatisticIndex = 0;
+    var displaySlots = config.rootSection.sidebar.settingsDisplay.getPaginationSlots();
+    var itemsIndex = (currentPage - 1) * displaySlots.size();
+    var numberOfItems = displayData.statisticsInOrder.size();
 
-    for (var index = 0; index < inventory.getSize(); ++index) {
-      var currentItem = inventory.getItem(index);
+    for (var slot : displaySlots) {
+      var currentItemIndex = itemsIndex++;
 
-      if (currentItem != null && !currentItem.getType().isAir())
+      if (currentItemIndex >= numberOfItems) {
+        slotMap[slot] = null;
+        inventory.setItem(slot, null);
         continue;
+      }
 
-      if (nextStatisticIndex == displayData.statisticsInOrder.size())
-        break;
+      var statistic = displayData.statisticsInOrder.get(currentItemIndex);
 
-      var statistic = displayData.statisticsInOrder.get(nextStatisticIndex++);
+      slotMap[slot] = statistic;
+
       var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
-
-      statisticBySlotIndex.put(index, statisticSection);
 
       var enableMode = displayData.enableModeByStatistic.get(statistic);
 
@@ -78,12 +130,17 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
         .withVariable("show_label", enableMode.showLabel)
         .withVariable("is_spacer", statistic.isSpacer);
 
-      inventory.setItem(index, config.rootSection.sidebar.settingsDisplay.items.statisticIcon.build(environment));
+      inventory.setItem(slot, config.rootSection.sidebar.settingsDisplay.items.statisticIcon.build(environment));
     }
   }
 
   public @Nullable StatisticSection getStatisticBySlotIndex(int slotIndex) {
-    return statisticBySlotIndex.get(slotIndex);
+    var statistic = slotMap[slotIndex];
+
+    if (statistic == null)
+      return null;
+
+    return config.rootSection.sidebar._statisticsMap.get(statistic);
   }
 
   @Override
@@ -99,6 +156,8 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
   private InterpretationEnvironment makeEnvironment() {
     return new InterpretationEnvironment()
       .withVariable("is_floodgate", isFloodgate)
+      .withVariable("current_page", currentPage)
+      .withVariable("number_pages", numberOfPages)
       .withVariable("sidebar_enabled", displayData.enabled)
       .withVariable("show_title", displayData.showTitle)
       .withVariable("show_icons", displayData.showIcons)

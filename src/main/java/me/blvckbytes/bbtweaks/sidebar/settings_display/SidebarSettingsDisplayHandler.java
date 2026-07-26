@@ -40,123 +40,112 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
 
   @Override
   protected void handleClick(Player player, SidebarSettingsDisplay display, ClickType clickType, int slot) {
-    if (config.rootSection.sidebar.settingsDisplay.items.enabled.getDisplaySlots().contains(slot)) {
-      if (clickType != ClickType.LEFT)
-        return;
+    var statistic = display.getStatisticBySlotIndex(slot);
 
-      display.displayData.toggleEnabled();
+    if (statistic != null) {
+      if (clickType == ClickType.LEFT) {
+        display.displayData.enableModeByStatistic.computeIfPresent(
+          statistic._sidebarStatistic,
+          (sidebarStatistic, currentMode) -> currentMode.next(sidebarStatistic)
+        );
 
-      display.renderItems();
-      return;
-    }
-
-    if (config.rootSection.sidebar.settingsDisplay.items.showTitle.getDisplaySlots().contains(slot)) {
-      if (clickType != ClickType.LEFT)
-        return;
-
-      display.displayData.showTitle ^= true;
-
-      display.renderItems();
-      return;
-    }
-
-    if (config.rootSection.sidebar.settingsDisplay.items.showIcons.getDisplaySlots().contains(slot)) {
-      if (clickType != ClickType.LEFT)
-        return;
-
-      display.displayData.showIcons ^= true;
-
-      display.renderItems();
-      return;
-    }
-
-    if (config.rootSection.sidebar.settingsDisplay.items.delimitersMode.getDisplaySlots().contains(slot)) {
-      if (clickType != ClickType.LEFT)
-        return;
-
-      display.displayData.delimitersMode = display.displayData.delimitersMode.next();
-
-      display.renderItems();
-      return;
-    }
-
-    if (config.rootSection.sidebar.settingsDisplay.items.nextSneakMode.getDisplaySlots().contains(slot)) {
-      if (clickType != ClickType.LEFT)
-        return;
-
-      display.displayData.sneakMode = display.displayData.sneakMode.next();
-
-      display.renderItems();
-      return;
-    }
-
-    if (config.rootSection.sidebar.settingsDisplay.items.resetToDefaults.getDisplaySlots().contains(slot)) {
-      if (clickType != ClickType.LEFT)
-        return;
-
-      if (!display.displayData.divergesFromDefaults()) {
-        config.rootSection.sidebar.noChangesMadeToReset.sendMessage(player);
+        display.renderItems();
         return;
       }
 
-      display.displayData.resetToDefaults();
+      if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
+        if (statistic._sidebarStatistic.isSpacer)
+          return;
 
-      config.rootSection.sidebar.settingsHaveBeenReset.sendMessage(player);
+        var displayData = new ColorDisplayData(
+          display.displayData, statistic,
+          display::showNextTick
+        );
 
-      display.renderItems();
+        sidebarColorDisplayHandler.show(player, displayData);
+      }
       return;
     }
-
-    if (config.rootSection.sidebar.settingsDisplay.items.allColors.getDisplaySlots().contains(slot)) {
-      if (clickType != ClickType.LEFT)
-        return;
-
-      var displayData = new ColorDisplayData(
-        display.displayData, null,
-        display::showNextTick
-      );
-
-      sidebarColorDisplayHandler.show(player, displayData);
-      return;
-    }
-
-    if (config.rootSection.sidebar.settingsDisplay.items.openSorting.getDisplaySlots().contains(slot)) {
-      if (clickType != ClickType.LEFT)
-        return;
-
-      sidebarSortingDisplayHandler.show(player, new SortingDisplayData(
-        display.displayData,
-        display::showNextTick
-      ));
-
-      return;
-    }
-
-    var statistic = display.getStatisticBySlotIndex(slot);
-
-    if (statistic == null)
-      return;
 
     if (clickType == ClickType.LEFT) {
-      display.displayData.enableModeByStatistic.computeIfPresent(
-        statistic._sidebarStatistic,
-        (sidebarStatistic, currentMode) -> currentMode.next(sidebarStatistic)
-      );
+      if (config.rootSection.sidebar.settingsDisplay.items.previousPage.getDisplaySlots().contains(slot)) {
+        display.previousPage();
+        return;
+      }
 
-      display.renderItems();
+      if (config.rootSection.sidebar.settingsDisplay.items.nextPage.getDisplaySlots().contains(slot)) {
+        display.nextPage();
+        return;
+      }
+
+      if (config.rootSection.sidebar.settingsDisplay.items.showTitle.getDisplaySlots().contains(slot)) {
+        display.displayData.showTitle ^= true;
+        display.renderItems();
+        return;
+      }
+
+      if (config.rootSection.sidebar.settingsDisplay.items.showIcons.getDisplaySlots().contains(slot)) {
+        display.displayData.showIcons ^= true;
+        display.renderItems();
+        return;
+      }
+
+      if (config.rootSection.sidebar.settingsDisplay.items.delimitersMode.getDisplaySlots().contains(slot)) {
+        display.displayData.delimitersMode = display.displayData.delimitersMode.next();
+        display.renderItems();
+        return;
+      }
+
+      if (config.rootSection.sidebar.settingsDisplay.items.nextSneakMode.getDisplaySlots().contains(slot)) {
+        display.displayData.sneakMode = display.displayData.sneakMode.next();
+        display.renderItems();
+        return;
+      }
+
+      // TODO: This most definitely needs a confirmation-UI
+      if (config.rootSection.sidebar.settingsDisplay.items.resetToDefaults.getDisplaySlots().contains(slot)) {
+        if (!display.displayData.divergesFromDefaults()) {
+          config.rootSection.sidebar.noChangesMadeToReset.sendMessage(player);
+          return;
+        }
+
+        display.displayData.resetToDefaults();
+        display.renderItems();
+
+        config.rootSection.sidebar.settingsHaveBeenReset.sendMessage(player);
+        return;
+      }
+
+      if (config.rootSection.sidebar.settingsDisplay.items.allColors.getDisplaySlots().contains(slot)) {
+        var displayData = new ColorDisplayData(
+          display.displayData, null,
+          display::showNextTick
+        );
+
+        sidebarColorDisplayHandler.show(player, displayData);
+        return;
+      }
+
+      if (config.rootSection.sidebar.settingsDisplay.items.openSorting.getDisplaySlots().contains(slot)) {
+        sidebarSortingDisplayHandler.show(player, new SortingDisplayData(
+          display.displayData,
+          display::showNextTick
+        ));
+
+        return;
+      }
+
       return;
     }
 
-    if (display.isFloodgate && clickType == ClickType.DROP || !display.isFloodgate && clickType == ClickType.RIGHT) {
-      if (statistic._sidebarStatistic.isSpacer)
+    if (clickType == ClickType.RIGHT) {
+      if (config.rootSection.sidebar.settingsDisplay.items.previousPage.getDisplaySlots().contains(slot)) {
+        display.firstPage();
         return;
+      }
 
-      var displayData = new ColorDisplayData(
-        display.displayData, statistic,
-        display::showNextTick
-      );
-
-      sidebarColorDisplayHandler.show(player, displayData);
+      if (config.rootSection.sidebar.settingsDisplay.items.nextPage.getDisplaySlots().contains(slot))
+        display.lastPage();
     }
   }
 }

@@ -9,7 +9,7 @@ import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 public class SettingsDisplayItemsSection extends ConfigSection {
 
   public GuiItemStackSection filler;
-  public GuiItemStackSection enabled;
+  public GuiItemStackSection previousPage;
   public GuiItemStackSection showTitle;
   public GuiItemStackSection showIcons;
   public GuiItemStackSection delimitersMode;
@@ -17,6 +17,7 @@ public class SettingsDisplayItemsSection extends ConfigSection {
   public GuiItemStackSection allColors;
   public GuiItemStackSection openSorting;
   public GuiItemStackSection resetToDefaults;
+  public GuiItemStackSection nextPage;
   public ItemStackSection statisticIcon;
 
   public SettingsDisplayItemsSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
