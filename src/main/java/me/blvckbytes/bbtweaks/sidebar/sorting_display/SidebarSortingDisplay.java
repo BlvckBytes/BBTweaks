@@ -87,8 +87,10 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
     var environment = makeEnvironment();
 
     config.rootSection.sidebar.sortingDisplay.items.filler.renderInto(inventory, environment);
+    config.rootSection.sidebar.sortingDisplay.items.previousPage.renderInto(inventory, environment);
     config.rootSection.sidebar.sortingDisplay.items.backButton.renderInto(inventory, environment);
     config.rootSection.sidebar.sortingDisplay.items.moveDisabledToEnd.renderInto(inventory, environment);
+    config.rootSection.sidebar.sortingDisplay.items.nextPage.renderInto(inventory, environment);
 
     var displaySlots = config.rootSection.sidebar.settingsDisplay.getPaginationSlots();
     var itemsIndex = (currentPage - 1) * displaySlots.size();
