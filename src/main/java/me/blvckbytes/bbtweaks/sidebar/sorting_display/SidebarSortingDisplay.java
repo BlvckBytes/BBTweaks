@@ -18,7 +18,7 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
   private final SidebarStatistic[] slotMap;
   private int numberOfPages;
 
-  private int currentPage = 1;
+  private int currentPage;
 
   public SidebarSortingDisplay(
     Player player,
@@ -32,6 +32,8 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
 
     this.slotMap = new SidebarStatistic[9 * 6];
+
+    this.currentPage = displayData.initialPage();
   }
 
   public void nextPage() {
@@ -72,6 +74,9 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
 
     if (currentPage > numberOfPages)
       currentPage = numberOfPages;
+
+    if (currentPage < 1)
+      currentPage = 1;
   }
 
   @Override

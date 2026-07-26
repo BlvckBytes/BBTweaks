@@ -115,6 +115,7 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
       if (config.rootSection.sidebar.settingsDisplay.items.openSorting.getDisplaySlots().contains(slot)) {
         sidebarSortingDisplayHandler.show(player, new SortingDisplayData(
           display.displayData,
+          display.getCurrentPage(),
           display::showNextTick
         ));
 

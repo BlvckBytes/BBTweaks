@@ -35,6 +35,10 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
     this.slotMap = new StatisticSection[9 * 6];
   }
 
+  public int getCurrentPage() {
+    return currentPage;
+  }
+
   public void nextPage() {
     if (currentPage >= numberOfPages)
       return;
