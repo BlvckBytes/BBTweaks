@@ -73,11 +73,6 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
     showNextTick();
   }
 
-  private void clearSlotMap() {
-    for (var i = 0; i < slotMap.length; ++i)
-      this.slotMap[i] = null;
-  }
-
   public void nextPage() {
     if (currentPage >= numberOfPages)
       return;
@@ -131,18 +126,15 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
   private void updateNumberOfPages() {
     var numberOfDisplaySlots = config.rootSection.pipes.search.display.getPaginationSlots().size();
     this.numberOfPages = Math.max(1, (int) Math.ceil(displayData.entries().size() / (double) numberOfDisplaySlots));
+
+    // Since we're removing items when handing them out, automatically page back if it was the last on the current page
+    if (currentPage > numberOfPages)
+      currentPage = numberOfPages;
   }
 
   @Override
   public void show() {
     updateNumberOfPages();
-
-    // Since we're removing items when handing them out, automatically page back if it was the last on the current page
-    if (currentPage > numberOfPages)
-      currentPage = numberOfPages;
-
-    clearSlotMap();
-
     super.show();
   }
 
