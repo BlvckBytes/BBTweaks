@@ -6,8 +6,6 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
 import net.kyori.adventure.text.Component;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -15,15 +13,16 @@ import java.util.List;
 
 public class SidebarPreferences {
 
-  private static final boolean DEFAULT_ENABLED = false;
+  // TODO: Have different defaults per preferences-slot.
+
   private static final boolean DEFAULT_SHOW_TITLE = true;
   private static final boolean DEFAULT_SHOW_ICONS = true;
   private static final boolean DEFAULT_DO_SCROLL = true;
 
-  public final Player player;
+  public final SidebarPreferencesSlots preferencesSlots;
+  public final int slotIndex;
   private final ConfigKeeper<MainSection> config;
 
-  public boolean enabled;
   public boolean showTitle;
   public boolean showIcons;
   public boolean doScroll;
@@ -35,12 +34,14 @@ public class SidebarPreferences {
   public final EnumMap<SidebarStatistic, ColorAndFormats> valueStyleByStatistic;
   public final List<SidebarStatistic> statisticsInOrder;
 
-  public SidebarPreferences(Player player, ConfigKeeper<MainSection> config) {
-    this.player = player;
+  public SidebarPreferences(
+    SidebarPreferencesSlots preferencesSlots,
+    int slotIndex,
+    ConfigKeeper<MainSection> config
+  ) {
+    this.preferencesSlots = preferencesSlots;
+    this.slotIndex = slotIndex;
     this.config = config;
-
-    // This flag is consciously excluded from the public reset-API.
-    this.enabled = DEFAULT_ENABLED;
 
     this.enableModeByStatistic = new EnumMap<>(SidebarStatistic.class);
     this.labelStyleByStatistic = new EnumMap<>(SidebarStatistic.class);
@@ -108,29 +109,6 @@ public class SidebarPreferences {
     }
   }
 
-  public void setEnabled(@Nullable Boolean value) {
-    var newValue = value == null ? !enabled : value;
-
-    if (newValue == enabled) {
-      if (newValue) {
-        config.rootSection.sidebar.sidebarAlreadyEnabled.sendMessage(player);
-        return;
-      }
-
-      config.rootSection.sidebar.sidebarAlreadyDisabled.sendMessage(player);
-      return;
-    }
-
-    enabled = newValue;
-
-    if (enabled) {
-      config.rootSection.sidebar.sidebarNowEnabled.sendMessage(player);
-      return;
-    }
-
-    config.rootSection.sidebar.sidebarNowDisabled.sendMessage(player);
-  }
-
   public void onConfigReload() {
     for (var value : labelStyleByStatistic.values())
       value.color = config.rootSection.sidebar.tryGetCurrentColorWithEqualName(value.color);
@@ -146,8 +124,20 @@ public class SidebarPreferences {
     return config.rootSection.sidebar.boardTitle.interpret(
       SlotType.SINGLE_LINE_CHAT,
       new InterpretationEnvironment()
-        .withVariable("name", player.getName())
-        .withVariable("display_name", player.displayName())
+        .withVariable("name", preferencesSlots.player.getName())
+        .withVariable("display_name", preferencesSlots.player.displayName())
     ).getFirst();
+  }
+
+  public InterpretationEnvironment makeEnvironment() {
+    return new InterpretationEnvironment()
+      .withVariable("enabled", preferencesSlots.enabled)
+      .withVariable("slot_index", slotIndex)
+      .withVariable("show_title", showTitle)
+      .withVariable("show_icons", showIcons)
+      .withVariable("do_scroll", doScroll)
+      .withVariable("delimiters_mode", delimitersMode.name())
+      .withVariable("slot_enabled", preferencesSlots.getSelectedSlotIndex() == slotIndex)
+      .withVariable("sneak_mode", sneakMode.name());
   }
 }

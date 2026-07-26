@@ -11,7 +11,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
@@ -22,12 +21,16 @@ import java.util.function.Function;
 
 public class SidebarPreferencesStore implements Disableable, Listener {
 
+  private static final int PREFERENCES_SLOTS_COUNT = 3;
+
   private final ConfigKeeper<MainSection> config;
 
-  private final NamespacedKey keyEnabled, keyShowTitle, keyShowIcons, keyDoScroll, keyDelimitersMode, keySneakMode,
-    keyEnabledStatistics, keyStatisticEnableModes, keyStatisticsOrder, keyStatisticsLabelStyles, keyStatisticsValueStyles;
+  private final NamespacedKey keyEnabled, keySelectedSlotIndex;
 
-  private final Map<UUID, SidebarPreferences> preferencesByPlayerId;
+  private final NamespacedKey[] keysShowTitle, keysShowIcons, keysDoScroll, keysDelimitersMode, keysSneakMode,
+    keysStatisticEnableModes, keysStatisticsOrder, keysStatisticsLabelStyles, keysStatisticsValueStyles;
+
+  private final Map<UUID, SidebarPreferencesSlots> preferencesSlotsByPlayerId;
 
   public SidebarPreferencesStore(
     Plugin plugin,
@@ -36,30 +39,48 @@ public class SidebarPreferencesStore implements Disableable, Listener {
     this.config = config;
 
     this.keyEnabled = new NamespacedKey(plugin, "sidebar-enabled");
-    this.keyShowTitle = new NamespacedKey(plugin, "sidebar-show-title");
-    this.keyShowIcons = new NamespacedKey(plugin, "sidebar-show-icons");
-    this.keyDoScroll = new NamespacedKey(plugin, "sidebar-do-scroll");
-    this.keyDelimitersMode = new NamespacedKey(plugin, "sidebar-delimiters-mode");
-    this.keySneakMode = new NamespacedKey(plugin, "sidebar-sneak-mode");
-    this.keyEnabledStatistics = new NamespacedKey(plugin, "sidebar-enabled-statistics");
-    this.keyStatisticEnableModes = new NamespacedKey(plugin, "sidebar-statistic-enable-modes");
-    this.keyStatisticsOrder = new NamespacedKey(plugin, "sidebar-statistics-order");
+    this.keySelectedSlotIndex = new NamespacedKey(plugin, "sidebar-selected-slot-index");
 
-    // Due to backwards compatibility, the naming will be a bit off...
-    this.keyStatisticsLabelStyles = new NamespacedKey(plugin, "sidebar-statistics-colors");
-    this.keyStatisticsValueStyles = new NamespacedKey(plugin, "sidebar-statistics-value-colors");
+    this.keysShowTitle = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
+    this.keysShowIcons = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
+    this.keysDoScroll = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
+    this.keysDelimitersMode = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
+    this.keysSneakMode = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
+    this.keysStatisticEnableModes = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
+    this.keysStatisticsOrder = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
+    this.keysStatisticsLabelStyles = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
+    this.keysStatisticsValueStyles = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
 
-    this.preferencesByPlayerId = new HashMap<>();
+    for (var slotIndex = 0; slotIndex < PREFERENCES_SLOTS_COUNT; ++slotIndex) {
+      var baseKey = "sidebar";
+
+      if (slotIndex > 0)
+        baseKey += "-" + slotIndex;
+
+      this.keysShowTitle[slotIndex] = new NamespacedKey(plugin, baseKey + "-show-title");
+      this.keysShowIcons[slotIndex] = new NamespacedKey(plugin, baseKey + "-show-icons");
+      this.keysDoScroll[slotIndex] = new NamespacedKey(plugin, baseKey + "-do-scroll");
+      this.keysDelimitersMode[slotIndex] = new NamespacedKey(plugin, baseKey + "-delimiters-mode");
+      this.keysSneakMode[slotIndex] = new NamespacedKey(plugin, baseKey + "-sneak-mode");
+      this.keysStatisticEnableModes[slotIndex] = new NamespacedKey(plugin, baseKey + "-statistic-enable-modes");
+      this.keysStatisticsOrder[slotIndex] = new NamespacedKey(plugin, baseKey + "-statistics-order");
+
+      // Due to backwards compatibility, the naming will be a bit off...
+      this.keysStatisticsLabelStyles[slotIndex] = new NamespacedKey(plugin, baseKey + "-statistics-colors");
+      this.keysStatisticsValueStyles[slotIndex] = new NamespacedKey(plugin, baseKey + "-statistics-value-colors");
+    }
+
+    this.preferencesSlotsByPlayerId = new HashMap<>();
   }
 
-  public SidebarPreferences accessPreferences(Player player) {
-    return preferencesByPlayerId.computeIfAbsent(player.getUniqueId(), _ -> loadPreferences(player));
+  public SidebarPreferencesSlots accessPreferencesSlots(Player player) {
+    return preferencesSlotsByPlayerId.computeIfAbsent(player.getUniqueId(), _ -> loadPreferencesSlots(player));
   }
 
   @Override
   public void disable() {
-    preferencesByPlayerId.values().forEach(this::savePreferences);
-    preferencesByPlayerId.clear();
+    preferencesSlotsByPlayerId.values().forEach(this::savePreferencesSlots);
+    preferencesSlotsByPlayerId.clear();
   }
 
   @EventHandler
@@ -67,56 +88,71 @@ public class SidebarPreferencesStore implements Disableable, Listener {
     if (event.configKeeper != config)
       return;
 
-    for (var preference : preferencesByPlayerId.values())
-      preference.onConfigReload();
+    for (var preferenceSlots : preferencesSlotsByPlayerId.values())
+      preferenceSlots.onConfigReload();
   }
 
   @EventHandler
   public void onQuit(PlayerQuitEvent event) {
-    var preferences = preferencesByPlayerId.remove(event.getPlayer().getUniqueId());
+    var preferencesSlots = preferencesSlotsByPlayerId.remove(event.getPlayer().getUniqueId());
 
-    if (preferences != null)
-      savePreferences(preferences);
+    if (preferencesSlots != null)
+      savePreferencesSlots(preferencesSlots);
   }
 
-  private SidebarPreferences loadPreferences(Player player) {
-    var result = new SidebarPreferences(player, config);
+  private SidebarPreferencesSlots loadPreferencesSlots(Player player) {
+    var slotsList = new ArrayList<SidebarPreferences>();
+    var slots = new SidebarPreferencesSlots(player, config, slotsList);
+
+    for (var slotIndex = 0; slotIndex < PREFERENCES_SLOTS_COUNT; ++slotIndex)
+      slotsList.add(loadPreferences(slots, slotIndex));
 
     var pdc = player.getPersistentDataContainer();
-
-    possiblyMigrateEnableModes(pdc);
 
     var enabledValue = pdc.get(keyEnabled, PersistentDataType.BOOLEAN);
 
     if (enabledValue != null)
-      result.enabled = enabledValue;
+      slots.enabled = enabledValue;
 
-    var showTitleValue = pdc.get(keyShowTitle, PersistentDataType.BOOLEAN);
+    var selectedSlotIndexValue = pdc.get(keySelectedSlotIndex, PersistentDataType.INTEGER);
+
+    if (selectedSlotIndexValue != null)
+      slots.setSelectedSlotIndex(selectedSlotIndexValue, false);
+
+    return slots;
+  }
+
+  private SidebarPreferences loadPreferences(SidebarPreferencesSlots preferencesSlots, int slotIndex) {
+    var result = new SidebarPreferences(preferencesSlots, slotIndex, config);
+
+    var pdc = preferencesSlots.player.getPersistentDataContainer();
+
+    var showTitleValue = pdc.get(keysShowTitle[slotIndex], PersistentDataType.BOOLEAN);
 
     if (showTitleValue != null)
       result.showTitle = showTitleValue;
 
-    var showIconsValue = pdc.get(keyShowIcons, PersistentDataType.BOOLEAN);
+    var showIconsValue = pdc.get(keysShowIcons[slotIndex], PersistentDataType.BOOLEAN);
 
     if (showIconsValue != null)
       result.showIcons = showIconsValue;
 
-    var doScrollValue = pdc.get(keyDoScroll, PersistentDataType.BOOLEAN);
+    var doScrollValue = pdc.get(keysDoScroll[slotIndex], PersistentDataType.BOOLEAN);
 
     if (doScrollValue != null)
       result.doScroll = doScrollValue;
 
-    var delimitersModeValue = pdc.get(keyDelimitersMode, PersistentDataType.INTEGER);
+    var delimitersModeValue = pdc.get(keysDelimitersMode[slotIndex], PersistentDataType.INTEGER);
 
     if (delimitersModeValue != null)
       result.delimitersMode = DelimitersMode.byOrdinalOrDefault(delimitersModeValue);
 
-    var sneakModeValue = pdc.get(keySneakMode, PersistentDataType.INTEGER);
+    var sneakModeValue = pdc.get(keysSneakMode[slotIndex], PersistentDataType.INTEGER);
 
     if (sneakModeValue != null)
       result.sneakMode = SneakMode.byOrdinalOrDefault(sneakModeValue);
 
-    var enableModesValue = pdc.get(keyStatisticEnableModes, PersistentDataType.INTEGER_ARRAY);
+    var enableModesValue = pdc.get(keysStatisticEnableModes[slotIndex], PersistentDataType.INTEGER_ARRAY);
 
     if (enableModesValue != null) {
       for (var statistic : SidebarStatistic.ALL_VALUES) {
@@ -133,7 +169,7 @@ public class SidebarPreferencesStore implements Disableable, Listener {
       }
     }
 
-    var statisticsOrderValue = pdc.get(keyStatisticsOrder, PersistentDataType.INTEGER_ARRAY);
+    var statisticsOrderValue = pdc.get(keysStatisticsOrder[slotIndex], PersistentDataType.INTEGER_ARRAY);
 
     if (statisticsOrderValue != null) {
       result.statisticsInOrder.clear();
@@ -151,8 +187,8 @@ public class SidebarPreferencesStore implements Disableable, Listener {
       }
     }
 
-    loadStatisticStyles(pdc.get(keyStatisticsLabelStyles, PersistentDataType.STRING), result.labelStyleByStatistic::put);
-    loadStatisticStyles(pdc.get(keyStatisticsValueStyles, PersistentDataType.STRING), result.valueStyleByStatistic::put);
+    loadStatisticStyles(pdc.get(keysStatisticsLabelStyles[slotIndex], PersistentDataType.STRING), result.labelStyleByStatistic::put);
+    loadStatisticStyles(pdc.get(keysStatisticsValueStyles[slotIndex], PersistentDataType.STRING), result.valueStyleByStatistic::put);
 
     return result;
   }
@@ -195,36 +231,40 @@ public class SidebarPreferencesStore implements Disableable, Listener {
     }
   }
 
+  private void savePreferencesSlots(SidebarPreferencesSlots preferencesSlots) {
+    var pdc = preferencesSlots.player.getPersistentDataContainer();
+
+    pdc.set(keyEnabled, PersistentDataType.BOOLEAN, preferencesSlots.enabled);
+    pdc.set(keySelectedSlotIndex, PersistentDataType.INTEGER, preferencesSlots.getSelectedSlotIndex());
+
+    preferencesSlots.preferencesBySlotIndex.forEach(this::savePreferences);
+  }
+
   private void savePreferences(SidebarPreferences preferences) {
-    var pdc = preferences.player.getPersistentDataContainer();
+    var pdc = preferences.preferencesSlots.player.getPersistentDataContainer();
 
-    pdc.set(keyEnabled, PersistentDataType.BOOLEAN, preferences.enabled);
-    pdc.set(keyShowTitle, PersistentDataType.BOOLEAN, preferences.showTitle);
-    pdc.set(keyShowIcons, PersistentDataType.BOOLEAN, preferences.showIcons);
-    pdc.set(keyDoScroll, PersistentDataType.BOOLEAN, preferences.doScroll);
-    pdc.set(keyDelimitersMode, PersistentDataType.INTEGER, preferences.delimitersMode.ordinal());
-    pdc.set(keySneakMode, PersistentDataType.INTEGER, preferences.sneakMode.ordinal());
+    pdc.set(keysShowTitle[preferences.slotIndex], PersistentDataType.BOOLEAN, preferences.showTitle);
+    pdc.set(keysShowIcons[preferences.slotIndex], PersistentDataType.BOOLEAN, preferences.showIcons);
+    pdc.set(keysDoScroll[preferences.slotIndex], PersistentDataType.BOOLEAN, preferences.doScroll);
+    pdc.set(keysDelimitersMode[preferences.slotIndex], PersistentDataType.INTEGER, preferences.delimitersMode.ordinal());
+    pdc.set(keysSneakMode[preferences.slotIndex], PersistentDataType.INTEGER, preferences.sneakMode.ordinal());
 
-    saveEnableModes(pdc, preferences.enableModeByStatistic);
+    var enableModes = new IntArrayList();
 
-    pdc.set(keyStatisticsLabelStyles, PersistentDataType.STRING, serializeStatisticStyles(preferences.labelStyleByStatistic::get));
-    pdc.set(keyStatisticsValueStyles, PersistentDataType.STRING, serializeStatisticStyles(preferences.valueStyleByStatistic::get));
+    for (var statistic : SidebarStatistic.ALL_VALUES)
+      enableModes.add(preferences.enableModeByStatistic.get(statistic).ordinal());
+
+    pdc.set(keysStatisticEnableModes[preferences.slotIndex], PersistentDataType.INTEGER_ARRAY, enableModes.toIntArray());
+
+    pdc.set(keysStatisticsLabelStyles[preferences.slotIndex], PersistentDataType.STRING, serializeStatisticStyles(preferences.labelStyleByStatistic::get));
+    pdc.set(keysStatisticsValueStyles[preferences.slotIndex], PersistentDataType.STRING, serializeStatisticStyles(preferences.valueStyleByStatistic::get));
 
     var statisticsOrder = new IntArrayList();
 
     for (var statistic : preferences.statisticsInOrder)
       statisticsOrder.add(statistic.ordinal());
 
-    pdc.set(keyStatisticsOrder, PersistentDataType.INTEGER_ARRAY, statisticsOrder.toIntArray());
-  }
-
-  private void saveEnableModes(PersistentDataContainer pdc, Map<SidebarStatistic, StatisticEnableMode> modeMap) {
-    var enableModes = new IntArrayList();
-
-    for (var statistic : SidebarStatistic.ALL_VALUES)
-      enableModes.add(modeMap.get(statistic).ordinal());
-
-    pdc.set(keyStatisticEnableModes, PersistentDataType.INTEGER_ARRAY, enableModes.toIntArray());
+    pdc.set(keysStatisticsOrder[preferences.slotIndex], PersistentDataType.INTEGER_ARRAY, statisticsOrder.toIntArray());
   }
 
   private String serializeStatisticStyles(Function<SidebarStatistic, ColorAndFormats> getter) {
@@ -244,30 +284,5 @@ public class SidebarPreferencesStore implements Disableable, Listener {
     }
 
     return colorsJoiner.toString();
-  }
-
-  private void possiblyMigrateEnableModes(PersistentDataContainer pdc) {
-    // We've transitioned from a simple list of enabled ordinals to a mode-enum per statistic.
-
-    var enabledStatisticsValue = pdc.get(keyEnabledStatistics, PersistentDataType.INTEGER_ARRAY);
-
-    if (enabledStatisticsValue == null)
-      return;
-
-    var modeMap = new HashMap<SidebarStatistic, StatisticEnableMode>();
-
-    for (var statistic : SidebarStatistic.ALL_VALUES)
-      modeMap.put(statistic, StatisticEnableMode.OFF);
-
-    for (var enabledStatistic : enabledStatisticsValue) {
-      var statistic = SidebarStatistic.byOrdinalOrNull(enabledStatistic);
-
-      if (statistic != null)
-        modeMap.put(statistic, StatisticEnableMode.ON);
-    }
-
-    saveEnableModes(pdc, modeMap);
-
-    pdc.remove(keyEnabledStatistics);
   }
 }

@@ -4,7 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.color_display.ColorDisplayData;
 import me.blvckbytes.bbtweaks.sidebar.color_display.SidebarColorDisplayHandler;
-import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
+import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferencesSlots;
 import me.blvckbytes.bbtweaks.sidebar.sorting_display.SidebarSortingDisplayHandler;
 import me.blvckbytes.bbtweaks.sidebar.sorting_display.SortingDisplayData;
 import me.blvckbytes.bbtweaks.util.DisplayHandler;
@@ -13,7 +13,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.plugin.Plugin;
 
-public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSettingsDisplay, SidebarPreferences> {
+public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSettingsDisplay, SidebarPreferencesSlots> {
 
   private final SidebarColorDisplayHandler sidebarColorDisplayHandler;
   private final SidebarSortingDisplayHandler sidebarSortingDisplayHandler;
@@ -34,17 +34,18 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
   }
 
   @Override
-  protected SidebarSettingsDisplay instantiateDisplay(Player player, SidebarPreferences displayData) {
+  protected SidebarSettingsDisplay instantiateDisplay(Player player, SidebarPreferencesSlots displayData) {
     return new SidebarSettingsDisplay(player, displayData, config, floodgateIntegration, plugin);
   }
 
   @Override
   protected void handleClick(Player player, SidebarSettingsDisplay display, ClickType clickType, int slot) {
+    var preferences = display.displayData.getSelectedPreferences();
     var statistic = display.getStatisticBySlotIndex(slot);
 
     if (statistic != null) {
       if (clickType == ClickType.LEFT) {
-        display.displayData.enableModeByStatistic.computeIfPresent(
+        preferences.enableModeByStatistic.computeIfPresent(
           statistic._sidebarStatistic,
           (sidebarStatistic, currentMode) -> currentMode.next(sidebarStatistic)
         );
@@ -58,7 +59,7 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
           return;
 
         var displayData = new ColorDisplayData(
-          display.displayData, statistic,
+          preferences, statistic,
           display::showNextTick
         );
 
@@ -79,38 +80,38 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
       }
 
       if (config.rootSection.sidebar.settingsDisplay.items.showTitle.getDisplaySlots().contains(slot)) {
-        display.displayData.showTitle ^= true;
+        preferences.showTitle ^= true;
         display.updateItems();
         return;
       }
 
       if (config.rootSection.sidebar.settingsDisplay.items.showIcons.getDisplaySlots().contains(slot)) {
-        display.displayData.showIcons ^= true;
+        preferences.showIcons ^= true;
         display.updateItems();
         return;
       }
 
       if (config.rootSection.sidebar.settingsDisplay.items.doScroll.getDisplaySlots().contains(slot)) {
-        display.displayData.doScroll ^= true;
+        preferences.doScroll ^= true;
         display.updateItems();
         return;
       }
 
       if (config.rootSection.sidebar.settingsDisplay.items.delimitersMode.getDisplaySlots().contains(slot)) {
-        display.displayData.delimitersMode = display.displayData.delimitersMode.next();
+        preferences.delimitersMode = preferences.delimitersMode.next();
         display.updateItems();
         return;
       }
 
       if (config.rootSection.sidebar.settingsDisplay.items.nextSneakMode.getDisplaySlots().contains(slot)) {
-        display.displayData.sneakMode = display.displayData.sneakMode.next();
+        preferences.sneakMode = preferences.sneakMode.next();
         display.updateItems();
         return;
       }
 
       if (config.rootSection.sidebar.settingsDisplay.items.allColors.getDisplaySlots().contains(slot)) {
         var displayData = new ColorDisplayData(
-          display.displayData, null,
+          preferences, null,
           display::showNextTick
         );
 
@@ -120,11 +121,20 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
 
       if (config.rootSection.sidebar.settingsDisplay.items.openSorting.getDisplaySlots().contains(slot)) {
         sidebarSortingDisplayHandler.show(player, new SortingDisplayData(
-          display.displayData,
+          preferences,
           display.getCurrentPage(),
           display::showNextTick
         ));
 
+        return;
+      }
+
+      var slotsSlotIndices = config.rootSection.sidebar.settingsDisplay.items.preferencesSlot.getDisplaySlots();
+
+      if (slotsSlotIndices.contains(slot)) {
+        var parametersSlotIndex = (int) slotsSlotIndices.stream().filter(it -> it < slot).count();
+        display.displayData.setSelectedSlotIndex(parametersSlotIndex, true);
+        display.updateItems();
         return;
       }
 

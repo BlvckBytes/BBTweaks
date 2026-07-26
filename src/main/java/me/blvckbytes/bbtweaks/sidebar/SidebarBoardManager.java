@@ -141,14 +141,18 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       return;
 
     for (var board : boardByPlayerId.values()) {
-      var preferences = sidebarPreferencesStore.accessPreferences(board.holder.bukkitPlayer());
+      var preferencesSlots = sidebarPreferencesStore.accessPreferencesSlots(board.holder.bukkitPlayer());
+      var preferences = preferencesSlots.getSelectedPreferences();
+
       var isSneaking = board.holder.bukkitPlayer().isSneaking();
 
-      if (
-        !preferences.enabled
-          || (isSneaking && preferences.sneakMode == SneakMode.DISABLE_DURING_SNEAK)
-          || (!isSneaking && preferences.sneakMode == SneakMode.ENABLE_DURING_SNEAK)
-      ) {
+      if (!preferencesSlots.enabled) {
+        board.unregisterIfShown();
+        continue;
+      }
+
+      if ((isSneaking && preferences.sneakMode == SneakMode.DISABLE_DURING_SNEAK)
+        || (!isSneaking && preferences.sneakMode == SneakMode.ENABLE_DURING_SNEAK)) {
         board.unregisterIfShown();
         continue;
       }
@@ -173,7 +177,8 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       return;
 
     var player = event.getPlayer();
-    var preferences = sidebarPreferencesStore.accessPreferences(player);
+    var preferencesSlots = sidebarPreferencesStore.accessPreferencesSlots(player);
+    var preferences = preferencesSlots.getSelectedPreferences();
 
     if (preferences.sneakMode == SneakMode.DISABLE_DURING_SNEAK) {
       var board = boardByPlayerId.get(player.getUniqueId());
@@ -207,7 +212,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       if (now - lastSneakStamp > config.rootSection.sidebar.doubleSneakMaxDelayMs)
         return;
 
-      preferences.setEnabled(null);
+      preferencesSlots.setEnabled(null);
     }
   }
 

@@ -54,24 +54,54 @@ public class SidebarCommand implements CommandHandler {
       return true;
     }
 
-    var preferences = sidebarPreferencesStore.accessPreferences(player);
+    var preferencesSlots = sidebarPreferencesStore.accessPreferencesSlots(player);
 
     switch (normalizedAction.constant) {
-      case SETTINGS -> sidebarSettingsDisplayHandler.show(player, preferences);
+      case SETTINGS -> sidebarSettingsDisplayHandler.show(player, preferencesSlots);
 
       case RESET_TO_DEFAULTS -> {
+        var preferences = preferencesSlots.getSelectedPreferences();
+
         if (!preferences.divergesFromDefaults()) {
-          config.rootSection.sidebar.noChangesMadeToReset.sendMessage(player);
+          config.rootSection.sidebar.noChangesMadeToReset.sendMessage(player, preferences.makeEnvironment());
           return true;
         }
 
         preferences.resetToDefaults();
-        config.rootSection.sidebar.settingsHaveBeenReset.sendMessage(player);
+
+        config.rootSection.sidebar.settingsHaveBeenReset.sendMessage(player, preferences.makeEnvironment());
       }
 
-      case ON -> preferences.setEnabled(true);
-      case OFF -> preferences.setEnabled(false);
-      case TOGGLE -> preferences.setEnabled(null);
+      case ON -> preferencesSlots.setEnabled(true);
+      case OFF -> preferencesSlots.setEnabled(false);
+      case TOGGLE -> preferencesSlots.setEnabled(null);
+
+      case SELECT_SLOT -> {
+        int slot;
+
+        try {
+          if (args.length != 2)
+            throw new IllegalStateException();
+
+          slot = Integer.parseInt(args[1]);
+
+          if (slot <= 0 || slot > preferencesSlots.preferencesBySlotIndex.size())
+            throw new IllegalStateException();
+        } catch (Throwable e) {
+          config.rootSection.sidebar.selectSlotUsage.sendMessage(
+            player,
+            new InterpretationEnvironment()
+              .withVariable("label", label)
+              .withVariable("action", normalizedAction.getNormalizedName())
+              .withVariable("max_slot", preferencesSlots.preferencesBySlotIndex.size())
+          );
+
+          return true;
+        }
+
+        preferencesSlots.setSelectedSlotIndex(slot - 1, true);
+        return true;
+      }
 
       default -> throw new IllegalStateException("Unaccounted-for command-action: " + normalizedAction.constant);
     }

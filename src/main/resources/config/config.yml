@@ -919,9 +919,9 @@ multiBreak:
           <&a><u>{filter_predicate}
       </hover-text>
       .
-  filterAlreadyEnabled: '{lut.multi_break_prefix} <&c>Der Filter von <&6>Einstellungsslot {slot_index + 1}</> ist bereits aktiviert!'
+  filterAlreadyEnabled: '{lut.multi_break_prefix} <&c>Der Filter von <&4>Einstellungsslot {slot_index + 1}</> ist bereits aktiviert!'
   filterNowEnabled: '{lut.multi_break_prefix} <&7>Der Filter von <&6>Einstellungsslot {slot_index + 1}</> ist nun <&a>aktiviert<&7>.'
-  filterAlreadyDisabled: '{lut.multi_break_prefix} <&c>Der Filter von <&6>Einstellungsslot {slot_index + 1}</> ist bereits deaktiviert!'
+  filterAlreadyDisabled: '{lut.multi_break_prefix} <&c>Der Filter von <&4>Einstellungsslot {slot_index + 1}</> ist bereits deaktiviert!'
   filterNowDisabled: '{lut.multi_break_prefix} <&7>Der Filter von <&6>Einstellungsslot {slot_index + 1}</> ist nun <&c>deaktiviert<&7>.'
   hotbarNotification: |
     <separate
@@ -947,7 +947,7 @@ multiBreak:
     <&7>).
   selectSlotUsage: '{lut.multi_break_prefix} <&c>Benutzung: /{label} {action} \<<&4>1-{max_slot}</>>'
   slotSelected: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist nun selektiert.'
-  slotAlreadySelected: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist bereits selektiert!'
+  slotAlreadySelected: '{lut.multi_break_prefix} <&c>Der <&4>Einstellungsslot {slot_index + 1}</> ist bereits selektiert!'
   slotIsLocked: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist für Änderungen <&c>gesperrt</>!'
   slotNowLocked: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist nun für Änderungen <&c>gesperrt</>.'
   slotNowUnlocked: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist nun für Änderungen <&a>entsperrt</>.'
@@ -1373,12 +1373,15 @@ sidebar:
   movedAllDeactivatedItemsToEnd: '{lut.sidebar_prefix} <&7>Alle <&a>deaktivierten Einträge</> wurden an das <&a>Ende</> der Liste bewegt.'
   entryAlreadyAtTheVeryBeginning: '{lut.sidebar_prefix} <&c>Der Eintrag <&4>{name}</> befindet sich bereits ganz am Anfang der Liste!'
   entryAlreadyAtTheVeryEnd: '{lut.sidebar_prefix} <&c>Der Eintrag <&4>{name}</> befindet sich bereits ganz am Ende der Liste!'
-  sidebarNowEnabled: '{lut.sidebar_prefix} <&7>Die Anzeige der Sidebar ist nun <&a>aktiviert</>.'
+  sidebarNowEnabled: '{lut.sidebar_prefix} <&7>Die Anzeige der Sidebar (<&6>Einstellungsslot {slot_index + 1}</>) ist nun <&a>aktiviert</>.'
   sidebarAlreadyEnabled: '{lut.sidebar_prefix} <&c>Die Anzeige der Sidebar ist bereits aktiviert!'
   sidebarNowDisabled: '{lut.sidebar_prefix} <&7>Die Anzeige der Sidebar ist nun <&c>deaktiviert</>.'
   sidebarAlreadyDisabled: '{lut.sidebar_prefix} <&c>Die Anzeige der Sidebar ist bereits deaktiviert!'
-  noChangesMadeToReset: '{lut.sidebar_prefix} <&c>Deine aktuellen Einstellungen weichen noch nicht von den Standardwerten ab!'
-  settingsHaveBeenReset: '{lut.sidebar_prefix} <&7>Deine Einstellungen wurden auf die <&a>Standardwerte</> zurückgesetzt.'
+  noChangesMadeToReset: '{lut.sidebar_prefix} <&c>Deine aktuellen Auswahlen auf <&4>Einstellungsslot {slot_index + 1}</> weichen noch nicht von den Standardwerten ab!'
+  settingsHaveBeenReset: '{lut.sidebar_prefix} <&7>Deine Auswahlen auf <&6>Einstellungsslot {slot_index + 1}</> wurden auf die <&a>Standardwerte</> zurückgesetzt.'
+  slotSelected: '{lut.sidebar_prefix} <&7><&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist nun selektiert.'
+  slotAlreadySelected: '{lut.sidebar_prefix} <&c>Der <&4>Einstellungsslot {slot_index + 1}</> ist bereits selektiert!'
+  selectSlotUsage: '{lut.sidebar_prefix} <&c>Benutzung: /{label} {action} \<<&4>1-{max_slot}</>>'
   doubleSneakMaxDelayMs: 350
   scrollIntervalTicks: 45
   updateIntervalTicks: 5
@@ -2360,6 +2363,24 @@ sidebar:
         type: BLACK_STAINED_GLASS_PANE
         name: ' '
         slots: '(last_slot - 17)..last_slot'
+      preferencesSlot:
+        slots: '[38, 40, 42]'
+        type: '{slot_enabled then "YELLOW_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <style [color]="slot_enabled then '&6' else '&7'">Einstellungsslot {slot_index + 1}</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Alle verfügbaren Auswahlen können<br/>
+            separat pro Slot getroffen werden und<br/>
+            stehen dann jederzeit auf Abruf bereit.
+            <container *if="not slot_enabled">
+              <br/>
+              {lut.spacer}<br/>
+              <&8>➥ <&e>Linksklick <&7>Slot auswählen<br/>
+              {lut.spacer}
+            </container>
       previousPage:
         slots: 'last_slot - 8'
         type: PLAYER_HEAD
@@ -2468,6 +2489,7 @@ sidebar:
         slots: 'last_slot - 3'
       nextSneakMode:
         type: 'IRON_BOOTS'
+        hideAdditionalTooltips: true
         name: |
           <reset>
             <&8>» <&6>Sneak-Modus</> «

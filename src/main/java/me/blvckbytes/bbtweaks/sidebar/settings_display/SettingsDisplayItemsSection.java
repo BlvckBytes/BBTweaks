@@ -9,6 +9,7 @@ import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 public class SettingsDisplayItemsSection extends ConfigSection {
 
   public GuiItemStackSection filler;
+  public GuiItemStackSection preferencesSlot;
   public GuiItemStackSection previousPage;
   public GuiItemStackSection showTitle;
   public GuiItemStackSection showIcons;

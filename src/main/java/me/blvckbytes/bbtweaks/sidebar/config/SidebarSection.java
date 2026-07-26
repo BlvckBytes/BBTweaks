@@ -38,6 +38,9 @@ public class SidebarSection extends ConfigSection {
   public ComponentMarkup sidebarAlreadyDisabled;
   public ComponentMarkup noChangesMadeToReset;
   public ComponentMarkup settingsHaveBeenReset;
+  public ComponentMarkup slotSelected;
+  public ComponentMarkup slotAlreadySelected;
+  public ComponentMarkup selectSlotUsage;
 
   public int doubleSneakMaxDelayMs;
   public int scrollIntervalTicks;

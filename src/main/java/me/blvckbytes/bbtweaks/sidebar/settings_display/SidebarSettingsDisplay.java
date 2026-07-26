@@ -6,7 +6,7 @@ import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.config.StatisticSection;
-import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
+import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferencesSlots;
 import me.blvckbytes.bbtweaks.util.Display;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
@@ -14,7 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
-public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
+public class SidebarSettingsDisplay extends Display<SidebarPreferencesSlots> {
 
   public final boolean isFloodgate;
 
@@ -25,7 +25,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
 
   public SidebarSettingsDisplay(
     Player player,
-    SidebarPreferences displayData,
+    SidebarPreferencesSlots displayData,
     ConfigKeeper<MainSection> config,
     FloodgateIntegration floodgateIntegration,
     Plugin plugin
@@ -81,7 +81,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
 
   private void updateNumberOfPages() {
     var numberOfDisplaySlots = config.rootSection.sidebar.settingsDisplay.getPaginationSlots().size();
-    this.numberOfPages = Math.max(1, (int) Math.ceil(displayData.statisticsInOrder.size() / (double) numberOfDisplaySlots));
+    this.numberOfPages = Math.max(1, (int) Math.ceil(displayData.getSelectedPreferences().statisticsInOrder.size() / (double) numberOfDisplaySlots));
 
     if (currentPage > numberOfPages)
       currentPage = numberOfPages;
@@ -101,9 +101,11 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
     config.rootSection.sidebar.settingsDisplay.items.openSorting.renderInto(itemConsumer, environment);
     config.rootSection.sidebar.settingsDisplay.items.nextPage.renderInto(itemConsumer, environment);
 
+    var preferences = displayData.getSelectedPreferences();
+
     var displaySlots = config.rootSection.sidebar.settingsDisplay.getPaginationSlots();
     var itemsIndex = (currentPage - 1) * displaySlots.size();
-    var numberOfItems = displayData.statisticsInOrder.size();
+    var numberOfItems = preferences.statisticsInOrder.size();
 
     for (var slot : displaySlots) {
       var currentItemIndex = itemsIndex++;
@@ -114,24 +116,43 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
         continue;
       }
 
-      var statistic = displayData.statisticsInOrder.get(currentItemIndex);
+      var statistic = preferences.statisticsInOrder.get(currentItemIndex);
       var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
 
       slotMap[slot] = statisticSection;
 
-      var enableMode = displayData.enableModeByStatistic.get(statistic);
+      var enableMode = preferences.enableModeByStatistic.get(statistic);
 
       environment
         .withVariable("name", statisticSection.iconData.name.markupNode)
         .withVariable("description", statisticSection.iconData.description.markupNode)
         .withVariable("icon_type", statisticSection.iconData._iconType)
-        .withVariable("label_style", displayData.labelStyleByStatistic.get(statistic))
-        .withVariable("value_style", displayData.valueStyleByStatistic.get(statistic))
+        .withVariable("label_style", preferences.labelStyleByStatistic.get(statistic))
+        .withVariable("value_style", preferences.valueStyleByStatistic.get(statistic))
         .withVariable("enabled", enableMode.enabled)
         .withVariable("show_label", enableMode.showLabel)
         .withVariable("is_spacer", statistic.isSpacer);
 
       itemConsumer.handle(slot, config.rootSection.sidebar.settingsDisplay.items.statisticIcon.build(environment));
+    }
+
+    renderSlotSelectionItems(itemConsumer, environment);
+  }
+
+  private void renderSlotSelectionItems(ItemConsumer itemConsumer, InterpretationEnvironment displayEnvironment) {
+    var preferencesSlots = config.rootSection.sidebar.settingsDisplay.items.preferencesSlot.getDisplaySlots();
+
+    for (var slotIndex = 0; slotIndex < displayData.preferencesBySlotIndex.size(); ++slotIndex) {
+      var preferences = displayData.preferencesBySlotIndex.get(slotIndex);
+
+      if (slotIndex >= preferencesSlots.size())
+        break;
+
+      var slot = preferencesSlots.get(slotIndex);
+
+      itemConsumer.handle(slot, config.rootSection.sidebar.settingsDisplay.items.preferencesSlot.build(
+        preferences.makeEnvironment().inheritFrom(displayEnvironment, false)
+      ));
     }
   }
 
@@ -155,15 +176,10 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
   }
 
   private InterpretationEnvironment makeEnvironment() {
-    return new InterpretationEnvironment()
+    return displayData.getSelectedPreferences().makeEnvironment()
       .withVariable("is_floodgate", isFloodgate)
       .withVariable("current_page", currentPage)
       .withVariable("number_pages", numberOfPages)
-      .withVariable("sidebar_enabled", displayData.enabled)
-      .withVariable("show_title", displayData.showTitle)
-      .withVariable("show_icons", displayData.showIcons)
-      .withVariable("do_scroll", displayData.doScroll)
-      .withVariable("delimiters_mode", displayData.delimitersMode.name())
-      .withVariable("sneak_mode", displayData.sneakMode.name());
+      .withVariable("sidebar_enabled", displayData.enabled);
   }
 }

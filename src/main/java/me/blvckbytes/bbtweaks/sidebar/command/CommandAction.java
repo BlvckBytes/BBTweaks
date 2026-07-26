@@ -9,6 +9,7 @@ public enum CommandAction implements MatchableEnum {
   ON,
   OFF,
   TOGGLE,
+  SELECT_SLOT,
   ;
 
   public static final EnumMatcher<CommandAction> matcher = new EnumMatcher<>(values());
