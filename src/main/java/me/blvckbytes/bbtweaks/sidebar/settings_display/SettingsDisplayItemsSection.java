@@ -12,9 +12,10 @@ public class SettingsDisplayItemsSection extends ConfigSection {
   public GuiItemStackSection previousPage;
   public GuiItemStackSection showTitle;
   public GuiItemStackSection showIcons;
+  public GuiItemStackSection doScroll;
   public GuiItemStackSection delimitersMode;
-  public GuiItemStackSection nextSneakMode;
   public GuiItemStackSection allColors;
+  public GuiItemStackSection nextSneakMode;
   public GuiItemStackSection openSorting;
   public GuiItemStackSection nextPage;
   public ItemStackSection statisticIcon;

@@ -90,6 +90,12 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
         return;
       }
 
+      if (config.rootSection.sidebar.settingsDisplay.items.doScroll.getDisplaySlots().contains(slot)) {
+        display.displayData.doScroll ^= true;
+        display.renderItems();
+        return;
+      }
+
       if (config.rootSection.sidebar.settingsDisplay.items.delimitersMode.getDisplaySlots().contains(slot)) {
         display.displayData.delimitersMode = display.displayData.delimitersMode.next();
         display.renderItems();

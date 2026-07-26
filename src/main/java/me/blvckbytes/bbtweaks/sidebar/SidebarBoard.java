@@ -18,7 +18,7 @@ import java.util.Objects;
 
 public class SidebarBoard {
 
-  private static final int MAX_SCORE_COUNT = 15;
+  private static final int VANILLA_MAX_SCORE_COUNT = 15;
 
   private static final String[] FORMATTING_SEQUENCES = {
     "§0", "§1", "§2", "§3", "§4", "§5", "§6", "§7", "§8", "§9",
@@ -50,7 +50,7 @@ public class SidebarBoard {
     List<? extends Component> lines,
     IntSet staticLineIndices
   ) {
-    if (staticLineIndices.size() >= MAX_SCORE_COUNT)
+    if (staticLineIndices.size() >= VANILLA_MAX_SCORE_COUNT)
       throw new IllegalStateException("Cannot keep more lines static than there is size on the board");
 
     for (var staticIndex : staticLineIndices) {
@@ -58,7 +58,7 @@ public class SidebarBoard {
         throw new IllegalStateException("Encountered static-index " + staticIndex + " outside of [0;" + lines.size() + "[");
     }
 
-    var excessLineCount = lines.size() - MAX_SCORE_COUNT;
+    var excessLineCount = lines.size() - VANILLA_MAX_SCORE_COUNT;
 
     if (excessLineCount <= 0) {
       currentScrollOffset = 0;
@@ -76,9 +76,9 @@ public class SidebarBoard {
         currentScrollOffset = 0;
     }
 
-    var result = new ArrayList<Component>(MAX_SCORE_COUNT);
+    var result = new ArrayList<Component>(VANILLA_MAX_SCORE_COUNT);
 
-    var scrollableLineCount = MAX_SCORE_COUNT - staticLineIndices.size();
+    var scrollableLineCount = VANILLA_MAX_SCORE_COUNT - staticLineIndices.size();
 
     var encounteredScrollableLines = 0;
     var addedScrollableLines = 0;
@@ -141,7 +141,8 @@ public class SidebarBoard {
       return;
     }
 
-    lines = paginate(relativeTime, lines, staticLineIndices);
+    if (preferences.doScroll)
+      lines = paginate(relativeTime, lines, staticLineIndices);
 
     // Note: Calling into set-/reset-/prefix-methods marks the board/team as dirty and creates
     //       update packets; let's diff-check locally beforehand, as it's cheap enough.
@@ -185,7 +186,7 @@ public class SidebarBoard {
   }
 
   private ScoreAndTeam accessScoreAndTeam(Scoreboard scoreboard, Objective sidebarObjective, int index) {
-    return cachedScoreAndTeamByIndex.computeIfAbsent(index, k -> {
+    return cachedScoreAndTeamByIndex.computeIfAbsent(index, _ -> {
       var uniqueHolderName = makeUniqueScoreHolderName(index);
       var teamName = pluginName + ":t" + index;
 

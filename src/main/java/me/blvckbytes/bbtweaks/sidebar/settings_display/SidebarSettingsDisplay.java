@@ -95,6 +95,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
     config.rootSection.sidebar.settingsDisplay.items.previousPage.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.showTitle.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.showIcons.renderInto(inventory, environment);
+    config.rootSection.sidebar.settingsDisplay.items.doScroll.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.delimitersMode.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.allColors.renderInto(inventory, environment);
     config.rootSection.sidebar.settingsDisplay.items.nextSneakMode.renderInto(inventory, environment);
@@ -157,6 +158,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
       .withVariable("sidebar_enabled", displayData.enabled)
       .withVariable("show_title", displayData.showTitle)
       .withVariable("show_icons", displayData.showIcons)
+      .withVariable("do_scroll", displayData.doScroll)
       .withVariable("delimiters_mode", displayData.delimitersMode.name())
       .withVariable("sneak_mode", displayData.sneakMode.name());
   }

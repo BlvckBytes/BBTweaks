@@ -2375,23 +2375,6 @@ sidebar:
             <&8>➥ <&e>Linksklick <&7>Navigiere zur vorherigen Seite<br/>
             <&8>➥ <&e>Rechtsklick <&7>Springe zur ersten Seite<br/>
             {lut.spacer}
-      nextSneakMode:
-        type: 'IRON_BOOTS'
-        name: |
-          <reset>
-            <&8>» <&6>Sneak-Modus</> «
-        lore: |
-          <reset>
-            <br/>
-            <&7>Wählt das Verhalten hinsichtlich deines<br/>
-            Sneakzustandes aus, um dadurch die Sidebar<br/>
-            im Alltag schnell ein- und auszublenden.<br/>
-            {lut.spacer}<br/>
-            <&8>♦ <&e>Aktueller Modus: {lut.sidebar.sneak_mode[sneak_mode]}<br/>
-            {lut.spacer}<br/>
-            <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
-            {lut.spacer}
-        slots: 'last_slot - 3'
       showTitle:
         type: '{show_title then "GREEN_CONCRETE" else "RED_CONCRETE"}'
         name: |
@@ -2427,6 +2410,31 @@ sidebar:
             <&8>➥ <&e>Linksklick <&7>Icons {show_icons then "ausblenden" else "anzeigen"}<br/>
             {lut.spacer}
         slots: 'last_slot - 6'
+      doScroll:
+        type: '{do_scroll then "GREEN_CONCRETE" else "RED_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>»<space/>
+            <&a *if="do_scroll">Zeilen scrollen</>
+            <&c *else>Zeilen nicht scrollen</>
+            <space/>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Der vanilla Minecraft-Client limitiert<br/>
+            die Maximalanzahl an Zeilen in der<br/>
+            Sidebar auf 15; sind mehrere Einträge<br/>
+            aktiviert, so muss gescrollt werden.<br/>
+            <br/>
+            Diese Obergrenze kann durch Mods<br/>
+            entfernt werden, beispielsweise mit <i>Simple<br/>
+            Scoreboard Tweaks</i>; deaktiviere hiermit<br/>
+            das Scrollen, wenn du diese oder eine<br/>
+            vergleichbare Mod im Einsatz hast.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Scrollen {do_scroll then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+        slots: 'last_slot - 5'
       delimitersMode:
         type: 'OAK_FENCE'
         name: |
@@ -2442,7 +2450,7 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
             {lut.spacer}
-        slots: 'last_slot - 5'
+        slots: 'last_slot - 4'
       allColors:
         type: 'GHAST_TEAR'
         name: |
@@ -2457,7 +2465,24 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Farben auswählen<br/>
             {lut.spacer}
-        slots: 'last_slot - 4'
+        slots: 'last_slot - 3'
+      nextSneakMode:
+        type: 'IRON_BOOTS'
+        name: |
+          <reset>
+            <&8>» <&6>Sneak-Modus</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Wählt das Verhalten hinsichtlich deines<br/>
+            Sneakzustandes aus, um dadurch die Sidebar<br/>
+            im Alltag schnell ein- und auszublenden.<br/>
+            {lut.spacer}<br/>
+            <&8>♦ <&e>Aktueller Modus: {lut.sidebar.sneak_mode[sneak_mode]}<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
+            {lut.spacer}
+        slots: 'last_slot - 2'
       openSorting:
         type: 'COMPARATOR'
         name: |
@@ -2471,7 +2496,7 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Ins Sortiermenü wechseln<br/>
             {lut.spacer}
-        slots: 'last_slot - 2'
+        slots: 'last_slot - 1'
       nextPage:
         slots: 'last_slot'
         type: PLAYER_HEAD

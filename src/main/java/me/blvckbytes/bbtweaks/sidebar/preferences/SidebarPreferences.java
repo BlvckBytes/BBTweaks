@@ -18,6 +18,7 @@ public class SidebarPreferences {
   private static final boolean DEFAULT_ENABLED = false;
   private static final boolean DEFAULT_SHOW_TITLE = true;
   private static final boolean DEFAULT_SHOW_ICONS = true;
+  private static final boolean DEFAULT_DO_SCROLL = true;
 
   public final Player player;
   private final ConfigKeeper<MainSection> config;
@@ -25,6 +26,7 @@ public class SidebarPreferences {
   public boolean enabled;
   public boolean showTitle;
   public boolean showIcons;
+  public boolean doScroll;
   public DelimitersMode delimitersMode;
   public SneakMode sneakMode;
 
@@ -55,6 +57,9 @@ public class SidebarPreferences {
     if (showIcons != DEFAULT_SHOW_ICONS)
       return true;
 
+    if (doScroll != DEFAULT_DO_SCROLL)
+      return true;
+
     if (sneakMode != SneakMode.DEFAULT_VALUE)
       return true;
 
@@ -83,6 +88,7 @@ public class SidebarPreferences {
   public void resetToDefaults() {
     this.showTitle = DEFAULT_SHOW_TITLE;
     this.showIcons = DEFAULT_SHOW_ICONS;
+    this.doScroll = DEFAULT_DO_SCROLL;
     this.sneakMode = SneakMode.DEFAULT_VALUE;
     this.delimitersMode = DelimitersMode.DEFAULT_VALUE;
 

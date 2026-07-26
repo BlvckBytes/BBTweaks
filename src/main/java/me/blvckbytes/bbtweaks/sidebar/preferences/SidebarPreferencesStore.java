@@ -24,7 +24,7 @@ public class SidebarPreferencesStore implements Disableable, Listener {
 
   private final ConfigKeeper<MainSection> config;
 
-  private final NamespacedKey keyEnabled, keyShowTitle, keyShowIcons, keyDelimitersMode, keySneakMode,
+  private final NamespacedKey keyEnabled, keyShowTitle, keyShowIcons, keyDoScroll, keyDelimitersMode, keySneakMode,
     keyEnabledStatistics, keyStatisticEnableModes, keyStatisticsOrder, keyStatisticsLabelStyles, keyStatisticsValueStyles;
 
   private final Map<UUID, SidebarPreferences> preferencesByPlayerId;
@@ -38,6 +38,7 @@ public class SidebarPreferencesStore implements Disableable, Listener {
     this.keyEnabled = new NamespacedKey(plugin, "sidebar-enabled");
     this.keyShowTitle = new NamespacedKey(plugin, "sidebar-show-title");
     this.keyShowIcons = new NamespacedKey(plugin, "sidebar-show-icons");
+    this.keyDoScroll = new NamespacedKey(plugin, "sidebar-do-scroll");
     this.keyDelimitersMode = new NamespacedKey(plugin, "sidebar-delimiters-mode");
     this.keySneakMode = new NamespacedKey(plugin, "sidebar-sneak-mode");
     this.keyEnabledStatistics = new NamespacedKey(plugin, "sidebar-enabled-statistics");
@@ -52,7 +53,7 @@ public class SidebarPreferencesStore implements Disableable, Listener {
   }
 
   public SidebarPreferences accessPreferences(Player player) {
-    return preferencesByPlayerId.computeIfAbsent(player.getUniqueId(), k -> loadPreferences(player));
+    return preferencesByPlayerId.computeIfAbsent(player.getUniqueId(), _ -> loadPreferences(player));
   }
 
   @Override
@@ -99,6 +100,11 @@ public class SidebarPreferencesStore implements Disableable, Listener {
 
     if (showIconsValue != null)
       result.showIcons = showIconsValue;
+
+    var doScrollValue = pdc.get(keyDoScroll, PersistentDataType.BOOLEAN);
+
+    if (doScrollValue != null)
+      result.doScroll = doScrollValue;
 
     var delimitersModeValue = pdc.get(keyDelimitersMode, PersistentDataType.INTEGER);
 
@@ -195,6 +201,7 @@ public class SidebarPreferencesStore implements Disableable, Listener {
     pdc.set(keyEnabled, PersistentDataType.BOOLEAN, preferences.enabled);
     pdc.set(keyShowTitle, PersistentDataType.BOOLEAN, preferences.showTitle);
     pdc.set(keyShowIcons, PersistentDataType.BOOLEAN, preferences.showIcons);
+    pdc.set(keyDoScroll, PersistentDataType.BOOLEAN, preferences.doScroll);
     pdc.set(keyDelimitersMode, PersistentDataType.INTEGER, preferences.delimitersMode.ordinal());
     pdc.set(keySneakMode, PersistentDataType.INTEGER, preferences.sneakMode.ordinal());
 
