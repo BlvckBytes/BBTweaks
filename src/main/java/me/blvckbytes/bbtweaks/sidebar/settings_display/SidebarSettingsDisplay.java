@@ -3,7 +3,6 @@ package me.blvckbytes.bbtweaks.sidebar.settings_display;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
 import me.blvckbytes.bbtweaks.sidebar.config.StatisticSection;
 import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
 import me.blvckbytes.bbtweaks.util.Display;
@@ -17,7 +16,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
 
   public final boolean isFloodgate;
 
-  private final SidebarStatistic[] slotMap;
+  private final StatisticSection[] slotMap;
   private int numberOfPages;
 
   private int currentPage = 1;
@@ -33,7 +32,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
 
     this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
 
-    this.slotMap = new SidebarStatistic[9 * 6];
+    this.slotMap = new StatisticSection[9 * 6];
   }
 
   public void nextPage() {
@@ -113,10 +112,9 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
       }
 
       var statistic = displayData.statisticsInOrder.get(currentItemIndex);
-
-      slotMap[slot] = statistic;
-
       var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
+
+      slotMap[slot] = statisticSection;
 
       var enableMode = displayData.enableModeByStatistic.get(statistic);
 
@@ -135,12 +133,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
   }
 
   public @Nullable StatisticSection getStatisticBySlotIndex(int slotIndex) {
-    var statistic = slotMap[slotIndex];
-
-    if (statistic == null)
-      return null;
-
-    return config.rootSection.sidebar._statisticsMap.get(statistic);
+    return slotMap[slotIndex];
   }
 
   @Override
