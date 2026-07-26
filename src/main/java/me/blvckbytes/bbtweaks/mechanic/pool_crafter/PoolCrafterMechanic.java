@@ -6,12 +6,16 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.mechanic.BaseMechanic;
 import me.blvckbytes.bbtweaks.mechanic.auto_crafter.RecipeCache;
 import me.blvckbytes.bbtweaks.util.BlockUtil;
+import me.blvckbytes.bbtweaks.util.CacheByPosition;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,6 +34,8 @@ public class PoolCrafterMechanic extends BaseMechanic<PoolCrafterInstance> imple
   private final RecipeCache recipeCache;
   private final EnumMap<Material, List<Material>> similarMaterialsMap;
 
+  private final CacheByPosition<PoolCrafterInstance> instanceByMountBlockPosition;
+
   public PoolCrafterMechanic(
     Plugin plugin,
     ConfigKeeper<MainSection> config,
@@ -40,6 +46,8 @@ public class PoolCrafterMechanic extends BaseMechanic<PoolCrafterInstance> imple
     this.recipeCache = recipeCache;
 
     this.similarMaterialsMap = new EnumMap<>(Material.class);
+
+    this.instanceByMountBlockPosition = new CacheByPosition<>();
 
     for (var material : Material.values()) {
       if (!material.isItem())
@@ -97,12 +105,12 @@ public class PoolCrafterMechanic extends BaseMechanic<PoolCrafterInstance> imple
 
     var instance = new PoolCrafterInstance(sign, side, recipeCache, this);
 
-    var dropper = instance.getMountBlock();
+    var mountBlock = instance.getMountBlock();
 
-    if (BlockUtil.isBlockLoaded(dropper)) {
+    if (BlockUtil.isBlockLoaded(mountBlock)) {
       if (
-        dropper.getType() != Material.DROPPER
-          || (!(dropper.getState(false) instanceof Container container))
+        mountBlock.getType() != Material.DROPPER
+          || (!(mountBlock.getState(false) instanceof Container container))
       ) {
         if (creator != null)
           config.rootSection.mechanic.poolCrafter.notOnADropper.sendMessage(creator);
@@ -115,9 +123,9 @@ public class PoolCrafterMechanic extends BaseMechanic<PoolCrafterInstance> imple
           config.rootSection.mechanic.poolCrafter.existingSign.sendMessage(
             creator,
             new InterpretationEnvironment()
-              .withVariable("x", dropper.getX())
-              .withVariable("y", dropper.getY())
-              .withVariable("z", dropper.getZ())
+              .withVariable("x", mountBlock.getX())
+              .withVariable("y", mountBlock.getY())
+              .withVariable("z", mountBlock.getZ())
           );
         }
 
@@ -126,6 +134,7 @@ public class PoolCrafterMechanic extends BaseMechanic<PoolCrafterInstance> imple
     }
 
     instanceBySignPosition.put(sign.getWorld(), sign.getX(), sign.getY(), sign.getZ(), instance);
+    instanceByMountBlockPosition.put(mountBlock.getWorld(), mountBlock.getX(), mountBlock.getY(), mountBlock.getZ(), instance);
 
     if (creator != null)
       config.rootSection.mechanic.poolCrafter.creationSuccess.sendMessage(creator, getSignEnvironment(sign));
@@ -134,7 +143,27 @@ public class PoolCrafterMechanic extends BaseMechanic<PoolCrafterInstance> imple
   }
 
   @Override
+  public @Nullable PoolCrafterInstance onSignDestroy(@Nullable Player destroyer, Sign sign) {
+    var instance = super.onSignDestroy(destroyer, sign);
+
+    if (instance != null) {
+      var mountBlock = instance.getMountBlock();
+      instanceByMountBlockPosition.invalidate(mountBlock.getWorld(), mountBlock.getX(), mountBlock.getY(), mountBlock.getZ());
+    }
+
+    return instance;
+  }
+
+  @Override
   public List<Material> resolveSimilarMaterials(Material material) {
     return similarMaterialsMap.computeIfAbsent(material, Collections::singletonList);
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+  public void onDropperDrop(BlockDispenseEvent event) {
+    var block = event.getBlock();
+
+    if (instanceByMountBlockPosition.get(block.getWorld(), block.getX(), block.getY(), block.getZ()) != null)
+      event.setCancelled(true);
   }
 }
