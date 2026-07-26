@@ -46,6 +46,9 @@ public enum SidebarStatistic {
   AUTO_PICKUP_CONTAINER_USAGE_RELATIVE,
   BLOCK_FACING_STATUS,
   HOTBAR_RANDOMIZER_STATUS,
+  PLAYER_COUNT,
+  DEATH_COUNT,
+  WORLD_NAME,
   ;
 
   public final boolean isSpacer;

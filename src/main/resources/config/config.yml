@@ -2169,6 +2169,67 @@ sidebar:
             {enabled then "An" else "Aus"}
           }
         />
+    PLAYER_COUNT:
+      iconData:
+        name: 'Spielerzahl'
+        description: |
+          Die Anzahl der Spieler, die sich aktuell<br/>
+          auf dem Server befinden.
+        iconType: 'PLAYER_HEAD'
+      defaultLabelStyle:
+        color: 'YELLOW'
+      defaultValueStyle:
+        color: 'WHITE'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="✌" floodgate-icon="⇄" label="Spieler"
+          value={
+            {player_count}
+          }
+        />
+    DEATH_COUNT:
+      iconData:
+        name: 'Todesanzahl'
+        description: 'Die Gesamtanzahl deiner Tode.'
+        iconType: 'SKELETON_SKULL'
+      defaultLabelStyle:
+        color: 'LIGHT_RED'
+      defaultValueStyle:
+        color: 'WHITE'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="☠" label="Tode"
+          value={
+            {death_count}
+          }
+        />
+    WORLD_NAME:
+      iconData:
+        name: 'Aktuelle Welt'
+        description: |
+          Der Name der Welt, in der du dich zum<br/>
+          aktuellen Zeitpunkt aufhältst.
+        iconType: 'HEART_OF_THE_SEA'
+      defaultLabelStyle:
+        color: 'LIGHT_BLUE'
+      defaultValueStyle:
+        color: 'WHITE'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="🌍" label="Welt"
+          value={
+            <container *when='world_name'>
+              <container +is='world'>Bauwelt</>
+              <container +is='world_nether'>Nether</>
+              <container +is='world_the_end'>End</>
+              <container +is='world_farm'>Farm</>
+              <container +is='creative'>Kreativ</>
+              <container *other>{world_name}</>
+          }
+        />
   colorDisplay:
     title: |
       <&8>Farbauswahl<space/>

@@ -35,6 +35,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.luckperms.api.LuckPerms;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
+import org.bukkit.Statistic;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -569,6 +570,21 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
 
         return environment
           .withVariable("enabled", settings.enabled);
+      }
+
+      case PLAYER_COUNT -> {
+        return environment
+          .withVariable("player_count", Bukkit.getOnlinePlayers().size());
+      }
+
+      case DEATH_COUNT -> {
+        return environment
+          .withVariable("death_count", player.getStatistic(Statistic.DEATHS));
+      }
+
+      case WORLD_NAME -> {
+        return environment
+          .withVariable("world_name", player.getWorld().getName().toLowerCase());
       }
     }
 
