@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.hotbar_randomizer.settings_display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
+import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerSettings;
@@ -10,6 +12,7 @@ import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.IntConsumer;
@@ -31,11 +34,10 @@ public class HotbarRandomizerSettingsDisplay extends Display<HotbarRandomizerSet
   }
 
   @Override
-  protected void renderItems() {
+  protected void renderItems(ItemConsumer itemConsumer) {
     var environment = makeEnvironment();
 
-    config.rootSection.hotbarRandomizer.settingsDisplay.items.filler.renderInto(inventory, environment);
-    config.rootSection.hotbarRandomizer.settingsDisplay.items.enabled.renderInto(inventory, environment);
+    config.rootSection.hotbarRandomizer.settingsDisplay.items.enabled.renderInto(itemConsumer, environment);
 
     var enabledSlotItem = config.rootSection.hotbarRandomizer.settingsDisplay.items.enabledSlot;
     var hotbarItemPatch = config.rootSection.hotbarRandomizer.settingsDisplay.items.hotbarItemPatch;
@@ -50,7 +52,7 @@ public class HotbarRandomizerSettingsDisplay extends Display<HotbarRandomizerSet
         .withVariable("slot", index + 1);
 
       tryGetListItem(enabledSlotItem.getDisplaySlots(), index, itemIndex -> {
-        inventory.setItem(itemIndex, enabledSlotItem.build(environment));
+        itemConsumer.handle(itemIndex, enabledSlotItem.build(environment));
       });
 
       var itemAtSlot = playerInventory.getItem(index);
@@ -65,9 +67,14 @@ public class HotbarRandomizerSettingsDisplay extends Display<HotbarRandomizerSet
           hotbarItemPatch.patch(displayItem, environment);
         }
 
-        inventory.setItem(itemIndex, displayItem);
+        itemConsumer.handle(itemIndex, displayItem);
       });
     }
+  }
+
+  @Override
+  protected @Nullable GuiItemStackSection getFillerItem() {
+    return config.rootSection.hotbarRandomizer.settingsDisplay.items.filler;
   }
 
   @Override

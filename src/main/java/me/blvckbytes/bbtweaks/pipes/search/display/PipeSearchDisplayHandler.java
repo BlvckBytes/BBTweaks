@@ -76,7 +76,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
       if (moveResult == MoveResult.DID_MOVE)
         movedAmount = amountBefore;
       else if (moveResult == MoveResult.DID_DECREMENT) {
-        display.renderItems();
+        display.updateItems();
         movedAmount = amountBefore - itemEntry.itemAndSlot.item().getAmount();
       }
 
@@ -240,7 +240,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
 
     // Synchronize the displayed counts
     if (totalHandOutAmount > 0 && display != null)
-      display.renderItems();
+      display.updateItems();
   }
 
   @Override

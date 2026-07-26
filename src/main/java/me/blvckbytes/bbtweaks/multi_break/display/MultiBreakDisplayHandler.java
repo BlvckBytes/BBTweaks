@@ -35,7 +35,7 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
   @Override
   protected void handleClick(Player player, MultiBreakDisplay display, ClickType clickType, int slot) {
     if (handleSlotClickAndGetIfRender(player, display, clickType, slot))
-      display.renderItems();
+      display.updateItems();
   }
 
   private boolean handleSlotClickAndGetIfRender(Player player, MultiBreakDisplay display, ClickType clickType, int slot) {

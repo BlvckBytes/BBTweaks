@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.itemdata.display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
+import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
@@ -11,6 +13,7 @@ import me.blvckbytes.bbtweaks.util.EmptyObject;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 public class ItemDataDisplay extends Display<EmptyObject> {
 
@@ -29,22 +32,18 @@ public class ItemDataDisplay extends Display<EmptyObject> {
   }
 
   @Override
-  protected void renderItems() {
+  protected void renderItems(ItemConsumer itemConsumer) {
     var storageContents = player.getInventory().getStorageContents();
-    var displaySize = inventory.getSize();
 
     for (var inventoryIndex = 0; inventoryIndex < storageContents.length; ++inventoryIndex) {
-      if (inventoryIndex >= displaySize)
-        break;
-
       // Account for how the hotbar is really the first row, as to make both
       // the top- and bottom inventory look exactly alike.
-      var displayIndex = (inventoryIndex + 9 * 3) % displaySize;
+      var displayIndex = (inventoryIndex + 9 * 3) % storageContents.length;
 
       var storageItem = storageContents[inventoryIndex];
 
       if (storageItem == null || storageItem.getType().isAir()) {
-        inventory.setItem(displayIndex, null);
+        itemConsumer.handle(displayIndex, null);
         continue;
       }
 
@@ -60,8 +59,13 @@ public class ItemDataDisplay extends Display<EmptyObject> {
           .withVariable("is_floodgate", isFloodgate)
       );
 
-      inventory.setItem(displayIndex, displayItem);
+      itemConsumer.handle(displayIndex, displayItem);
     }
+  }
+
+  @Override
+  protected @Nullable GuiItemStackSection getFillerItem() {
+    return null;
   }
 
   @Override

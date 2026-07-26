@@ -35,7 +35,7 @@ public class BlockFacingSettingsDisplayHandler extends DisplayHandler<BlockFacin
 
     if (config.rootSection.blockFacing.settingsDisplay.items.enabled.getDisplaySlots().contains(slot)) {
       display.displayData.setEnabled(null);
-      display.renderItems();
+      display.updateItems();
       return;
     }
 
@@ -45,6 +45,6 @@ public class BlockFacingSettingsDisplayHandler extends DisplayHandler<BlockFacin
       return;
 
     display.displayData.setFacingOverride(facingOverride);
-    display.renderItems();
+    display.updateItems();
   }
 }

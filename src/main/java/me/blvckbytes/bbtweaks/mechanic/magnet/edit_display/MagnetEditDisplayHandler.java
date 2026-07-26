@@ -46,7 +46,7 @@ public class MagnetEditDisplayHandler extends DisplayHandler<MagnetEditDisplay, 
 
     if (config.rootSection.mechanic.magnet.editDisplay.items.toggleClickDetection.getDisplaySlots().contains(slot)) {
       display.displayData.clickDetection ^= true;
-      display.renderItems();
+      display.updateItems();
       return;
     }
 
@@ -60,7 +60,7 @@ public class MagnetEditDisplayHandler extends DisplayHandler<MagnetEditDisplay, 
     if (display.displayData.getCurrentParameter() != targetParameter) {
       if (clickType == ClickType.LEFT) {
         display.displayData.setParameter(targetParameter);
-        display.renderItems();
+        display.updateItems();
       }
 
       return;
@@ -68,13 +68,13 @@ public class MagnetEditDisplayHandler extends DisplayHandler<MagnetEditDisplay, 
 
     if (clickType == ClickType.LEFT) {
       display.displayData.decreaseParameter();
-      display.renderItems();
+      display.updateItems();
       return;
     }
 
     if (isDropOrRight) {
       display.displayData.increaseParameter();
-      display.renderItems();
+      display.updateItems();
     }
   }
 

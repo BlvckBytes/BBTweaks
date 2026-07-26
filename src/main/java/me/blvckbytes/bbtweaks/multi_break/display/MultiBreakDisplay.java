@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.multi_break.display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
+import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.multi_break.command.CommandAction;
@@ -9,6 +11,7 @@ import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 public class MultiBreakDisplay extends Display<MultiBreakDisplayData> {
 
@@ -27,25 +30,28 @@ public class MultiBreakDisplay extends Display<MultiBreakDisplayData> {
   }
 
   @Override
-  protected void renderItems() {
+  protected void renderItems(ItemConsumer itemConsumer) {
     var environment = createEnvironment();
 
-    config.rootSection.multiBreak.display.items.filler.renderInto(inventory, environment);
+    config.rootSection.multiBreak.display.items.extentLeft.renderInto(itemConsumer, environment);
+    config.rootSection.multiBreak.display.items.extentRight.renderInto(itemConsumer, environment);
+    config.rootSection.multiBreak.display.items.extentUp.renderInto(itemConsumer, environment);
+    config.rootSection.multiBreak.display.items.extentDown.renderInto(itemConsumer, environment);
+    config.rootSection.multiBreak.display.items.extentDepth.renderInto(itemConsumer, environment);
 
-    config.rootSection.multiBreak.display.items.extentLeft.renderInto(inventory, environment);
-    config.rootSection.multiBreak.display.items.extentRight.renderInto(inventory, environment);
-    config.rootSection.multiBreak.display.items.extentUp.renderInto(inventory, environment);
-    config.rootSection.multiBreak.display.items.extentDown.renderInto(inventory, environment);
-    config.rootSection.multiBreak.display.items.extentDepth.renderInto(inventory, environment);
+    config.rootSection.multiBreak.display.items.currentFilter.renderInto(itemConsumer, environment);
+    config.rootSection.multiBreak.display.items.sneakMode.renderInto(itemConsumer, environment);
+    config.rootSection.multiBreak.display.items.toggleEnabled.renderInto(itemConsumer, environment);
 
-    config.rootSection.multiBreak.display.items.currentFilter.renderInto(inventory, environment);
-    config.rootSection.multiBreak.display.items.sneakMode.renderInto(inventory, environment);
-    config.rootSection.multiBreak.display.items.toggleEnabled.renderInto(inventory, environment);
-
-    renderSlotSelectionItems(environment);
+    renderSlotSelectionItems(itemConsumer, environment);
   }
 
-  private void renderSlotSelectionItems(InterpretationEnvironment displayEnvironment) {
+  @Override
+  protected @Nullable GuiItemStackSection getFillerItem() {
+    return config.rootSection.multiBreak.display.items.filler;
+  }
+
+  private void renderSlotSelectionItems(ItemConsumer itemConsumer, InterpretationEnvironment displayEnvironment) {
     var itemSection = config.rootSection.multiBreak.display.items.parametersSlot;
     var slotsInOrder = itemSection.getDisplaySlots().stream().sorted().toList();
 
@@ -59,7 +65,7 @@ public class MultiBreakDisplay extends Display<MultiBreakDisplayData> {
       var parametersSlot = parametersSlots.get(parametersSlotIndex++);
       var slotEnvironment = parametersSlot.makeEnvironment().inheritFrom(displayEnvironment, false);
 
-      inventory.setItem(slot, itemSection.build(slotEnvironment));
+      itemConsumer.handle(slot, itemSection.build(slotEnvironment));
     }
   }
 

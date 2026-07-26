@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.markers_menu.display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
+import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.util.Display;
@@ -68,7 +70,7 @@ public class MarkerDisplay extends Display<MarkerDisplayData> {
   }
 
   @Override
-  protected void renderItems() {
+  protected void renderItems(ItemConsumer itemConsumer) {
     var environment = getEnvironment();
 
     var displaySlots = new ArrayList<>(config.rootSection.markersMenu.display.getPaginationSlots());
@@ -79,21 +81,25 @@ public class MarkerDisplay extends Display<MarkerDisplayData> {
 
       if (currentSlot >= displayItems.size()) {
         slotMap[slot] = null;
-        inventory.setItem(slot, null);
+        itemConsumer.handle(slot, null);
         continue;
       }
 
       var renderable = displayItems.get(currentSlot);
-      inventory.setItem(slot, renderable.makeRepresentative(environment, config));
+      itemConsumer.handle(slot, renderable.makeRepresentative(environment, config));
       slotMap[slot] = renderable;
     }
 
-    config.rootSection.markersMenu.display.items.filler.renderInto(inventory, environment);
-    config.rootSection.markersMenu.display.items.previousPage.renderInto(inventory, environment);
-    config.rootSection.markersMenu.display.items.nextPage.renderInto(inventory, environment);
+    config.rootSection.markersMenu.display.items.previousPage.renderInto(itemConsumer, environment);
+    config.rootSection.markersMenu.display.items.nextPage.renderInto(itemConsumer, environment);
 
     if (displayData.previousDisplay() != null)
-      config.rootSection.markersMenu.display.items.backToCategoriesButton.renderInto(inventory, environment);
+      config.rootSection.markersMenu.display.items.backToCategoriesButton.renderInto(itemConsumer, environment);
+  }
+
+  @Override
+  protected @Nullable GuiItemStackSection getFillerItem() {
+    return config.rootSection.markersMenu.display.items.filler;
   }
 
   @Override

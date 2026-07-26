@@ -42,7 +42,7 @@ public class SignCopierSettingsDisplayHandler extends DisplayHandler<SignCopierS
 
     toggleFlag(display.displayData, targetFlag);
 
-    display.renderItems();
+    display.updateItems();
   }
 
   private void toggleFlag(SignCopierSettings settings, SettingFlag flag) {

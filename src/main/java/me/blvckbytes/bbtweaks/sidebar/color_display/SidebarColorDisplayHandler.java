@@ -42,7 +42,7 @@ public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDispl
         return;
 
       display.setSelectingLabelColor(true);
-      display.renderItems();
+      display.updateItems();
       return;
     }
 
@@ -51,7 +51,7 @@ public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDispl
         return;
 
       display.setSelectingLabelColor(false);
-      display.renderItems();
+      display.updateItems();
       return;
     }
 
@@ -60,7 +60,7 @@ public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDispl
         return;
 
       display.toggleFormat(Format.BOLD);
-      display.renderItems();
+      display.updateItems();
       return;
     }
 
@@ -69,7 +69,7 @@ public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDispl
         return;
 
       display.toggleFormat(Format.ITALIC);
-      display.renderItems();
+      display.updateItems();
       return;
     }
 
@@ -78,7 +78,7 @@ public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDispl
         return;
 
       display.toggleFormat(Format.UNDERLINED);
-      display.renderItems();
+      display.updateItems();
       return;
     }
 
@@ -88,6 +88,6 @@ public class SidebarColorDisplayHandler extends DisplayHandler<SidebarColorDispl
       return;
 
     display.onColorSelection(color);
-    display.renderItems();
+    display.updateItems();
   }
 }

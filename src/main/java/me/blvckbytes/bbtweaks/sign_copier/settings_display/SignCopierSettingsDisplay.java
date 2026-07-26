@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.sign_copier.settings_display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
+import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
@@ -10,6 +12,7 @@ import me.blvckbytes.bbtweaks.util.Display;
 import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 public class SignCopierSettingsDisplay extends Display<SignCopierSettings> {
 
@@ -28,16 +31,20 @@ public class SignCopierSettingsDisplay extends Display<SignCopierSettings> {
   }
 
   @Override
-  protected void renderItems() {
+  protected void renderItems(ItemConsumer itemConsumer) {
     var environment = makeEnvironment();
 
-    config.rootSection.signCopier.settingsDisplay.items.filler.renderInto(inventory, environment);
-    config.rootSection.signCopier.settingsDisplay.items.pasteSignColor.renderInto(inventory, environment);
-    config.rootSection.signCopier.settingsDisplay.items.pasteSignGlowing.renderInto(inventory, environment);
-    config.rootSection.signCopier.settingsDisplay.items.sendCopiedMessage.renderInto(inventory, environment);
-    config.rootSection.signCopier.settingsDisplay.items.sendPastedMessage.renderInto(inventory, environment);
-    config.rootSection.signCopier.settingsDisplay.items.inkSacAsShortcut.renderInto(inventory, environment);
-    config.rootSection.signCopier.settingsDisplay.items.pasteAdditionalAttributes.renderInto(inventory, environment);
+    config.rootSection.signCopier.settingsDisplay.items.pasteSignColor.renderInto(itemConsumer, environment);
+    config.rootSection.signCopier.settingsDisplay.items.pasteSignGlowing.renderInto(itemConsumer, environment);
+    config.rootSection.signCopier.settingsDisplay.items.sendCopiedMessage.renderInto(itemConsumer, environment);
+    config.rootSection.signCopier.settingsDisplay.items.sendPastedMessage.renderInto(itemConsumer, environment);
+    config.rootSection.signCopier.settingsDisplay.items.inkSacAsShortcut.renderInto(itemConsumer, environment);
+    config.rootSection.signCopier.settingsDisplay.items.pasteAdditionalAttributes.renderInto(itemConsumer, environment);
+  }
+
+  @Override
+  protected @Nullable GuiItemStackSection getFillerItem() {
+    return config.rootSection.signCopier.settingsDisplay.items.filler;
   }
 
   @Override

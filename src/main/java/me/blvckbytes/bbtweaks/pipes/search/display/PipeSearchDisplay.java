@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.pipes.search.display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
+import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
@@ -66,7 +68,7 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
 
     // Avoid reopening the inventory if the title did not change
     if (priorNumberOfPages == numberOfPages) {
-      renderItems();
+      updateItems();
       return;
     }
 
@@ -107,12 +109,12 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
 
   public void nextCollectionAction() {
     this.collectionAction = this.collectionAction.nextAction();
-    renderItems();
+    updateItems();
   }
 
   public void nextStackAction() {
     this.stackAction = this.stackAction.nextAction();
-    renderItems();
+    updateItems();
   }
 
   public CollectionAction getCollectionAction() {
@@ -139,7 +141,7 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
   }
 
   @Override
-  public void renderItems() {
+  public void renderItems(ItemConsumer itemConsumer) {
     var displaySlots = config.rootSection.pipes.search.display.getPaginationSlots();
     var itemsIndex = (currentPage - 1) * displaySlots.size();
     var numberOfItems = displayData.entries().size();
@@ -152,7 +154,7 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
 
       if (currentSlot >= numberOfItems) {
         slotMap[slot] = null;
-        inventory.setItem(slot, null);
+        itemConsumer.handle(slot, null);
         continue;
       }
 
@@ -180,20 +182,24 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
         continue;
       }
 
-      inventory.setItem(slot, representativeItem);
+      itemConsumer.handle(slot, representativeItem);
 
       slotMap[slot] = entry;
     }
 
-    config.rootSection.pipes.search.display.items.filler.renderInto(inventory, environment);
-    config.rootSection.pipes.search.display.items.previousPage.renderInto(inventory, environment);
-    config.rootSection.pipes.search.display.items.nextPage.renderInto(inventory, environment);
+    config.rootSection.pipes.search.display.items.previousPage.renderInto(itemConsumer, environment);
+    config.rootSection.pipes.search.display.items.nextPage.renderInto(itemConsumer, environment);
 
     if (displayData.backToDisplay() != null)
-      config.rootSection.pipes.search.display.items.backToCollectionsButton.renderInto(inventory, environment);
+      config.rootSection.pipes.search.display.items.backToCollectionsButton.renderInto(itemConsumer, environment);
 
     if (displayData.predicate() != null)
-      config.rootSection.pipes.search.display.items.searchDetails.renderInto(inventory, environment);
+      config.rootSection.pipes.search.display.items.searchDetails.renderInto(itemConsumer, environment);
+  }
+
+  @Override
+  protected @Nullable GuiItemStackSection getFillerItem() {
+    return config.rootSection.pipes.search.display.items.filler;
   }
 
   @Override

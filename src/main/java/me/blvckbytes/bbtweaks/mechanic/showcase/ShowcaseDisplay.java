@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.mechanic.showcase;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
+import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
@@ -25,18 +27,23 @@ public class ShowcaseDisplay extends Display<ShowcaseDisplayData> {
   }
 
   @Override
-  protected void renderItems() {
+  protected void renderItems(ItemConsumer itemConsumer) {
     var containerInventory = getContainerInventory();
 
     if (containerInventory == null) {
-      inventory.setItem(13, displayData.frameItem());
+      itemConsumer.handle(13, displayData.frameItem());
       return;
     }
 
     var containerSize = containerInventory.getSize();
 
     for (var index = 0; index < containerSize; ++index)
-      inventory.setItem(index, containerInventory.getItem(index));
+      itemConsumer.handle(index, containerInventory.getItem(index));
+  }
+
+  @Override
+  protected @Nullable GuiItemStackSection getFillerItem() {
+    return null;
   }
 
   @Override

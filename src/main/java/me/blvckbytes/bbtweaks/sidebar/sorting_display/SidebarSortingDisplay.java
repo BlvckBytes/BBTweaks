@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.sidebar.sorting_display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
+import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.SidebarStatistic;
@@ -86,16 +88,13 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
   }
 
   @Override
-  protected void renderItems() {
-    inventory.clear();
-
+  protected void renderItems(ItemConsumer itemConsumer) {
     var environment = makeEnvironment();
 
-    config.rootSection.sidebar.sortingDisplay.items.filler.renderInto(inventory, environment);
-    config.rootSection.sidebar.sortingDisplay.items.previousPage.renderInto(inventory, environment);
-    config.rootSection.sidebar.sortingDisplay.items.backButton.renderInto(inventory, environment);
-    config.rootSection.sidebar.sortingDisplay.items.moveDisabledToEnd.renderInto(inventory, environment);
-    config.rootSection.sidebar.sortingDisplay.items.nextPage.renderInto(inventory, environment);
+    config.rootSection.sidebar.sortingDisplay.items.previousPage.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.sortingDisplay.items.backButton.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.sortingDisplay.items.moveDisabledToEnd.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.sortingDisplay.items.nextPage.renderInto(itemConsumer, environment);
 
     var displaySlots = config.rootSection.sidebar.settingsDisplay.getPaginationSlots();
     var itemsIndex = (currentPage - 1) * displaySlots.size();
@@ -106,7 +105,7 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
 
       if (currentItemIndex >= numberOfItems) {
         slotMap[slot] = null;
-        inventory.setItem(slot, null);
+        itemConsumer.handle(slot, null);
         continue;
       }
 
@@ -125,8 +124,13 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
         .withVariable("enabled", enableMode.enabled)
         .withVariable("show_label", enableMode.showLabel);
 
-      inventory.setItem(slot, config.rootSection.sidebar.sortingDisplay.items.statisticIcon.build(environment));
+      itemConsumer.handle(slot, config.rootSection.sidebar.sortingDisplay.items.statisticIcon.build(environment));
     }
+  }
+
+  @Override
+  protected @Nullable GuiItemStackSection getFillerItem() {
+    return config.rootSection.sidebar.sortingDisplay.items.filler;
   }
 
   public @Nullable SidebarStatistic getStatisticBySlotIndex(int slotIndex) {

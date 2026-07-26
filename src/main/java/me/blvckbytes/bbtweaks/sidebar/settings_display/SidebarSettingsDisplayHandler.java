@@ -49,7 +49,7 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
           (sidebarStatistic, currentMode) -> currentMode.next(sidebarStatistic)
         );
 
-        display.renderItems();
+        display.updateItems();
         return;
       }
 
@@ -80,31 +80,31 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
 
       if (config.rootSection.sidebar.settingsDisplay.items.showTitle.getDisplaySlots().contains(slot)) {
         display.displayData.showTitle ^= true;
-        display.renderItems();
+        display.updateItems();
         return;
       }
 
       if (config.rootSection.sidebar.settingsDisplay.items.showIcons.getDisplaySlots().contains(slot)) {
         display.displayData.showIcons ^= true;
-        display.renderItems();
+        display.updateItems();
         return;
       }
 
       if (config.rootSection.sidebar.settingsDisplay.items.doScroll.getDisplaySlots().contains(slot)) {
         display.displayData.doScroll ^= true;
-        display.renderItems();
+        display.updateItems();
         return;
       }
 
       if (config.rootSection.sidebar.settingsDisplay.items.delimitersMode.getDisplaySlots().contains(slot)) {
         display.displayData.delimitersMode = display.displayData.delimitersMode.next();
-        display.renderItems();
+        display.updateItems();
         return;
       }
 
       if (config.rootSection.sidebar.settingsDisplay.items.nextSneakMode.getDisplaySlots().contains(slot)) {
         display.displayData.sneakMode = display.displayData.sneakMode.next();
-        display.renderItems();
+        display.updateItems();
         return;
       }
 

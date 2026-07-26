@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.inv_filter.display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
+import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
@@ -9,6 +11,7 @@ import me.blvckbytes.bbtweaks.util.Display;
 import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.Nullable;
 
 public class InvFilterDisplay extends Display<InvFilterDisplayData> {
 
@@ -27,20 +30,18 @@ public class InvFilterDisplay extends Display<InvFilterDisplayData> {
   }
 
   @Override
-  protected void renderItems() {
+  protected void renderItems(ItemConsumer itemConsumer) {
     var environment = makeEnvironment();
 
-    config.rootSection.invFilter.display.items.filler.renderInto(inventory, environment);
-
     config.rootSection.invFilter.display.items.help.renderInto(
-      inventory,
+      itemConsumer,
       environment
         .withVariable("label", displayData.commandLabel())
         .withVariable("set_command_action", CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER))
         .withVariable("get_command_action", CommandAction.matcher.getNormalizedName(CommandAction.GET_FILTER))
     );
 
-    config.rootSection.invFilter.display.items.enabled.renderInto(inventory, environment);
+    config.rootSection.invFilter.display.items.enabled.renderInto(itemConsumer, environment);
 
     var filterItemSection = config.rootSection.invFilter.display.items.filterSlot;
 
@@ -53,7 +54,7 @@ public class InvFilterDisplay extends Display<InvFilterDisplayData> {
       var currentIndex = filterIndex++;
       var filterSlot = displayData.profile().getFilter(currentIndex);
 
-      inventory.setItem(
+      itemConsumer.handle(
         slot,
         filterItemSection.build(
           environment
@@ -63,6 +64,11 @@ public class InvFilterDisplay extends Display<InvFilterDisplayData> {
         )
       );
     }
+  }
+
+  @Override
+  protected @Nullable GuiItemStackSection getFillerItem() {
+    return config.rootSection.invFilter.display.items.filler;
   }
 
   @Override

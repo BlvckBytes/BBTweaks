@@ -52,7 +52,7 @@ public class SidebarSortingDisplayHandler extends DisplayHandler<SidebarSortingD
         list.remove(currentIndex);
         list.add(currentIndex + 1, statistic);
 
-        display.renderItems();
+        display.updateItems();
         return;
       }
 
@@ -73,7 +73,7 @@ public class SidebarSortingDisplayHandler extends DisplayHandler<SidebarSortingD
         list.remove(currentIndex);
         list.add(currentIndex - 1, statistic);
 
-        display.renderItems();
+        display.updateItems();
       }
 
       return;
@@ -113,7 +113,7 @@ public class SidebarSortingDisplayHandler extends DisplayHandler<SidebarSortingD
 
         config.rootSection.sidebar.movedAllDeactivatedItemsToEnd.sendMessage(player);
 
-        display.renderItems();
+        display.updateItems();
         return;
       }
 

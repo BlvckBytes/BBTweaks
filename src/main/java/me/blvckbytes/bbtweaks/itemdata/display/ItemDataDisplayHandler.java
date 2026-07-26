@@ -39,11 +39,11 @@ public class ItemDataDisplayHandler extends DisplayHandler<ItemDataDisplay, Empt
 
   @Override
   protected void handleOwnInventoryClick(Player player, ItemDataDisplay display, ClickType clickType, int slot) {
-    Bukkit.getScheduler().runTaskLater(plugin, display::renderItems, 1);
+    Bukkit.getScheduler().runTaskLater(plugin, display::updateItems, 1);
   }
 
   @Override
   protected void handleOwnInventoryDrag(Player player, ItemDataDisplay display, Set<Integer> slots) {
-    Bukkit.getScheduler().runTaskLater(plugin, display::renderItems, 1);
+    Bukkit.getScheduler().runTaskLater(plugin, display::updateItems, 1);
   }
 }

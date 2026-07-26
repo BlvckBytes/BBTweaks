@@ -38,7 +38,7 @@ public class HotbarRandomizerSettingsDisplayHandler extends DisplayHandler<Hotba
 
     if (config.rootSection.hotbarRandomizer.settingsDisplay.items.enabled.getDisplaySlots().contains(slot)) {
       display.displayData.setEnabledAndSendMessage(null);
-      display.renderItems();
+      display.updateItems();
       return;
     }
 
@@ -49,7 +49,7 @@ public class HotbarRandomizerSettingsDisplayHandler extends DisplayHandler<Hotba
       return;
 
     display.displayData.toggleSlotEnableState(slotIndex);
-    display.renderItems();
+    display.updateItems();
   }
 
   @EventHandler
@@ -62,6 +62,6 @@ public class HotbarRandomizerSettingsDisplayHandler extends DisplayHandler<Hotba
     if (event.getRawSlot() < display.getSize() + 9 * 3)
       return;
 
-    Bukkit.getScheduler().runTaskLater(plugin, display::renderItems, 1L);
+    Bukkit.getScheduler().runTaskLater(plugin, display::updateItems, 1L);
   }
 }

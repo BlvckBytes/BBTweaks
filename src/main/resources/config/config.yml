@@ -2426,10 +2426,10 @@ sidebar:
             Sidebar auf 15; sind mehrere Einträge<br/>
             aktiviert, so muss gescrollt werden.<br/>
             <br/>
-            Diese Obergrenze kann durch Mods<br/>
+            <&f>Diese Obergrenze kann durch Mods<br/>
             entfernt werden, beispielsweise mit <i>Simple<br/>
-            Scoreboard Tweaks</i>; deaktiviere hiermit<br/>
-            das Scrollen, wenn du diese oder eine<br/>
+            Scoreboard Tweaks</i></&f>; deaktiviere hiermit<br/>
+            das scrollen, wenn du diese oder eine<br/>
             vergleichbare Mod im Einsatz hast.<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Scrollen {do_scroll then "deaktivieren" else "aktivieren"}<br/>

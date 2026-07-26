@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.block_facing.settings_display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
+import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.block_facing.settings.BlockFacingSettings;
@@ -29,12 +31,10 @@ public class BlockFacingSettingsDisplay extends Display<BlockFacingSettings> {
   }
 
   @Override
-  protected void renderItems() {
+  protected void renderItems(ItemConsumer itemConsumer) {
     var environment = createEnvironment();
 
-    config.rootSection.blockFacing.settingsDisplay.items.filler.renderInto(inventory, environment);
-
-    config.rootSection.blockFacing.settingsDisplay.items.enabled.renderInto(inventory, environment);
+    config.rootSection.blockFacing.settingsDisplay.items.enabled.renderInto(itemConsumer, environment);
 
     var facingItem = config.rootSection.blockFacing.settingsDisplay.items.facing;
 
@@ -50,8 +50,13 @@ public class BlockFacingSettingsDisplay extends Display<BlockFacingSettings> {
           .withVariable("facing_enabled", facingOverride == displayData.facingOverride)
       );
 
-      inventory.setItem(slot, itemStack);
+      itemConsumer.handle(slot, itemStack);
     }
+  }
+
+  @Override
+  protected @Nullable GuiItemStackSection getFillerItem() {
+    return config.rootSection.blockFacing.settingsDisplay.items.filler;
   }
 
   @Override

@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.sidebar.settings_display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
+import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.sidebar.config.StatisticSection;
@@ -86,21 +88,18 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
   }
 
   @Override
-  protected void renderItems() {
-    inventory.clear();
-
+  protected void renderItems(ItemConsumer itemConsumer) {
     var environment = makeEnvironment();
 
-    config.rootSection.sidebar.settingsDisplay.items.filler.renderInto(inventory, environment);
-    config.rootSection.sidebar.settingsDisplay.items.previousPage.renderInto(inventory, environment);
-    config.rootSection.sidebar.settingsDisplay.items.showTitle.renderInto(inventory, environment);
-    config.rootSection.sidebar.settingsDisplay.items.showIcons.renderInto(inventory, environment);
-    config.rootSection.sidebar.settingsDisplay.items.doScroll.renderInto(inventory, environment);
-    config.rootSection.sidebar.settingsDisplay.items.delimitersMode.renderInto(inventory, environment);
-    config.rootSection.sidebar.settingsDisplay.items.allColors.renderInto(inventory, environment);
-    config.rootSection.sidebar.settingsDisplay.items.nextSneakMode.renderInto(inventory, environment);
-    config.rootSection.sidebar.settingsDisplay.items.openSorting.renderInto(inventory, environment);
-    config.rootSection.sidebar.settingsDisplay.items.nextPage.renderInto(inventory, environment);
+    config.rootSection.sidebar.settingsDisplay.items.previousPage.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.settingsDisplay.items.showTitle.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.settingsDisplay.items.showIcons.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.settingsDisplay.items.doScroll.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.settingsDisplay.items.delimitersMode.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.settingsDisplay.items.allColors.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.settingsDisplay.items.nextSneakMode.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.settingsDisplay.items.openSorting.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.settingsDisplay.items.nextPage.renderInto(itemConsumer, environment);
 
     var displaySlots = config.rootSection.sidebar.settingsDisplay.getPaginationSlots();
     var itemsIndex = (currentPage - 1) * displaySlots.size();
@@ -111,7 +110,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
 
       if (currentItemIndex >= numberOfItems) {
         slotMap[slot] = null;
-        inventory.setItem(slot, null);
+        itemConsumer.handle(slot, null);
         continue;
       }
 
@@ -132,8 +131,13 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferences> {
         .withVariable("show_label", enableMode.showLabel)
         .withVariable("is_spacer", statistic.isSpacer);
 
-      inventory.setItem(slot, config.rootSection.sidebar.settingsDisplay.items.statisticIcon.build(environment));
+      itemConsumer.handle(slot, config.rootSection.sidebar.settingsDisplay.items.statisticIcon.build(environment));
     }
+  }
+
+  @Override
+  protected @Nullable GuiItemStackSection getFillerItem() {
+    return config.rootSection.sidebar.settingsDisplay.items.filler;
   }
 
   public @Nullable StatisticSection getStatisticBySlotIndex(int slotIndex) {

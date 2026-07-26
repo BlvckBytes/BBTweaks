@@ -1,6 +1,8 @@
 package me.blvckbytes.bbtweaks.sidebar.color_display;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
+import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
+import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -89,34 +91,22 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
   }
 
   @Override
-  protected void renderItems() {
-    inventory.clear();
-
+  protected void renderItems(ItemConsumer itemConsumer) {
     var environment = makeEnvironment();
 
-    config.rootSection.sidebar.colorDisplay.items.filler.renderInto(inventory, environment);
-    config.rootSection.sidebar.colorDisplay.items.backButton.renderInto(inventory, environment);
+    config.rootSection.sidebar.colorDisplay.items.backButton.renderInto(itemConsumer, environment);
 
-    config.rootSection.sidebar.colorDisplay.items.labelColorMode.renderInto(inventory, environment);
-    config.rootSection.sidebar.colorDisplay.items.valueColorMode.renderInto(inventory, environment);
+    config.rootSection.sidebar.colorDisplay.items.labelColorMode.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.colorDisplay.items.valueColorMode.renderInto(itemConsumer, environment);
 
-    config.rootSection.sidebar.colorDisplay.items.toggleBold.renderInto(inventory, environment);
-    config.rootSection.sidebar.colorDisplay.items.toggleUnderlined.renderInto(inventory, environment);
-    config.rootSection.sidebar.colorDisplay.items.toggleItalic.renderInto(inventory, environment);
+    config.rootSection.sidebar.colorDisplay.items.toggleBold.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.colorDisplay.items.toggleUnderlined.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.colorDisplay.items.toggleItalic.renderInto(itemConsumer, environment);
 
     var colors = config.rootSection.sidebar._colors;
-    var nextColorIndex = 0;
 
-    for (var index = 0; index < inventory.getSize(); ++index) {
-      var currentItem = inventory.getItem(index);
-
-      if (currentItem != null && !currentItem.getType().isAir())
-        continue;
-
-      if (nextColorIndex == colors.size())
-        break;
-
-      var color = colors.get(nextColorIndex++);
+    for (var index = 0; index < colors.size(); ++index) {
+      var color = colors.get(index);
 
       colorBySlotIndex.put(index, color);
 
@@ -134,8 +124,13 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
         .withVariable("display_name", color.displayName())
         .withVariable("icon_type", color.iconType());
 
-      inventory.setItem(index, config.rootSection.sidebar.colorDisplay.items.colorIcon.build(environment));
+      itemConsumer.handle(index, config.rootSection.sidebar.colorDisplay.items.colorIcon.build(environment));
     }
+  }
+
+  @Override
+  protected @Nullable GuiItemStackSection getFillerItem() {
+    return config.rootSection.sidebar.colorDisplay.items.filler;
   }
 
   public @Nullable NamedColor getColorBySlotIndex(int slotIndex) {

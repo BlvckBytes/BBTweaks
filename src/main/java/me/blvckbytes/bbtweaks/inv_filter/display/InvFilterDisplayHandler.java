@@ -34,7 +34,7 @@ public class InvFilterDisplayHandler extends DisplayHandler<InvFilterDisplay, In
         return;
 
       display.displayData.profile().setEnabledAndMessage(display.displayData.commandLabel(), null);
-      display.renderItems();
+      display.updateItems();
       return;
     }
 
@@ -45,13 +45,13 @@ public class InvFilterDisplayHandler extends DisplayHandler<InvFilterDisplay, In
 
     if (clickType == ClickType.LEFT) {
       display.displayData.profile().setSelectedSlotIndexAndMessage(display.displayData.commandLabel(), filterSlotIndex);
-      display.renderItems();
+      display.updateItems();
       return;
     }
 
     if (clickType == ClickType.DROP) {
       display.displayData.profile().removeCurrentFilterIfSetAndMessage(display.displayData.commandLabel());
-      display.renderItems();
+      display.updateItems();
     }
   }
 }
