@@ -19,6 +19,8 @@ import java.util.Objects;
 
 public class SidebarCommand implements CommandHandler {
 
+  private static final String RESET_CONFIRM_SENTINEL = "confirm";
+
   private final PluginCommand command;
   private final SidebarPreferencesStore sidebarPreferencesStore;
   private final SidebarSettingsDisplayHandler sidebarSettingsDisplayHandler;
@@ -64,6 +66,18 @@ public class SidebarCommand implements CommandHandler {
 
         if (!preferences.divergesFromDefaults()) {
           config.rootSection.sidebar.noChangesMadeToReset.sendMessage(player, preferences.makeEnvironment());
+          return true;
+        }
+
+        if (args.length == 1 || !args[1].equalsIgnoreCase(RESET_CONFIRM_SENTINEL)) {
+          config.rootSection.sidebar.resetUnconfirmed.sendMessage(
+            player,
+            new InterpretationEnvironment()
+              .withVariable("label", label)
+              .withVariable("action", normalizedAction.getNormalizedName())
+              .withVariable("sentinel", RESET_CONFIRM_SENTINEL)
+          );
+
           return true;
         }
 
@@ -116,6 +130,14 @@ public class SidebarCommand implements CommandHandler {
 
     if (args.length == 1)
       return CommandAction.matcher.createCompletions(args[0]);
+
+    var normalizedAction = CommandAction.matcher.matchFirst(args[0]);
+
+    if (normalizedAction == null)
+      return List.of();
+
+    if (normalizedAction.constant == CommandAction.RESET_TO_DEFAULTS && args.length == 2)
+      return List.of(RESET_CONFIRM_SENTINEL);
 
     return List.of();
   }

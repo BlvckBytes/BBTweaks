@@ -39,6 +39,7 @@ public class SidebarSection extends ConfigSection {
   public ComponentMarkup sidebarNowDisabled;
   public ComponentMarkup sidebarAlreadyDisabled;
   public ComponentMarkup noChangesMadeToReset;
+  public ComponentMarkup resetUnconfirmed;
   public ComponentMarkup settingsHaveBeenReset;
   public ComponentMarkup slotSelected;
   public ComponentMarkup slotAlreadySelected;

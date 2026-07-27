@@ -1378,6 +1378,7 @@ sidebar:
   sidebarNowDisabled: '{lut.sidebar_prefix} <&7>Die Anzeige der Sidebar ist nun <&c>deaktiviert</>.'
   sidebarAlreadyDisabled: '{lut.sidebar_prefix} <&c>Die Anzeige der Sidebar ist bereits deaktiviert!'
   noChangesMadeToReset: '{lut.sidebar_prefix} <&c>Deine aktuellen Auswahlen auf <&4>Einstellungsslot {slot_index + 1}</> weichen noch nicht von den Standardwerten ab!'
+  resetUnconfirmed: '{lut.sidebar_prefix} <&c>Bitte bestätige das Zurücksetzen via <&4>/{label} {action} {sentinel}</>!'
   settingsHaveBeenReset: '{lut.sidebar_prefix} <&7>Deine Auswahlen auf <&6>Einstellungsslot {slot_index + 1}</> wurden auf die <&a>Standardwerte</> zurückgesetzt.'
   slotSelected: '{lut.sidebar_prefix} <&7><&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist nun selektiert.'
   slotAlreadySelected: '{lut.sidebar_prefix} <&c>Der <&4>Einstellungsslot {slot_index + 1}</> ist bereits selektiert!'
