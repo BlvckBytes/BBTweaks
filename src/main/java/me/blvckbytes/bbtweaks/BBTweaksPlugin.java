@@ -61,6 +61,7 @@ import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommand;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.pipes.*;
+import me.blvckbytes.bbtweaks.pipes.command.timings.PipeTimingsCommand;
 import me.blvckbytes.bbtweaks.pipes.enumeration_session.PipeEnumerationSessionHandler;
 import me.blvckbytes.bbtweaks.pipes.predicates.PipePredicateEventHandler;
 import me.blvckbytes.bbtweaks.pipes.predicates.PipePredicateDataHandler;

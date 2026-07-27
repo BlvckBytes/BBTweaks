@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.pipes;
+package me.blvckbytes.bbtweaks.pipes.command.timings;
 
 import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;

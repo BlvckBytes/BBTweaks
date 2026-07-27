@@ -19,6 +19,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.plugin.Plugin;
 
@@ -213,6 +214,10 @@ public class WirelessPipeSignListener implements Listener, Tickable {
     player.teleport(thisWirelessSign.referencedBlock.getLocation());
   }
 
+  @EventHandler
+  public void onQuit(PlayerQuitEvent event) {
+    lastTeleportByPlayerId.removeLong(event.getPlayer().getUniqueId());
+  }
 
   private void cancelAndBreakSign(SignChangeEvent event) {
     event.setCancelled(true);

@@ -5,6 +5,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.pipes.command.timings.PipeTimingsCommand;
 import me.blvckbytes.bbtweaks.pipes.notification.*;
 import me.blvckbytes.bbtweaks.util.CompactId;
 import me.blvckbytes.bbtweaks.util.ComponentUtil;
