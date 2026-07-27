@@ -91,6 +91,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferencesSlots> {
   protected void renderItems(ItemConsumer itemConsumer) {
     var environment = makeEnvironment();
 
+    config.rootSection.sidebar.settingsDisplay.items.enabled.renderInto(itemConsumer, environment);
     config.rootSection.sidebar.settingsDisplay.items.previousPage.renderInto(itemConsumer, environment);
     config.rootSection.sidebar.settingsDisplay.items.showTitle.renderInto(itemConsumer, environment);
     config.rootSection.sidebar.settingsDisplay.items.showIcons.renderInto(itemConsumer, environment);

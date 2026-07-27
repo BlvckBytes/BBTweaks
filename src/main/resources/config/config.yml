@@ -2709,6 +2709,22 @@ sidebar:
         type: BLACK_STAINED_GLASS_PANE
         name: ' '
         slots: '(last_slot - 17)..last_slot'
+      enabled:
+        type: '{sidebar_enabled then "GREEN_CONCRETE" else "RED_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>»<space/>
+            <&a *if="sidebar_enabled">Anzeige aktiviert</>
+            <&c *else>Anzeige deaktiviert</>
+            <space/>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Schaltet die Gesamtanzeige der Sidebar um.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Anzeige {sidebar_enabled then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+        slots: 'last_slot - 8'
       preferencesSlot:
         slots: '[38, 40, 42]'
         type: '{slot_enabled then "YELLOW_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
@@ -2728,7 +2744,7 @@ sidebar:
               {lut.spacer}
             </container>
       previousPage:
-        slots: 'last_slot - 8'
+        slots: 'last_slot - 17'
         type: PLAYER_HEAD
         textures: '{lut.textures[current_page > 1 then "ARROW_LEFT" else "ARROW_LEFT_RED"]}'
         name: |
@@ -2866,7 +2882,7 @@ sidebar:
             {lut.spacer}
         slots: 'last_slot - 1'
       nextPage:
-        slots: 'last_slot'
+        slots: 'last_slot - 9'
         type: PLAYER_HEAD
         textures: '{lut.textures[current_page < number_pages then "ARROW_RIGHT" else "ARROW_RIGHT_RED"]}'
         name: |
@@ -2918,7 +2934,7 @@ sidebar:
         name: ' '
         slots: '(last_slot - 17)..last_slot'
       previousPage:
-        slots: 'last_slot - 8'
+        slots: 'last_slot - 17'
         type: PLAYER_HEAD
         textures: '{lut.textures[current_page > 1 then "ARROW_LEFT" else "ARROW_LEFT_RED"]}'
         name: |
@@ -2960,7 +2976,7 @@ sidebar:
             <&8>➥ <&e>Linksklick <&7>Deaktivierte ans Ende bewegen<br/>
             {lut.spacer}
       nextPage:
-        slots: 'last_slot'
+        slots: 'last_slot - 9'
         type: PLAYER_HEAD
         textures: '{lut.textures[current_page < number_pages then "ARROW_RIGHT" else "ARROW_RIGHT_RED"]}'
         name: |

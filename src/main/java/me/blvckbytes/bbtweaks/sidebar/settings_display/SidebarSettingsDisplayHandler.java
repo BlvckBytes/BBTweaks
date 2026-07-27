@@ -69,6 +69,12 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
     }
 
     if (clickType == ClickType.LEFT) {
+      if (config.rootSection.sidebar.settingsDisplay.items.enabled.getDisplaySlots().contains(slot)) {
+        display.displayData.setEnabled(null);
+        display.updateItems();
+        return;
+      }
+
       if (config.rootSection.sidebar.settingsDisplay.items.previousPage.getDisplaySlots().contains(slot)) {
         display.previousPage();
         return;
