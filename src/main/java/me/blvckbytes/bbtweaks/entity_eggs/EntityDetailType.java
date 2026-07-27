@@ -32,7 +32,7 @@ public enum EntityDetailType {
   public static List<MarkupNode> captureDetails(LivingEntity entity, ConfigKeeper<MainSection> config) {
     var result = new ArrayList<MarkupNode>();
 
-    result.add(makeDetailCapture(HEALTH, entity.getHealth(), config));
+    result.add(makeDetailCapture(HEALTH, entity.getHealth() / 2.0, config));
 
     var activeItem = entity.getActiveItem();
 

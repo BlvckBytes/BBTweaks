@@ -5,8 +5,7 @@ import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
-import org.bukkit.Bukkit;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
@@ -20,6 +19,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.SpawnEggMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -33,12 +33,15 @@ public class EntityEggsListener implements Listener, Tickable {
 
   private static final long MAX_DOUBLE_CLICK_DELAY_MS = 800;
   private static final long LOG_FLUSH_PERIOD_T = 20;
+  private static final int RELEASE_RAY_TRACE_DISTANCE = 5;
 
   private record TimeAndEntityId(long time, long relativeTime, int entityId) {}
 
   private final Plugin plugin;
   private final ConfigKeeper<MainSection> config;
   private final Map<UUID, TimeAndEntityId> lastInteractionByPlayerId;
+
+  private final NamespacedKey keyEntityEgg;
 
   private final File captureLogFile;
   private final List<String> linesToLog = new ArrayList<>();
@@ -52,6 +55,8 @@ public class EntityEggsListener implements Listener, Tickable {
     this.plugin = plugin;
     this.config = config;
     this.lastInteractionByPlayerId = new HashMap<>();
+
+    this.keyEntityEgg = new NamespacedKey(plugin, "entity-egg");
 
     this.captureLogFile = new File(plugin.getDataFolder(), "entity-eggs-log.txt");
 
@@ -115,16 +120,28 @@ public class EntityEggsListener implements Listener, Tickable {
   }
 
   private boolean handleRightClickInteraction(Player player, @Nullable Entity entity) {
+    Boolean result;
+
+    if ((result = handleEntityCapture(player, entity)) != null)
+      return result;
+
+    if ((result = handleEntityRelease(player, entity)) != null)
+      return result;
+
+    return false;
+  }
+
+  private @Nullable Boolean handleEntityCapture(Player player, @Nullable Entity entity) {
     if (!player.isSneaking())
-      return false;
+      return null;
+
+    if (!player.hasPermission("bbtweaks.entity-eggs"))
+      return null;
 
     var heldItem = player.getInventory().getItemInMainHand();
 
-    if (heldItem.getType() != Material.EGG || heldItem.getAmount() < 1)
-      return false;
-
-    if (!player.hasPermission("bbtweaks.entity-eggs"))
-      return false;
+    if (heldItem.getType() != Material.EGG)
+      return null;
 
     var lastInteraction = lastInteractionByPlayerId.get(player.getUniqueId());
 
@@ -181,18 +198,76 @@ public class EntityEggsListener implements Listener, Tickable {
       return true;
     }
 
-    var newHeldAmount = heldItem.getAmount() - 1;
-
-    heldItem.setAmount(newHeldAmount);
-
-    if (newHeldAmount <= 0)
-      player.getInventory().setItemInMainHand(null);
+    reduceItemInHandIfApplicable(player);
 
     config.rootSection.entityEggs.captureSuccess.sendMessage(player, environment);
 
     linesToLog.add(config.rootSection.entityEggs.captureSuccessLog.asPlainString(environment));
 
     livingEntity.remove();
+    return true;
+  }
+
+  private @Nullable Boolean handleEntityRelease(Player player, @Nullable Entity entity) {
+    var heldItem = player.getInventory().getItemInMainHand();
+
+    if (!heldItem.getType().name().endsWith("_SPAWN_EGG"))
+      return null;
+
+    var flagValue = heldItem.getPersistentDataContainer().get(keyEntityEgg, PersistentDataType.BOOLEAN);
+
+    if (flagValue == null || !flagValue)
+      return null;
+
+    if (!(heldItem.getItemMeta() instanceof SpawnEggMeta spawnEggMeta))
+      return null;
+
+    var spawnedEntity = spawnEggMeta.getSpawnedEntity();
+
+    if (spawnedEntity == null)
+      return null;
+
+    var lastInteraction = lastInteractionByPlayerId.get(player.getUniqueId());
+
+    // Ensure that they do not release the entity instantly after they've captured it due to clicking too long.
+    if (lastInteraction != null && relativeTime - lastInteraction.relativeTime < 5)
+      return true;
+
+    Location location = null;
+
+    if (entity == null) {
+      var rayTraceResult = player.rayTraceEntities(RELEASE_RAY_TRACE_DISTANCE);
+
+      if (rayTraceResult != null && rayTraceResult.getHitEntity() != null)
+        entity = rayTraceResult.getHitEntity();
+    }
+
+    if (entity != null)
+      location = entity.getLocation().add(Math.random() / 4, .2, Math.random() / 4);
+
+    if (location == null) {
+      var rayTraceResult = player.rayTraceBlocks(RELEASE_RAY_TRACE_DISTANCE);
+
+      if (rayTraceResult != null && rayTraceResult.getHitBlock() != null && rayTraceResult.getHitBlockFace() != null) {
+        var targetBlock = rayTraceResult.getHitBlock();
+
+        if (!targetBlock.isPassable())
+          targetBlock = targetBlock.getRelative(rayTraceResult.getHitBlockFace());
+
+        if (!targetBlock.isPassable())
+          return true;
+
+        location = targetBlock.getLocation().add(.5, .2, .5);
+      }
+    }
+
+    if (location == null)
+      return true;
+
+    spawnedEntity.createEntity(location);
+
+    reduceItemInHandIfApplicable(player);
+
     return true;
   }
 
@@ -213,6 +288,8 @@ public class EntityEggsListener implements Listener, Tickable {
     if (!(spawnEgg.getItemMeta() instanceof SpawnEggMeta eggMeta))
       return null;
 
+    eggMeta.getPersistentDataContainer().set(keyEntityEgg, PersistentDataType.BOOLEAN, true);
+
     eggMeta.setSpawnedEntity(snapshot);
 
     eggMeta.lore(
@@ -223,12 +300,22 @@ public class EntityEggsListener implements Listener, Tickable {
       )
     );
 
-    if (livingEntity.customName() != null)
-      eggMeta.displayName(livingEntity.customName());
-
     spawnEgg.setItemMeta(eggMeta);
 
     return spawnEgg;
+  }
+
+  private void reduceItemInHandIfApplicable(Player player) {
+    if (player.getGameMode() == GameMode.CREATIVE)
+      return;
+
+    var heldItem = player.getInventory().getItemInMainHand();
+    var newHeldAmount = heldItem.getAmount() - 1;
+
+    heldItem.setAmount(newHeldAmount);
+
+    if (newHeldAmount <= 0)
+      player.getInventory().setItemInMainHand(null);
   }
 
   private static Material getSpawnEggMaterial(EntityType type) {
