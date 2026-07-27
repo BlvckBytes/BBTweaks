@@ -2235,6 +2235,367 @@ sidebar:
               <container *other>{world_name}</>
           }
         />
+    MCMMO_ACROBATICS_LEVEL:
+      iconData:
+        name: 'McMMO Akrobatik-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Akrobatik-Fähigkeit.
+        iconType: 'LEATHER_BOOTS'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_ALCHEMY_LEVEL:
+      iconData:
+        name: 'McMMO Alchemie-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Alchemie-Fähigkeit.
+        iconType: 'SPLASH_POTION'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_ARCHERY_LEVEL:
+      iconData:
+        name: 'McMMO Bogenschießen-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Bogenschießen-Fähigkeit.
+        iconType: 'BOW'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_AXES_LEVEL:
+      iconData:
+        name: 'McMMO Axtkampf-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Axtkampf-Fähigkeit.
+        iconType: 'STONE_AXE'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_CROSSBOWS_LEVEL:
+      iconData:
+        name: 'McMMO Armbrust-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Armbrust-Fähigkeit.
+        iconType: 'CROSSBOW'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_EXCAVATION_LEVEL:
+      iconData:
+        name: 'McMMO Graben-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Graben-Fähigkeit.
+        iconType: 'STONE_SHOVEL'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_FISHING_LEVEL:
+      iconData:
+        name: 'McMMO Angeln-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Angeln-Fähigkeit.
+        iconType: 'FISHING_ROD'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_HERBALISM_LEVEL:
+      iconData:
+        name: 'McMMO Kräuterkunde-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Kräuterkunde-Fähigkeit.
+        iconType: 'STONE_HOE'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_MACES_LEVEL:
+      iconData:
+        name: 'McMMO Streitkolben-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Streitkolben-Fähigkeit.
+        iconType: 'MACE'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_MINING_LEVEL:
+      iconData:
+        name: 'McMMO Bergbau-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Bergbau-Fähigkeit.
+        iconType: 'STONE_PICKAXE'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_REPAIR_LEVEL:
+      iconData:
+        name: 'McMMO Reparatur-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Reparatur-Fähigkeit.
+        iconType: 'EXPERIENCE_BOTTLE'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_SALVAGE_LEVEL:
+      iconData:
+        name: 'McMMO Bergung-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Bergung-Fähigkeit.
+        iconType: 'GOLD_BLOCK'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_SMELTING_LEVEL:
+      iconData:
+        name: 'McMMO Schmelzen-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Schmelzen-Fähigkeit.
+        iconType: 'FURNACE'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_SPEARS_LEVEL:
+      iconData:
+        name: 'McMMO Speerkampf-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Speerkampf-Fähigkeit.
+        iconType: 'STONE_SPEAR'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_SWORDS_LEVEL:
+      iconData:
+        name: 'McMMO Schwertkampf-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Schwertkampf-Fähigkeit.
+        iconType: 'STONE_SWORD'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_TAMING_LEVEL:
+      iconData:
+        name: 'McMMO Zähmen-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Zähmen-Fähigkeit.
+        iconType: 'BONE'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_TRIDENTS_LEVEL:
+      iconData:
+        name: 'McMMO Dreizack-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Dreizack-Fähigkeit.
+        iconType: 'TRIDENT'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_UNARMED_LEVEL:
+      iconData:
+        name: 'McMMO Faustkampf-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Faustkampf-Fähigkeit.
+        iconType: 'RABBIT_FOOT'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
+    MCMMO_WOODCUTTING_LEVEL:
+      iconData:
+        name: 'McMMO Holzfällen-Level'
+        description: |
+          Dein aktuelles mcMMO-Level in<br/>
+          der Holzfällen-Fähigkeit.
+        iconType: 'OAK_LOG'
+      defaultLabelStyle:
+        color: 'LIGHT_GREEN'
+      defaultValueStyle:
+        color: 'LIGHT_RED'
+      defaultEnabled: false
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⛏" floodgate-icon="↯" label=`{skill_name}`
+          value={
+            {skill_level}
+          }
+        />
   colorDisplay:
     title: |
       <&8>Farbauswahl<space/>

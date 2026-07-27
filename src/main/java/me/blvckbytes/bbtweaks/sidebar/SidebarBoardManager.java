@@ -9,6 +9,8 @@ import at.blvckbytes.playtime_rewards.store.TimeType;
 import at.blvckbytes.playtime_rewards.store.TopListDirection;
 import at.blvckbytes.playtime_rewards.store.TopListType;
 import com.gamingmesh.jobs.Jobs;
+import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
+import com.gmail.nossr50.mcMMO;
 import com.gmail.nossr50.util.player.UserManager;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
@@ -591,6 +593,43 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
         return environment
           .withVariable("world_name", player.getWorld().getName().toLowerCase());
       }
+    }
+
+    if (statistic.ordinal() >= SidebarStatistic.MCMMO_ACROBATICS_LEVEL.ordinal() && statistic.ordinal() <= SidebarStatistic.MCMMO_WOODCUTTING_LEVEL.ordinal()) {
+      if (!hasMcMMO)
+        return environment.withVariable("skill_level", "?").withVariable("skill_name", "?");
+
+      var skillType = switch (statistic) {
+        case MCMMO_ACROBATICS_LEVEL -> PrimarySkillType.ACROBATICS;
+        case MCMMO_ALCHEMY_LEVEL -> PrimarySkillType.ALCHEMY;
+        case MCMMO_ARCHERY_LEVEL -> PrimarySkillType.ARCHERY;
+        case MCMMO_AXES_LEVEL -> PrimarySkillType.AXES;
+        case MCMMO_CROSSBOWS_LEVEL -> PrimarySkillType.CROSSBOWS;
+        case MCMMO_EXCAVATION_LEVEL -> PrimarySkillType.EXCAVATION;
+        case MCMMO_FISHING_LEVEL -> PrimarySkillType.FISHING;
+        case MCMMO_HERBALISM_LEVEL -> PrimarySkillType.HERBALISM;
+        case MCMMO_MACES_LEVEL -> PrimarySkillType.MACES;
+        case MCMMO_MINING_LEVEL -> PrimarySkillType.MINING;
+        case MCMMO_REPAIR_LEVEL -> PrimarySkillType.REPAIR;
+        case MCMMO_SALVAGE_LEVEL -> PrimarySkillType.SALVAGE;
+        case MCMMO_SMELTING_LEVEL -> PrimarySkillType.SMELTING;
+        case MCMMO_SPEARS_LEVEL -> PrimarySkillType.SPEARS;
+        case MCMMO_SWORDS_LEVEL -> PrimarySkillType.SWORDS;
+        case MCMMO_TAMING_LEVEL -> PrimarySkillType.TAMING;
+        case MCMMO_TRIDENTS_LEVEL -> PrimarySkillType.TRIDENTS;
+        case MCMMO_UNARMED_LEVEL -> PrimarySkillType.UNARMED;
+        case MCMMO_WOODCUTTING_LEVEL -> PrimarySkillType.WOODCUTTING;
+        default -> null;
+      };
+
+      if (skillType == null)
+        return environment.withVariable("skill_level", "?").withVariable("skill_name", "?");
+
+      var user = UserManager.getPlayer(player);
+
+      return environment
+        .withVariable("skill_level", user == null ? "?" : user.getSkillLevel(skillType))
+        .withVariable("skill_name", mcMMO.p.getSkillTools().getLocalizedSkillName(skillType));
     }
 
     return environment;
