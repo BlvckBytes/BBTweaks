@@ -16,8 +16,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class SignCopierSettingsDisplay extends Display<SignCopierSettings> {
 
-  private final boolean isFloodgate;
-
   public SignCopierSettingsDisplay(
     Player player,
     SignCopierSettings displayData,
@@ -25,9 +23,7 @@ public class SignCopierSettingsDisplay extends Display<SignCopierSettings> {
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
-
-    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
+    super(player, displayData, config, floodgateIntegration, plugin);
   }
 
   @Override

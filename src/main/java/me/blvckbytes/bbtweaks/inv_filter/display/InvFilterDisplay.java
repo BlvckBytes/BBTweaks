@@ -15,8 +15,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class InvFilterDisplay extends Display<InvFilterDisplayData> {
 
-  private final boolean isFloodgate;
-
   public InvFilterDisplay(
     Player player,
     InvFilterDisplayData displayData,
@@ -24,9 +22,7 @@ public class InvFilterDisplay extends Display<InvFilterDisplayData> {
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
-
-    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
+    super(player, displayData, config, floodgateIntegration, plugin);
   }
 
   @Override

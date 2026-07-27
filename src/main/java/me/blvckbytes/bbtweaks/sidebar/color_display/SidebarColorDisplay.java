@@ -22,8 +22,6 @@ import java.util.Map;
 
 public class SidebarColorDisplay extends Display<ColorDisplayData> {
 
-  public final boolean isFloodgate;
-
   private boolean selectingLabelColor;
 
   private final Int2ObjectMap<NamedColor> colorBySlotIndex;
@@ -38,9 +36,7 @@ public class SidebarColorDisplay extends Display<ColorDisplayData> {
     FloodgateIntegration floodgateIntegration,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
-
-    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
+    super(player, displayData, config, floodgateIntegration, plugin);
 
     this.colorBySlotIndex = new Int2ObjectOpenHashMap<>();
 

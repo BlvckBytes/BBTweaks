@@ -16,8 +16,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class SidebarSettingsDisplay extends Display<SidebarPreferencesSlots> {
 
-  public final boolean isFloodgate;
-
   private final StatisticSection[] slotMap;
   private int numberOfPages;
 
@@ -30,9 +28,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferencesSlots> {
     FloodgateIntegration floodgateIntegration,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
-
-    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
+    super(player, displayData, config, floodgateIntegration, plugin);
 
     this.slotMap = new StatisticSection[9 * 6];
   }

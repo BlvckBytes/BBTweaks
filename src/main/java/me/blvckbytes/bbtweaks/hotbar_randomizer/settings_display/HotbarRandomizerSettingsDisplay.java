@@ -19,8 +19,6 @@ import java.util.function.IntConsumer;
 
 public class HotbarRandomizerSettingsDisplay extends Display<HotbarRandomizerSettings> {
 
-  private final boolean isFloodgate;
-
   public HotbarRandomizerSettingsDisplay(
     Player player,
     HotbarRandomizerSettings displayData,
@@ -28,9 +26,7 @@ public class HotbarRandomizerSettingsDisplay extends Display<HotbarRandomizerSet
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
-
-    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
+    super(player, displayData, config, floodgateIntegration, plugin);
   }
 
   @Override

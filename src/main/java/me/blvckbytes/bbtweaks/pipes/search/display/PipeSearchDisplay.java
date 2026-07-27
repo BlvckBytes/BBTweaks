@@ -25,20 +25,16 @@ public class PipeSearchDisplay extends Display<SearchDisplayData> {
   private CollectionAction collectionAction = CollectionAction.first();
   private StackAction stackAction = StackAction.first();
 
-  public final boolean isFloodgate;
-
   public PipeSearchDisplay(
     Player player,
-    FloodgateIntegration floodgateIntegration,
     SearchDisplayData displayData,
     ConfigKeeper<MainSection> config,
+    FloodgateIntegration floodgateIntegration,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
+    super(player, displayData, config, floodgateIntegration, plugin);
 
     this.slotMap = new SearchDisplayEntry[9 * 6];
-
-    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
 
     // Sort the data once initially, as to provide a well-defined order. Then, do
     // not sort after requesting items, to avoid having icons shift around, which

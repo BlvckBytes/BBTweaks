@@ -5,6 +5,7 @@ import at.blvckbytes.cm_mapper.section.gui.GuiItemStackSection;
 import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -20,6 +21,7 @@ public abstract class Display<DisplayDataType> implements InventoryHolder {
 
   public final Player player;
   protected final ConfigKeeper<MainSection> config;
+  public final boolean isFloodgate;
   protected final Plugin plugin;
   public final DisplayDataType displayData;
   private Inventory inventory;
@@ -28,11 +30,13 @@ public abstract class Display<DisplayDataType> implements InventoryHolder {
     Player player,
     DisplayDataType displayData,
     ConfigKeeper<MainSection> config,
+    FloodgateIntegration floodgateIntegration,
     Plugin plugin
   ) {
     this.player = player;
     this.displayData = displayData;
     this.config = config;
+    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
     this.plugin = plugin;
   }
 

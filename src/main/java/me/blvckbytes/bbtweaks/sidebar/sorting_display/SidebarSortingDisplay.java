@@ -15,8 +15,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class SidebarSortingDisplay extends Display<SortingDisplayData> {
 
-  public final boolean isFloodgate;
-
   private final SidebarStatistic[] slotMap;
   private int numberOfPages;
 
@@ -29,9 +27,7 @@ public class SidebarSortingDisplay extends Display<SortingDisplayData> {
     FloodgateIntegration floodgateIntegration,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
-
-    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
+    super(player, displayData, config, floodgateIntegration, plugin);
 
     this.slotMap = new SidebarStatistic[9 * 6];
 

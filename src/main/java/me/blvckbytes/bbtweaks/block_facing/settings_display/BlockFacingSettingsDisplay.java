@@ -16,8 +16,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class BlockFacingSettingsDisplay extends Display<BlockFacingSettings> {
 
-  public final boolean isFloodgate;
-
   public BlockFacingSettingsDisplay(
     Player player,
     BlockFacingSettings displayData,
@@ -25,9 +23,7 @@ public class BlockFacingSettingsDisplay extends Display<BlockFacingSettings> {
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
-
-    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
+    super(player, displayData, config, floodgateIntegration, plugin);
   }
 
   @Override

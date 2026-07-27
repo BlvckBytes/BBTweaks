@@ -15,8 +15,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class MagnetEditDisplay extends Display<EditSession> {
 
-  public final boolean isFloodgate;
-
   public MagnetEditDisplay(
     Player player,
     EditSession displayData,
@@ -24,9 +22,7 @@ public class MagnetEditDisplay extends Display<EditSession> {
     FloodgateIntegration floodgateIntegration,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
-
-    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
+    super(player, displayData, config, floodgateIntegration, plugin);
   }
 
   @Override

@@ -17,8 +17,6 @@ import java.util.List;
 
 public class MarkerDisplay extends Display<MarkerDisplayData> {
 
-  public final boolean isFloodgate;
-
   private final MarkerDisplayItem[] slotMap;
 
   private final List<? extends MarkerDisplayItem> displayItems;
@@ -33,9 +31,8 @@ public class MarkerDisplay extends Display<MarkerDisplayData> {
     FloodgateIntegration floodgateIntegration,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
+    super(player, displayData, config, floodgateIntegration, plugin);
 
-    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
     this.slotMap = new MarkerDisplayItem[9 * 6];
 
     displayItems = displayData.selectedCategory() == null

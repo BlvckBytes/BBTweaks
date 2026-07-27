@@ -6,6 +6,7 @@ import at.blvckbytes.cm_mapper.section.gui.ItemConsumer;
 import at.blvckbytes.component_markup.constructor.SlotType;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.util.Display;
 import me.blvckbytes.bbtweaks.util.DisplayInventoryParameters;
 import org.bukkit.block.Container;
@@ -21,9 +22,10 @@ public class ShowcaseDisplay extends Display<ShowcaseDisplayData> {
     Player player,
     ShowcaseDisplayData displayData,
     ConfigKeeper<MainSection> config,
+    FloodgateIntegration floodgateIntegration,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
+    super(player, displayData, config, floodgateIntegration, plugin);
   }
 
   @Override

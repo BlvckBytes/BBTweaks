@@ -48,7 +48,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
 
   @Override
   protected PipeSearchDisplay instantiateDisplay(Player player, SearchDisplayData displayData) {
-    return new PipeSearchDisplay(player, floodgateIntegration, displayData, config, plugin);
+    return new PipeSearchDisplay(player, displayData, config, floodgateIntegration, plugin);
   }
 
   private void handleStackAction(Player player, PipeSearchDisplay display, StackAction stackAction, ItemStackEntry itemEntry) {

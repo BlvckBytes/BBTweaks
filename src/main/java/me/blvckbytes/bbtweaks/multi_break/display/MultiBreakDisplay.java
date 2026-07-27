@@ -15,8 +15,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class MultiBreakDisplay extends Display<MultiBreakDisplayData> {
 
-  public final boolean isFloodgate;
-
   public MultiBreakDisplay(
     Player player,
     MultiBreakDisplayData displayData,
@@ -24,9 +22,7 @@ public class MultiBreakDisplay extends Display<MultiBreakDisplayData> {
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
-
-    this.isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
+    super(player, displayData, config, floodgateIntegration, plugin);
   }
 
   @Override

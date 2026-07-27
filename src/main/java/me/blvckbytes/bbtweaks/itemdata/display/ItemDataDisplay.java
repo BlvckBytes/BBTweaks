@@ -17,8 +17,6 @@ import org.jetbrains.annotations.Nullable;
 
 public class ItemDataDisplay extends Display<EmptyObject> {
 
-  private final boolean isFloodgate;
-
   public ItemDataDisplay(
     Player player,
     EmptyObject displayData,
@@ -26,9 +24,7 @@ public class ItemDataDisplay extends Display<EmptyObject> {
     ConfigKeeper<MainSection> config,
     Plugin plugin
   ) {
-    super(player, displayData, config, plugin);
-
-    isFloodgate = floodgateIntegration.isFloodgatePlayer(player);
+    super(player, displayData, config, floodgateIntegration, plugin);
   }
 
   @Override
