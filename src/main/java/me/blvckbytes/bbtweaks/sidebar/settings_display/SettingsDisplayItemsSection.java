@@ -15,6 +15,7 @@ public class SettingsDisplayItemsSection extends ConfigSection {
   public GuiItemStackSection showTitle;
   public GuiItemStackSection showIcons;
   public GuiItemStackSection doScroll;
+  public GuiItemStackSection autoSort;
   public GuiItemStackSection delimitersMode;
   public GuiItemStackSection allColors;
   public GuiItemStackSection nextSneakMode;

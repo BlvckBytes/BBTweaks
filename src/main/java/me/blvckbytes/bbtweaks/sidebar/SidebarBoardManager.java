@@ -26,10 +26,7 @@ import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import me.blvckbytes.bbtweaks.multi_break.BlockDirections;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
 import me.blvckbytes.bbtweaks.integration.arm.ArmIntegration;
-import me.blvckbytes.bbtweaks.sidebar.preferences.DelimitersMode;
-import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferences;
-import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferencesStore;
-import me.blvckbytes.bbtweaks.sidebar.preferences.SneakMode;
+import me.blvckbytes.bbtweaks.sidebar.preferences.*;
 import me.blvckbytes.bbtweaks.util.*;
 import net.ess3.api.IEssentials;
 import net.kyori.adventure.text.Component;
@@ -261,11 +258,11 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       default -> throw new IllegalStateException("Unaccounted-for delimiters-mode: " + preferences.delimitersMode);
     }
 
-    var lines = new ArrayList<Component>(maxLineCount);
+    var renderedLines = new ArrayList<RenderedLine>(maxLineCount);
 
     if (preferences.delimitersMode != DelimitersMode.NONE) {
       staticLineIndices.add(0);
-      lines.add(Component.empty());
+      renderedLines.add(new RenderedLine(Component.empty(), null, 0));
     }
 
     var lengthBuffer = new MutableInt();
@@ -273,19 +270,19 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
 
     for (var statistic : preferences.statisticsInOrder) {
       var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
-      var line = statistic.renderFor(board.holder, statisticSection, preferences, this);
+      var renderedLine = statistic.renderFor(board.holder, statisticSection, preferences, this);
 
-      if (line == null)
+      if (renderedLine == null)
         continue;
 
       lengthBuffer.value = 0;
 
-      ComponentUtil.forEachTextOfComponent(line, text -> lengthBuffer.value += text.length());
+      ComponentUtil.forEachTextOfComponent(renderedLine.component(), text -> lengthBuffer.value += text.length());
 
       if (lengthBuffer.value > maxLineLength)
         maxLineLength = lengthBuffer.value;
 
-      lines.add(line);
+      renderedLines.add(renderedLine);
     }
 
     if (preferences.delimitersMode != DelimitersMode.NONE) {
@@ -296,19 +293,71 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
           .withVariable("max_line_length", maxLineLength)
       ).getFirst();
 
-      lines.set(0, delimiter);
+      renderedLines.set(0, new RenderedLine(delimiter, null, 0));
 
       if (preferences.delimitersMode == DelimitersMode.TOP_AND_BOTTOM) {
-        staticLineIndices.add(lines.size());
-        lines.add(delimiter);
+        staticLineIndices.add(renderedLines.size());
+        renderedLines.add(new RenderedLine(delimiter, null, 0));
       }
     }
+
+    var lines = sortAndUnwrapRenderedLines(renderedLines, preferences.autoSortMode);
 
     board.advanceScrollingAndSetLines(relativeTime, lines, staticLineIndices, preferences);
   }
 
+  private List<Component> sortAndUnwrapRenderedLines(List<RenderedLine> renderedLines, AutoSortMode autoSortMode) {
+    var result = new ArrayList<Component>(renderedLines.size());
+
+    if (autoSortMode != AutoSortMode.OFF) {
+      var groupMemberLines = new ArrayList<RenderedLine>(renderedLines.size());
+      var affectedStatistics = EnumSet.noneOf(SidebarStatistic.class);
+
+      for (var sortingGroup : SidebarSortingGroup.ALL_VALUES) {
+        groupMemberLines.clear();
+        affectedStatistics.clear();
+
+        for (var line : renderedLines) {
+          if (line.statistic() == null || !sortingGroup.members.contains(line.statistic()))
+            continue;
+
+          groupMemberLines.add(line);
+          affectedStatistics.add(line.statistic());
+        }
+
+        if (groupMemberLines.isEmpty())
+          continue;
+
+        groupMemberLines.sort((a, b) -> {
+          return Integer.compare(a.sortingValue(), b.sortingValue()) * (autoSortMode == AutoSortMode.ASCENDING ? 1 : -1);
+        });
+
+        var nextGroupMemberIndex = 0;
+
+        for (var index = 0; index < renderedLines.size(); ++index) {
+          var currentLine = renderedLines.get(index);
+
+          if (!affectedStatistics.contains(currentLine.statistic()))
+            continue;
+
+          var currentGroupMemberIndex = nextGroupMemberIndex++;
+
+          if (currentGroupMemberIndex >= groupMemberLines.size())
+            break;
+
+          renderedLines.set(index, groupMemberLines.get(currentGroupMemberIndex));
+        }
+      }
+    }
+
+    for (var renderedLine : renderedLines)
+      result.add(renderedLine.component());
+
+    return result;
+  }
+
   @Override
-  public InterpretationEnvironment resolve(BoardHolder holder, SidebarStatistic statistic) {
+  public EnvironmentAndSortingValue resolve(BoardHolder holder, SidebarStatistic statistic) {
     var player = holder.bukkitPlayer();
 
     var environment = new InterpretationEnvironment()
@@ -319,74 +368,110 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
         var prefix = luckPerms.getPlayerAdapter(Player.class).getMetaData(player).getPrefix();
 
         if (prefix == null)
-          return environment.withVariable("prefix", "?");
+          return new EnvironmentAndSortingValue(environment.withVariable("prefix", "?"), 0);
 
-        return environment
-          .withVariable("prefix", LegacyComponentSerializer.legacySection().deserialize(LegacyColorUtil.enableColors(prefix.trim())));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("prefix", LegacyComponentSerializer.legacySection().deserialize(LegacyColorUtil.enableColors(prefix.trim()))),
+          0
+        );
       }
 
       case MONEY -> {
-        return environment
-          .withVariable("balance", holder.essentialsUser().getMoney().doubleValue());
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("balance", holder.essentialsUser().getMoney().doubleValue()),
+          0
+        );
       }
 
       case TOTAL_PLAYTIME -> {
-        return environment
-          .withVariable("time", playtimeRewards.getTotalTimeTicks(player, TimeType.PLAY_TIME));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("time", playtimeRewards.getTotalTimeTicks(player, TimeType.PLAY_TIME)),
+          0
+        );
       }
 
       case TOTAL_PLAYTIME_TOP_PLACE -> {
-        return environment
-          .withVariable("place", playtimeRewards.getTopListNumber(player, TopListType.TOTAL, TopListDirection.DESCENDING, TimeType.PLAY_TIME));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("place", playtimeRewards.getTopListNumber(player, TopListType.TOTAL, TopListDirection.DESCENDING, TimeType.PLAY_TIME)),
+          0
+        );
       }
 
       case TOTAL_AFKTIME -> {
-        return environment
-          .withVariable("time", playtimeRewards.getTotalTimeTicks(player, TimeType.AFK_TIME));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("time", playtimeRewards.getTotalTimeTicks(player, TimeType.AFK_TIME)),
+          0
+        );
       }
 
       case TOTAL_AFKTIME_TOP_PLACE -> {
-        return environment
-          .withVariable("place", playtimeRewards.getTopListNumber(player, TopListType.TOTAL, TopListDirection.DESCENDING, TimeType.AFK_TIME));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("place", playtimeRewards.getTopListNumber(player, TopListType.TOTAL, TopListDirection.DESCENDING, TimeType.AFK_TIME)),
+          0
+        );
       }
 
       case HOME_COUNT -> {
-        return environment
-          .withVariable("current_home_count", holder.essentialsUser().getHomes().size())
-          .withVariable("total_home_count", essentials.getSettings().getHomeLimit(holder.essentialsUser()));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("current_home_count", holder.essentialsUser().getHomes().size())
+            .withVariable("total_home_count", essentials.getSettings().getHomeLimit(holder.essentialsUser())),
+          0
+        );
       }
 
       case PING -> {
-        return environment
-          .withVariable("ping", player.getPing());
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("ping", player.getPing()),
+          0
+        );
       }
 
       case DATE, REAL_TIME -> {
-        return environment
-          .withVariable("millis", System.currentTimeMillis());
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("millis", System.currentTimeMillis()),
+          0
+        );
       }
 
       case COORDINATES -> {
-        return environment
-          .withVariable("x", (int) player.getX())
-          .withVariable("y", (int) player.getY())
-          .withVariable("z", (int) player.getZ())
-          .withVariable("world", player.getWorld().getName());
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("x", (int) player.getX())
+            .withVariable("y", (int) player.getY())
+            .withVariable("z", (int) player.getZ())
+            .withVariable("world", player.getWorld().getName()),
+          0
+        );
       }
 
       case BIOME -> {
         var location = player.getLocation();
         var biome = player.getWorld().getBiome(location);
 
-        return environment
-          .withVariable("biome_key", biome.translationKey());
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("biome_key", biome.translationKey()),
+          0
+        );
       }
 
       case LOOKING_DIRECTION -> {
         var face = BlockDirections.directionToBlockFace(player.getLocation().getDirection());
 
-        return environment
-          .withVariable("direction", StringUtils.capitalize(face.name().toLowerCase()));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("direction", StringUtils.capitalize(face.name().toLowerCase())),
+          0
+        );
       }
 
       case GAME_TIME -> {
@@ -412,60 +497,74 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
           time -= TICKS_PER_SECOND;
         }
 
-        return environment
-          .withVariable("hours", hours)
-          .withVariable("minutes", minutes)
-          .withVariable("seconds", seconds);
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("hours", hours)
+            .withVariable("minutes", minutes)
+            .withVariable("seconds", seconds),
+          0
+        );
       }
 
       case FIRST_JOB_PROGRESSION -> {
         if (!hasJobs)
-          return environment.withVariable("name", null).withVariable("progression", null);
+          return new EnvironmentAndSortingValue(environment.withVariable("name", null).withVariable("progression", null), 0);
 
         var progressions = Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression();
 
         if (progressions.isEmpty())
-          return environment.withVariable("name", null).withVariable("progression", null);
+          return new EnvironmentAndSortingValue(environment.withVariable("name", null).withVariable("progression", null), 0);
 
         var progression = progressions.getFirst();
 
-        return environment
-          .withVariable("name", progression.getJob().getName())
-          .withVariable("progression", JobProgressionData.fromProgression(progression));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("name", progression.getJob().getName())
+            .withVariable("progression", JobProgressionData.fromProgression(progression)),
+          0
+        );
       }
 
       case SECOND_JOB_PROGRESSION -> {
         if (!hasJobs)
-          return environment.withVariable("name", null).withVariable("progression", null);
+          return new EnvironmentAndSortingValue(environment.withVariable("name", null).withVariable("progression", null), 0);
 
         var progressions = Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression();
 
         if (progressions.size() < 2)
-          return environment.withVariable("name", null).withVariable("progression", null);
+          return new EnvironmentAndSortingValue(environment.withVariable("name", null).withVariable("progression", null), 0);
 
         var progression = progressions.get(1);
 
-        return environment
-          .withVariable("name", progression.getJob().getName())
-          .withVariable("progression", JobProgressionData.fromProgression(progression));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("name", progression.getJob().getName())
+            .withVariable("progression", JobProgressionData.fromProgression(progression)),
+          0
+        );
       }
 
       case MCMMO_POWER_LEVEL -> {
         if (!hasMcMMO)
-          return environment.withVariable("power_level", "?");
+          return new EnvironmentAndSortingValue(environment.withVariable("power_level", "?"), 0);
 
         var user = UserManager.getPlayer(player);
 
         if (user == null)
-          return environment.withVariable("power_level", "?");
+          return new EnvironmentAndSortingValue(environment.withVariable("power_level", "?"), 0);
 
-        return environment
-          .withVariable("power_level", user.getPowerLevel());
+        return new EnvironmentAndSortingValue(
+          environment.withVariable("power_level", user.getPowerLevel()),
+          0
+        );
       }
 
       case PLAYER_NAME -> {
-        return environment
-          .withVariable("name", player.getName());
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("name", player.getName()),
+          0
+        );
       }
 
       case TPS -> {
@@ -477,9 +576,12 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
 
         var tickMillisAverage = tickTimes.length == 0 ? 0 : tickMillisSum / tickTimes.length;
 
-        return environment
-          .withVariable("tps", Bukkit.getServer().getTPS())
-          .withVariable("average_mspt", tickMillisAverage);
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("tps", Bukkit.getServer().getTPS())
+            .withVariable("average_mspt", tickMillisAverage),
+          0
+        );
       }
 
       case LIGHT_LEVEL -> {
@@ -489,115 +591,160 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
         BlockFace face;
 
         if (result == null || (block = result.getHitBlock()) == null || (face = result.getHitBlockFace()) == null)
-          return environment.withVariable("has_block", false);
+          return new EnvironmentAndSortingValue(environment.withVariable("has_block", false), 0);
 
         if (block.getType().isOccluding())
           block = block.getRelative(face);
 
-        return environment
-          .withVariable("has_block", true)
-          .withVariable("light_sky", block.getLightFromSky())
-          .withVariable("light_blocks", block.getLightFromBlocks());
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("has_block", true)
+            .withVariable("light_sky", block.getLightFromSky())
+            .withVariable("light_blocks", block.getLightFromBlocks()),
+          0
+        );
       }
 
       case MULTIBREAK_STATUS -> {
         var parametersSlots = multiBreakParametersStore.accessParametersSlots(player);
 
-        return environment
-          .withVariable("enabled", parametersSlots.isEnabledAndInAllowedWorld())
-          .withVariable("slot_index", parametersSlots.getSelectedSlotIndex());
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("enabled", parametersSlots.isEnabledAndInAllowedWorld())
+            .withVariable("slot_index", parametersSlots.getSelectedSlotIndex()),
+          0
+        );
       }
 
       case INV_MAGNET_STATUS -> {
         var parameters = invMagnetParametersStore.accessParameters(player);
 
-        return environment
-          .withVariable("enabled", parameters.isEnabled())
-          .withVariable("radius", parameters.getRadius())
-          .withVariable("max_radius", parameters.getLimits().maxRadius());
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("enabled", parameters.isEnabled())
+            .withVariable("radius", parameters.getRadius())
+            .withVariable("max_radius", parameters.getLimits().maxRadius()),
+          0
+        );
       }
 
       case INV_FILTER_STATUS -> {
         var profile = invFilterProfileStore.access(player);
 
-        return environment
-          .withVariable("enabled", profile.enabled)
-          .withVariable("slot", profile.getSelectedSlotIndex() + 1);
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("enabled", profile.enabled)
+            .withVariable("slot", profile.getSelectedSlotIndex() + 1),
+          0
+        );
       }
 
       case AUTOTOOL_STATUS -> {
-        return environment
-          .withVariable("enabled", autoToolCommand.isEnabled(player));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("enabled", autoToolCommand.isEnabled(player)),
+          0
+        );
       }
 
       case CURRENT_AFK_DURATION -> {
-        return environment
-          .withVariable(
-            "time",
-            holder.essentialsUser().isAfk()
-              ? System.currentTimeMillis() - holder.essentialsUser().getAfkSince()
-              : null
-          );
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable(
+              "time",
+              holder.essentialsUser().isAfk()
+                ? System.currentTimeMillis() - holder.essentialsUser().getAfkSince()
+                : null
+            ),
+          0
+        );
       }
 
       case REMAINING_PLAYTIME_UNTIL_NEXT_RANK -> {
-        return environment
-          .withVariable("time", playtimeRewards.getRemainingTimeUntilNextRank(player));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("time", playtimeRewards.getRemainingTimeUntilNextRank(player)),
+          0
+        );
       }
 
       case REMAINING_SHOP_REGION_RENT_DURATION -> {
-        return environment
-          .withVariable("time", armIntegration.getRemainingShopRegionTime(player));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("time", armIntegration.getRemainingShopRegionTime(player)),
+          0
+        );
       }
 
       case REMAINING_CREATIVE_REGION_RENT_DURATION -> {
-        return environment
-          .withVariable("time", armIntegration.getRemainingCreativeRegionTime(player));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("time", armIntegration.getRemainingCreativeRegionTime(player)),
+          0
+        );
       }
 
       case AUTO_PICKUP_CONTAINER_USAGE_ABSOLUTE, AUTO_PICKUP_CONTAINER_USAGE_RELATIVE -> {
         var usageCounts = autoPickupContainerListener.getLastKnownUsageCounts(player);
 
-        return environment
-          .withVariable("used_slots", usageCounts.usedSlots())
-          .withVariable("vacant_slots", usageCounts.vacantSlots())
-          .withVariable("container_count", usageCounts.containerCount());
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("used_slots", usageCounts.usedSlots())
+            .withVariable("vacant_slots", usageCounts.vacantSlots())
+            .withVariable("container_count", usageCounts.containerCount()),
+          0
+        );
       }
 
       case BLOCK_FACING_STATUS -> {
         var settings = blockFacingSettingsStore.access(player);
 
-        return environment
-          .withVariable("enabled", settings.enabled)
-          .withVariable("facing", settings.facingOverride.sidebarShorthand);
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("enabled", settings.enabled)
+            .withVariable("facing", settings.facingOverride.sidebarShorthand),
+          0
+        );
       }
 
       case HOTBAR_RANDOMIZER_STATUS -> {
         var settings = hotbarRandomizerSettingsStore.accessSettings(player);
 
-        return environment
-          .withVariable("enabled", settings.enabled);
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("enabled", settings.enabled),
+          0
+        );
       }
 
       case PLAYER_COUNT -> {
-        return environment
-          .withVariable("player_count", Bukkit.getOnlinePlayers().size());
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("player_count", Bukkit.getOnlinePlayers().size()),
+          0
+        );
       }
 
       case DEATH_COUNT -> {
-        return environment
-          .withVariable("death_count", player.getStatistic(Statistic.DEATHS));
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("death_count", player.getStatistic(Statistic.DEATHS)),
+          0
+        );
       }
 
       case WORLD_NAME -> {
-        return environment
-          .withVariable("world_name", player.getWorld().getName().toLowerCase());
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("world_name", player.getWorld().getName().toLowerCase()),
+          0
+        );
       }
     }
 
     if (statistic.ordinal() >= SidebarStatistic.MCMMO_ACROBATICS_LEVEL.ordinal() && statistic.ordinal() <= SidebarStatistic.MCMMO_WOODCUTTING_LEVEL.ordinal()) {
       if (!hasMcMMO)
-        return environment.withVariable("skill_level", "?").withVariable("skill_name", "?");
+        return new EnvironmentAndSortingValue(environment.withVariable("skill_level", "?").withVariable("skill_name", "?"), 0);
 
       var skillType = switch (statistic) {
         case MCMMO_ACROBATICS_LEVEL -> PrimarySkillType.ACROBATICS;
@@ -623,15 +770,19 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       };
 
       if (skillType == null)
-        return environment.withVariable("skill_level", "?").withVariable("skill_name", "?");
+        return new EnvironmentAndSortingValue(environment.withVariable("skill_level", "?").withVariable("skill_name", "?"), 0);
 
       var user = UserManager.getPlayer(player);
+      var level = user == null ? null : user.getSkillLevel(skillType);
 
-      return environment
-        .withVariable("skill_level", user == null ? "?" : user.getSkillLevel(skillType))
-        .withVariable("skill_name", mcMMO.p.getSkillTools().getLocalizedSkillName(skillType));
+      return new EnvironmentAndSortingValue(
+        environment
+          .withVariable("skill_level", level == null ? "?" : level)
+          .withVariable("skill_name", mcMMO.p.getSkillTools().getLocalizedSkillName(skillType)),
+        level == null ? 0 : level
+      );
     }
 
-    return environment;
+    return new EnvironmentAndSortingValue(environment, 0);
   }
 }

@@ -27,7 +27,7 @@ public class SidebarPreferencesStore implements Disableable, Listener {
 
   private final NamespacedKey keyEnabled, keySelectedSlotIndex;
 
-  private final NamespacedKey[] keysShowTitle, keysShowIcons, keysDoScroll, keysDelimitersMode, keysSneakMode,
+  private final NamespacedKey[] keysShowTitle, keysShowIcons, keysDoScroll, keysAutoSort, keysDelimitersMode, keysSneakMode,
     keysStatisticEnableModes, keysStatisticsOrder, keysStatisticsLabelStyles, keysStatisticsValueStyles;
 
   private final Map<UUID, SidebarPreferencesSlots> preferencesSlotsByPlayerId;
@@ -44,6 +44,7 @@ public class SidebarPreferencesStore implements Disableable, Listener {
     this.keysShowTitle = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
     this.keysShowIcons = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
     this.keysDoScroll = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
+    this.keysAutoSort = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
     this.keysDelimitersMode = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
     this.keysSneakMode = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
     this.keysStatisticEnableModes = new NamespacedKey[PREFERENCES_SLOTS_COUNT];
@@ -60,6 +61,7 @@ public class SidebarPreferencesStore implements Disableable, Listener {
       this.keysShowTitle[slotIndex] = new NamespacedKey(plugin, baseKey + "-show-title");
       this.keysShowIcons[slotIndex] = new NamespacedKey(plugin, baseKey + "-show-icons");
       this.keysDoScroll[slotIndex] = new NamespacedKey(plugin, baseKey + "-do-scroll");
+      this.keysAutoSort[slotIndex] = new NamespacedKey(plugin, baseKey + "-auto-sort");
       this.keysDelimitersMode[slotIndex] = new NamespacedKey(plugin, baseKey + "-delimiters-mode");
       this.keysSneakMode[slotIndex] = new NamespacedKey(plugin, baseKey + "-sneak-mode");
       this.keysStatisticEnableModes[slotIndex] = new NamespacedKey(plugin, baseKey + "-statistic-enable-modes");
@@ -153,6 +155,11 @@ public class SidebarPreferencesStore implements Disableable, Listener {
 
     if (sneakModeValue != null)
       result.sneakMode = SneakMode.byOrdinalOrDefault(sneakModeValue, defaults);
+
+    var autoSortValue = pdc.get(keysAutoSort[slotIndex], PersistentDataType.INTEGER);
+
+    if (autoSortValue != null)
+      result.autoSortMode = AutoSortMode.byOrdinalOrDefault(autoSortValue, defaults);
 
     var enableModesValue = pdc.get(keysStatisticEnableModes[slotIndex], PersistentDataType.INTEGER_ARRAY);
 
@@ -250,6 +257,7 @@ public class SidebarPreferencesStore implements Disableable, Listener {
     pdc.set(keysDoScroll[preferences.slotIndex], PersistentDataType.BOOLEAN, preferences.doScroll);
     pdc.set(keysDelimitersMode[preferences.slotIndex], PersistentDataType.INTEGER, preferences.delimitersMode.ordinal());
     pdc.set(keysSneakMode[preferences.slotIndex], PersistentDataType.INTEGER, preferences.sneakMode.ordinal());
+    pdc.set(keysAutoSort[preferences.slotIndex], PersistentDataType.INTEGER, preferences.autoSortMode.ordinal());
 
     var enableModes = new IntArrayList();
 

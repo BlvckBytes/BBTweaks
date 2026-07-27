@@ -103,6 +103,12 @@ public class SidebarSettingsDisplayHandler extends DisplayHandler<SidebarSetting
         return;
       }
 
+      if (config.rootSection.sidebar.settingsDisplay.items.autoSort.getDisplaySlots().contains(slot)) {
+        preferences.autoSortMode = preferences.autoSortMode.next();
+        display.updateItems();
+        return;
+      }
+
       if (config.rootSection.sidebar.settingsDisplay.items.delimitersMode.getDisplaySlots().contains(slot)) {
         preferences.delimitersMode = preferences.delimitersMode.next();
         display.updateItems();

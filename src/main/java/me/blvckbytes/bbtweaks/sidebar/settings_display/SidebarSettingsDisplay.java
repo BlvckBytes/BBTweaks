@@ -96,6 +96,7 @@ public class SidebarSettingsDisplay extends Display<SidebarPreferencesSlots> {
     config.rootSection.sidebar.settingsDisplay.items.showTitle.renderInto(itemConsumer, environment);
     config.rootSection.sidebar.settingsDisplay.items.showIcons.renderInto(itemConsumer, environment);
     config.rootSection.sidebar.settingsDisplay.items.doScroll.renderInto(itemConsumer, environment);
+    config.rootSection.sidebar.settingsDisplay.items.autoSort.renderInto(itemConsumer, environment);
     config.rootSection.sidebar.settingsDisplay.items.delimitersMode.renderInto(itemConsumer, environment);
     config.rootSection.sidebar.settingsDisplay.items.allColors.renderInto(itemConsumer, environment);
     config.rootSection.sidebar.settingsDisplay.items.nextSneakMode.renderInto(itemConsumer, environment);

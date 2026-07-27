@@ -20,8 +20,10 @@ public class SidebarPreferences {
   public boolean showTitle;
   public boolean showIcons;
   public boolean doScroll;
+
   public DelimitersMode delimitersMode;
   public SneakMode sneakMode;
+  public AutoSortMode autoSortMode;
 
   public final EnumMap<SidebarStatistic, StatisticEnableMode> enableModeByStatistic;
   public final EnumMap<SidebarStatistic, ColorAndFormats> labelStyleByStatistic;
@@ -57,6 +59,9 @@ public class SidebarPreferences {
     if (doScroll != defaults.doScroll)
       return true;
 
+    if (autoSortMode != defaults.autoSortMode)
+      return true;
+
     if (sneakMode != defaults.sneakMode)
       return true;
 
@@ -88,6 +93,7 @@ public class SidebarPreferences {
     this.showTitle = defaults.showTitle;
     this.showIcons = defaults.showIcons;
     this.doScroll = defaults.doScroll;
+    this.autoSortMode = defaults.autoSortMode;
     this.sneakMode = defaults.sneakMode;
     this.delimitersMode = defaults.delimitersMode;
 
@@ -134,6 +140,7 @@ public class SidebarPreferences {
       .withVariable("show_title", showTitle)
       .withVariable("show_icons", showIcons)
       .withVariable("do_scroll", doScroll)
+      .withVariable("auto_sort_mode", autoSortMode.name())
       .withVariable("delimiters_mode", delimitersMode.name())
       .withVariable("slot_enabled", preferencesSlots.getSelectedSlotIndex() == slotIndex)
       .withVariable("sneak_mode", sneakMode.name());

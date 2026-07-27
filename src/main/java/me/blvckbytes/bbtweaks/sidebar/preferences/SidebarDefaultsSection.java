@@ -18,6 +18,7 @@ public class SidebarDefaultsSection extends ConfigSection {
 
   public SneakMode sneakMode;
   public DelimitersMode delimitersMode;
+  public AutoSortMode autoSortMode;
 
   public final List<String> enabledStatistics = new ArrayList<>();
 
@@ -30,6 +31,15 @@ public class SidebarDefaultsSection extends ConfigSection {
   @Override
   public void afterParsing(List<Field> fields) throws Exception {
     super.afterParsing(fields);
+
+    if (sneakMode == null)
+      throw new MappingError("Property \"sneakMode\" must not be absent");
+
+    if (delimitersMode == null)
+      throw new MappingError("Property \"delimitersMode\" must not be absent");
+
+    if (autoSortMode == null)
+      throw new MappingError("Property \"autoSortMode\" must not be absent");
 
     for (var statisticName : enabledStatistics) {
       statisticName = statisticName.trim().toUpperCase();

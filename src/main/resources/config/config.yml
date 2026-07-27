@@ -1474,6 +1474,7 @@ sidebar:
     doScroll: true
     sneakMode: 'NONE'
     delimitersMode: 'TOP_AND_BOTTOM'
+    autoSortMode: 'OFF'
     enabledStatistics:
       - 'GROUP_PREFIX'
       - 'MONEY'
@@ -1489,6 +1490,7 @@ sidebar:
       doScroll: true
       sneakMode: 'NONE'
       delimitersMode: 'NONE'
+      autoSortMode: 'DESCENDING'
       enabledStatistics:
         - 'MCMMO_POWER_LEVEL'
         - 'MCMMO_ACROBATICS_LEVEL'
@@ -2818,6 +2820,30 @@ sidebar:
             <&8>➥ <&e>Linksklick <&7>Scrollen {do_scroll then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
         slots: 'last_slot - 5'
+      autoSort:
+        type: '{auto_sort_mode neq "OFF" then "PURPLE_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>»<space/>
+            <&5 *if="auto_sort_mode neq 'OFF'">Automatisch sortieren</>
+            <&7 *else>Nicht automatisch sortieren</>
+            <space/>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Sortiert regelmäßig alle numerischen<br/>
+            Einträge der selben Statistikkategorie<br/>
+            untereinander, sodass diese in der<br/>
+            gewünschten Reihenfolge erscheinen.<br/>
+            <br/>
+            <i>(Momentan betrifft diese Einstellung<br/>
+            ausschließlich die McMMO-Fähigkeiten.)</i><br/>
+            {lut.spacer}<br/>
+            <&8>♦ <&e>Aktueller Modus: {lut.sidebar.auto_sort_mode[auto_sort_mode]}<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
+            {lut.spacer}
+        slots: 'last_slot - 4'
       delimitersMode:
         type: 'OAK_FENCE'
         name: |
@@ -2833,7 +2859,7 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
             {lut.spacer}
-        slots: 'last_slot - 4'
+        slots: 'last_slot - 3'
       allColors:
         type: 'GHAST_TEAR'
         name: |
@@ -2848,7 +2874,7 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Farben auswählen<br/>
             {lut.spacer}
-        slots: 'last_slot - 3'
+        slots: 'last_slot - 2'
       nextSneakMode:
         type: 'IRON_BOOTS'
         hideAdditionalTooltips: true
@@ -2866,7 +2892,7 @@ sidebar:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
             {lut.spacer}
-        slots: 'last_slot - 2'
+        slots: 'last_slot - 1'
       openSorting:
         type: 'COMPARATOR'
         name: |
@@ -2877,10 +2903,15 @@ sidebar:
             <br/>
             <&7>Sortiere die Einträge in deiner<br/>
             Sidebar nach individuellem Belieben.<br/>
+            <br/>
+            <&e>🛈 Achtung! Sollte die automatische<br/>
+            Sortierung aktiviert sein, so hat diese<br/>
+            Einstellung für die davon übernommenen<br/>
+            Statistiken keinen Effekt.<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Ins Sortiermenü wechseln<br/>
             {lut.spacer}
-        slots: 'last_slot - 1'
+        slots: 'last_slot'
       nextPage:
         slots: 'last_slot - 9'
         type: PLAYER_HEAD
@@ -3872,6 +3903,10 @@ cLut:
       NONE: '<&7>Keine Linien'
       TOP_AND_BOTTOM: '<&a>Oberhalb und unterhalb'
       TOP_ONLY: '<&3>Nur oberhalb'
+    auto_sort_mode:
+      'OFF': '<&7>Ausgeschalten'
+      ASCENDING: '<&d>Aufsteigend'
+      DESCENDING: '<&d>Absteigend'
     statistic_renderer: |
       <color [label_style.color.hex] *if="show_label">
         <container *if="show_icon">

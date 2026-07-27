@@ -82,7 +82,7 @@ public enum SidebarStatistic {
     this.isSpacer = isSpacer;
   }
 
-  public @Nullable Component renderFor(
+  public @Nullable RenderedLine renderFor(
     BoardHolder holder,
     StatisticSection statisticSection,
     SidebarPreferences preferences,
@@ -93,9 +93,11 @@ public enum SidebarStatistic {
     if (enableMode == StatisticEnableMode.OFF)
       return null;
 
+    var resolutionResult = environmentResolver.resolve(holder, this);
+
     var result = statisticSection.render.interpret(
       SlotType.SINGLE_LINE_CHAT,
-      environmentResolver.resolve(holder, this)
+      resolutionResult.environment()
         .withVariable("label_style", preferences.labelStyleByStatistic.get(statisticSection._sidebarStatistic))
         .withVariable("value_style", preferences.valueStyleByStatistic.get(statisticSection._sidebarStatistic))
         .withVariable("show_icon", preferences.showIcons)
@@ -106,7 +108,7 @@ public enum SidebarStatistic {
     if (result.equals(Component.empty()))
       return null;
 
-    return result;
+    return new RenderedLine(result, statisticSection._sidebarStatistic, resolutionResult.sortingValue());
   }
 
   public static @Nullable SidebarStatistic byOrdinalOrNull(int ordinal) {
