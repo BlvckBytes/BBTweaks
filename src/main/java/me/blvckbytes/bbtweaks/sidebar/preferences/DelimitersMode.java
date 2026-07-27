@@ -10,15 +10,14 @@ public enum DelimitersMode {
   ;
 
   public static final List<DelimitersMode> ALL_VALUES = List.of(values());
-  public static final DelimitersMode DEFAULT_VALUE = TOP_AND_BOTTOM;
 
   public DelimitersMode next() {
     return ALL_VALUES.get((ordinal() + 1) % ALL_VALUES.size());
   }
 
-  public static DelimitersMode byOrdinalOrDefault(int ordinal) {
+  public static DelimitersMode byOrdinalOrDefault(int ordinal, SidebarDefaultsSection defaults) {
     if (ordinal < 0 || ordinal >= ALL_VALUES.size())
-      return DEFAULT_VALUE;
+      return defaults.delimitersMode;
 
     return ALL_VALUES.get(ordinal);
   }

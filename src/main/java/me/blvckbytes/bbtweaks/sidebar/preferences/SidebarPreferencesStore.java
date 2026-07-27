@@ -21,7 +21,7 @@ import java.util.function.Function;
 
 public class SidebarPreferencesStore implements Disableable, Listener {
 
-  private static final int PREFERENCES_SLOTS_COUNT = 3;
+  public static final int PREFERENCES_SLOTS_COUNT = 3;
 
   private final ConfigKeeper<MainSection> config;
 
@@ -142,21 +142,23 @@ public class SidebarPreferencesStore implements Disableable, Listener {
     if (doScrollValue != null)
       result.doScroll = doScrollValue;
 
+    var defaults = config.rootSection.sidebar.getDefaultsForSlot(slotIndex);
+
     var delimitersModeValue = pdc.get(keysDelimitersMode[slotIndex], PersistentDataType.INTEGER);
 
     if (delimitersModeValue != null)
-      result.delimitersMode = DelimitersMode.byOrdinalOrDefault(delimitersModeValue);
+      result.delimitersMode = DelimitersMode.byOrdinalOrDefault(delimitersModeValue, defaults);
 
     var sneakModeValue = pdc.get(keysSneakMode[slotIndex], PersistentDataType.INTEGER);
 
     if (sneakModeValue != null)
-      result.sneakMode = SneakMode.byOrdinalOrDefault(sneakModeValue);
+      result.sneakMode = SneakMode.byOrdinalOrDefault(sneakModeValue, defaults);
 
     var enableModesValue = pdc.get(keysStatisticEnableModes[slotIndex], PersistentDataType.INTEGER_ARRAY);
 
     if (enableModesValue != null) {
       for (var statistic : SidebarStatistic.ALL_VALUES) {
-        var enableMode = config.rootSection.sidebar._statisticsMap.get(statistic)._defaultEnableMode;
+        var enableMode = defaults._enableModeByStatistic.get(statistic);
 
         if (statistic.ordinal() < enableModesValue.length) {
           var modeValue = StatisticEnableMode.byOrdinalOrNull(enableModesValue[statistic.ordinal()]);

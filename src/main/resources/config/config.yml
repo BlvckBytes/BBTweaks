@@ -1468,6 +1468,48 @@ sidebar:
       color: '#FF63DB'
       displayName: '<color [color]>Pink'
       iconType: 'PINK_CONCRETE'
+  fallbackDefaults:
+    showTitle: true
+    showIcons: true
+    doScroll: true
+    sneakMode: 'NONE'
+    delimitersMode: 'TOP_AND_BOTTOM'
+    enabledStatistics:
+      - 'GROUP_PREFIX'
+      - 'MONEY'
+      - 'TOTAL_PLAYTIME'
+      - 'HOME_COUNT'
+      - 'PING'
+      - 'DATE'
+      - 'REAL_TIME'
+  defaultsByPreferencesSlot:
+    2:
+      showTitle: true
+      showIcons: false
+      doScroll: true
+      sneakMode: 'NONE'
+      delimitersMode: 'NONE'
+      enabledStatistics:
+        - 'MCMMO_POWER_LEVEL'
+        - 'MCMMO_ACROBATICS_LEVEL'
+        - 'MCMMO_ALCHEMY_LEVEL'
+        - 'MCMMO_ARCHERY_LEVEL'
+        - 'MCMMO_AXES_LEVEL'
+        - 'MCMMO_CROSSBOWS_LEVEL'
+        - 'MCMMO_EXCAVATION_LEVEL'
+        - 'MCMMO_FISHING_LEVEL'
+        - 'MCMMO_HERBALISM_LEVEL'
+        - 'MCMMO_MACES_LEVEL'
+        - 'MCMMO_MINING_LEVEL'
+        - 'MCMMO_REPAIR_LEVEL'
+        - 'MCMMO_SALVAGE_LEVEL'
+        - 'MCMMO_SMELTING_LEVEL'
+        - 'MCMMO_SPEARS_LEVEL'
+        - 'MCMMO_SWORDS_LEVEL'
+        - 'MCMMO_TAMING_LEVEL'
+        - 'MCMMO_TRIDENTS_LEVEL'
+        - 'MCMMO_UNARMED_LEVEL'
+        - 'MCMMO_WOODCUTTING_LEVEL'
   statistics:
     GROUP_PREFIX:
       iconData:
@@ -1478,7 +1520,6 @@ sidebar:
         color: 'ORANGE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: true
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⯪" floodgate-icon="★" label="Rang"
@@ -1495,7 +1536,6 @@ sidebar:
         color: 'YELLOW'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: true
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛁" label="Geld"
@@ -1514,7 +1554,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: true
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⌛" label="Spielzeit"
@@ -1533,7 +1572,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="🠙" floodgate-icon="⌛" label="Top Spielzeit"
@@ -1552,7 +1590,6 @@ sidebar:
         color: 'LIGHT_GRAY'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⌛" label="Afk-Zeit"
@@ -1571,7 +1608,6 @@ sidebar:
         color: 'LIGHT_GRAY'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="🠙" floodgate-icon="⌛" label="Top Afk-Zeit"
@@ -1590,7 +1626,6 @@ sidebar:
         color: 'GREEN'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: true
       render: |
         <$lut.sidebar.statistic_renderer
           icon="🏛" floodgate-icon="☎" label="Homepunkte"
@@ -1611,7 +1646,6 @@ sidebar:
         color: 'LIGHT_BLUE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: true
       render: |
         <$lut.sidebar.statistic_renderer
           icon="📶" floodgate-icon="✈" label="Ping"
@@ -1628,7 +1662,6 @@ sidebar:
         color: 'MAGENTA'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: true
       render: |
         <$lut.sidebar.statistic_renderer
           icon="🗓" floodgate-icon="◷" label="Datum"
@@ -1645,7 +1678,6 @@ sidebar:
         color: 'MAGENTA'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: true
       render: |
         <$lut.sidebar.statistic_renderer
           icon="🕓" floodgate-icon="◷" label="Uhrzeit"
@@ -1662,7 +1694,6 @@ sidebar:
         color: 'BLUE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="🖈" floodgate-icon="⚓" label="Position"
@@ -1679,7 +1710,6 @@ sidebar:
         color: 'BROWN'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="🌵" floodgate-icon="❄" label="Biom"
@@ -1696,7 +1726,6 @@ sidebar:
         color: 'PINK'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="👁" floodgate-icon="➜" label="Richtung"
@@ -1715,7 +1744,6 @@ sidebar:
         color: 'PURPLE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="🕓" floodgate-icon="◷" label="Weltzeit"
@@ -1737,7 +1765,6 @@ sidebar:
         color: 'ORANGE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           *if="name"
@@ -1760,7 +1787,6 @@ sidebar:
         color: 'ORANGE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           *if="name"
@@ -1780,7 +1806,6 @@ sidebar:
         color: 'PURPLE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label="Powerlevel"
@@ -1797,7 +1822,6 @@ sidebar:
         color: 'LIGHT_BLUE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="👤" floodgate-icon="✍" label="Name"
@@ -1824,7 +1848,6 @@ sidebar:
         color: 'LIGHT_RED'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⚡" label="TPS"
@@ -1850,7 +1873,6 @@ sidebar:
         color: 'YELLOW'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="💡" floodgate-icon="☀" label="Lichtlevel"
@@ -1879,7 +1901,6 @@ sidebar:
         color: 'LIGHT_GRAY'
       defaultValueStyle:
         color: 'LIGHT_GREEN'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="⚒" label="MultiBreak" [value-color-override]="not enabled then '&7'"
@@ -1905,7 +1926,6 @@ sidebar:
         color: 'LIGHT_GRAY'
       defaultValueStyle:
         color: 'LIGHT_GREEN'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="🧲" floodgate-icon="⍧" label="InvMagnet" [value-color-override]="not enabled then '&7'"
@@ -1930,7 +1950,6 @@ sidebar:
         color: 'LIGHT_GRAY'
       defaultValueStyle:
         color: 'LIGHT_GREEN'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="✔" label="InvFilter" [value-color-override]="not enabled then '&7'"
@@ -1953,7 +1972,6 @@ sidebar:
         color: 'LIGHT_GRAY'
       defaultValueStyle:
         color: 'LIGHT_GREEN'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="🪓" floodgate-icon="⇄" label="AutoTool" [value-color-override]="not enabled then '&7'"
@@ -1974,7 +1992,6 @@ sidebar:
         color: 'LIGHT_RED'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           *if="time > 0"
@@ -1997,7 +2014,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⌛" label="Rank-Up"
@@ -2018,7 +2034,6 @@ sidebar:
         color: 'LIGHT_BLUE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⌛" label="Shopregion"
@@ -2039,7 +2054,6 @@ sidebar:
         color: 'LIGHT_BLUE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⌛" label="Kreativ-Plot"
@@ -2056,7 +2070,6 @@ sidebar:
           mittels Sortierung der Einträge zur<br/>
           visuellen Einteilung nutzen kannst.
         iconType: 'GLASS'
-      defaultEnabled: false
       render: '<space/>'
     SPACER_NUMBER_TWO:
       iconData:
@@ -2066,7 +2079,6 @@ sidebar:
           mittels Sortierung der Einträge zur<br/>
           visuellen Einteilung nutzen kannst.
         iconType: 'GLASS'
-      defaultEnabled: false
       render: '<space/>'
     SPACER_NUMBER_THREE:
       iconData:
@@ -2076,7 +2088,6 @@ sidebar:
           mittels Sortierung der Einträge zur<br/>
           visuellen Einteilung nutzen kannst.
         iconType: 'GLASS'
-      defaultEnabled: false
       render: '<space/>'
     AUTO_PICKUP_CONTAINER_USAGE_ABSOLUTE:
       iconData:
@@ -2094,7 +2105,6 @@ sidebar:
         color: 'PURPLE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           *if="container_count"
@@ -2119,7 +2129,6 @@ sidebar:
         color: 'PURPLE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           *if="container_count"
@@ -2143,7 +2152,6 @@ sidebar:
         color: 'LIGHT_GRAY'
       defaultValueStyle:
         color: 'LIGHT_GREEN'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="◆" floodgate-icon="➜" label="BlockFacing" [value-color-override]="not enabled then '&7'"
@@ -2166,7 +2174,6 @@ sidebar:
         color: 'LIGHT_GRAY'
       defaultValueStyle:
         color: 'LIGHT_GREEN'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="🎲" floodgate-icon="➜" label="HotbarRandom" [value-color-override]="not enabled then '&7'"
@@ -2185,7 +2192,6 @@ sidebar:
         color: 'YELLOW'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="✌" floodgate-icon="⇄" label="Spieler"
@@ -2202,7 +2208,6 @@ sidebar:
         color: 'LIGHT_RED'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="☠" label="Tode"
@@ -2221,7 +2226,6 @@ sidebar:
         color: 'LIGHT_BLUE'
       defaultValueStyle:
         color: 'WHITE'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="🌍" label="Welt"
@@ -2246,7 +2250,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2265,7 +2268,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2284,7 +2286,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2303,7 +2304,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2322,7 +2322,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2341,7 +2340,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2360,7 +2358,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2379,7 +2376,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2398,7 +2394,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2417,7 +2412,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2436,7 +2430,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2455,7 +2448,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2474,7 +2466,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2493,7 +2484,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2512,7 +2502,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2531,7 +2520,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2550,7 +2538,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2569,7 +2556,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`
@@ -2588,7 +2574,6 @@ sidebar:
         color: 'LIGHT_GREEN'
       defaultValueStyle:
         color: 'LIGHT_RED'
-      defaultEnabled: false
       render: |
         <$lut.sidebar.statistic_renderer
           icon="⛏" floodgate-icon="↯" label=`{skill_name}`

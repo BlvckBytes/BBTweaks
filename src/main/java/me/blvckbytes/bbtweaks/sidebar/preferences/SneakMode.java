@@ -11,15 +11,14 @@ public enum SneakMode {
   ;
 
   public static final List<SneakMode> ALL_VALUES = List.of(values());
-  public static final SneakMode DEFAULT_VALUE = NONE;
 
   public SneakMode next() {
     return ALL_VALUES.get((ordinal() + 1) % ALL_VALUES.size());
   }
 
-  public static SneakMode byOrdinalOrDefault(int ordinal) {
+  public static SneakMode byOrdinalOrDefault(int ordinal, SidebarDefaultsSection defaults) {
     if (ordinal < 0 || ordinal >= ALL_VALUES.size())
-      return DEFAULT_VALUE;
+      return defaults.sneakMode;
 
     return ALL_VALUES.get(ordinal);
   }

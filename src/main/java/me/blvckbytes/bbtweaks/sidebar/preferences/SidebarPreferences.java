@@ -13,12 +13,6 @@ import java.util.List;
 
 public class SidebarPreferences {
 
-  // TODO: Have different defaults per preferences-slot.
-
-  private static final boolean DEFAULT_SHOW_TITLE = true;
-  private static final boolean DEFAULT_SHOW_ICONS = true;
-  private static final boolean DEFAULT_DO_SCROLL = true;
-
   public final SidebarPreferencesSlots preferencesSlots;
   public final int slotIndex;
   private final ConfigKeeper<MainSection> config;
@@ -52,19 +46,21 @@ public class SidebarPreferences {
   }
 
   public boolean divergesFromDefaults() {
-    if (showTitle != DEFAULT_SHOW_TITLE)
+    var defaults = config.rootSection.sidebar.getDefaultsForSlot(slotIndex);
+
+    if (showTitle != defaults.showTitle)
       return true;
 
-    if (showIcons != DEFAULT_SHOW_ICONS)
+    if (showIcons != defaults.showIcons)
       return true;
 
-    if (doScroll != DEFAULT_DO_SCROLL)
+    if (doScroll != defaults.doScroll)
       return true;
 
-    if (sneakMode != SneakMode.DEFAULT_VALUE)
+    if (sneakMode != defaults.sneakMode)
       return true;
 
-    if (delimitersMode != DelimitersMode.DEFAULT_VALUE)
+    if (delimitersMode != defaults.delimitersMode)
       return true;
 
     for (var statistic : SidebarStatistic.ALL_VALUES) {
@@ -79,7 +75,7 @@ public class SidebarPreferences {
       if (!valueStyleByStatistic.get(statistic).equals(statisticSection._defaultValueStyle))
         return true;
 
-      if (enableModeByStatistic.get(statistic) != statisticSection._defaultEnableMode)
+      if (enableModeByStatistic.get(statistic) != defaults._enableModeByStatistic.get(statistic))
         return true;
     }
 
@@ -87,18 +83,20 @@ public class SidebarPreferences {
   }
 
   public void resetToDefaults() {
-    this.showTitle = DEFAULT_SHOW_TITLE;
-    this.showIcons = DEFAULT_SHOW_ICONS;
-    this.doScroll = DEFAULT_DO_SCROLL;
-    this.sneakMode = SneakMode.DEFAULT_VALUE;
-    this.delimitersMode = DelimitersMode.DEFAULT_VALUE;
+    var defaults = config.rootSection.sidebar.getDefaultsForSlot(slotIndex);
+
+    this.showTitle = defaults.showTitle;
+    this.showIcons = defaults.showIcons;
+    this.doScroll = defaults.doScroll;
+    this.sneakMode = defaults.sneakMode;
+    this.delimitersMode = defaults.delimitersMode;
 
     this.statisticsInOrder.clear();
 
     for (var statistic : SidebarStatistic.ALL_VALUES) {
-      var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
+      enableModeByStatistic.put(statistic, defaults._enableModeByStatistic.get(statistic));
 
-      enableModeByStatistic.put(statistic, statisticSection._defaultEnableMode);
+      var statisticSection = config.rootSection.sidebar._statisticsMap.get(statistic);
 
       // We're modifying styles in place, so cloning before setting is crucial as
       // to not mess up the stored defaults by editing them by reference.

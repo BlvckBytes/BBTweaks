@@ -15,6 +15,8 @@ import me.blvckbytes.bbtweaks.sidebar.color_display.ColorDisplaySection;
 import me.blvckbytes.bbtweaks.sidebar.command.SidebarCommandSection;
 import me.blvckbytes.bbtweaks.sidebar.preferences.ColorAndFormats;
 import me.blvckbytes.bbtweaks.sidebar.preferences.Format;
+import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarDefaultsSection;
+import me.blvckbytes.bbtweaks.sidebar.preferences.SidebarPreferencesStore;
 import me.blvckbytes.bbtweaks.sidebar.settings_display.SettingsDisplaySection;
 import me.blvckbytes.bbtweaks.sidebar.sorting_display.SidebarSortingDisplaySection;
 
@@ -55,6 +57,10 @@ public class SidebarSection extends ConfigSection {
 
   public @CSIgnore List<NamedColor> _colors = new ArrayList<>();
   public @CSIgnore Map<String, NamedColor> _colorByNameLower = new HashMap<>();
+
+  public @CSAlways SidebarDefaultsSection fallbackDefaults;
+
+  public Map<Integer, SidebarDefaultsSection> defaultsByPreferencesSlot = new HashMap<>();
 
   public ColorDisplaySection colorDisplay;
   public SettingsDisplaySection settingsDisplay;
@@ -143,6 +149,15 @@ public class SidebarSection extends ConfigSection {
 
     if (updateIntervalTicks <= 0)
       throw new MappingError("Property \"updateIntervalTicks\" cannot be less than or equal to zero");
+
+    for (var key : defaultsByPreferencesSlot.keySet()) {
+      if (key < 1 || key > SidebarPreferencesStore.PREFERENCES_SLOTS_COUNT)
+        throw new MappingError("Sidebar-slot " + key + " out of range [1;" + SidebarPreferencesStore.PREFERENCES_SLOTS_COUNT + "]");
+    }
+  }
+
+  public SidebarDefaultsSection getDefaultsForSlot(int slotIndex) {
+    return defaultsByPreferencesSlot.getOrDefault(slotIndex + 1, fallbackDefaults);
   }
 
   public NamedColor tryGetCurrentColorWithEqualName(NamedColor color) {
