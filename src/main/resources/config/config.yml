@@ -2907,7 +2907,7 @@ sidebar:
             <&e>🛈 Achtung! Sollte die automatische<br/>
             Sortierung aktiviert sein, so hat diese<br/>
             Einstellung für die davon übernommenen<br/>
-            Statistiken keinen Effekt.<br/>
+            Statistiken keinen direkten Effekt.<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Ins Sortiermenü wechseln<br/>
             {lut.spacer}
