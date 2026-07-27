@@ -190,6 +190,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(PipeBlockCacheRegistry.class)
         .withSingleton(PipesInventoryUtil.class)
         .withSingleton(Pipes.class)
+        .withSingleton(WirelessPipeSignListener.class)
         .withSingleton(PipePredicateDataHandler.class)
         .withSingleton(PipePredicateEventHandler.class)
         .withSingleton(PipeEnumerationSessionHandler.class)

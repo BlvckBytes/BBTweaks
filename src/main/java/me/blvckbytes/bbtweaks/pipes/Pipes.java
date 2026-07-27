@@ -5,9 +5,7 @@ import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvir
 import it.unimi.dsi.fastutil.longs.LongOpenHashSet;
 import it.unimi.dsi.fastutil.longs.LongSet;
 import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.back.BackOverrideCommand;
 import me.blvckbytes.bbtweaks.pipes.notification.*;
-import me.blvckbytes.bbtweaks.util.BlockUtil;
 import me.blvckbytes.bbtweaks.util.CompactId;
 import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import net.kyori.adventure.text.Component;
@@ -17,18 +15,14 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.Sign;
 import org.bukkit.block.data.type.WallSign;
-import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.HopperInventorySearchEvent;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.*;
 import org.bukkit.plugin.Plugin;
@@ -65,7 +59,6 @@ public class Pipes implements PipesApi, Listener {
 
   private final PipeTimingsCommand pipeTimingsCommand;
   private final PipesInventoryUtil inventoryUtil;
-  private final BackOverrideCommand backCommand;
 
   private final Map<UUID, Map<String, Long>> lastNotificationSendByDebounceIdByPlayerId;
 
@@ -74,15 +67,13 @@ public class Pipes implements PipesApi, Listener {
     ConfigKeeper<MainSection> config,
     PipeBlockCacheRegistry cacheRegistry,
     PipeTimingsCommand pipeTimingsCommand,
-    PipesInventoryUtil inventoryUtil,
-    BackOverrideCommand backCommand
+    PipesInventoryUtil inventoryUtil
   ) {
     this.plugin = plugin;
     this.config = config;
     this.cacheRegistry = cacheRegistry;
     this.pipeTimingsCommand = pipeTimingsCommand;
     this.inventoryUtil = inventoryUtil;
-    this.backCommand = backCommand;
 
     this.lastNotificationSendByDebounceIdByPlayerId = new HashMap<>();
   }
@@ -91,16 +82,9 @@ public class Pipes implements PipesApi, Listener {
   public void onSignChange(SignChangeEvent event) {
     var markerContents = ComponentUtil.asTrimmedText(event.line(1));
 
-    if (markerContents.equalsIgnoreCase(PIPE_MARKER)) {
-      handlePipeSignChange(event);
+    if (!markerContents.equalsIgnoreCase(PIPE_MARKER))
       return;
-    }
 
-    if (markerContents.equalsIgnoreCase(WirelessPipeSign.MARKER))
-      handleWirelessPipeSignChange(event);
-  }
-
-  private void handlePipeSignChange(SignChangeEvent event) {
     var player = event.getPlayer();
 
     if (!player.hasPermission("bbtweaks.pipes")) {
@@ -143,149 +127,6 @@ public class Pipes implements PipesApi, Listener {
 
     event.line(1, Component.text(PIPE_MARKER));
     config.rootSection.pipes.signCreated.sendMessage(player);
-  }
-
-  private void handleWirelessPipeSignChange(SignChangeEvent event) {
-    var player = event.getPlayer();
-
-    if (!player.hasPermission("bbtweaks.pipes.wireless")) {
-      cancelAndBreakSign(event);
-      config.rootSection.pipes.wirelessSignCreateNoPermission.sendMessage(player);
-      return;
-    }
-
-    var signBlock = event.getBlock();
-
-    if (!Tag.WALL_SIGNS.isTagged(signBlock.getType())) {
-      config.rootSection.pipes.wirelessSignNotOnGlassBlock.sendMessage(player);
-      cancelAndBreakSign(event);
-      return;
-    }
-
-    if (ComponentUtil.asTrimmedText(event.line(2)).equals("?"))
-      event.line(2, Component.text(signBlock.getX() + " " + signBlock.getY() + " " + signBlock.getZ()));
-
-    var wirelessSign = WirelessPipeSign.fromLines(event.lines(), signBlock);
-
-    if (wirelessSign == WirelessPipeSign.NO_SIGN) {
-      cancelAndBreakSign(event);
-      config.rootSection.pipes.wirelessSignMalformed.sendMessage(player);
-      return;
-    }
-
-    var mountColor = TubeColor.fromMaterial(wirelessSign.mountBlock.getType());
-
-    if (mountColor.isPane() || mountColor.color() == TubeColor.NONE) {
-      config.rootSection.pipes.wirelessSignNotOnGlassBlock.sendMessage(player);
-      cancelAndBreakSign(event);
-      return;
-    }
-
-    event.line(1, Component.text(WirelessPipeSign.MARKER));
-
-    config.rootSection.pipes.wirelessSignCreated.sendMessage(
-      player,
-      new InterpretationEnvironment()
-        .withVariable("x", signBlock.getX())
-        .withVariable("y", signBlock.getY())
-        .withVariable("z", signBlock.getZ())
-        .withVariable("referenced_x", wirelessSign.referencedBlock.getX())
-        .withVariable("referenced_y", wirelessSign.referencedBlock.getY())
-        .withVariable("referenced_z", wirelessSign.referencedBlock.getZ())
-    );
-  }
-
-  @EventHandler
-  public void onInteract(PlayerInteractEvent event) {
-    if (event.getAction() != Action.RIGHT_CLICK_BLOCK && event.getAction() != Action.LEFT_CLICK_BLOCK)
-      return;
-
-    if (event.getHand() != EquipmentSlot.HAND)
-      return;
-
-    var block = event.getClickedBlock();
-
-    if (block == null)
-      return;
-
-    var player = event.getPlayer();
-
-    if (!player.isSneaking())
-      return;
-
-    if (!(block.getState(false) instanceof Sign sign))
-      return;
-
-    var signSide = sign.getSide(Side.FRONT);
-    var markerContents = ComponentUtil.asTrimmedText(signSide.line(1));
-
-    if (!markerContents.equalsIgnoreCase(WirelessPipeSign.MARKER))
-      return;
-
-    var signBlock = sign.getBlock();
-    var blockCache = cacheRegistry.getBlockCache(signBlock.getWorld());
-
-    WirelessPipeSign thisWirelessSign;
-
-    try {
-      thisWirelessSign = blockCache.getWirelessPipeSign(sign.getBlock(), blockCache.getCachedBlock(signBlock));
-    } catch (LoadingChunkException _) {
-      return;
-    }
-
-    event.setCancelled(true);
-
-    if (thisWirelessSign == null) {
-      config.rootSection.pipes.wirelessSignMalformed.sendMessage(player);
-      return;
-    }
-
-    WirelessPipeSign otherWirelessSign;
-
-    try {
-      // Ensure that the sign is loaded - we can afford doing so synchronously for the event.
-      thisWirelessSign.referencedBlock.getState(false);
-
-      otherWirelessSign = blockCache.getWirelessPipeSign(thisWirelessSign.referencedBlock, blockCache.getCachedBlock(thisWirelessSign.referencedBlock));
-    } catch (LoadingChunkException _) {
-      return;
-    }
-
-    var environment = new InterpretationEnvironment()
-      .withVariable("x", signBlock.getX())
-      .withVariable("y", signBlock.getY())
-      .withVariable("z", signBlock.getZ())
-      .withVariable("referenced_x", thisWirelessSign.referencedBlock.getX())
-      .withVariable("referenced_y", thisWirelessSign.referencedBlock.getY())
-      .withVariable("referenced_z", thisWirelessSign.referencedBlock.getZ())
-      .withVariable("is_connected", otherWirelessSign != null);
-
-    if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-      config.rootSection.pipes.wirelessSignInformation.sendMessage(player, environment);
-      return;
-    }
-
-    if (!player.hasPermission("bbtweaks.pipes.wireless.teleport")) {
-      config.rootSection.pipes.wirelessSignMissingTeleportPermission.sendMessage(player, environment);
-      return;
-    }
-
-    var flagsLine = ComponentUtil.asTrimmedText(signSide.line(3)).toLowerCase();
-
-    if (flagsLine.contains("no-back"))
-      backCommand.temporarilyIgnore(player);
-
-    if (!flagsLine.contains("silent"))
-      config.rootSection.pipes.wirelessSignTeleported.sendMessage(player, environment);
-
-    var targetBlock = thisWirelessSign.referencedBlock;
-
-    if (targetBlock.getState(false) instanceof Sign targetSign) {
-      BlockUtil.teleportPlayerToSign(player, targetSign);
-      return;
-    }
-
-    player.teleport(thisWirelessSign.referencedBlock.getLocation());
   }
 
   private void cancelAndBreakSign(SignChangeEvent event) {
