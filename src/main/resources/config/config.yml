@@ -3707,6 +3707,58 @@ hotbarRandomizer:
           <reset>
             <&8>» <&c>Leerer Hotbar-Slot (<&4>{slot}</>) <&8>«
 
+entityEggs:
+  rayTraceDistance: 4
+  cannotBuildAtEntity: '{lut.entity_eggs_prefix} <&c>Du kannst beim <translate [entity_key] /> bei {x} {y} {z} nicht bauen; breche das Einfangen ab!'
+  couldNotDetermineEggType: '{lut.entity_eggs_prefix} <&c>Konnte den Spawn-Ei-Typ für <translate [entity_key] /> nicht zuweisen; bitte melden!'
+  noSpaceInInventory: '{lut.entity_eggs_prefix} <&c>Du hast keinen Platz mehr im Inventar, um das Spawn-Ei aufzunehmen!'
+  captureSuccess: '{lut.entity_eggs_prefix} <&7>Ein Spawn-Ei vom Typ <&a><translate [entity_key] /></> wurde nach dem Einfangen bei <&a>{x} {y} {z}</> in dein Inventar gelegt.'
+  captureSuccessLog: '[<date format="dd.MM.yyyy HH:mm:ss" locale="de" [time] />] Player {player} captured a {entity_type} at {x} {y} {z} in {world} using an egg.'
+  detailLineRenderer: |
+    <container *when="type">
+      <container +is="HEALTH">
+        Leben: <&d><number format="#.##" locale="de" [value] /> Herzen
+      </container>
+      <container +is="HELD_ITEM">
+        Gehaltenes Item: <&d><translate [value] />
+      </container>
+      <container +is="FIRE_TICKS">
+        Feuer-Ticks: <&d>{value}
+      </container>
+      <container +is="CUSTOM_NAME">
+        Name: <&d>{value}
+      </container>
+      <container +is="IS_BABY">
+        Baby: <&d>{value then "ja" else "nein"}
+      </container>
+      <container +is="VILLAGER_PROFESSION">
+        Beruf: <&d><translate [value] />
+      </container>
+      <container +is="VILLAGER_LEVEL">
+        Level: <&d>{value}
+      </container>
+      <container +is="VILLAGER_RECIPES">
+        Rezepte: <&d>
+        <container
+          *for-recipe="value"
+          *for-separator={,<space/><br *if="loop.index % 2 neq 0 or len(loop.prior.enchants) > 0" />}
+        >
+          {recipe.amount}x <translate [recipe.type] />
+          <container *if="len(recipe.enchants) > 0">
+            <space/>
+            <container *for-enchant="recipe.enchants" *for-separator={<space/>} [enchant] />
+          </container>
+        </container>
+  spawnEggLore: |
+    <reset>
+      <&d>Dieses Spawn-Ei beinhaltet ein Lebewesen,<br/>
+      welches bei <&5>{x} {y} {z}</> eingefangen wurde und<br/>
+      die folgenden Eigenschaften aufweist:<br/>
+      <br/>
+      <container *for-detail="details" *for-separator={<br/>}>
+        <&8>♦ <&7>{detail}
+      </container>
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -3741,6 +3793,7 @@ cLut:
   frame_locking_prefix: '<&7>[<&6>FrameLocking<&7>]'
   hotbar_randomizer_prefix: '<&7>[<&6>HotbarRandomizer<&7>]'
   item_notifier_prefix: '<&7>[<&6>ItemNotifier<&7>]'
+  entity_eggs_prefix: '<&7>[<&6>EntityEggs<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

@@ -20,6 +20,7 @@ import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.durability_warnings.DurabilityWarningsListener;
 import me.blvckbytes.bbtweaks.durability_warnings.WarningsProfileStore;
 import me.blvckbytes.bbtweaks.durability_warnings.command.DurabilityWarningCommand;
+import me.blvckbytes.bbtweaks.entity_eggs.EntityEggsListener;
 import me.blvckbytes.bbtweaks.frame_locking.FrameLockingHandler;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerListener;
@@ -208,6 +209,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(SidebarCommand.class)
         .withSingleton(SidebarBoardManager.class)
         .withSingleton(RemoteOpenContainerTicketHandler.class)
+        .withSingleton(EntityEggsListener.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);

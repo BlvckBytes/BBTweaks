@@ -158,3 +158,5 @@ permissions:
     description: 'Allows to create WirelessPipe-signs, used to jump glass over a distance'
   bbtweaks.pipes.auto-init-signs:
     description: 'Allows to automatically initialize blank signs to pipe-signs'
+  bbtweaks.entity-eggs:
+    description: 'Allows to capture entities into spawn-eggs'
