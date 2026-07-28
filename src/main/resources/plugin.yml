@@ -101,6 +101,9 @@ commands:
   pipefetch:
     description: 'Allows to search a pipe using a predicate and retrieve items immediately'
     permission: bbtweaks.pipes
+  wirelesspipe:
+    description: 'Allows to bind wireless-pipe signs to each-other quickly'
+    permission: bbtweaks.pipes.wireless
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

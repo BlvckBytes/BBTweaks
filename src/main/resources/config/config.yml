@@ -3327,6 +3327,39 @@ itemData:
 pipes:
   pipeTimingsCommand:
     name: 'pipetimings'
+  wirelessPipeCommand:
+    name: 'wirelesspipe'
+    aliases:
+      - 'wpipe'
+    interactionSessionTimeoutTicks: 20*60
+    playersOnly: '{lut.pipes_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+    noPermission: '{lut.pipes_prefix} <&c>Dir fehlen die nötigen Zugriffsrechte um diesen Befehl zu benutzen!'
+    notLookingAtASign: '{lut.pipes_prefix} <&c>Du siehst aktuell kein Schild an! Blicke auf Schild 1/2 welches du kabellos verbinden möchtest und führe den Befehl erneut aus.'
+    lookedAtSignAlreadyConnected: '{lut.pipes_prefix} <&c>Das angesehene Schild bei <&4>{x} {y} {z}</> ist bereits verbunden; <&4>zerstöre</> es und setze es neu, wenn du diese Verbindung <&4>überschreiben</> möchtest.'
+    lookedAtSignNotMountedOnGlass: '{lut.pipes_prefix} <&c>Das angesehene Schild bei <&4>{x} {y} {z}</> ist nicht auf einem <&4>Glasblock</> als Wandschild montiert!'
+    lookedAtSignIncompatibleMarker: '{lut.pipes_prefix} <&c>Das angesehene Schild bei <&4>{x} {y} {z}</> muss auf der Vorderseite in zweiter Zeile <&4>leer</>- oder mit <&4>[WirelessPipe]</> ausgefüllt sein!'
+    cannotEditSign: '{lut.pipes_prefix} <&c>Du darfst das Schild bei <&4>{x} {y} {z}</> nicht bearbeiten!'
+    selectedFirstSign: |
+      {lut.pipes_prefix} <&7>Schild <&a>1/2</> bei<space/>
+      <&a><$lut.pipes.clickable_coordinates /></>
+      <space/>für die kabellose Verbindung ausgewählt. <&a>Blicke nun auf das Zweite</> und <&a>führe den Befehl erneut aus</>. Tippe <&e>/{label} {exit_sentinel}</> um die Auswahl abzubrechen.
+    cannotSelectFirstSignTwice: '{lut.pipes_prefix} <&c>Du blickst gerade auf das bereits ausgewählte Schild - bitte wähle ein anderes!'
+    interactionSessionTimeout: '{lut.pipes_prefix} <&c>Deine ausstehende Auswahl ist aufgrund von <&4>Inaktivität</> abgelaufen.'
+    secondBlockActionBarPrompt: '<&a>Blicke auf Schild 2/2, dann /{label}'
+    exitUsage: '{lut.pipes_prefix} <&c>Benutze <&4>/{label} {exit_sentinel}</>, um eine aktive Auswahl abzubrechen, die du zuvor mit <&4>/{label}</> gestartet hast.'
+    notCurrentlyInASession: '{lut.pipes_prefix} <&c>Du befindest dich aktuell in keiner aktiven Schildauswahl! Benutze <&4>/{label}</> um eine Auswahl zu starten.'
+    currentSessionExited: '{lut.pipes_prefix} <&7>Deine aktuelle Auswahl wurde <&a>abgebrochen</>.'
+    secondSignDifferentWorld: '{lut.pipes_prefix} <&c>Das Schild 2/2 befindet sich <&4>in einer anderen Welt</> als das Schild 1/2 - Verbindungen geschehen <&4>immer nur in derselben Welt</>; breche ab!'
+    firstSignIsGone: '{lut.pipes_prefix} <&c>Das Schild 1/2 bei <&4>{x} {y} {z}</> existiert nicht mehr; breche ab!'
+    firstSignAlreadyConnected: '{lut.pipes_prefix} <&c>Das Schild 1/2 bei <&4>{x} {y} {z}</> wurde inzwischen bereits verbunden; breche ab!'
+    firstSignNotMountedOnGlass: '{lut.pipes_prefix} <&c>Das Schild 1/2 bei <&4>{x} {y} {z}</> ist inzwischen nicht mehr auf einem <&4>Glasblock</> als Wandschild montiert; breche ab!'
+    firstSignIncompatibleMarker: '{lut.pipes_prefix} <&c>Das Schild 1/2 bei <&4>{x} {y} {z}</> wurde auf der Vorderseite inzwischen in zweiter Zeile anderweitig ausgefüllt; breche ab!'
+    wirelessConnectionEstablished: |
+      {lut.pipes_prefix} <&7>Die kabellose Verbindung zwischen Schild 1 bei<space/>
+      <&a><$lut.pipes.clickable_coordinates [x]="first_x" [y]="first_y" [z]="first_z" /></>
+      <space/>und Schild 2 bei<space/>
+      <&a><$lut.pipes.clickable_coordinates [x]="second_x" [y]="second_y" [z]="second_z" /></>
+      <space/>wurde erfolgreich hergestellt!
   signCreateNoPermission: '{lut.pipes_prefix} <&c>Dir fehlen die nötigen Zugriffsrechte, um ein Pipe-Schild zu erstellen!'
   signCreateNoPistonFound: '{lut.pipes_prefix} <&c>Ein Pipe-Schild muss an einem Kolben montiert werden!'
   unsupportedSignType: '{lut.pipes_prefix} <&c>Pipe-Schilder können nur Wand- oder Steheschilder sein!'
@@ -3336,27 +3369,15 @@ pipes:
   wirelessSignNotOnGlassBlock: '{lut.pipes_prefix} <&c>Ein WirelessPipe-Schild kann nur an einem Glasblock angebracht werden!'
   wirelessSignCreated: |
     {lut.pipes_prefix} <&7>Das WirelessPipe-Schild bei<space/>
-    <hover-text *let-coordinates=`{x} {y} {z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
-      <to-clipboard [coordinates]>
-        <&a><u>{coordinates}
-    </hover-text>
+    <&a><$lut.pipes.clickable_coordinates/></>
     <space/>zeigend auf<space/>
-    <hover-text *let-coordinates=`{referenced_x} {referenced_y} {referenced_z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
-      <to-clipboard [coordinates]>
-        <&a><u>{coordinates}
-    </hover-text>
+    <&a><$lut.pipes.clickable_coordinates [x]="referenced_x" [y]="referenced_y" [z]="referenced_z" /></>
     <space/>wurde erfolgreich erstellt!'
   wirelessSignInformation: |
     {lut.pipes_prefix} <&7>Das WirelessPipe-Schild bei<space/>
-    <hover-text *let-coordinates=`{x} {y} {z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
-      <to-clipboard [coordinates]>
-        <&a><u>{coordinates}
-    </hover-text>
+    <&a><$lut.pipes.clickable_coordinates/></>
     <space/>zeigt auf<space/>
-    <hover-text *let-coordinates=`{referenced_x} {referenced_y} {referenced_z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
-      <to-clipboard [coordinates]>
-        <&a><u>{coordinates}
-    </hover-text>
+    <&a><$lut.pipes.clickable_coordinates [x]="referenced_x" [y]="referenced_y" [z]="referenced_z" /></>
     <space/>und ist<space/>
     <&a *if="is_connected">verbunden</>
     <&c *else>nicht verbunden</>
@@ -3364,15 +3385,9 @@ pipes:
   wirelessSignMissingTeleportPermission: '{lut.pipes_prefix} <&c>Dir fehlen die nötigen Zugriffsrechte, um dich an das andere Ende der WirelessPipe zu teleportieren!'
   wirelessSignTeleported: |
     {lut.pipes_prefix} <&7>Du wurdest zum eingetragenen Punkt<space/>
-    <hover-text *let-coordinates=`{referenced_x} {referenced_y} {referenced_z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
-      <to-clipboard [coordinates]>
-        <&a><u>{coordinates}
-    </hover-text>
+    <&a><$lut.pipes.clickable_coordinates [x]="referenced_x" [y]="referenced_y" [z]="referenced_z" /></>
     <space/>am WirelessPipe-Schild bei<space/>
-    <hover-text *let-coordinates=`{x} {y} {z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
-      <to-clipboard [coordinates]>
-        <&a><u>{coordinates}
-    </hover-text>
+    <&a><$lut.pipes.clickable_coordinates/></>
     <space/>teleportiert.
   enumerationExceededRetries: '{lut.pipes_prefix} <&e>Das Limit von <&6>{limit} Ladeversuchen</> wurde überschritten; breche vorzeitig ab!'
   enumerationNotAPipeBlock: '{lut.pipes_prefix} <&c>Der Block bei <&4>{x} {y} {z}</> ist kein Pipe-Block; bitte schaue auf einen Kolben, einen Behälter, ein Schild oder ein Rohr!'
@@ -4028,6 +4043,10 @@ cLut:
       TELEPORT_TO_CONTAINER: 'Zum Behälter teleportieren'
       MOVE_TO_INVENTORY: 'Ins Inventar bewegen'
       OPEN_CONTAINER: 'Behälter öffnen'
+    clickable_coordinates: |
+      <hover-text *let-coordinates=`{x} {y} {z}` value={<&a>Klicke, um die Koordinaten zu kopieren!}>
+        <to-clipboard [coordinates]>
+        <u>{coordinates}
   teleporter:
     facing:
       NORTH: 'Norden'

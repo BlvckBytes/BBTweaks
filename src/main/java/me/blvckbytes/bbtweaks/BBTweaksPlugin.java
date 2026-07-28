@@ -62,6 +62,7 @@ import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.pipes.*;
 import me.blvckbytes.bbtweaks.pipes.command.timings.PipeTimingsCommand;
+import me.blvckbytes.bbtweaks.pipes.command.wireless_pipe.WirelessPipeCommand;
 import me.blvckbytes.bbtweaks.pipes.enumeration_session.PipeEnumerationSessionHandler;
 import me.blvckbytes.bbtweaks.pipes.predicates.PipePredicateEventHandler;
 import me.blvckbytes.bbtweaks.pipes.predicates.PipePredicateDataHandler;
@@ -194,6 +195,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(WirelessPipeSignListener.class)
         .withSingleton(PipePredicateDataHandler.class)
         .withSingleton(PipePredicateEventHandler.class)
+        .withSingleton(WirelessPipeCommand.class)
         .withSingleton(PipeEnumerationSessionHandler.class)
         .withSingleton(PipeSearchDisplayHandler.class)
         .withSingleton(PipeSearchCommand.class)
