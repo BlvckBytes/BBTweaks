@@ -44,7 +44,7 @@ public class BlockFacingSettingsDisplayHandler extends DisplayHandler<BlockFacin
     if (facingOverride == null)
       return;
 
-    display.displayData.setFacingOverride(facingOverride);
+    display.displayData.setFacingOverride(facingOverride, false);
     display.updateItems();
   }
 }

@@ -95,11 +95,12 @@ public class BlockFacingCommand implements CommandHandler, Listener {
       var normalizedFacing = FacingOverride.matcher.matchFirst(args[0]);
 
       if (normalizedFacing != null) {
-        settings.setFacingOverride(normalizedFacing.constant);
+        var doEnable = !settings.enabled;
 
-        if (!settings.enabled)
+        if (doEnable)
           settings.setEnabled(true);
 
+        settings.setFacingOverride(normalizedFacing.constant, doEnable);
         return true;
       }
 

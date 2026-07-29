@@ -34,8 +34,8 @@ public class BlockFacingSettings {
     return true;
   }
 
-  public void setFacingOverride(FacingOverride facingOverride) {
-    if (this.facingOverride == facingOverride) {
+  public void setFacingOverride(FacingOverride facingOverride, boolean ignoreAlreadySelected) {
+    if (!ignoreAlreadySelected && this.facingOverride == facingOverride) {
       config.rootSection.blockFacing.facingOverrideAlreadySelected.sendMessage(
         player,
         new InterpretationEnvironment()
