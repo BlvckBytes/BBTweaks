@@ -20,6 +20,7 @@ import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
+import org.bukkit.block.sign.SignSide;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -316,63 +317,47 @@ public class SignCopyCommand implements CommandHandler, Listener {
   private void handleCopyPasteAction(Player player, Sign sign, boolean copy) {
     var settings = settingsStore.accessSettings(player);
 
-    var environment = new InterpretationEnvironment()
-      .withVariable("x", sign.getX())
-      .withVariable("y", sign.getY())
-      .withVariable("z", sign.getZ());
-
     if (copy) {
-      copySign(player, sign);
-
-      if (settings.flags.contains(SettingFlag.SEND_COPIED_MESSAGE))
-        config.rootSection.signCopier.signCopied.sendMessage(player, environment);
-
+      handleCopySign(player, settings, sign);
       return;
     }
 
-    var pasteError = pasteSign(player, settings, sign);
-
-    if (pasteError == null) {
-      sign.update(true, false);
-
-      if (settings.flags.contains(SettingFlag.SEND_PASTED_MESSAGE))
-        config.rootSection.signCopier.signPasted.sendMessage(player, environment);
-
-      return;
-    }
-
-    (switch (pasteError) {
-      case NO_LINES_AVAILABLE -> config.rootSection.signCopier.noSignCopied;
-      case CHANGE_WAS_CANCELLED -> config.rootSection.signCopier.signPasteWasCancelled;
-    }).sendMessage(player, environment);
+    handlePasteSign(player, settings, sign);
   }
 
-  private @Nullable PasteSignError pasteSign(Player player, SignCopierSettings settings, Sign sign) {
+  private void handlePasteSign(Player player, SignCopierSettings settings, Sign sign) {
     var pdc = player.getPersistentDataContainer();
 
     var copiedLines = getCopiedLines(pdc);
 
-    if (copiedLines == null)
-      return PasteSignError.NO_LINES_AVAILABLE;
+    if (copiedLines == null) {
+      config.rootSection.signCopier.noSignCopied.sendMessage(player);
+      return;
+    }
 
     var renderedLines = new ArrayList<Component>(copiedLines.size());
 
     for (var copiedLine : copiedLines)
       renderedLines.add(copiedLine.renderedLine());
 
-    var signSide = sign.getTargetSide(player);
-
-    // The SignSide is unaware of its Sade and getting the target-side is rather involved,
-    // so I'd rather use this little "hack" (they're accessed directly, by reference).
-    var side = signSide == sign.getSide(Side.FRONT) ? Side.FRONT : Side.BACK;
+    var signSide = accessTargetSide(player, settings, sign, false);
+    var side = getSideFromSignSide(sign, signSide);
 
     //noinspection UnstableApiUsage
     var changeEvent = new SignChangeEvent(sign.getBlock(), player, renderedLines, side);
 
     callChangeEventWithExclusions(changeEvent);
 
-    if (changeEvent.isCancelled())
-      return PasteSignError.CHANGE_WAS_CANCELLED;
+    var environment = new InterpretationEnvironment()
+      .withVariable("x", sign.getX())
+      .withVariable("y", sign.getY())
+      .withVariable("z", sign.getZ())
+      .withVariable("front", side == Side.FRONT);
+
+    if (changeEvent.isCancelled()) {
+      config.rootSection.signCopier.signPasteWasCancelled.sendMessage(player, environment);
+      return;
+    }
 
     var finalLines = changeEvent.lines();
 
@@ -396,7 +381,10 @@ public class SignCopyCommand implements CommandHandler, Listener {
         additionalAttributesPdc.copyTo(sign.getPersistentDataContainer(), true);
     }
 
-    return null;
+    sign.update(true, false);
+
+    if (settings.flags.contains(SettingFlag.SEND_PASTED_MESSAGE))
+      config.rootSection.signCopier.signPasted.sendMessage(player, environment);
   }
 
   private @Nullable DyeColor getDyeColor(PersistentDataContainer pdc) {
@@ -439,11 +427,31 @@ public class SignCopyCommand implements CommandHandler, Listener {
     return input.replace("\\&", "&");
   }
 
-  private void copySign(Player player, Sign sign) {
+  private Side getSideFromSignSide(Sign sign, SignSide signSide) {
+    return sign.getSide(Side.FRONT) == signSide ? Side.FRONT : Side.BACK;
+  }
+
+  private SignSide accessTargetSide(Player player, SignCopierSettings settings, Sign sign, boolean forCopy) {
+    var lookedAtSignSide = sign.getTargetSide(player);
+    var lookedAtSide = getSideFromSignSide(sign, lookedAtSignSide);
+
+    if (forCopy) {
+      if (settings.flags.contains(SettingFlag.COPY_FROM_BACK_SIDE))
+        lookedAtSide = lookedAtSide == Side.FRONT ? Side.BACK : Side.FRONT;
+    } else {
+      if (settings.flags.contains(SettingFlag.PASTE_TO_BACK_SIDE))
+        lookedAtSide = lookedAtSide == Side.FRONT ? Side.BACK : Side.FRONT;
+    }
+
+    return sign.getSide(lookedAtSide);
+  }
+
+  private void handleCopySign(Player player, SignCopierSettings settings, Sign sign) {
     var pdc = player.getPersistentDataContainer();
 
+    var signSide = accessTargetSide(player, settings, sign, true);
+
     try {
-      var signSide = sign.getTargetSide(player);
       var lines = signSide.lines();
 
       for (var lineIndex = 0; lineIndex < NUMBER_OF_LINES; ++lineIndex) {
@@ -478,6 +486,17 @@ public class SignCopyCommand implements CommandHandler, Listener {
       removeAllKeys(pdc);
 
       throw e;
+    }
+
+    if (settings.flags.contains(SettingFlag.SEND_COPIED_MESSAGE)) {
+      config.rootSection.signCopier.signCopied.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("x", sign.getX())
+          .withVariable("y", sign.getY())
+          .withVariable("z", sign.getZ())
+          .withVariable("front", getSideFromSignSide(sign, signSide) == Side.FRONT)
+      );
     }
   }
 

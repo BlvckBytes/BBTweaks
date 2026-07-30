@@ -1,7 +1,5 @@
 package me.blvckbytes.bbtweaks.sign_copier.settings;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 
 public enum SettingFlag {
@@ -12,6 +10,8 @@ public enum SettingFlag {
   SEND_PASTED_MESSAGE(true),
   INK_SAC_AS_SHORTCUT(true),
   PASTE_ADDITIONAL_ATTRIBUTES(false),
+  COPY_FROM_BACK_SIDE(false),
+  PASTE_TO_BACK_SIDE(false),
   ;
 
   public static final List<SettingFlag> ALL_VALUES = List.of(values());
@@ -20,12 +20,5 @@ public enum SettingFlag {
 
   SettingFlag(boolean defaultEnabled) {
     this.defaultEnabled = defaultEnabled;
-  }
-
-  public static @Nullable SettingFlag byOrdinalOrNull(int ordinal) {
-    if (ordinal < 0 || ordinal >= ALL_VALUES.size())
-      return null;
-
-    return ALL_VALUES.get(ordinal);
   }
 }

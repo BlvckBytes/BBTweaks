@@ -36,6 +36,8 @@ public class SignCopierSettingsDisplay extends Display<SignCopierSettings> {
     config.rootSection.signCopier.settingsDisplay.items.sendPastedMessage.renderInto(itemConsumer, environment);
     config.rootSection.signCopier.settingsDisplay.items.inkSacAsShortcut.renderInto(itemConsumer, environment);
     config.rootSection.signCopier.settingsDisplay.items.pasteAdditionalAttributes.renderInto(itemConsumer, environment);
+    config.rootSection.signCopier.settingsDisplay.items.copyFromBackSide.renderInto(itemConsumer, environment);
+    config.rootSection.signCopier.settingsDisplay.items.pasteToBackSide.renderInto(itemConsumer, environment);
   }
 
   @Override
@@ -62,6 +64,8 @@ public class SignCopierSettingsDisplay extends Display<SignCopierSettings> {
       .withVariable("send_copied_message", displayData.flags.contains(SettingFlag.SEND_COPIED_MESSAGE))
       .withVariable("send_pasted_message", displayData.flags.contains(SettingFlag.SEND_PASTED_MESSAGE))
       .withVariable("ink_sac_as_shortcut", displayData.flags.contains(SettingFlag.INK_SAC_AS_SHORTCUT))
-      .withVariable("paste_additional_attributes", displayData.flags.contains(SettingFlag.PASTE_ADDITIONAL_ATTRIBUTES));
+      .withVariable("paste_additional_attributes", displayData.flags.contains(SettingFlag.PASTE_ADDITIONAL_ATTRIBUTES))
+      .withVariable("copy_from_back_side", displayData.flags.contains(SettingFlag.COPY_FROM_BACK_SIDE))
+      .withVariable("paste_to_back_side", displayData.flags.contains(SettingFlag.PASTE_TO_BACK_SIDE));
   }
 }

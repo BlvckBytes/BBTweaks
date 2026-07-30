@@ -3076,9 +3076,9 @@ signCopier:
         <hover-text value={<&a>Klicke, um einen Editierungsbefehl vorgeschlagen zu bekommen}>
           <&7><u>Zeile {loop.index + 1}:</u> {line.render}
     </container>
-  signCopied: '{lut.sign_copier_prefix} <&7>Der Inhalt des Schildes bei <&a>{x} {y} {z}</> wurde in deinen Bearbeitungsspeichers kopiert.'
-  signPasted: '{lut.sign_copier_prefix} <&7>Der Inhalt deines Bearbeitungsspeichers wurde am Schild bei <&a>{x} {y} {z}</> eingefügt.'
-  signPasteWasCancelled: '{lut.sign_copier_prefix} <&c>Das Einfügen des Schildes bei <&4>{x} {y} {z}</> wurde verweigert; bestehen Baurechte?'
+  signCopied: '{lut.sign_copier_prefix} <&7>Der Inhalt der <&a>{front then "Vorderseite" else "Rückseite"}</> des Schildes bei <&a>{x} {y} {z}</> wurde in deinen Bearbeitungsspeichers kopiert.'
+  signPasted: '{lut.sign_copier_prefix} <&7>Der Inhalt deines Bearbeitungsspeichers wurde auf der <&a>{front then "Vorderseite" else "Rückseite"}</> am Schild bei <&a>{x} {y} {z}</> eingefügt.'
+  signPasteWasCancelled: '{lut.sign_copier_prefix} <&c>Das Einfügen auf der {front then "Vorderseite" else "Rückseite"} des Schildes bei <&4>{x} {y} {z}</> wurde verweigert; bestehen Baurechte?'
   notLookingAtSign: '{lut.sign_copier_prefix} <&c>Du siehst aktuell kein Schild an!'
   settingsDisplay:
     title: '<&8>SignCopier-Einstellungen'
@@ -3089,7 +3089,7 @@ signCopier:
         name: ' '
         slots: '0..last_slot'
       pasteSignColor:
-        slots: 10
+        slots: 9
         type: '{paste_sign_color then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
         name: |
           <reset>
@@ -3104,7 +3104,7 @@ signCopier:
             <&8>➥ <&e>Linksklick <&7>Funktion {paste_sign_color then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
       pasteSignGlowing:
-        slots: 11
+        slots: 10
         type: '{paste_sign_glowing then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
         name: |
           <reset>
@@ -3119,7 +3119,7 @@ signCopier:
             <&8>➥ <&e>Linksklick <&7>Funktion {paste_sign_glowing then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
       sendCopiedMessage:
-        slots: 12
+        slots: 11
         type: '{send_copied_message then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
         name: |
           <reset>
@@ -3133,7 +3133,7 @@ signCopier:
             <&8>➥ <&e>Linksklick <&7>Funktion {send_copied_message then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
       sendPastedMessage:
-        slots: 13
+        slots: 12
         type: '{send_pasted_message then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
         name: |
           <reset>
@@ -3147,7 +3147,7 @@ signCopier:
             <&8>➥ <&e>Linksklick <&7>Funktion {send_pasted_message then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
       inkSacAsShortcut:
-        slots: 14
+        slots: 13
         type: '{ink_sac_as_shortcut then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
         name: |
           <reset>
@@ -3162,7 +3162,7 @@ signCopier:
             <&8>➥ <&e>Linksklick <&7>Funktion {ink_sac_as_shortcut then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
       pasteAdditionalAttributes:
-        slots: 15
+        slots: 14
         type: '{paste_additional_attributes then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
         name: |
           <reset>
@@ -3175,6 +3175,44 @@ signCopier:
             (Prädikate, etc.), eingefügt werden sollen.<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Funktion {paste_additional_attributes then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      copyFromBackSide:
+        slots: 16
+        type: '{copy_from_back_side then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="copy_from_back_side">Von der Rückseite kopieren</> <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob die Rückseite (relativ zur aktuell<br/>
+            angesehenen) zum kopieren benutzt werden soll.<br/>
+            <br/>
+            Diese Funktion ist dann nützlich, wenn Wandschilder<br/>
+            auf jener Seite kopiert werden sollen, die zur<br/>
+            Montagefläche zeigt und dadurch nur sehr<br/>
+            umständlich zugänglich ist.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Funktion {copy_from_back_side then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      pasteToBackSide:
+        slots: 17
+        type: '{paste_to_back_side then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="paste_to_back_side">Auf die Rückseite einfügen</> <&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob die Rückseite (relativ zur aktuell<br/>
+            angesehenen) zum einfügen benutzt werden soll.<br/>
+            <br/>
+            Diese Funktion ist dann nützlich, wenn Wandschilder<br/>
+            auf jener Seite eingefügt werden sollen, die zur<br/>
+            Montagefläche zeigt und dadurch nur sehr<br/>
+            umständlich zugänglich ist.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Funktion {paste_to_back_side then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
 
 bottleXp:
