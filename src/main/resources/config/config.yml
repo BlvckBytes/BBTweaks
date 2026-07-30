@@ -3775,6 +3775,30 @@ entityEggs:
         <&8>♦ <&7>{detail}
       </container>
 
+clearChat:
+  command:
+    name: 'clearchat'
+  blankLineCount: 100
+  playersOnly: '{lut.clear_chat_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
+  noPermission: '{lut.clear_chat_prefix} <&c>Dir fehlen die nötigen Zugriffsrechte, um diesen Befehl zu nutzen!'
+  actionUsage: '{lut.clear_chat_prefix} <&c>Benutzung: /{label} \<<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>>'
+  unknownFlag: '{lut.clear_chat_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="known_flags" *for-separator={,<space/>}>{flag}</>.'
+  otherUsage: '{lut.clear_chat_prefix} <&c>Benutzung: /{label} {action} \<<&4>Spieler</>>'
+  targetNotOnline: '{lut.clear_chat_prefix} <&c>Der Spieler <&4>{name}</> befindet sich aktuell nicht auf dem Server!'
+  clearedChatOfTarget: |
+    {lut.clear_chat_prefix} <&7>Der Chat von <&a>{name}</> wurde
+    <container *if="silent">
+      <space/>
+      im <&a>Silent-Modus</>
+    </container>
+    <space/>geleert.
+  otherCannotBeSelf: '{lut.clear_chat_prefix} <&c>Du kannst nicht selbst das Ziel eines <&4>{action}</>-Befehls sein!'
+  clearedChatSelf: '{lut.clear_chat_prefix} <&7>Dein Chat wurde geleert.'
+  clearedChatByOther: '{lut.clear_chat_prefix} <&7>Dein Chat wurde von <&a *if="executor">{executor}</><&5 *else>Konsole</> geleert.'
+  clearedChatByOtherGlobal: '{lut.clear_chat_prefix} <&7>Der globale Chat wurde von <&a *if="executor">{executor}</><&5 *else>Konsole</> geleert.'
+  clearedChatGlobal: '{lut.clear_chat_prefix} <&7>Der Chat wurde von <&a *if="executor">{executor}</><&5 *else>Konsole</> geleert.'
+  clearedChatGlobalSilent: '{lut.clear_chat_prefix} <&7>Der globale Chat wurde im <&a>Silent-Modus</> geleert.'
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -3810,6 +3834,7 @@ cLut:
   hotbar_randomizer_prefix: '<&7>[<&6>HotbarRandomizer<&7>]'
   item_notifier_prefix: '<&7>[<&6>ItemNotifier<&7>]'
   entity_eggs_prefix: '<&7>[<&6>EntityEggs<&7>]'
+  clear_chat_prefix: '<&7>[<&6>ClearChat<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

@@ -12,6 +12,7 @@ import me.blvckbytes.bbtweaks.auto_tool.AutoToolSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideSection;
 import me.blvckbytes.bbtweaks.block_facing.BlockFacingSection;
 import me.blvckbytes.bbtweaks.bottlexp.BottleXpSection;
+import me.blvckbytes.bbtweaks.clear_chat.ClearChatSection;
 import me.blvckbytes.bbtweaks.command_items.CommandItemsSection;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsSection;
 import me.blvckbytes.bbtweaks.durability_warnings.config.DurabilityWarningsSection;
@@ -84,6 +85,7 @@ public class MainSection extends ConfigSection {
   public FrameLockingSection frameLocking;
   public HotbarRandomizerSection hotbarRandomizer;
   public EntityEggsSection entityEggs;
+  public ClearChatSection clearChat;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

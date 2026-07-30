@@ -104,6 +104,9 @@ commands:
   wirelesspipe:
     description: 'Allows to bind wireless-pipe signs to each-other quickly'
     permission: bbtweaks.pipes.wireless
+  clearchat:
+    description: 'Clears the chat of players by printing blank lines'
+    permission: bbtweaks.clear-chat
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'
