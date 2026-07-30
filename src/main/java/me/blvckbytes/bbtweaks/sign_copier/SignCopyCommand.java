@@ -282,7 +282,7 @@ public class SignCopyCommand implements CommandHandler, Listener {
     return List.of();
   }
 
-  @EventHandler(priority = EventPriority.MONITOR)
+  @EventHandler(priority = EventPriority.HIGH)
   public void onInteract(PlayerInteractEvent event) {
     if (event.useInteractedBlock() == Event.Result.DENY && !config.rootSection.signCopier.alsoHandleCancelledInteractions)
       return;
