@@ -166,3 +166,5 @@ permissions:
     description: 'Allows to automatically initialize blank signs to pipe-signs'
   bbtweaks.entity-eggs:
     description: 'Allows to capture entities into spawn-eggs'
+  bbtweaks.infinite-waterbucket:
+    description: 'Allows to use the infinite waterbucket'
