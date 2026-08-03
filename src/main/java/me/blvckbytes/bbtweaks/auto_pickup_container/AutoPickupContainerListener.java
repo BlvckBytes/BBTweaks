@@ -19,6 +19,7 @@ import me.blvckbytes.bbtweaks.shulker_accessor.PreShulkerAccessorWriteEvent;
 import me.blvckbytes.item_predicate_parser.event.*;
 import me.blvckbytes.item_predicate_parser.parse.ItemPredicateParseException;
 import me.blvckbytes.item_predicate_parser.predicate.ItemPredicate;
+import me.blvckbytes.item_predicate_parser.translation.PredicateSourcesReloadEvent;
 import me.blvckbytes.item_predicate_parser.translation.TranslationLanguage;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -262,6 +263,11 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     updateData(item);
 
     return null;
+  }
+
+  @EventHandler
+  public void onPredicateSourcesReload(PredicateSourcesReloadEvent event) {
+    filterPredicateAccessorCache.clear();
   }
 
   @EventHandler
