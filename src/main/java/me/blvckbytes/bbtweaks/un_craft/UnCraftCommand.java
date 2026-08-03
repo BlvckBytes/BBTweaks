@@ -327,7 +327,7 @@ public class UnCraftCommand implements CommandHandler, Listener {
     // Simulate the remaining space of the inventory while accumulating results, since we're not
     // immediately adding and thus receive no feedback regarding dropped items. The goal is to drop
     // no items at all, because it can create needless lag - especially if abused wilfully.
-    var simulatingInventory = new SimulatingAddOnlyInventory(player.getInventory(), null, null);
+    var simulatingInventory = SimulatingAddOnlyInventory.fromCapturedInventory(player.getInventory(), null, null);
 
     var ranOutOfSpace = false;
 

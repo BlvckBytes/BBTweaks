@@ -220,7 +220,7 @@ public class PipeBlockCache implements CachedBlockResolver {
             return null;
         }
 
-        return LiveAddOnlyInventory.fromInventoryHolder(holder);
+        return new LiveAddOnlyInventory(holder.getInventory(), holder);
     }
 
     @Override

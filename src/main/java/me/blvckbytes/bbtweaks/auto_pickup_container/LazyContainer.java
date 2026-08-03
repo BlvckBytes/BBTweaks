@@ -82,7 +82,7 @@ public class LazyContainer {
       return 0;
 
     if (flags.contains(AddFlag.DRY_RUN))
-      return new SimulatingAddOnlyInventory(inventory, null, null).addItemAndGetAddedAmount(itemToAdd, amount);
+      return SimulatingAddOnlyInventory.fromCapturedInventory(inventory, null, null).addItemAndGetAddedAmount(itemToAdd, amount);
 
     var remainingAmount = InventoryUtil.addItemToInventoryAndGetRemainingAmount(itemToAdd, amount, inventory);
 

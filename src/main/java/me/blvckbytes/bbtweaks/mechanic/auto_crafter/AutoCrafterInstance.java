@@ -185,7 +185,7 @@ public class AutoCrafterInstance extends SISOInstance {
 
     var additions = new ArrayList<SlotItemAddition>();
 
-    var simulatingInventory = new SimulatingAddOnlyInventory(
+    var simulatingInventory = SimulatingAddOnlyInventory.fromCapturedInventory(
       outputInventory,
       (slot, wasVacant, addedItem, addedAmount, stackSizeOverride) -> additions.add(new SlotItemAddition(slot, wasVacant, addedItem, addedAmount, stackSizeOverride)),
       null

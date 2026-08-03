@@ -6,13 +6,31 @@ import org.jetbrains.annotations.Nullable;
 
 public class SimulatingAddOnlyInventory extends AddOnlyInventory {
 
+  private final ItemStack[] capturedContents;
+
   public SimulatingAddOnlyInventory(
-    Inventory capturedInventory,
+    ItemStack[] capturedContents,
     @Nullable PerSlotItemAdditionHandler perSlotItemAdditionHandler,
     @Nullable PerCallItemAdditionHandler perCallItemAdditionHandler
   ) {
     super(
-      copyContents(capturedInventory.getStorageContents()),
+      capturedContents.length,
+      slot -> capturedContents[slot],
+      (slot, item) -> capturedContents[slot] = item,
+      perSlotItemAdditionHandler,
+      perCallItemAdditionHandler
+    );
+
+    this.capturedContents = capturedContents;
+  }
+
+  public static SimulatingAddOnlyInventory fromCapturedInventory(
+    Inventory inventory,
+    @Nullable PerSlotItemAdditionHandler perSlotItemAdditionHandler,
+    @Nullable PerCallItemAdditionHandler perCallItemAdditionHandler
+  ) {
+    return new SimulatingAddOnlyInventory(
+      copyContents(inventory.getStorageContents()),
       perSlotItemAdditionHandler,
       perCallItemAdditionHandler
     );
@@ -21,14 +39,14 @@ public class SimulatingAddOnlyInventory extends AddOnlyInventory {
   // Yes - not quite "add-only", but we only use this for simulating and some usage-sites need to reduce
   // as well. It's not at all critical, so instead of deriving again, I'm fine with this addition.
   public void setSlotAmount(int slot, int amount) {
-    var targetItem = inventoryContents[slot];
+    var targetItem = capturedContents[slot];
 
     if (!ItemUtil.isStackValid(targetItem))
       return;
 
     if (amount <= 0) {
       targetItem.setAmount(0);
-      inventoryContents[slot] = null;
+      capturedContents[slot] = null;
       return;
     }
 

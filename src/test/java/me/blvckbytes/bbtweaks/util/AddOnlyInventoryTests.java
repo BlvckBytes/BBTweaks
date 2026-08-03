@@ -87,7 +87,7 @@ public class AddOnlyInventoryTests {
 
     inventoryPreparer.accept(inventory);
 
-    var addOnlyInventory = new SimulatingAddOnlyInventory(
+    var addOnlyInventory = SimulatingAddOnlyInventory.fromCapturedInventory(
       inventory,
       (slot, wasVacant, addedItem, addedAmount, stackSizeOverride) -> slotAdditions.add(new SlotItemAddition(slot, wasVacant, addedItem, addedAmount, stackSizeOverride)),
       (addedItem, addedAmount, stackSizeOverride) -> callAdditions.add(new CallItemAddition(addedItem, addedAmount, stackSizeOverride))

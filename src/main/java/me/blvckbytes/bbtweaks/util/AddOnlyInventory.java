@@ -16,6 +16,9 @@ public abstract class AddOnlyInventory {
     for (var index = 0; index < materialValues.length; ++index) {
       var material = materialValues[index];
 
+      if (material.isLegacy())
+        continue;
+
       if (material.isItem())
         unitStackByMaterialOrdinal[index] = new ItemStack(material);
     }
@@ -24,16 +27,24 @@ public abstract class AddOnlyInventory {
   // NOTE: We intentionally *never* store an item by reference, as to absolutely avoid
   //       untracked mutations. This is far more important than the little allocation.
 
-  protected final ItemStack[] inventoryContents;
+  private final int size;
+
+  private final SlotGetHandler slotGetHandler;
+  private final SlotSetHandler slotSetHandler;
+
   private final @Nullable PerSlotItemAdditionHandler perSlotItemAdditionHandler;
   private final @Nullable PerCallItemAdditionHandler perCallItemAdditionHandler;
 
   protected AddOnlyInventory(
-    ItemStack[] inventoryContents,
+    int size,
+    SlotGetHandler slotGetHandler,
+    SlotSetHandler slotSetHandler,
     @Nullable PerSlotItemAdditionHandler perSlotItemAdditionHandler,
     @Nullable PerCallItemAdditionHandler perCallItemAdditionHandler
   ) {
-    this.inventoryContents = inventoryContents;
+    this.size = size;
+    this.slotGetHandler = slotGetHandler;
+    this.slotSetHandler = slotSetHandler;
     this.perSlotItemAdditionHandler = perSlotItemAdditionHandler;
     this.perCallItemAdditionHandler = perCallItemAdditionHandler;
   }
@@ -41,7 +52,7 @@ public abstract class AddOnlyInventory {
   public abstract boolean isSlotDisabled(int slot);
 
   public int getSize() {
-    return inventoryContents.length;
+    return size;
   }
 
   public int addItemAndGetAddedAmount(Material typeToAdd, int amountToAdd) {
@@ -68,7 +79,7 @@ public abstract class AddOnlyInventory {
   }
 
   public int addItemToSlotAndGetAddedAmount(int slot, ItemStack itemToAdd, int amountToAdd, int stackSizeOverride) {
-    var currentItem = inventoryContents[slot];
+    var currentItem = slotGetHandler.getItem(slot);
 
     var finalStackSize = itemToAdd.getMaxStackSize();
 
@@ -81,7 +92,7 @@ public abstract class AddOnlyInventory {
       var newItem = new ItemStack(itemToAdd);
       newItem.setAmount(amountToAdd);
 
-      inventoryContents[slot] = newItem;
+      slotSetHandler.setItem(slot, newItem);
 
       if (perCallItemAdditionHandler != null)
         perCallItemAdditionHandler.onAdditionPerAddCall(newItem, amountToAdd, stackSizeOverride);
@@ -114,7 +125,7 @@ public abstract class AddOnlyInventory {
   }
 
   public @Nullable Integer getAmountIfIsSimilarOrVacant(int slot, ItemStack item) {
-    var currentItem = inventoryContents[slot];
+    var currentItem = slotGetHandler.getItem(slot);
 
     if (!ItemUtil.isStackValid(currentItem))
       return 0;
@@ -132,8 +143,8 @@ public abstract class AddOnlyInventory {
 
     // 1. Fill up all partial stacks
 
-    for (var slotIndex = 0; slotIndex < inventoryContents.length; ++slotIndex) {
-      var currentItem = inventoryContents[slotIndex];
+    for (var slotIndex = 0; slotIndex < size; ++slotIndex) {
+      var currentItem = slotGetHandler.getItem(slotIndex);
 
       if (currentItem == null || currentItem.getType().isAir()) {
         if (firstVacantSlotIndex < 0)
@@ -178,7 +189,7 @@ public abstract class AddOnlyInventory {
     var remainderAmount = Math.min(itemToAdd.getMaxStackSize(), remainingAmount);
     remainder.setAmount(remainderAmount);
 
-    inventoryContents[firstVacantSlotIndex] = remainder;
+    slotSetHandler.setItem(firstVacantSlotIndex, remainder);
 
     if (perSlotItemAdditionHandler != null)
         perSlotItemAdditionHandler.onAdditionPerSlot(firstVacantSlotIndex, true, remainder, remainderAmount, 0);
@@ -192,8 +203,8 @@ public abstract class AddOnlyInventory {
     //    a rather seldom, special case, we don't keep a list of vacant slots but rather just
     //    iterate again - that's plenty fast.
 
-    for (var slotIndex = 0; slotIndex < inventoryContents.length; ++slotIndex) {
-      var currentItem = inventoryContents[slotIndex];
+    for (var slotIndex = 0; slotIndex < size; ++slotIndex) {
+      var currentItem = slotGetHandler.getItem(slotIndex);
 
       if (currentItem == null || currentItem.getType().isAir()) {
         remainder = new ItemStack(itemToAdd);
@@ -201,7 +212,7 @@ public abstract class AddOnlyInventory {
         remainderAmount = Math.min(itemToAdd.getMaxStackSize(), remainingAmount);
         remainder.setAmount(remainderAmount);
 
-        inventoryContents[slotIndex] = remainder;
+        slotSetHandler.setItem(slotIndex, remainder);
 
         if (perSlotItemAdditionHandler != null)
           perSlotItemAdditionHandler.onAdditionPerSlot(slotIndex, true, remainder, remainderAmount, 0);

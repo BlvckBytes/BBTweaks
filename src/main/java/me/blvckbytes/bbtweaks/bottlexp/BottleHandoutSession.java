@@ -27,7 +27,7 @@ public class BottleHandoutSession {
   ) {
     this.player = player;
 
-    this.simulatingPlayerInventory = bottleStorage.intoInventory ? new SimulatingAddOnlyInventory(player.getInventory(), null, null) : null;
+    this.simulatingPlayerInventory = bottleStorage.intoInventory ? SimulatingAddOnlyInventory.fromCapturedInventory(player.getInventory(), null, null) : null;
     this.addToContainerSession = bottleStorage.intoShulkers ? autoPickupContainerListener.makePickupSession(player) : null;
   }
 
