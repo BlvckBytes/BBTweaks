@@ -96,8 +96,8 @@ public class AddToContainerSession {
       return;
 
     for (var container : containers) {
-      container.onCompletion();
-      inventory.setItem(container.slotOfContainingInventory, container.itemStack);
+      if (container.onCompletionAndGetIfChanged())
+        inventory.setItem(container.slotOfContainingInventory, container.itemStack);
     }
   }
 }

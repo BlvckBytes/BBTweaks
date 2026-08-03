@@ -52,12 +52,13 @@ public class LazyContainer {
     return instance.inventory;
   }
 
-  public void onCompletion() {
+  public boolean onCompletionAndGetIfChanged() {
     if (!dirty || container == null || blockStateMeta == null || inventory == null)
-      return;
+      return false;
 
     blockStateMeta.setBlockState(container);
     itemStack.setItemMeta(blockStateMeta);
+    return true;
   }
 
   public int tryAddItemAndGetAddedAmount(ItemStack itemToAdd, int amount, EnumSet<AddFlag> flags) {
