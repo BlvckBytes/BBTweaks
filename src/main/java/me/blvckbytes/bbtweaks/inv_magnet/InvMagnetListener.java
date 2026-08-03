@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
 import org.bukkit.event.EventHandler;
@@ -13,7 +14,11 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 
+import java.util.Comparator;
+
 public class InvMagnetListener implements Listener, Tickable {
+
+  private record EntityAndDistance(Entity entity, double distanceSquared) {}
 
   // Per minecraft-wiki, it's 1.425, but I'd rather remain on the low side of that.
   // I'm aware that it's not just a simple radius in vanilla, but rather a hitbox distance.
@@ -22,6 +27,8 @@ public class InvMagnetListener implements Listener, Tickable {
   private final InvMagnetParametersStore parametersStore;
 
   private final Int2ObjectMap<EntityAttractionSession> perTickAttractionSessionByEntityId;
+
+  private long relativeTime;
 
   public InvMagnetListener(
     InvMagnetParametersStore parametersStore
@@ -33,6 +40,8 @@ public class InvMagnetListener implements Listener, Tickable {
 
   @Override
   public void tick(long relativeTime) {
+    this.relativeTime = relativeTime;
+
     attractNearbyItemsAndOrbs(relativeTime);
   }
 
@@ -44,13 +53,13 @@ public class InvMagnetListener implements Listener, Tickable {
         if (player.getGameMode() != GameMode.SURVIVAL)
           continue;
 
-        var parameter = parametersStore.accessParameters(player);
+        var parameters = parametersStore.accessParameters(player);
 
-        if (parameter.updateLimitsAndConstrain() == null)
+        if (parameters.updateLimitsAndConstrain() == null)
           continue;
 
-        double effectiveRadius = parameter.getRadius();
-        var isMagnetDisabled = !parameter.isEnabled() || effectiveRadius <= 0;
+        double effectiveRadius = parameters.getRadius();
+        var isMagnetDisabled = !parameters.isEnabled() || effectiveRadius <= 0;
 
         if (isMagnetDisabled)
           effectiveRadius = VANILLA_PICKUP_RADIUS;
@@ -58,25 +67,39 @@ public class InvMagnetListener implements Listener, Tickable {
         // Attract near their chest
         var playerLocation = player.getLocation().add(0, .75, 0);
 
-        for (var nearbyEntity : player.getNearbyEntities(effectiveRadius, effectiveRadius, effectiveRadius)) {
+        // Always attract the closest entities first, as to ensure consistent behavior.
+        // We don't know what order the nearby lookup will hand us.
+        var nearbyEntitiesInOrder = player
+          .getNearbyEntities(effectiveRadius, effectiveRadius, effectiveRadius)
+          .stream()
+          .map(entity -> new EntityAndDistance(entity, entity.getLocation().distanceSquared(playerLocation)))
+          .sorted(Comparator.comparing(EntityAndDistance::distanceSquared))
+          .map(EntityAndDistance::entity)
+          .toList();
+
+        for (var nearbyEntity : nearbyEntitiesInOrder) {
           if (nearbyEntity.isDead() || !nearbyEntity.isValid())
             continue;
 
           if (nearbyEntity instanceof Item item) {
-            if (item.getPickupDelay() > 0)
+            // Important! We need some tolerance here, as we do not know when we execute; it could be that vanilla pickup
+            // happens right after our attraction and then, if they decrement the delay by one, the stack within reach
+            // will be picked up immediately, having had us attract a remote stack for nothing, which looks bad. We take
+            // at least one tick to attract anyway, so this should be a solution with no downsides at all.
+            if (item.getPickupDelay() > 1)
               continue;
 
             var itemStack = item.getItemStack();
 
-            if (parameter.didFailAttemptRecently(itemStack, relativeTime))
+            if (parameters.didFailAttemptRecently(itemStack, relativeTime))
               continue;
 
-            var attractEvent = new PreAttractItemEvent(player, itemStack);
+            var attractEvent = new PreAttractItemEvent(player, itemStack, parameters);
 
             Bukkit.getPluginManager().callEvent(attractEvent);
 
             if (attractEvent.isCancelled() || !attractEvent.canHoldSome()) {
-              parameter.submitFailedAttempt(itemStack, relativeTime);
+              parameters.submitFailedAttempt(itemStack, relativeTime);
               continue;
             }
           }
@@ -106,27 +129,12 @@ public class InvMagnetListener implements Listener, Tickable {
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
   public void onPreAttractItem(PreAttractItemEvent event) {
-    var inventory = event.getPlayer().getInventory();
     var attractedItem = event.getAttractedItem();
 
-    for (var slotIndex = 0; slotIndex < 9 * 4; ++slotIndex) {
-      var currentItem = inventory.getItem(slotIndex);
+    var simulatingInventory = event.getParameters().getSimulatingInventoryForCurrentTick(relativeTime);
+    var addedAmount = simulatingInventory.addItemAndGetAddedAmount(attractedItem, attractedItem.getAmount());
 
-      if (currentItem == null || currentItem.getType().isAir()) {
-        event.markCanHoldSome();
-        return;
-      }
-
-      if (!attractedItem.isSimilar(currentItem))
-        continue;
-
-      var remainingSpace = currentItem.getMaxStackSize() - currentItem.getAmount();
-
-      if (remainingSpace <= 0)
-        continue;
-
+    if (addedAmount > 0)
       event.markCanHoldSome();
-      return;
-    }
   }
 }

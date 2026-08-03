@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.inv_magnet;
 
+import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParameters;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
@@ -13,13 +14,18 @@ public class PreAttractItemEvent extends Event implements Cancellable {
 
   private final Player player;
   private final ItemStack attractedItem;
+  private final InvMagnetParameters parameters;
 
   private boolean cancelled;
   private boolean canHoldSome;
 
-  public PreAttractItemEvent(Player player, ItemStack attractedItem) {
+  public PreAttractItemEvent(
+    Player player,
+    ItemStack attractedItem,
+    InvMagnetParameters parameters) {
     this.player = player;
     this.attractedItem = attractedItem;
+    this.parameters = parameters;
   }
 
   @Override
@@ -46,6 +52,10 @@ public class PreAttractItemEvent extends Event implements Cancellable {
 
   public ItemStack getAttractedItem() {
     return attractedItem;
+  }
+
+  public InvMagnetParameters getParameters() {
+    return parameters;
   }
 
   @Override

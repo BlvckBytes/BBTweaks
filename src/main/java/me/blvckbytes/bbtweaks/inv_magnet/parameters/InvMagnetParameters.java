@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_pickup_container.settings.ItemAttemptsKeeper;
+import me.blvckbytes.bbtweaks.util.SimulatingAddOnlyInventory;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Nullable;
 
@@ -21,6 +22,11 @@ public class InvMagnetParameters extends ItemAttemptsKeeper {
 
   private InvMagnetLimits limits;
 
+  // Not necessarily a parameter, but I do not needlessly want to introduce another
+  // map-lookup, so I see no issue with it living here.
+  private @Nullable SimulatingAddOnlyInventory simulatingInventory;
+  private long simulatingInventoryCreatedAt;
+
   public InvMagnetParameters(Player player, ConfigKeeper<MainSection> config) {
     this.player = player;
     this.config = config;
@@ -32,6 +38,15 @@ public class InvMagnetParameters extends ItemAttemptsKeeper {
     this.radiusByWorldGroupIdentifyingName.defaultReturnValue(0);
 
     updateLimitsAndConstrain();
+  }
+
+  public SimulatingAddOnlyInventory getSimulatingInventoryForCurrentTick(long relativeTime) {
+    if (simulatingInventory == null || simulatingInventoryCreatedAt != relativeTime) {
+      simulatingInventoryCreatedAt = relativeTime;
+      return simulatingInventory = SimulatingAddOnlyInventory.fromCapturedInventory(player.getInventory(), null, null);
+    }
+
+    return simulatingInventory;
   }
 
   public InvMagnetLimits getLimits() {
