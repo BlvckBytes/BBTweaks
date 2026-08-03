@@ -28,6 +28,7 @@ import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerListener;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerSettingsStore;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.command.HotbarRandomizerCommand;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.settings_display.HotbarRandomizerSettingsDisplayHandler;
+import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteLavaBucketListener;
 import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteWaterBucketListener;
 import me.blvckbytes.bbtweaks.integration.mc_mmo.McMMOIntegrationLoader;
 import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
@@ -177,6 +178,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(BlockFacingCommand.class)
         .withSingleton(NewbieAnnounceHandler.class)
         .withSingleton(InfiniteWaterBucketListener.class)
+        .withSingleton(InfiniteLavaBucketListener.class)
         .withSingleton(MainCommand.class)
         .withSingleton(CommandItemListener.class)
         .withSingleton(SignCopierSettingsStore.class)

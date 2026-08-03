@@ -22,6 +22,7 @@ import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
 import me.blvckbytes.bbtweaks.get_exp.GetExpSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerSection;
+import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteLavaBucketSection;
 import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteWaterBucketSection;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordSection;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterSection;
@@ -77,6 +78,7 @@ public class MainSection extends ConfigSection {
   public SignCopierSection signCopier;
   public BottleXpSection bottleXp;
   public InfiniteWaterBucketSection infiniteWaterBucket;
+  public InfiniteLavaBucketSection infiniteLavaBucket;
   public ListChunkTicketsSection listChunkTickets;
   public LavaSpongeSection lavaSponge;
   public ItemDataSection itemData;

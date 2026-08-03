@@ -157,7 +157,7 @@ public abstract class InfiniteBucketListener implements Listener, Tickable {
   }
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
-  private boolean doesContainMarker(PersistentDataContainerView pdcView) {
+  protected boolean doesContainMarker(PersistentDataContainerView pdcView) {
     var markerFlag = pdcView.get(bucketMarkerKey, PersistentDataType.BOOLEAN);
     return markerFlag != null && markerFlag;
   }

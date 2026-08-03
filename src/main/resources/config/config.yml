@@ -21,6 +21,9 @@ mainCommand:
   setInfiniteWaterBucketNoValidItem: '{lut.main_prefix} <&c>Du hältst keinen Wassereimer in der Hand!'
   setInfiniteWaterBucketAlreadyMarked: '{lut.main_prefix} <&c>Das von dir gehaltene Item wurde bereits als unendlicher Wassereimer gekennzeichnet!'
   setInfiniteWaterBucketSuccess: '{lut.main_prefix} <&a>Dieses Item ist nun als unendlicher Wassereimer gekennzeichnet.'
+  setInfiniteLavaBucketNoValidItem: '{lut.main_prefix} <&c>Du hältst keinen Lavaeimer in der Hand!'
+  setInfiniteLavaBucketAlreadyMarked: '{lut.main_prefix} <&c>Das von dir gehaltene Item wurde bereits als unendlicher Lavaeimer gekennzeichnet!'
+  setInfiniteLavaBucketSuccess: '{lut.main_prefix} <&a>Dieses Item ist nun als unendlicher Lavaeimer gekennzeichnet.'
 
 abSleep:
   thresholdNotYetReached: '<&a>Es sind <&2>{sleeping_count}<&a>/<&2>{threshold_count} <&a>benötigen Spielern im Bett'
@@ -3292,6 +3295,18 @@ infiniteWaterBucket:
       <br/>
       <&3>Eine mobile, unerschöpfliche Quelle an<br/>
       ständig verfügbarem und frischem Wasser.
+  glint: true
+
+infiniteLavaBucket:
+  noPermission: '<&7>[<&6>ULEimer<&7>] <&c>Dir fehlen die nötigen Rechte, um dieses Feature benutzen zu können!'
+  name: |
+    <reset>
+      <&c>Unendlicher Lavaeimer
+  lore: |
+    <reset>
+      <br/>
+      <&4>Eine mobile, unerschöpfliche Quelle an<br/>
+      ständig verfügbarer und glühender Lava.
   glint: true
 
 listChunkTickets:

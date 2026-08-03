@@ -22,6 +22,9 @@ public class MainCommandSection extends ConfigSection {
   public ComponentMarkup setInfiniteWaterBucketNoValidItem;
   public ComponentMarkup setInfiniteWaterBucketAlreadyMarked;
   public ComponentMarkup setInfiniteWaterBucketSuccess;
+  public ComponentMarkup setInfiniteLavaBucketNoValidItem;
+  public ComponentMarkup setInfiniteLavaBucketAlreadyMarked;
+  public ComponentMarkup setInfiniteLavaBucketSuccess;
 
   public MainCommandSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

@@ -5,6 +5,7 @@ import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import com.google.gson.*;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteLavaBucketListener;
 import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteWaterBucketListener;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerListener;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
@@ -39,7 +40,8 @@ public class MainCommand implements CommandHandler {
     LWC_EXTEND_BLOCKS,
     MARK_AUTO_PICKUP_CONTAINER,
     PATCH_SIGNS_FROM_FILE,
-    MARK_INFINITE_WATERBUCKET,
+    MARK_INFINITE_WATER_BUCKET,
+    MARK_INFINITE_LAVA_BUCKET,
     ;
 
     static final EnumMatcher<Action> matcher = new EnumMatcher<>(values());
@@ -50,6 +52,7 @@ public class MainCommand implements CommandHandler {
   private final RDBreakerListener rdBreakerListener;
   private final AutoPickupContainerListener autoPickupContainer;
   private final InfiniteWaterBucketListener infiniteWaterBucket;
+  private final InfiniteLavaBucketListener infiniteLavaBucket;
   private final Plugin plugin;
 
   public MainCommand(
@@ -57,6 +60,7 @@ public class MainCommand implements CommandHandler {
     RDBreakerListener rdBreakerListener,
     AutoPickupContainerListener autoPickupContainer,
     InfiniteWaterBucketListener infiniteWaterBucket,
+    InfiniteLavaBucketListener infiniteLavaBucket,
     ConfigKeeper<MainSection> config
   ) {
     this.command = Objects.requireNonNull(plugin.getCommand("bbtweaks"));
@@ -64,6 +68,7 @@ public class MainCommand implements CommandHandler {
     this.rdBreakerListener = rdBreakerListener;
     this.autoPickupContainer = autoPickupContainer;
     this.infiniteWaterBucket = infiniteWaterBucket;
+    this.infiniteLavaBucket = infiniteLavaBucket;
     this.plugin = plugin;
   }
 
@@ -315,7 +320,7 @@ public class MainCommand implements CommandHandler {
         }
       }
 
-      case MARK_INFINITE_WATERBUCKET -> {
+      case MARK_INFINITE_WATER_BUCKET -> {
         if (!(sender instanceof Player player)) {
           config.rootSection.mainCommand.playersOnly.sendMessage(sender);
           return true;
@@ -332,6 +337,28 @@ public class MainCommand implements CommandHandler {
         switch (error) {
           case ALREADY_MARKED -> config.rootSection.mainCommand.setInfiniteWaterBucketAlreadyMarked.sendMessage(player);
           case WRONG_ITEM_TYPE -> config.rootSection.mainCommand.setInfiniteWaterBucketNoValidItem.sendMessage(player);
+        }
+
+        return true;
+      }
+
+      case MARK_INFINITE_LAVA_BUCKET -> {
+        if (!(sender instanceof Player player)) {
+          config.rootSection.mainCommand.playersOnly.sendMessage(sender);
+          return true;
+        }
+
+        var heldItem = player.getInventory().getItemInMainHand();
+        var error = infiniteLavaBucket.modifyItemToBecomeInfiniteBucket(heldItem);
+
+        if (error == null) {
+          config.rootSection.mainCommand.setInfiniteLavaBucketSuccess.sendMessage(player);
+          return true;
+        }
+
+        switch (error) {
+          case ALREADY_MARKED -> config.rootSection.mainCommand.setInfiniteLavaBucketAlreadyMarked.sendMessage(player);
+          case WRONG_ITEM_TYPE -> config.rootSection.mainCommand.setInfiniteLavaBucketNoValidItem.sendMessage(player);
         }
 
         return true;
