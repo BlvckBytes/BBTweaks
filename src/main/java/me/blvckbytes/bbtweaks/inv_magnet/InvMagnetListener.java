@@ -1,7 +1,6 @@
 package me.blvckbytes.bbtweaks.inv_magnet;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.*;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import org.bukkit.Bukkit;
@@ -9,6 +8,7 @@ import org.bukkit.GameMode;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Item;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -20,15 +20,21 @@ public class InvMagnetListener implements Listener, Tickable {
 
   private record EntityAndDistance(Entity entity, double distanceSquared) {}
 
+  private record AttractionInfo(long relativeTime, Player target) {}
+
   // Per minecraft-wiki, it's 1.425, but I'd rather remain on the low side of that.
   // I'm aware that it's not just a simple radius in vanilla, but rather a hitbox distance.
   private static final double VANILLA_PICKUP_RADIUS = 1.42;
 
   private static final int ATTEMPT_CLEANUP_PERIOD_T = 10;
 
+  private static final int ATTRACTION_STAMP_MAX_AGE_T = 20;
+  private static final int ATTRACTION_STAMP_CLEANUP_PERIOD_T = 2 * ATTRACTION_STAMP_MAX_AGE_T;
+
   private final InvMagnetParametersStore parametersStore;
 
   private final Int2ObjectMap<EntityAttractionSession> perTickAttractionSessionByEntityId;
+  private final Int2ObjectMap<AttractionInfo> attractionInfoByEntityId;
 
   private long relativeTime;
 
@@ -38,11 +44,24 @@ public class InvMagnetListener implements Listener, Tickable {
     this.parametersStore = parametersStore;
 
     this.perTickAttractionSessionByEntityId = new Int2ObjectArrayMap<>();
+    this.attractionInfoByEntityId = new Int2ObjectArrayMap<>();
+  }
+
+  public boolean didAttractToRecently(Entity entity, Player target) {
+    var attractionInfo = attractionInfoByEntityId.get(entity.getEntityId());
+
+    if (attractionInfo == null || attractionInfo.target != target)
+      return false;
+
+    return relativeTime - attractionInfo.relativeTime <= ATTRACTION_STAMP_MAX_AGE_T;
   }
 
   @Override
   public void tick(long relativeTime) {
     this.relativeTime = relativeTime;
+
+    if (relativeTime % ATTRACTION_STAMP_CLEANUP_PERIOD_T == 0)
+      attractionInfoByEntityId.values().removeIf(info -> relativeTime - info.relativeTime > ATTRACTION_STAMP_MAX_AGE_T);
 
     attractNearbyItemsAndOrbs(relativeTime);
   }
@@ -114,8 +133,10 @@ public class InvMagnetListener implements Listener, Tickable {
           else if (!(nearbyEntity instanceof ExperienceOrb))
             continue;
 
-          perTickAttractionSessionByEntityId
-            .computeIfAbsent(nearbyEntity.getEntityId(), _ -> new EntityAttractionSession(nearbyEntity))
+          var entityId = nearbyEntity.getEntityId();
+
+          var didAttract = perTickAttractionSessionByEntityId
+            .computeIfAbsent(entityId, _ -> new EntityAttractionSession(nearbyEntity))
             .attractOrClearIfClosest(
               nearbyEntity,
               playerLocation,
@@ -124,6 +145,9 @@ public class InvMagnetListener implements Listener, Tickable {
               // such that they cannot "steal" the item the player is trying to pick up.
               isMagnetDisabled
             );
+
+          if (didAttract)
+            attractionInfoByEntityId.put(entityId, new AttractionInfo(relativeTime, player));
         }
       }
     }

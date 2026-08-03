@@ -21,7 +21,7 @@ public class EntityAttractionSession {
     originalZ = entity.getZ();
   }
 
-  public void attractOrClearIfClosest(Entity attractedEntity, Location to, boolean clearIfClosest) {
+  public boolean attractOrClearIfClosest(Entity attractedEntity, Location to, boolean clearIfClosest) {
     var deltaX = to.getX() - originalX;
     var deltaY = to.getY() - originalY;
     var deltaZ = to.getZ() - originalZ;
@@ -29,13 +29,13 @@ public class EntityAttractionSession {
     var distanceSquared = deltaX * deltaX + deltaY * deltaY + deltaZ * deltaZ;
 
     if (lastDistanceSquared >= 0 && distanceSquared >= lastDistanceSquared)
-      return;
+      return false;
 
     lastDistanceSquared = distanceSquared;
 
     if (clearIfClosest) {
       attractedEntity.setVelocity(originalVelocity);
-      return;
+      return false;
     }
 
     var distance = Math.sqrt(distanceSquared);
@@ -47,5 +47,7 @@ public class EntityAttractionSession {
       deltaY / distance * speed + OLD_VELOCITY_FACTOR * originalVelocity.getY(),
       deltaZ / distance * speed + OLD_VELOCITY_FACTOR * originalVelocity.getZ()
     ));
+
+    return true;
   }
 }

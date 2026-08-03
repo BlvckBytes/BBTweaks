@@ -12,6 +12,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_pickup_container.settings.AutoPickupContainerSettingsStore;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
+import me.blvckbytes.bbtweaks.inv_magnet.InvMagnetListener;
 import me.blvckbytes.bbtweaks.inv_magnet.PreAttractItemEvent;
 import me.blvckbytes.bbtweaks.shulker_accessor.PostShulkerAccessorWriteEvent;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
@@ -116,6 +117,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   private final Plugin plugin;
   private final AutoPickupContainerSettingsStore settingsStore;
   private final ShulkerAccessorListener shulkerAccessor;
+  private final InvMagnetListener invMagnetListener;
   private final IPPIntegration ippIntegration;
   private final ConfigKeeper<MainSection> config;
 
@@ -135,12 +137,14 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     Plugin plugin,
     AutoPickupContainerSettingsStore settingsStore,
     ShulkerAccessorListener shulkerAccessor,
+    InvMagnetListener invMagnetListener,
     IPPIntegration ippIntegration,
     ConfigKeeper<MainSection> config
   ) {
     this.plugin = plugin;
     this.settingsStore = settingsStore;
     this.shulkerAccessor = shulkerAccessor;
+    this.invMagnetListener = invMagnetListener;
     this.ippIntegration = ippIntegration;
     this.config = config;
 
@@ -579,8 +583,10 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     var itemEntity = event.getItem();
     var pickedUpStack = itemEntity.getItemStack();
 
-    if (settings.didFailAttemptAndNotSucceedOnceRecently(pickedUpStack, relativeTime))
+    if (settings.didFailAttemptAndNotSucceedOnceRecently(pickedUpStack, relativeTime)) {
+      clearVelocityIfAttractedRecently(itemEntity, player);
       return;
+    }
 
     var session = makePickupSession(player, true);
 
@@ -591,6 +597,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
     // Had no space to add any amount of the item to any of the containers carried by the player.
     if (addedAmount == 0) {
+      clearVelocityIfAttractedRecently(itemEntity, player);
       settings.submitFailedAttempt(pickedUpStack, relativeTime);
       return;
     }
@@ -621,6 +628,13 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     // may also mimic that; also, as to not make it bounce around, let's clear its initial velocity.
     remainderItem.setPickupDelay(0);
     remainderItem.setVelocity(new Vector(0, 0, 0));
+  }
+
+  // Sometimes, we attract an entity whose stack can only partially be picked up; so, after taking
+  // from it, let's reset its velocity back to zero, as to not have it flying way past the player.
+  private void clearVelocityIfAttractedRecently(Item item, Player target) {
+    if (invMagnetListener.didAttractToRecently(item, target))
+      item.setVelocity(new Vector(0, 0, 0));
   }
 
   @EventHandler
