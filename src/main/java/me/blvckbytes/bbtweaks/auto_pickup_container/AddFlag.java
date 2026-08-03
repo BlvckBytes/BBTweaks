@@ -4,7 +4,7 @@ import java.util.EnumSet;
 
 public enum AddFlag {
   ALLOW_UNMARKED,
-  DRY_RUN,
+  SIMULATING,
   ;
 
   public static EnumSet<AddFlag> makeSet(AddFlag... flags) {

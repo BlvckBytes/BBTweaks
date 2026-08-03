@@ -52,6 +52,7 @@ import java.util.function.Consumer;
 public class AutoPickupContainerListener implements Listener, Tickable, FilterPredicateAccessor {
 
   private static final int FILTER_PREDICATE_CACHE_CLEAR_PERIOD_T = 20 * 60 * 5;
+  private static final int ATTEMPT_CLEANUP_PERIOD_T = 10;
   private static final int USAGE_INFO_MAX_UPDATE_AGE_T = 10;
 
   private record ShulkerCapture(Block block, ShulkerBox state) {}
@@ -160,6 +161,11 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
     if (relativeTime % FILTER_PREDICATE_CACHE_CLEAR_PERIOD_T == 0)
       filterPredicateAccessorCache.clear();
+
+    if (relativeTime % ATTEMPT_CLEANUP_PERIOD_T == 0) {
+      for (var player : Bukkit.getOnlinePlayers())
+        settingsStore.accessSettings(player).cleanupExpiredAttempts(relativeTime);
+    }
 
     for (var usageInfo : usageInfoByPlayerId.values()) {
       if (!usageInfo.possiblyChanged)
@@ -543,7 +549,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
 
     var attractedItem = event.getAttractedItem();
 
-    if (settings.didFailAttemptRecently(attractedItem, relativeTime))
+    if (settings.didFailAttemptAndNotSucceedOnceRecently(attractedItem, relativeTime))
       return;
 
     // This does not necessarily run in one burst with the pickups, but since we're only executing
@@ -552,10 +558,12 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     // taking the benefit of the optimization, which is making a large difference.
     var session = makePickupSession(event.getPlayer(), true);
 
-    if (session.tryAddItemToContainersAndGetAddedAmount(attractedItem, AddFlag.DRY_RUN) <= 0) {
+    if (session.tryAddItemToContainersAndGetAddedAmount(attractedItem, AddFlag.SIMULATING) <= 0) {
       settings.submitFailedAttempt(attractedItem, relativeTime);
       return;
     }
+
+    settings.submitSuccessfulAttempt(attractedItem, relativeTime);
 
     event.markCanHoldSome();
   }
@@ -571,7 +579,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     var itemEntity = event.getItem();
     var pickedUpStack = itemEntity.getItemStack();
 
-    if (settings.didFailAttemptRecently(pickedUpStack, relativeTime))
+    if (settings.didFailAttemptAndNotSucceedOnceRecently(pickedUpStack, relativeTime))
       return;
 
     var session = makePickupSession(player, true);
@@ -586,6 +594,8 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
       settings.submitFailedAttempt(pickedUpStack, relativeTime);
       return;
     }
+
+    settings.submitSuccessfulAttempt(pickedUpStack, relativeTime);
 
     // Cancelling prevents the default pickup-behavior from being executed, but sets the fly-at-player
     // flag to false, so we need to explicitly set it again; then, the pickup-animation will be played.

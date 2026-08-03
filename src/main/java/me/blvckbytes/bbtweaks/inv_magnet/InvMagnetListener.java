@@ -24,6 +24,8 @@ public class InvMagnetListener implements Listener, Tickable {
   // I'm aware that it's not just a simple radius in vanilla, but rather a hitbox distance.
   private static final double VANILLA_PICKUP_RADIUS = 1.42;
 
+  private static final int ATTEMPT_CLEANUP_PERIOD_T = 10;
+
   private final InvMagnetParametersStore parametersStore;
 
   private final Int2ObjectMap<EntityAttractionSession> perTickAttractionSessionByEntityId;
@@ -54,6 +56,9 @@ public class InvMagnetListener implements Listener, Tickable {
           continue;
 
         var parameters = parametersStore.accessParameters(player);
+
+        if (relativeTime % ATTEMPT_CLEANUP_PERIOD_T == 0)
+          parameters.cleanupExpiredAttempts(relativeTime);
 
         if (parameters.updateLimitsAndConstrain() == null)
           continue;
@@ -91,7 +96,7 @@ public class InvMagnetListener implements Listener, Tickable {
 
             var itemStack = item.getItemStack();
 
-            if (parameters.didFailAttemptRecently(itemStack, relativeTime))
+            if (parameters.didFailAttemptAndNotSucceedOnceRecently(itemStack, relativeTime))
               continue;
 
             var attractEvent = new PreAttractItemEvent(player, itemStack, parameters);
@@ -102,6 +107,8 @@ public class InvMagnetListener implements Listener, Tickable {
               parameters.submitFailedAttempt(itemStack, relativeTime);
               continue;
             }
+
+            parameters.submitSuccessfulAttempt(itemStack, relativeTime);
           }
 
           else if (!(nearbyEntity instanceof ExperienceOrb))

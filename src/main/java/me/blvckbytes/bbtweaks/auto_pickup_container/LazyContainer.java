@@ -30,6 +30,7 @@ public class LazyContainer {
   private @Nullable BlockStateMeta blockStateMeta;
   private @Nullable Container container;
   private @Nullable Inventory inventory;
+  private @Nullable SimulatingAddOnlyInventory simulatingInventory;
   private @Nullable ItemPredicate filter;
 
   public LazyContainer(
@@ -81,8 +82,12 @@ public class LazyContainer {
     if (filter != null && !filter.test(itemToAdd))
       return 0;
 
-    if (flags.contains(AddFlag.DRY_RUN))
-      return SimulatingAddOnlyInventory.fromCapturedInventory(inventory, null, null).addItemAndGetAddedAmount(itemToAdd, amount);
+    if (flags.contains(AddFlag.SIMULATING)) {
+      if (simulatingInventory == null)
+        simulatingInventory = SimulatingAddOnlyInventory.fromCapturedInventory(inventory, null, null);
+
+      return simulatingInventory.addItemAndGetAddedAmount(itemToAdd, amount);
+    }
 
     var remainingAmount = InventoryUtil.addItemToInventoryAndGetRemainingAmount(itemToAdd, amount, inventory);
 
