@@ -5,7 +5,7 @@ import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import com.google.gson.*;
 import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteWaterbucketListener;
+import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteWaterBucketListener;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerListener;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
@@ -49,21 +49,21 @@ public class MainCommand implements CommandHandler {
   private final ConfigKeeper<MainSection> config;
   private final RDBreakerListener rdBreakerListener;
   private final AutoPickupContainerListener autoPickupContainer;
-  private final InfiniteWaterbucketListener infiniteWaterbucket;
+  private final InfiniteWaterBucketListener infiniteWaterBucket;
   private final Plugin plugin;
 
   public MainCommand(
     JavaPlugin plugin,
     RDBreakerListener rdBreakerListener,
     AutoPickupContainerListener autoPickupContainer,
-    InfiniteWaterbucketListener infiniteWaterbucket,
+    InfiniteWaterBucketListener infiniteWaterBucket,
     ConfigKeeper<MainSection> config
   ) {
     this.command = Objects.requireNonNull(plugin.getCommand("bbtweaks"));
     this.config = config;
     this.rdBreakerListener = rdBreakerListener;
     this.autoPickupContainer = autoPickupContainer;
-    this.infiniteWaterbucket = infiniteWaterbucket;
+    this.infiniteWaterBucket = infiniteWaterBucket;
     this.plugin = plugin;
   }
 
@@ -322,16 +322,16 @@ public class MainCommand implements CommandHandler {
         }
 
         var heldItem = player.getInventory().getItemInMainHand();
-        var error = infiniteWaterbucket.modifyItemToBecomeInfiniteBucket(heldItem);
+        var error = infiniteWaterBucket.modifyItemToBecomeInfiniteBucket(heldItem);
 
         if (error == null) {
-          config.rootSection.mainCommand.setInfiniteWaterbucketSuccess.sendMessage(player);
+          config.rootSection.mainCommand.setInfiniteWaterBucketSuccess.sendMessage(player);
           return true;
         }
 
         switch (error) {
-          case ALREADY_MARKED -> config.rootSection.mainCommand.setInfiniteWaterbucketAlreadyMarked.sendMessage(player);
-          case WRONG_ITEM_TYPE -> config.rootSection.mainCommand.setInfiniteWaterbucketNoValidItem.sendMessage(player);
+          case ALREADY_MARKED -> config.rootSection.mainCommand.setInfiniteWaterBucketAlreadyMarked.sendMessage(player);
+          case WRONG_ITEM_TYPE -> config.rootSection.mainCommand.setInfiniteWaterBucketNoValidItem.sendMessage(player);
         }
 
         return true;

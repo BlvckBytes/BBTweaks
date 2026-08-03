@@ -18,9 +18,9 @@ mainCommand:
   setAutoPickupContainerNoValidItem: '{lut.main_prefix} <&c>Du hältst keine Shulkerbox in der Hand!'
   setAutoPickupContainerAlreadyMarked: '{lut.main_prefix} <&c>Das von dir gehaltene Item wurde bereits als Auto-Pickup-Behälter gekennzeichnet!'
   setAutoPickupContainerSuccess: '{lut.main_prefix} <&a>Dieses Item ist nun als Auto-Pickup-Behälter gekennzeichnet.'
-  setInfiniteWaterbucketNoValidItem: '{lut.main_prefix} <&c>Du hältst keinen Wassereimer in der Hand!'
-  setInfiniteWaterbucketAlreadyMarked: '{lut.main_prefix} <&c>Das von dir gehaltene Item wurde bereits als unendlicher Wassereimer gekennzeichnet!'
-  setInfiniteWaterbucketSuccess: '{lut.main_prefix} <&a>Dieses Item ist nun als unendlicher Wassereimer gekennzeichnet.'
+  setInfiniteWaterBucketNoValidItem: '{lut.main_prefix} <&c>Du hältst keinen Wassereimer in der Hand!'
+  setInfiniteWaterBucketAlreadyMarked: '{lut.main_prefix} <&c>Das von dir gehaltene Item wurde bereits als unendlicher Wassereimer gekennzeichnet!'
+  setInfiniteWaterBucketSuccess: '{lut.main_prefix} <&a>Dieses Item ist nun als unendlicher Wassereimer gekennzeichnet.'
 
 abSleep:
   thresholdNotYetReached: '<&a>Es sind <&2>{sleeping_count}<&a>/<&2>{threshold_count} <&a>benötigen Spielern im Bett'
@@ -3282,7 +3282,7 @@ bottleXp:
       <space/>der verfügbaren Erfahrung abgebrochen wurde.
     </container>
 
-infiniteWaterbucket:
+infiniteWaterBucket:
   noPermission: '<&7>[<&6>UWEimer<&7>] <&c>Dir fehlen die nötigen Rechte, um dieses Feature benutzen zu können!'
   name: |
     <reset>

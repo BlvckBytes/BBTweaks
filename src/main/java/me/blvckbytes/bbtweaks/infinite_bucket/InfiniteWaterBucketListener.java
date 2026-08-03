@@ -6,9 +6,9 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.Plugin;
 
-public class InfiniteWaterbucketListener extends InfiniteBucketListener {
+public class InfiniteWaterBucketListener extends InfiniteBucketListener {
 
-  public InfiniteWaterbucketListener(
+  public InfiniteWaterBucketListener(
     Plugin plugin,
     ConfigKeeper<MainSection> config
   ) {
@@ -16,7 +16,7 @@ public class InfiniteWaterbucketListener extends InfiniteBucketListener {
       Material.WATER_BUCKET,
       new NamespacedKey(plugin, "infinite-waterbucket"),
       "bbtweaks.infinite-waterbucket",
-      () -> config.rootSection.infiniteWaterbucket,
+      () -> config.rootSection.infiniteWaterBucket,
       plugin
     );
   }
