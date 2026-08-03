@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
 import org.bukkit.Bukkit;
+import org.bukkit.FluidCollisionMode;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
@@ -156,7 +157,18 @@ public class AutoFlyCommand implements CommandHandler, Listener {
     }
 
     if (mode == AutoMode.ENABLED_SET_FLYING) {
-      player.setVelocity(new Vector(0, .1, 0));
+      if (!player.isFlying()) {
+        var verticalDistance = getVerticalDistanceToGround(player);
+        var verticalVelocity = player.getVelocity().getY();
+
+        // Account for gravity as well as air-drag
+        var deltaYNextTick = (verticalVelocity - .08) * .98;
+
+        // The player would be on ground next tick - so bump them up a bit,
+        // such that #setFlying is actually entering flying-mode.
+        if (verticalDistance + deltaYNextTick <= .001)
+          player.setVelocity(new Vector(0, .1, 0));
+      }
 
       Bukkit.getScheduler().runTaskLater(plugin, () -> {
         player.setAllowFlight(true);
@@ -173,6 +185,20 @@ public class AutoFlyCommand implements CommandHandler, Listener {
 
       applyAutoFlyMode(player, mode, true);
     }
+  }
+
+  private double getVerticalDistanceToGround(Player player) {
+    var feet = player.getLocation();
+
+    var hitResult = player.getWorld().rayTraceBlocks(
+      feet, new Vector(0, -1, 0),
+      5, FluidCollisionMode.NEVER, true
+    );
+
+    if (hitResult == null)
+      return 5;
+
+    return feet.distance(hitResult.getHitPosition().toLocation(feet.getWorld()));
   }
 
   private AutoMode readModeFor(Player player) {
