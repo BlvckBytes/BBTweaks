@@ -1,10 +1,6 @@
-package me.blvckbytes.bbtweaks.infinite_waterbucket;
+package me.blvckbytes.bbtweaks.infinite_bucket;
 
-import at.blvckbytes.cm_mapper.ConfigKeeper;
-import at.blvckbytes.component_markup.constructor.SlotType;
 import io.papermc.paper.persistence.PersistentDataContainerView;
-import me.blvckbytes.bbtweaks.MainSection;
-import me.blvckbytes.bbtweaks.auto_pickup_container.MarkerModifyError;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.durability_warnings.PlayerHand;
 import org.bukkit.Bukkit;
@@ -29,26 +25,36 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.Supplier;
 
-public class InfiniteWaterbucketListener implements Listener, Tickable {
+public abstract class InfiniteBucketListener implements Listener, Tickable {
 
   private record BucketSlot(int slot, long relativeTime) {}
 
-  private final Plugin plugin;
+  private final Material fullBucketType;
   private final NamespacedKey bucketMarkerKey;
-  private final ConfigKeeper<MainSection> config;
+  private final String usePermission;
+  private final Supplier<InfiniteBucketSection> sectionSupplier;
+
+  private final Plugin plugin;
 
   private final Map<UUID, BucketSlot> bucketSlotByPlayerId;
 
   private long relativeTime;
 
-  public InfiniteWaterbucketListener(
-    Plugin plugin,
-    ConfigKeeper<MainSection> config
+  public InfiniteBucketListener(
+    Material fullBucketType,
+    NamespacedKey bucketMarkerKey,
+    String usePermission,
+    Supplier<InfiniteBucketSection> sectionSupplier,
+    Plugin plugin
   ) {
+    this.fullBucketType = fullBucketType;
+    this.bucketMarkerKey = bucketMarkerKey;
+    this.usePermission = usePermission;
+    this.sectionSupplier = sectionSupplier;
+
     this.plugin = plugin;
-    this.bucketMarkerKey = new NamespacedKey(plugin, "infinite-waterbucket");
-    this.config = config;
 
     this.bucketSlotByPlayerId = new HashMap<>();
   }
@@ -71,11 +77,11 @@ public class InfiniteWaterbucketListener implements Listener, Tickable {
 
     var heldItem = playerInventory.getItem(event.getHand());
 
-    if (heldItem.getType() != Material.WATER_BUCKET || !doesContainMarker(heldItem.getPersistentDataContainer()))
+    if (heldItem.getType() != fullBucketType || !doesContainMarker(heldItem.getPersistentDataContainer()))
       return;
 
-    if (!player.hasPermission("bbtweaks.infinite-waterbucket")) {
-      config.rootSection.infiniteWaterbucket.noPermission.sendMessage(player);
+    if (!player.hasPermission(usePermission)) {
+      sectionSupplier.get().noPermission.sendMessage(player);
       event.setCancelled(true);
       return;
     }
@@ -129,8 +135,8 @@ public class InfiniteWaterbucketListener implements Listener, Tickable {
     tryRestoringBucket(event.getPlayer());
   }
 
-  public @Nullable MarkerModifyError modifyItemToBecomeInfiniteWaterBucket(ItemStack item) {
-    if (item.getType() != Material.WATER_BUCKET)
+  public @Nullable MarkerModifyError modifyItemToBecomeInfiniteBucket(ItemStack item) {
+    if (item.getType() != fullBucketType)
       return MarkerModifyError.WRONG_ITEM_TYPE;
 
     var meta = Objects.requireNonNull(item.getItemMeta());
@@ -143,9 +149,7 @@ public class InfiniteWaterbucketListener implements Listener, Tickable {
 
     pdc.set(bucketMarkerKey, PersistentDataType.BOOLEAN, true);
 
-    meta.lore(config.rootSection.infiniteWaterbucket.lore.interpret(SlotType.ITEM_LORE, null));
-    meta.displayName(config.rootSection.infiniteWaterbucket.name.interpret(SlotType.ITEM_NAME, null).getFirst());
-    meta.setEnchantmentGlintOverride(config.rootSection.infiniteWaterbucket.glint);
+    sectionSupplier.get().applyToMeta(meta);
 
     item.setItemMeta(meta);
 
@@ -179,8 +183,8 @@ public class InfiniteWaterbucketListener implements Listener, Tickable {
     if (bucketItem == null || bucketItem.getType() != Material.BUCKET)
       return;
 
-    var newBucketItem = new ItemStack(Material.WATER_BUCKET);
-    modifyItemToBecomeInfiniteWaterBucket(newBucketItem);
+    var newBucketItem = new ItemStack(fullBucketType);
+    modifyItemToBecomeInfiniteBucket(newBucketItem);
     playerInventory.setItem(bucketSlot.slot, newBucketItem);
   }
 }

@@ -22,7 +22,7 @@ import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
 import me.blvckbytes.bbtweaks.get_exp.GetExpSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerSection;
-import me.blvckbytes.bbtweaks.infinite_waterbucket.InfiniteWaterbucketSection;
+import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteWaterbucketSection;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordSection;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterSection;
 import me.blvckbytes.bbtweaks.inv_magnet.config.InvMagnetSection;

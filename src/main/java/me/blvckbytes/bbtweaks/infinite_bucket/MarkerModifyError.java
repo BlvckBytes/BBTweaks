@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks.infinite_waterbucket;
+package me.blvckbytes.bbtweaks.infinite_bucket;
 
 public enum MarkerModifyError {
   WRONG_ITEM_TYPE,
