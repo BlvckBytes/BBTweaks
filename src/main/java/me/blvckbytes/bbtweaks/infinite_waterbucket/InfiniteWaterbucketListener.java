@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -55,6 +56,12 @@ public class InfiniteWaterbucketListener implements Listener, Tickable {
   @Override
   public void tick(long relativeTime) {
     this.relativeTime = relativeTime;
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+  public void onBlockDispense(BlockDispenseEvent event) {
+    if (doesContainMarker(event.getItem().getPersistentDataContainer()))
+      event.setCancelled(true);
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
