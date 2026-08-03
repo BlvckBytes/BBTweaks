@@ -17,7 +17,10 @@ import java.util.EnumSet;
 public class LazyContainer {
 
   private final @Nullable Player player;
-  private final ItemStack itemStack;
+
+  public final ItemStack itemStack;
+  public final int slotOfContainingInventory;
+
   private final @Nullable FilterPredicateAccessor filterPredicateAccessor;
   private final EnumSet<DisableReason> disableReasons;
 
@@ -32,17 +35,19 @@ public class LazyContainer {
   public LazyContainer(
     @Nullable Player player,
     ItemStack itemStack,
+    int slotOfContainingInventory,
     @Nullable FilterPredicateAccessor filterPredicateAccessor,
     EnumSet<DisableReason> disableReasons
   ) {
     this.player = player;
     this.itemStack = itemStack;
+    this.slotOfContainingInventory = slotOfContainingInventory;
     this.filterPredicateAccessor = filterPredicateAccessor;
     this.disableReasons = disableReasons;
   }
 
   public static @Nullable Inventory tryAccessInventory(ItemStack itemStack) {
-    var instance = new LazyContainer(null, itemStack, null, null);
+    var instance = new LazyContainer(null, itemStack, 0, null, null);
     instance.tryAccessInventory();
     return instance.inventory;
   }

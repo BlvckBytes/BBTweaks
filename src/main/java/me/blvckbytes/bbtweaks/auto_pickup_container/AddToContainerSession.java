@@ -14,7 +14,6 @@ public class AddToContainerSession {
   public final long createdAt;
 
   private final PlayerInventory inventory;
-  private final ItemStack[] storageContents;
 
   private final List<LazyContainer> containers;
 
@@ -29,11 +28,12 @@ public class AddToContainerSession {
     this.createdAt = createdAt;
 
     this.inventory = player.getInventory();
-    this.storageContents = inventory.getStorageContents();
     this.containers = new ArrayList<>();
 
-    for (var slotIndex = 0; slotIndex < storageContents.length; ++slotIndex) {
-      var item = storageContents[slotIndex];
+    var inventorySize = inventory.getSize();
+
+    for (var slotIndex = 0; slotIndex < inventorySize; ++slotIndex) {
+      var item = inventory.getItem(slotIndex);
 
       if (item == null || item.getType().isAir())
         continue;
@@ -43,7 +43,7 @@ public class AddToContainerSession {
 
       var disableReasons = shulkerPredicate.test(inventory, slotIndex, item);
 
-      containers.add(new LazyContainer(player, item, filterPredicateAccessor, disableReasons));
+      containers.add(new LazyContainer(player, item, slotIndex, filterPredicateAccessor, disableReasons));
     }
   }
 
@@ -95,9 +95,9 @@ public class AddToContainerSession {
     if (!dirty)
       return;
 
-    for (var container : containers)
+    for (var container : containers) {
       container.onCompletion();
-
-    inventory.setStorageContents(storageContents);
+      inventory.setItem(container.slotOfContainingInventory, container.itemStack);
+    }
   }
 }
