@@ -10,8 +10,6 @@ import at.blvckbytes.playtime_rewards.store.TopListDirection;
 import at.blvckbytes.playtime_rewards.store.TopListType;
 import com.gamingmesh.jobs.Jobs;
 import com.gmail.nossr50.datatypes.skills.PrimarySkillType;
-import com.gmail.nossr50.mcMMO;
-import com.gmail.nossr50.util.player.UserManager;
 import it.unimi.dsi.fastutil.ints.IntArraySet;
 import it.unimi.dsi.fastutil.ints.IntSet;
 import me.blvckbytes.bbtweaks.MainSection;
@@ -21,6 +19,8 @@ import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.block_facing.settings.BlockFacingSettingsStore;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerSettingsStore;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
+import me.blvckbytes.bbtweaks.integration.mc_mmo.McMMOIntegration;
+import me.blvckbytes.bbtweaks.integration.mc_mmo.McMMOSpecifics;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterProfileStore;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import me.blvckbytes.bbtweaks.multi_break.BlockDirections;
@@ -66,6 +66,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
   private final AutoPickupContainerListener autoPickupContainerListener;
   private final BlockFacingSettingsStore blockFacingSettingsStore;
   private final HotbarRandomizerSettingsStore hotbarRandomizerSettingsStore;
+  private final McMMOIntegration mcMMOIntegration;
   private final PlaytimeRewardsAPI playtimeRewards;
   private final LuckPerms luckPerms;
   private final IEssentials essentials;
@@ -74,7 +75,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
   private final Map<UUID, SidebarBoard> boardByPlayerId;
   private final Map<UUID, Long> lastSneakStampByPlayerId;
 
-  private final boolean hasJobs, hasMcMMO;
+  private final boolean hasJobs;
 
   private long relativeTime;
 
@@ -90,6 +91,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     AutoPickupContainerListener autoPickupContainerListener,
     BlockFacingSettingsStore blockFacingSettingsStore,
     HotbarRandomizerSettingsStore hotbarRandomizerSettingsStore,
+    McMMOIntegration mcMMOIntegration,
     ConfigKeeper<MainSection> config
   ) {
     this.multiBreakParametersStore = multiBreakParametersStore;
@@ -102,6 +104,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     this.autoPickupContainerListener = autoPickupContainerListener;
     this.blockFacingSettingsStore = blockFacingSettingsStore;
     this.hotbarRandomizerSettingsStore = hotbarRandomizerSettingsStore;
+    this.mcMMOIntegration = mcMMOIntegration;
 
     var playtimeRegistration = Bukkit.getServicesManager().getRegistration(PlaytimeRewardsAPI.class);
 
@@ -121,7 +124,6 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       throw new IllegalStateException("Expected Essentials to be loaded");
 
     this.hasJobs = Bukkit.getPluginManager().isPluginEnabled("Jobs");
-    this.hasMcMMO = Bukkit.getPluginManager().isPluginEnabled("mcMMO");
 
     this.playtimeRewards = playtimeRegistration.getProvider();
 
@@ -545,16 +547,15 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       }
 
       case MCMMO_POWER_LEVEL -> {
-        if (!hasMcMMO)
+        var specificsApiObject = mcMMOIntegration.getSpecificsApi();
+
+        if (specificsApiObject == null)
           return new EnvironmentAndSortingValue(environment.withVariable("power_level", "?"), 0);
 
-        var user = UserManager.getPlayer(player);
-
-        if (user == null)
-          return new EnvironmentAndSortingValue(environment.withVariable("power_level", "?"), 0);
+        var powerLevel = ((McMMOSpecifics) specificsApiObject).getPowerLevel(player);
 
         return new EnvironmentAndSortingValue(
-          environment.withVariable("power_level", user.getPowerLevel()),
+          environment.withVariable("power_level", powerLevel == null ? "?" : powerLevel),
           0
         );
       }
@@ -743,8 +744,12 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     }
 
     if (statistic.ordinal() >= SidebarStatistic.MCMMO_ACROBATICS_LEVEL.ordinal() && statistic.ordinal() <= SidebarStatistic.MCMMO_WOODCUTTING_LEVEL.ordinal()) {
-      if (!hasMcMMO)
+      var specificsApiObject = mcMMOIntegration.getSpecificsApi();
+
+      if (specificsApiObject == null)
         return new EnvironmentAndSortingValue(environment.withVariable("skill_level", "?").withVariable("skill_name", "?"), 0);
+
+      var specificsApi = (McMMOSpecifics) specificsApiObject;
 
       var skillType = switch (statistic) {
         case MCMMO_ACROBATICS_LEVEL -> PrimarySkillType.ACROBATICS;
@@ -772,13 +777,29 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       if (skillType == null)
         return new EnvironmentAndSortingValue(environment.withVariable("skill_level", "?").withVariable("skill_name", "?"), 0);
 
-      var user = UserManager.getPlayer(player);
-      var level = user == null ? null : user.getSkillLevel(skillType);
+      environment.withVariable("skill_name", specificsApi.getSkillName(skillType));
+
+      var skillAbilities = specificsApi.getAbilitiesOfSkill(skillType);
+
+      if (!skillAbilities.isEmpty()) {
+        var abilityTimes = new ArrayList<Integer>();
+
+        for (var ability : skillAbilities) {
+          var duration = specificsApi.getSignEncodedAbilityDurationSeconds(player, ability);
+
+          if (duration != null)
+            abilityTimes.add(duration);
+        }
+
+        if (!abilityTimes.isEmpty())
+          environment.withVariable("ability_times", abilityTimes);
+      }
+
+      var level = specificsApi.getSkillLevel(player, skillType);
 
       return new EnvironmentAndSortingValue(
         environment
-          .withVariable("skill_level", level == null ? "?" : level)
-          .withVariable("skill_name", mcMMO.p.getSkillTools().getLocalizedSkillName(skillType)),
+          .withVariable("skill_level", level == null ? "?" : level),
         level == null ? 0 : level
       );
     }
