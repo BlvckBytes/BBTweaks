@@ -2,10 +2,11 @@ package me.blvckbytes.bbtweaks.custom_commands;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
-import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.cm_mapper.section.command.CommandUpdater;
 import me.blvckbytes.bbtweaks.MainSection;
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandSendEvent;
@@ -38,7 +39,7 @@ public class CustomCommandsManager implements Listener {
     this.pluginCommandConstructor = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
     this.pluginCommandConstructor.setAccessible(true);
 
-    updateCommands();
+    Bukkit.getScheduler().runTaskLater(plugin, this::updateCommands, 1L);
   }
 
   @EventHandler
@@ -58,36 +59,44 @@ public class CustomCommandsManager implements Listener {
 
     registeredCommands.clear();
 
-    for (var customCommand : config.rootSection.customCommands.commands) {
+    var customCommands = new ArrayList<CustomCommand>();
+
+    for (var customCommandSection : config.rootSection.customCommands.commands)
+      customCommands.add(new CustomCommandHandler(customCommandSection));
+
+    var registerEvent = new RegisterAdditionalCustomCommandsEvent();
+    Bukkit.getPluginManager().callEvent(registerEvent);
+
+    customCommands.addAll(registerEvent.getCommands());
+
+    for (var customCommand : customCommands) {
       var command = makeCommand(customCommand);
 
       if (command == null)
         continue;
 
       if (!commandUpdater.tryRegisterCommand(command)) {
-        plugin.getLogger().log(Level.SEVERE, "Failed to register command /" + customCommand.evaluatedName);
+        plugin.getLogger().log(Level.SEVERE, "Failed to register command /" + customCommand.getName());
         continue;
       }
 
-      var executor = new CustomCommandExecutor(customCommand);
+      var executor = customCommand.getExecutor();
 
       command.setExecutor(executor);
-      command.setTabCompleter(executor);
+
+      if (executor instanceof TabCompleter tabCompleter)
+        command.setTabCompleter(tabCompleter);
 
       registeredCommands.add(command);
     }
 
-    // Note: We do not sync commands at this point, as to avoid triggering a rebuild before
-    //       the wirer had a chance to finish handling registering/updating the commands it
-    //       handles, which would otherwise cause a CME.
-
     plugin.getLogger().info("Registered " + registeredCommands.size() + " custom-commands");
   }
 
-  private @Nullable PluginCommand makeCommand(CommandSection commandSection) {
+  private @Nullable PluginCommand makeCommand(CustomCommand customCommand) {
     try {
-      var command = pluginCommandConstructor.newInstance(commandSection.evaluatedName, plugin);
-      command.setAliases(commandSection.evaluatedAliases);
+      var command = pluginCommandConstructor.newInstance(customCommand.getName(), plugin);
+      command.setAliases(customCommand.getAliases());
       return command;
     } catch (Throwable e) {
       plugin.getLogger().log(Level.SEVERE, "An error occurred while trying to instantiate a plugin-command", e);

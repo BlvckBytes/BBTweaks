@@ -9,11 +9,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-public class CustomCommandExecutor implements CommandExecutor, TabCompleter {
+public class CustomCommandHandler implements CommandExecutor, TabCompleter, CustomCommand {
 
   private final CustomCommandSection commandsSection;
 
-  public CustomCommandExecutor(CustomCommandSection commandsSection) {
+  public CustomCommandHandler(CustomCommandSection commandsSection) {
     this.commandsSection = commandsSection;
   }
 
@@ -26,5 +26,20 @@ public class CustomCommandExecutor implements CommandExecutor, TabCompleter {
   @Override
   public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
     return List.of();
+  }
+
+  @Override
+  public String getName() {
+    return commandsSection.evaluatedName;
+  }
+
+  @Override
+  public List<String> getAliases() {
+    return commandsSection.evaluatedAliases;
+  }
+
+  @Override
+  public CommandExecutor getExecutor() {
+    return this;
   }
 }
