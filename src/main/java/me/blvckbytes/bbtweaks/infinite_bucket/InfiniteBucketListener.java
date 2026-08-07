@@ -12,10 +12,8 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.player.PlayerBucketEmptyEvent;
-import org.bukkit.event.player.PlayerDropItemEvent;
-import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.player.PlayerSwapHandItemsEvent;
+import org.bukkit.event.player.*;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
@@ -97,6 +95,28 @@ public abstract class InfiniteBucketListener implements Listener, Tickable {
     bucketSlotByPlayerId.put(playerId, new BucketSlot(playerHand.accessSlotIndex(playerInventory), relativeTime));
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> tryRestoringBucket(player), 1);
+  }
+
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+  public void onBucketFill(PlayerBucketFillEvent event) {
+    var player = event.getPlayer();
+
+    var bucketSlot = bucketSlotByPlayerId.get(player.getUniqueId());
+
+    if (bucketSlot == null)
+      return;
+
+    if (event.getHand() == EquipmentSlot.HAND) {
+      if (player.getInventory().getHeldItemSlot() == bucketSlot.slot) {
+        event.setCancelled(true);
+        return;
+      }
+    }
+
+    if (event.getHand() == EquipmentSlot.OFF_HAND) {
+      if (PlayerHand.OFFHAND_SLOT_INDEX == bucketSlot.slot)
+        event.setCancelled(true);
+    }
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
