@@ -26,6 +26,7 @@ public class PipeSearchSection extends ConfigSection {
   public ComponentMarkup getItemContainerAbsent;
   public ComponentMarkup getItemContainerSizeChanged;
   public ComponentMarkup getItemMoved;
+  public ComponentMarkup getItemShortOfRequestedAmount;
   public ComponentMarkup containerTeleportObstructed;
   public ComponentMarkup containerTeleported;
   public ComponentMarkup containerOpened;

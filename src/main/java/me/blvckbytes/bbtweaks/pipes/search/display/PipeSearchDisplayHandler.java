@@ -59,12 +59,15 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     }
 
     if (stackAction == StackAction.MOVE_TO_INVENTORY) {
-      var moveResultAndAmount = moveItemIntoInventory(player, itemEntry.itemAndSlot, Integer.MAX_VALUE);
+      var moveResultAndAmount = moveItemIntoInventory(player, itemEntry.itemAndSlot, Integer.MAX_VALUE, false);
       var moveResult = moveResultAndAmount.moveResult();
 
       if (moveResult == MoveResult.NO_SPACE) {
-        // TODO: Add requested item-type to this message
-        config.rootSection.pipes.search.getItemNoSpace.sendMessage(player);
+        config.rootSection.pipes.search.getItemNoSpace.sendMessage(
+          player,
+          addItemVariables(new InterpretationEnvironment(), itemEntry.itemAndSlot)
+        );
+
         return;
       }
 
@@ -190,14 +193,12 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
   public void handleMovingItems(Player player, @Nullable PipeSearchDisplay display, ItemCollectionEntry collectionEntry, int maximumAmount) {
     var totalHandOutAmount = 0;
     var ranOutOfSpace = false;
+    var encounteredInvalidItem = false;
 
     ItemAndSlot nextMember;
 
     while ((nextMember = collectionEntry.getFirstMember()) != null) {
-      // TODO: This really should be silent and only send a single warning at the end of the stack-action if we could
-      //       not fulfill the request - the user doesn't care if two out of 20 stacks moved, as long as they still
-      //       get what they need.
-      var moveResultAndAmount = moveItemIntoInventory(player, nextMember, maximumAmount - totalHandOutAmount);
+      var moveResultAndAmount = moveItemIntoInventory(player, nextMember, maximumAmount - totalHandOutAmount, true);
       var moveResult = moveResultAndAmount.moveResult();
 
       if (moveResult == MoveResult.NO_SPACE) {
@@ -206,6 +207,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
       }
 
       totalHandOutAmount += moveResultAndAmount.movedAmount();
+      encounteredInvalidItem |= moveResult == MoveResult.INVALID_ITEM;
 
       if (moveResult == MoveResult.INVALID_ITEM || moveResult == MoveResult.DID_MOVE)
         collectionEntry.removeMember(nextMember);
@@ -214,12 +216,23 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
         break;
     }
 
+    if (encounteredInvalidItem && totalHandOutAmount < maximumAmount && !ranOutOfSpace) {
+      config.rootSection.pipes.search.getItemShortOfRequestedAmount.sendMessage(
+        player,
+        new InterpretationEnvironment()
+          .withVariable("item_type_key", collectionEntry.getMaterial().translationKey())
+      );
+    }
+
     if (totalHandOutAmount > 0)
       sendHandOutMessage(player, totalHandOutAmount, collectionEntry.getStackSize(), collectionEntry.getMaterial());
 
-    // TODO: Add requested item-type to this message
-    else if (ranOutOfSpace)
-      config.rootSection.pipes.search.getItemNoSpace.sendMessage(player);
+    else if (ranOutOfSpace) {
+      config.rootSection.pipes.search.getItemNoSpace.sendMessage(
+        player,
+        addItemVariables(new InterpretationEnvironment(), nextMember)
+      );
+    }
 
     // Exhausted the collection - make it vanish altogether
     if (collectionEntry.isEmpty()) {
@@ -355,31 +368,32 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     return true;
   }
 
-  private MoveResultAndAmount moveItemIntoInventory(Player player, ItemAndSlot item, int maximumAmount) {
+  private MoveResultAndAmount moveItemIntoInventory(Player player, ItemAndSlot item, int maximumAmount, boolean silent) {
     var containerBlock = item.block();
     var containerInventory = BlockUtil.tryAccessBlockInventory(containerBlock);
 
     var environment = getBlockEnvironment(containerBlock);
 
     if (containerInventory == null) {
-      config.rootSection.pipes.search.getItemContainerAbsent.sendMessage(player, environment);
+      if (!silent)
+        config.rootSection.pipes.search.getItemContainerAbsent.sendMessage(player, environment);
+
       return new MoveResultAndAmount(MoveResult.INVALID_ITEM, 0);
     }
 
     if (item.slot() < 0 || item.slot() >= containerInventory.getSize()) {
-      config.rootSection.pipes.search.getItemContainerSizeChanged.sendMessage(player, environment);
+      if (!silent)
+        config.rootSection.pipes.search.getItemContainerSizeChanged.sendMessage(player, environment);
+
       return new MoveResultAndAmount(MoveResult.INVALID_ITEM, 0);
     }
 
     var targetItem = containerInventory.getItem(item.slot());
 
-    environment
-      .withVariable("item_slot", item.slot() + 1)
-      .withVariable("item_amount", item.item().getAmount())
-      .withVariable("item_type_key", item.type().translationKey());
-
     if (!item.item().equals(targetItem)) {
-      config.rootSection.pipes.search.getItemMoved.sendMessage(player, environment);
+      if (!silent)
+        config.rootSection.pipes.search.getItemMoved.sendMessage(player, addItemVariables(environment, item));
+
       return new MoveResultAndAmount(MoveResult.INVALID_ITEM, 0);
     }
 
@@ -399,6 +413,13 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     targetItem.setAmount(remainingAmount);
 
     return new MoveResultAndAmount(MoveResult.DID_DECREMENT, addedAmount);
+  }
+
+  private InterpretationEnvironment addItemVariables(InterpretationEnvironment environment, ItemAndSlot itemAndSlot) {
+    return environment
+      .withVariable("item_slot", itemAndSlot.slot() + 1)
+      .withVariable("item_amount", itemAndSlot.item().getAmount())
+      .withVariable("item_type_key", itemAndSlot.type().translationKey());
   }
 
   private boolean openContainer(Player player, ItemAndSlot item) {
