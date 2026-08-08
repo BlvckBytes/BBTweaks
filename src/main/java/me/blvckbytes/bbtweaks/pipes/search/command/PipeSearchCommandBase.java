@@ -18,6 +18,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -167,7 +168,11 @@ public abstract class PipeSearchCommandBase<ParameterType extends PipeSearchPara
           if (parameter.predicateAndLanguage != null && !parameter.predicateAndLanguage.predicate.test(item))
             continue;
 
-          matches.add(new ItemAndSlot(item, searchedInventory.block(), slotIndex + searchedInventory.slotOffset()));
+          // There's nothing guaranteeing that this item is still valid next tick - let's rather capture
+          // and avoid a whole range of nasty bugs, as it'll be cheap enough (and we're executing it async).
+          var itemCopy = new ItemStack(item);
+
+          matches.add(new ItemAndSlot(itemCopy, searchedInventory.block(), slotIndex + searchedInventory.slotOffset()));
         }
       }
 

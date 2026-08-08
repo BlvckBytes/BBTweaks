@@ -59,26 +59,22 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     }
 
     if (stackAction == StackAction.MOVE_TO_INVENTORY) {
-      var amountBefore = itemEntry.itemAndSlot.item().getAmount();
-      var moveResult = moveItemIntoInventory(player, itemEntry.itemAndSlot, Integer.MAX_VALUE);
+      var moveResultAndAmount = moveItemIntoInventory(player, itemEntry.itemAndSlot, Integer.MAX_VALUE);
+      var moveResult = moveResultAndAmount.moveResult();
 
       if (moveResult == MoveResult.NO_SPACE) {
+        // TODO: Add requested item-type to this message
         config.rootSection.pipes.search.getItemNoSpace.sendMessage(player);
         return;
       }
 
-      int movedAmount = 0;
-
       if (moveResult == MoveResult.DID_MOVE || moveResult == MoveResult.INVALID_ITEM)
         display.removeEntry(itemEntry);
 
-      // Only remove the entry if it has been moved wholly, e.g. not just decremented
-      if (moveResult == MoveResult.DID_MOVE)
-        movedAmount = amountBefore;
-      else if (moveResult == MoveResult.DID_DECREMENT) {
+      if (moveResult == MoveResult.DID_DECREMENT)
         display.updateItems();
-        movedAmount = amountBefore - itemEntry.itemAndSlot.item().getAmount();
-      }
+
+      var movedAmount = moveResultAndAmount.movedAmount();
 
       if (movedAmount > 0)
         sendHandOutMessage(player, movedAmount, itemEntry.itemAndSlot.stackSize(), itemEntry.itemAndSlot.type());
@@ -198,24 +194,18 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     ItemAndSlot nextMember;
 
     while ((nextMember = collectionEntry.getFirstMember()) != null) {
-      var amountBefore = nextMember.item().getAmount();
-      var moveResult = moveItemIntoInventory(player, nextMember, maximumAmount - totalHandOutAmount);
+      // TODO: This really should be silent and only send a single warning at the end of the stack-action if we could
+      //       not fulfill the request - the user doesn't care if two out of 20 stacks moved, as long as they still
+      //       get what they need.
+      var moveResultAndAmount = moveItemIntoInventory(player, nextMember, maximumAmount - totalHandOutAmount);
+      var moveResult = moveResultAndAmount.moveResult();
 
       if (moveResult == MoveResult.NO_SPACE) {
         ranOutOfSpace = true;
         break;
       }
 
-      var movedAmount = 0;
-
-      if (moveResult == MoveResult.DID_MOVE)
-        movedAmount = amountBefore;
-      else if (moveResult == MoveResult.DID_DECREMENT) {
-        var amountAfter = nextMember.item().getAmount();
-        movedAmount = amountBefore - amountAfter;
-      }
-
-      totalHandOutAmount += movedAmount;
+      totalHandOutAmount += moveResultAndAmount.movedAmount();
 
       if (moveResult == MoveResult.INVALID_ITEM || moveResult == MoveResult.DID_MOVE)
         collectionEntry.removeMember(nextMember);
@@ -227,6 +217,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     if (totalHandOutAmount > 0)
       sendHandOutMessage(player, totalHandOutAmount, collectionEntry.getStackSize(), collectionEntry.getMaterial());
 
+    // TODO: Add requested item-type to this message
     else if (ranOutOfSpace)
       config.rootSection.pipes.search.getItemNoSpace.sendMessage(player);
 
@@ -364,7 +355,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
     return true;
   }
 
-  private MoveResult moveItemIntoInventory(Player player, ItemAndSlot item, int maximumAmount) {
+  private MoveResultAndAmount moveItemIntoInventory(Player player, ItemAndSlot item, int maximumAmount) {
     var containerBlock = item.block();
     var containerInventory = BlockUtil.tryAccessBlockInventory(containerBlock);
 
@@ -372,12 +363,12 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
 
     if (containerInventory == null) {
       config.rootSection.pipes.search.getItemContainerAbsent.sendMessage(player, environment);
-      return MoveResult.INVALID_ITEM;
+      return new MoveResultAndAmount(MoveResult.INVALID_ITEM, 0);
     }
 
     if (item.slot() < 0 || item.slot() >= containerInventory.getSize()) {
       config.rootSection.pipes.search.getItemContainerSizeChanged.sendMessage(player, environment);
-      return MoveResult.INVALID_ITEM;
+      return new MoveResultAndAmount(MoveResult.INVALID_ITEM, 0);
     }
 
     var targetItem = containerInventory.getItem(item.slot());
@@ -389,7 +380,7 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
 
     if (!item.item().equals(targetItem)) {
       config.rootSection.pipes.search.getItemMoved.sendMessage(player, environment);
-      return MoveResult.INVALID_ITEM;
+      return new MoveResultAndAmount(MoveResult.INVALID_ITEM, 0);
     }
 
     var amountToAdd = Math.min(targetItem.getAmount(), maximumAmount);
@@ -399,15 +390,15 @@ public class PipeSearchDisplayHandler extends DisplayHandler<PipeSearchDisplay, 
 
     if (remainingAmount <= 0) {
       containerInventory.setItem(item.slot(), null);
-      return MoveResult.DID_MOVE;
+      return new MoveResultAndAmount(MoveResult.DID_MOVE, addedAmount);
     }
 
     if (amountNotAdded >= amountToAdd)
-      return MoveResult.NO_SPACE;
+      return new MoveResultAndAmount(MoveResult.NO_SPACE, 0);
 
     targetItem.setAmount(remainingAmount);
 
-    return MoveResult.DID_DECREMENT;
+    return new MoveResultAndAmount(MoveResult.DID_DECREMENT, addedAmount);
   }
 
   private boolean openContainer(Player player, ItemAndSlot item) {
