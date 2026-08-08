@@ -21,6 +21,10 @@ import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.durability_warnings.DurabilityWarningsListener;
 import me.blvckbytes.bbtweaks.durability_warnings.WarningsProfileStore;
 import me.blvckbytes.bbtweaks.durability_warnings.command.DurabilityWarningCommand;
+import me.blvckbytes.bbtweaks.emotions.command.EmotionCommand;
+import me.blvckbytes.bbtweaks.emotions.settings_command.EmotionSettingsCommand;
+import me.blvckbytes.bbtweaks.emotions.settings_display.EmotionSettingsDisplayHandler;
+import me.blvckbytes.bbtweaks.emotions.user_profile.EmotionUserProfileStore;
 import me.blvckbytes.bbtweaks.entity_eggs.EntityEggsListener;
 import me.blvckbytes.bbtweaks.frame_locking.FrameLockingHandler;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
@@ -218,6 +222,10 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(RemoteOpenContainerTicketHandler.class)
         .withSingleton(EntityEggsListener.class)
         .withSingleton(ClearChatCommand.class)
+        .withSingleton(EmotionUserProfileStore.class)
+        .withSingleton(EmotionCommand.class)
+        .withSingleton(EmotionSettingsDisplayHandler.class)
+        .withSingleton(EmotionSettingsCommand.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);

@@ -107,6 +107,11 @@ commands:
   clearchat:
     description: 'Clears the chat of players by printing blank lines'
     permission: bbtweaks.clear-chat
+  emotion:
+    description: 'Play emotions at yourself and others'
+    permission: bbtweaks.emotion
+  emotionsettings:
+    description: 'Configure details regarding the way you send/receive emotions'
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

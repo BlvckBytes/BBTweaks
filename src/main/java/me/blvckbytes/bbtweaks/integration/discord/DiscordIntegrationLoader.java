@@ -18,7 +18,8 @@ public class DiscordIntegrationLoader {
 
     if ((dependency = Bukkit.getPluginManager().getPlugin("EssentialsDiscord")) == null || !dependency.isEnabled()) {
       plugin.getLogger().info("Could not locate a loaded instance of the EssentialsDiscord-plugin; not hooking into Discord!");
-      discordIntegration = STUBBED_DISCORD_INTEGRATION;
+      // TODO: Undo me again
+      discordIntegration = message -> plugin.getLogger().info("[SimulatedDiscord] " + message);
       return;
     }
 

@@ -16,6 +16,7 @@ import me.blvckbytes.bbtweaks.clear_chat.ClearChatSection;
 import me.blvckbytes.bbtweaks.command_items.CommandItemsSection;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsSection;
 import me.blvckbytes.bbtweaks.durability_warnings.config.DurabilityWarningsSection;
+import me.blvckbytes.bbtweaks.emotions.EmotionsSection;
 import me.blvckbytes.bbtweaks.entity_eggs.EntityEggsSection;
 import me.blvckbytes.bbtweaks.frame_locking.FrameLockingSection;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
@@ -88,6 +89,7 @@ public class MainSection extends ConfigSection {
   public HotbarRandomizerSection hotbarRandomizer;
   public EntityEggsSection entityEggs;
   public ClearChatSection clearChat;
+  public EmotionsSection emotion;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
