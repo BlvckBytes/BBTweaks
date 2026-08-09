@@ -6,11 +6,13 @@ import me.blvckbytes.bbtweaks.durability_warnings.PlayerHand;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.inventory.EquipmentSlot;
@@ -117,6 +119,18 @@ public abstract class InfiniteBucketListener implements Listener, Tickable {
       if (PlayerHand.OFFHAND_SLOT_INDEX == bucketSlot.slot)
         event.setCancelled(true);
     }
+  }
+
+  @EventHandler
+  public void onEntityDamage(EntityDamageEvent event) {
+    if (!(event.getEntity() instanceof Item item))
+      return;
+
+    if (!doesContainMarker(item.getItemStack().getPersistentDataContainer()))
+      return;
+
+    if (event.getCause() != EntityDamageEvent.DamageCause.VOID)
+      event.setCancelled(true);
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
