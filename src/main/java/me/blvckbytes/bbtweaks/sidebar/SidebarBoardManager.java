@@ -796,10 +796,14 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       }
 
       var level = specificsApi.getSkillLevel(player, skillType);
+      var exp = specificsApi.getSkillExp(player, skillType);
+      var expToLevel = specificsApi.getSkillExpToLevel(player, skillType);
 
       return new EnvironmentAndSortingValue(
         environment
-          .withVariable("skill_level", level == null ? "?" : level),
+          .withVariable("skill_level", level == null ? "?" : level)
+          .withVariable("skill_exp", exp == null ? "?" : exp)
+          .withVariable("skill_exp_to_level", expToLevel == null ? "?" : expToLevel),
         level == null ? 0 : level
       );
     }

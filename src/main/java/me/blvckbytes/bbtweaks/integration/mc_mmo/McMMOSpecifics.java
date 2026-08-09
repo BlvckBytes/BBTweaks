@@ -51,6 +51,24 @@ public class McMMOSpecifics {
     return mmoPlayer.getSkillLevel(skillType);
   }
 
+  public @Nullable Integer getSkillExp(Player player, PrimarySkillType skillType) {
+    var mmoPlayer = UserManager.getPlayer(player);
+
+    if (mmoPlayer == null)
+      return null;
+
+    return mmoPlayer.getSkillXpLevel(skillType);
+  }
+
+  public @Nullable Integer getSkillExpToLevel(Player player, PrimarySkillType skillType) {
+    var mmoPlayer = UserManager.getPlayer(player);
+
+    if (mmoPlayer == null)
+      return null;
+
+    return mmoPlayer.getXpToLevel(skillType);
+  }
+
   public String getSkillName(PrimarySkillType skillType) {
     return cachedSkillNameByType.computeIfAbsent(skillType, mcMMO.p.getSkillTools()::getLocalizedSkillName);
   }

@@ -2252,6 +2252,8 @@ sidebar:
           Dein aktuelles mcMMO-Level des<br/>
           Akrobatik-Skills.<br/>
           <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
+          <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
           in gelb sowie danach der Cooldown in grau<br/>
@@ -2274,6 +2276,8 @@ sidebar:
         description: |
           Dein aktuelles mcMMO-Level des<br/>
           Alchemie-Skills.<br/>
+          <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
           <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
@@ -2298,6 +2302,8 @@ sidebar:
           Dein aktuelles mcMMO-Level des<br/>
           Bogenschießen-Skills.<br/>
           <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
+          <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
           in gelb sowie danach der Cooldown in grau<br/>
@@ -2320,6 +2326,8 @@ sidebar:
         description: |
           Dein aktuelles mcMMO-Level des<br/>
           Axtkampf-Skills.<br/>
+          <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
           <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
@@ -2344,6 +2352,8 @@ sidebar:
           Dein aktuelles mcMMO-Level des<br/>
           Armbrust-Skills.<br/>
           <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
+          <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
           in gelb sowie danach der Cooldown in grau<br/>
@@ -2366,6 +2376,8 @@ sidebar:
         description: |
           Dein aktuelles mcMMO-Level des<br/>
           Graben-Skills.<br/>
+          <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
           <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
@@ -2390,6 +2402,8 @@ sidebar:
           Dein aktuelles mcMMO-Level des<br/>
           Angeln-Skills.<br/>
           <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
+          <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
           in gelb sowie danach der Cooldown in grau<br/>
@@ -2412,6 +2426,8 @@ sidebar:
         description: |
           Dein aktuelles mcMMO-Level des<br/>
           Kräuterkunde-Skills.<br/>
+          <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
           <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
@@ -2436,6 +2452,8 @@ sidebar:
           Dein aktuelles mcMMO-Level des<br/>
           Streitkolben-Skills.<br/>
           <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
+          <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
           in gelb sowie danach der Cooldown in grau<br/>
@@ -2458,6 +2476,8 @@ sidebar:
         description: |
           Dein aktuelles mcMMO-Level des<br/>
           Bergbau-Skills.<br/>
+          <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
           <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
@@ -2482,6 +2502,8 @@ sidebar:
           Dein aktuelles mcMMO-Level des<br/>
           Reparatur-Skills.<br/>
           <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
+          <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
           in gelb sowie danach der Cooldown in grau<br/>
@@ -2504,6 +2526,8 @@ sidebar:
         description: |
           Dein aktuelles mcMMO-Level des<br/>
           Bergung-Skills.<br/>
+          <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
           <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
@@ -2528,6 +2552,8 @@ sidebar:
           Dein aktuelles mcMMO-Level des<br/>
           Schmelzen-Skills.<br/>
           <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
+          <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
           in gelb sowie danach der Cooldown in grau<br/>
@@ -2550,6 +2576,8 @@ sidebar:
         description: |
           Dein aktuelles mcMMO-Level des<br/>
           Speerkampf-Skills.<br/>
+          <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
           <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
@@ -2574,6 +2602,8 @@ sidebar:
           Dein aktuelles mcMMO-Level des<br/>
           Schwertkampf-Skills.<br/>
           <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
+          <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
           in gelb sowie danach der Cooldown in grau<br/>
@@ -2596,6 +2626,8 @@ sidebar:
         description: |
           Dein aktuelles mcMMO-Level des<br/>
           Zähmen-Skills.<br/>
+          <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
           <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
@@ -2620,6 +2652,8 @@ sidebar:
           Dein aktuelles mcMMO-Level des<br/>
           Dreizack-Skills.<br/>
           <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
+          <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
           in gelb sowie danach der Cooldown in grau<br/>
@@ -2643,6 +2677,8 @@ sidebar:
           Dein aktuelles mcMMO-Level des<br/>
           Faustkampf-Skills.<br/>
           <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
+          <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
           in gelb sowie danach der Cooldown in grau<br/>
@@ -2665,6 +2701,8 @@ sidebar:
         description: |
           Dein aktuelles mcMMO-Level des<br/>
           Holzfällen-Skills.<br/>
+          <br/>
+          Wert: \<Level>, \<aktuelle XP>/\<benötigte XP für Aufstieg><br/>
           <br/>
           <&e>🛈 Wenn eine Fähigkeit dieses Skills<br/>
           aktiv ist, wird dessen verbleibende Dauer<br/>
@@ -2914,7 +2952,9 @@ sidebar:
             entfernt werden, beispielsweise mit <i>Simple<br/>
             Scoreboard Tweaks</i></&f>; deaktiviere hiermit<br/>
             das scrollen, wenn du diese oder eine<br/>
-            vergleichbare Mod im Einsatz hast.<br/>
+            vergleichbare Mod im Einsatz hast oder<br/>
+            übrige Zeilen einfach abgeschnitten<br/>
+            werden sollen.<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Scrollen {do_scroll then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
@@ -4170,7 +4210,19 @@ cLut:
           {value}
       </color>
     skill_level_renderer: |
-      {skill_level}
+      {skill_level}<&7>,<space/>
+      <container
+        *let-exp_renderer={
+          <container *if="value < 1000">
+            {value}
+          </container>
+          <container *else>
+            <number [value]="value / 1000.0" format="0.#" locale="de_DE"/>k
+          </>
+        }
+      >
+        <$exp_renderer [value]="skill_exp"/>/<$exp_renderer [value]="skill_exp_to_level"/>
+      </container>
       <container *if="has(ability_times)">
         <space/><&7>(<container *for-time="ability_times" *for-separator={,<space/>}><&e *use="time >= 0">{abs(time)}s</container>)
   item_data:
