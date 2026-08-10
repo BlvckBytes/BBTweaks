@@ -23,6 +23,7 @@ import me.blvckbytes.bbtweaks.durability_warnings.DurabilityWarningsListener;
 import me.blvckbytes.bbtweaks.durability_warnings.WarningsProfileStore;
 import me.blvckbytes.bbtweaks.durability_warnings.command.DurabilityWarningCommand;
 import me.blvckbytes.bbtweaks.entity_eggs.EntityEggsListener;
+import me.blvckbytes.bbtweaks.experience_bottle_yield_adjust.ExperienceBottleYieldAdjust;
 import me.blvckbytes.bbtweaks.frame_locking.FrameLockingHandler;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerListener;
@@ -222,6 +223,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(ClearChatCommand.class)
         .withSingleton(CountEntitySpawnAttemptsCommand.class)
         .withSingleton(WorldPlayersCommand.class)
+        .withSingleton(ExperienceBottleYieldAdjust.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);
