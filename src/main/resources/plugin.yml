@@ -107,6 +107,9 @@ commands:
   clearchat:
     description: 'Clears the chat of players by printing blank lines'
     permission: bbtweaks.clear-chat
+  countentityspawnattempts:
+    description: 'Admin-tool to count entity-spawn-attempts over a time-interval for a given world'
+    permission: bbtweaks.countentityspawnattempts
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

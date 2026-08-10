@@ -17,6 +17,7 @@ import me.blvckbytes.bbtweaks.bottlexp.BottleXpCommand;
 import me.blvckbytes.bbtweaks.clear_chat.ClearChatCommand;
 import me.blvckbytes.bbtweaks.command_items.CommandItemListener;
 import me.blvckbytes.bbtweaks.container_ticket.RemoteOpenContainerTicketHandler;
+import me.blvckbytes.bbtweaks.count_entity_spawn_attempts.CountEntitySpawnAttemptsCommand;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
 import me.blvckbytes.bbtweaks.durability_warnings.DurabilityWarningsListener;
 import me.blvckbytes.bbtweaks.durability_warnings.WarningsProfileStore;
@@ -218,6 +219,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(RemoteOpenContainerTicketHandler.class)
         .withSingleton(EntityEggsListener.class)
         .withSingleton(ClearChatCommand.class)
+        .withSingleton(CountEntitySpawnAttemptsCommand.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);
