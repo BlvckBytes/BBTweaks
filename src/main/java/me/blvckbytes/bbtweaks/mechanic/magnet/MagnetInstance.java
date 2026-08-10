@@ -16,6 +16,8 @@ import java.util.function.Predicate;
 
 public class MagnetInstance extends SISOInstance implements CuboidMechanicInstance {
 
+  private static final long ENABLE_UPDATE_PERIOD_T = 4;
+
   private final Cuboid cuboid;
   private final @Nullable Predicate<ItemStack> filter;
 
@@ -123,8 +125,13 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
     if (wasMissingContainer)
       return false;
 
-    var inputPower = tryReadInputPower();
-    enabled = inputPower == null || inputPower == 0;
+    // There are countless magnets around on the server, so let's not needlessly update the enabled-state
+    // on every single tick. This is not at all a time-critical feature, but rather a convenience, mostly
+    // used with manual levers, so a few ticks of delay until the new state is acknowledged is irrelevant.
+    if (time % ENABLE_UPDATE_PERIOD_T == 0) {
+      var inputPower = tryReadInputPower();
+      enabled = inputPower == null || inputPower == 0;
+    }
 
     if (!didAddItems)
       return true;
