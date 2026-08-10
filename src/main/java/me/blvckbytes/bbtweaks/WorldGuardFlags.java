@@ -47,6 +47,7 @@ public class WorldGuardFlags implements Listener, Tickable {
   private final StateFlag chiseledBookshelfInteractFlag;
   private final StateFlag shelfInteractFlag;
   private final StateFlag mobSpawningFlag;
+  private final StateFlag naturalSpawning;
 
   private final SetFlag<EntityType> allowSpawnFlag;
   private final SetFlag<EntityType> denySpawnFlag;
@@ -63,6 +64,7 @@ public class WorldGuardFlags implements Listener, Tickable {
     hurtByHeatFlag = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("hurt-by-heat", true));
     chiseledBookshelfInteractFlag = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("chiseled-bookshelf-interact", true));
     shelfInteractFlag = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("shelf-interact", true));
+    naturalSpawning = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("natural-spawning", true));
 
     if (!(flagRegistry.get("mob-spawning") instanceof StateFlag _mobSpawningFlag))
       throw new IllegalStateException("Expected the WG-flag \"mob-spawning\" to be a registered StateFlag");
@@ -183,6 +185,13 @@ public class WorldGuardFlags implements Listener, Tickable {
   @EventHandler(priority = EventPriority.HIGHEST)
   public void onCreatureSpawn(CreatureSpawnEvent event) {
     var reason = event.getSpawnReason();
+
+    if (reason == CreatureSpawnEvent.SpawnReason.NATURAL) {
+      if (isFlagDeniedForAt(null, event.getLocation(), naturalSpawning)) {
+        event.setCancelled(true);
+        return;
+      }
+    }
 
     if (reason != CreatureSpawnEvent.SpawnReason.COMMAND && reason != CreatureSpawnEvent.SpawnReason.SPAWNER_EGG)
       return;
