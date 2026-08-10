@@ -139,14 +139,14 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
     didAddItems = false;
 
     if (inventory instanceof DoubleChestInventory doubleChestInventory) {
-      if (doubleChestInventory.getRightSide().getHolder() instanceof Container rightContainer) {
+      if (doubleChestInventory.getRightSide().getHolder(false) instanceof Container rightContainer) {
         if (!mountBlock.equals(rightContainer.getBlock())) {
           rightContainer.update(true, true);
           return true;
         }
       }
 
-      if (doubleChestInventory.getLeftSide().getHolder() instanceof Container leftContainer) {
+      if (doubleChestInventory.getLeftSide().getHolder(false) instanceof Container leftContainer) {
         if (!mountBlock.equals(leftContainer.getBlock()))
           leftContainer.update(true, true);
       }
@@ -157,7 +157,7 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
     // For some odd reason, bukkit doesn't cause a block-update for hoppers when modifying
     // their inventory, so we need to cause one manually, as to update comparators and the like.
     if (inventoryBlockType == Material.HOPPER)
-      mountBlock.getState().update(true, true);
+      mountBlock.getState(false).update(true, true);
 
     return true;
   }
