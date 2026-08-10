@@ -44,6 +44,7 @@ import me.blvckbytes.bbtweaks.shulker_accessor.config.ShulkerAccessorSection;
 import me.blvckbytes.bbtweaks.sidebar.config.SidebarSection;
 import me.blvckbytes.bbtweaks.sign_copier.SignCopierSection;
 import me.blvckbytes.bbtweaks.un_craft.config.UnCraftSection;
+import me.blvckbytes.bbtweaks.world_players.WorldPlayersCommandSection;
 
 @CSAlways
 public class MainSection extends ConfigSection {
@@ -88,6 +89,7 @@ public class MainSection extends ConfigSection {
   public HotbarRandomizerSection hotbarRandomizer;
   public EntityEggsSection entityEggs;
   public ClearChatSection clearChat;
+  public WorldPlayersCommandSection worldPlayersCommand;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

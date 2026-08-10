@@ -90,6 +90,7 @@ import me.blvckbytes.bbtweaks.sign_copier.settings.SignCopierSettingsStore;
 import me.blvckbytes.bbtweaks.sign_copier.settings_display.SignCopierSettingsDisplayHandler;
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegrationLoader;
+import me.blvckbytes.bbtweaks.world_players.WorldPlayersCommand;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
@@ -220,6 +221,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(EntityEggsListener.class)
         .withSingleton(ClearChatCommand.class)
         .withSingleton(CountEntitySpawnAttemptsCommand.class)
+        .withSingleton(WorldPlayersCommand.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);
