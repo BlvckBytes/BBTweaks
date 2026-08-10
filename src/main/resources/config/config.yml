@@ -282,11 +282,11 @@ mechanic:
     maxWidthOrDepth: 15
     maxHeight: 30
     collectionPeriodTicks: 5
-    defaultWidthAndDepth: 5
-    defaultHeight: 5
-    defaultOffsetX: -2
+    defaultWidthAndDepth: 14
+    defaultHeight: 14
+    defaultOffsetX: -7
     defaultOffsetY: 0
-    defaultOffsetZ: -2
+    defaultOffsetZ: -7
     visualization:
       durationMs: 10000
       periodTicks: 5
