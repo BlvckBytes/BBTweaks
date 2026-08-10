@@ -14,6 +14,8 @@ public class BottleXpSection extends ConfigSection {
 
   public @CSAlways BottleXpCommandSection command;
 
+  public @CSAlways SingleBottleXpCommandSection singleBottleCommand;
+
   public int experiencePerBottle;
 
   public ComponentMarkup playersOnly;

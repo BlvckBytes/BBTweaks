@@ -3350,7 +3350,31 @@ signCopier:
 bottleXp:
   command:
     name: 'bottlexp'
-  experiencePerBottle: 16
+  singleBottleCommand:
+    name: 'singlebottlexp'
+    aliases:
+      - 'sbottlexp'
+    commandUsage: '{lut.bottle_xp_prefix} <&c>Benutzung: /{label} \<<&4>Erfahrungspunkte</> | <&4>Prozentzahl%</>>'
+    cannotHoldBottle: '{lut.bottle_xp_prefix} <&c>Du hast nicht genügend Platz im Inventar, um die Flasche aufzunehmen!'
+    bottleLore: '<reset><&5>{experience} Erfahrungspunkte'
+    afterBottling: '{lut.bottle_xp_prefix} <&7>Es wurden <&c>{bottled_experience}exp</>/<&d>{available_experience}exp</> (<&d>Level {level_before}</> → <&d>Level {level_after}</>) in eine <&a>einzelne Flasche</> in deinem Inventar abgefüllt.'
+    experienceOverview: |
+      <&8><&m>{" " ** 30}</> <&6>BottleXp <&8><&m>{" " ** 30}</><br/>
+      <&7>Verfügbare Erfahrung: <&d>{available_experience}exp</> (<&d>{available_level} Level</>)<br/>
+      <&7>Die gesamte Anzahl wird in eine <&a>einzige Flasche</> gefüllt.<br/>
+      <&7>Benutzung: /{label}</> \<<&d>Erfahrungspunkte</> | <&d>Prozentzahl%</>><br/>
+      <br/>
+      <container *for-suggestion="suggestions" *for-separator={<br/>}>
+        <&7>- /{label} <&d>{suggestion.percentage}%</>:<space/>
+        <&c>-
+        <container *if="suggestion.experience < 1000" [suggestion.experience] />
+        <container *else>
+          <number [value]="suggestion.experience / 1000.0" format="#.#" />k
+        </container>
+        <space/>exp</>
+      </container>
+      <br/>
+  experiencePerBottle: 7
   playersOnly: "{lut.bottle_xp_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!"
   noPermission: "{lut.bottle_xp_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!"
   experienceOverview: |

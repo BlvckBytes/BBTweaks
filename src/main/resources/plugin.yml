@@ -77,6 +77,9 @@ commands:
   bottlexp:
     description: 'Fills your experience into bottles'
     permission: bbtweaks.bottlexp
+  singlebottlexp:
+    description: 'Fills your experience into a single bottle'
+    permission: bbtweaks.bottlexp
   autopickupcontainer:
     description: 'Manage settings regarding autopickup-containers'
   listchunktickets:
