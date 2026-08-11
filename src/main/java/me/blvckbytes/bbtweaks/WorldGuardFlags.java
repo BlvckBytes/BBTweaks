@@ -26,6 +26,7 @@ import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
+import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -48,6 +49,7 @@ public class WorldGuardFlags implements Listener, Tickable {
   private final StateFlag shelfInteractFlag;
   private final StateFlag mobSpawningFlag;
   private final StateFlag naturalSpawning;
+  private final StateFlag vehicleCollide;
 
   private final SetFlag<EntityType> allowSpawnFlag;
   private final SetFlag<EntityType> denySpawnFlag;
@@ -65,6 +67,7 @@ public class WorldGuardFlags implements Listener, Tickable {
     chiseledBookshelfInteractFlag = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("chiseled-bookshelf-interact", true));
     shelfInteractFlag = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("shelf-interact", true));
     naturalSpawning = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("natural-spawning", true));
+    vehicleCollide = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("vehicle-collide", true));
 
     if (!(flagRegistry.get("mob-spawning") instanceof StateFlag _mobSpawningFlag))
       throw new IllegalStateException("Expected the WG-flag \"mob-spawning\" to be a registered StateFlag");
@@ -120,6 +123,12 @@ public class WorldGuardFlags implements Listener, Tickable {
   @EventHandler(ignoreCancelled = true)
   public void onElytraBoost(PlayerElytraBoostEvent event) {
     if (isFlagDeniedForAt(event.getPlayer(), event.getPlayer().getLocation(), elytraBoostFlag))
+      event.setCancelled(true);
+  }
+
+  @EventHandler(ignoreCancelled = true)
+  public void onVehicleEntityCollision(VehicleEntityCollisionEvent event) {
+    if (isFlagDeniedForAt(null, event.getVehicle().getLocation(), vehicleCollide))
       event.setCancelled(true);
   }
 
