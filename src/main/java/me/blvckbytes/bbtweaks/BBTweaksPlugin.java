@@ -93,6 +93,7 @@ import me.blvckbytes.bbtweaks.sign_copier.settings_display.SignCopierSettingsDis
 import me.blvckbytes.bbtweaks.un_craft.UnCraftCommand;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegrationLoader;
 import me.blvckbytes.bbtweaks.world_players.WorldPlayersCommand;
+import me.blvckbytes.bbtweaks.worldguard_flags.WorldGuardFlags;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;

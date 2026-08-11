@@ -1,4 +1,4 @@
-package me.blvckbytes.bbtweaks;
+package me.blvckbytes.bbtweaks.worldguard_flags;
 
 import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
