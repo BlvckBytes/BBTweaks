@@ -46,6 +46,7 @@ import me.blvckbytes.bbtweaks.sidebar.config.SidebarSection;
 import me.blvckbytes.bbtweaks.sign_copier.SignCopierSection;
 import me.blvckbytes.bbtweaks.un_craft.config.UnCraftSection;
 import me.blvckbytes.bbtweaks.world_players.WorldPlayersCommandSection;
+import me.blvckbytes.bbtweaks.worldguard_flags.WorldGuardFlagsSection;
 
 @CSAlways
 public class MainSection extends ConfigSection {
@@ -92,6 +93,7 @@ public class MainSection extends ConfigSection {
   public ClearChatSection clearChat;
   public WorldPlayersCommandSection worldPlayersCommand;
   public ExperienceBottleYieldAdjustSection experienceBottleYieldAdjust;
+  public WorldGuardFlagsSection worldGuardFlags;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

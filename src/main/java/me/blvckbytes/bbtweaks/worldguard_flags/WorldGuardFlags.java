@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.worldguard_flags;
 
+import at.blvckbytes.cm_mapper.ConfigKeeper;
 import com.destroystokyo.paper.event.player.PlayerElytraBoostEvent;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.world.entity.EntityType;
@@ -11,13 +12,13 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.registry.FlagConflictException;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
 import io.papermc.paper.event.player.PlayerInsertLecternBookEvent;
+import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.LateWired;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Tag;
+import org.bukkit.*;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Vehicle;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -27,7 +28,10 @@ import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
+import org.bukkit.event.vehicle.VehicleEnterEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
@@ -42,6 +46,8 @@ public class WorldGuardFlags implements Listener, Tickable {
     DamageType.HOT_FLOOR, DamageType.IN_FIRE, DamageType.ON_FIRE, DamageType.CAMPFIRE, DamageType.LAVA
   );
 
+  private static final long UNUSED_VEHICLES_REMOVAL_PERIOD_T = 10;
+
   private final StateFlag lecternTakeFlag;
   private final StateFlag lecternInsertFlag;
   private final StateFlag elytraBoostFlag;
@@ -55,8 +61,14 @@ public class WorldGuardFlags implements Listener, Tickable {
 
   private final SetFlag<EntityType> allowSpawnFlag;
   private final SetFlag<EntityType> denySpawnFlag;
+  private final SetFlag<EntityType> removeUnusedVehicles;
+
+  private final NamespacedKey keyLastVehicleUse;
 
   private final Plugin plugin;
+
+  @LateWired
+  private ConfigKeeper<MainSection> config;
 
   private final Map<UUID, BukkitTask> lastClearFireTaskByPlayerId;
 
@@ -85,6 +97,10 @@ public class WorldGuardFlags implements Listener, Tickable {
 
     //noinspection unchecked
     denySpawnFlag = (SetFlag<EntityType>) _denySpawnFlag;
+
+    removeUnusedVehicles = tryRegisterSetFlagOrFail(flagRegistry, new SetFlag<>("remove-unused-vehicles", new RegistryFlag<>(null, EntityType.REGISTRY)));
+
+    keyLastVehicleUse = new NamespacedKey(plugin, "last-vehicle-use");
 
     this.plugin = plugin;
 
@@ -294,6 +310,24 @@ public class WorldGuardFlags implements Listener, Tickable {
   public void tick(long relativeTime) {
     if (relativeTime % 5 == 0)
       handleHurtByHeatFireResistance();
+
+    if (relativeTime % UNUSED_VEHICLES_REMOVAL_PERIOD_T == 0)
+      scanForUnusedVehicles();
+  }
+
+  @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+  public void onVehicleEnter(VehicleEnterEvent event) {
+    touchLastVehicleUseValue(event.getVehicle().getPersistentDataContainer());
+  }
+
+  private void scanForUnusedVehicles() {
+    if (config.rootSection.worldGuardFlags.unusedVehicleDurationSeconds <= 0)
+      return;
+
+    for (var world : Bukkit.getWorlds()) {
+      for (var vehicle : world.getEntitiesByClass(Vehicle.class))
+        removeUnusedVehicleIfApplicable(vehicle);
+    }
   }
 
   // Allows for clearer vision while swimming under lava.
@@ -316,5 +350,42 @@ public class WorldGuardFlags implements Listener, Tickable {
         false, false, false
       ));
     }
+  }
+
+  private void removeUnusedVehicleIfApplicable(Vehicle vehicle) {
+    var vehiclePdc = vehicle.getPersistentDataContainer();
+
+    if (!vehicle.getPassengers().isEmpty()) {
+      touchLastVehicleUseValue(vehiclePdc);
+      return;
+    }
+
+    var removedEntities = querySetFlagValueAt(vehicle.getLocation(), removeUnusedVehicles);
+
+    if (removedEntities == null)
+      return;
+
+    var weEntityType = BukkitAdapter.adapt(vehicle.getType());
+
+    if (!removedEntities.contains(weEntityType))
+      return;
+
+    var lastUseValue = vehiclePdc.get(keyLastVehicleUse, PersistentDataType.LONG);
+
+    if (lastUseValue == null) {
+      touchLastVehicleUseValue(vehiclePdc);
+      return;
+    }
+
+    var unusedDurationSeconds = (System.currentTimeMillis() - lastUseValue) / 1000;
+
+    if (unusedDurationSeconds < config.rootSection.worldGuardFlags.unusedVehicleDurationSeconds)
+      return;
+
+    vehicle.remove();
+  }
+
+  private void touchLastVehicleUseValue(PersistentDataContainer pdc) {
+    pdc.set(keyLastVehicleUse, PersistentDataType.LONG, System.currentTimeMillis());
   }
 }
