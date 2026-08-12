@@ -25,14 +25,16 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.bukkit.event.vehicle.VehicleEntityCollisionEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Set;
+import java.util.*;
 
 public class WorldGuardFlags implements Listener, Tickable {
 
@@ -55,6 +57,8 @@ public class WorldGuardFlags implements Listener, Tickable {
   private final SetFlag<EntityType> denySpawnFlag;
 
   private final Plugin plugin;
+
+  private final Map<UUID, BukkitTask> lastClearFireTaskByPlayerId;
 
   public WorldGuardFlags(Plugin plugin) {
     var flagRegistry = WorldGuard.getInstance().getFlagRegistry();
@@ -83,6 +87,8 @@ public class WorldGuardFlags implements Listener, Tickable {
     denySpawnFlag = (SetFlag<EntityType>) _denySpawnFlag;
 
     this.plugin = plugin;
+
+    this.lastClearFireTaskByPlayerId = new HashMap<>();
   }
 
   private static <T> SetFlag<T> tryRegisterSetFlagOrFail(FlagRegistry flagRegistry, SetFlag<T> flag) {
@@ -180,15 +186,16 @@ public class WorldGuardFlags implements Listener, Tickable {
     if (!HURT_BY_HEAT_DAMAGE_TYPES.contains(damageType))
       return;
 
-    if (!isFlagDeniedForAt(player, player.getLocation(), hurtByHeatFlag))
+    if (!isFlagDeniedForAt(player, player.getLocation(), hurtByHeatFlag, FlagTestOption.NO_BYPASS_CHECK))
       return;
 
     event.setCancelled(true);
 
-    // Also clear fire-ticks immediately after leaving the lava/fire/etc.
-    Bukkit.getScheduler().runTaskLater(plugin, () -> {
-      player.setFireTicks(0);
-    }, 1L);
+    var clearFireTask = Bukkit.getScheduler().runTaskLater(plugin, () -> player.setFireTicks(0), 5L);
+    var previousTask = lastClearFireTaskByPlayerId.put(player.getUniqueId(), clearFireTask);
+
+    if (previousTask != null)
+      previousTask.cancel();
   }
 
   @EventHandler(priority = EventPriority.HIGHEST)
@@ -196,7 +203,7 @@ public class WorldGuardFlags implements Listener, Tickable {
     var reason = event.getSpawnReason();
 
     if (reason == CreatureSpawnEvent.SpawnReason.NATURAL) {
-      if (isFlagDeniedForAt(null, event.getLocation(), naturalSpawning)) {
+      if (isFlagDeniedForAt(null, event.getLocation(), naturalSpawning, FlagTestOption.DENIED_ON_ALL_REGIONS)) {
         event.setCancelled(true);
         return;
       }
@@ -233,6 +240,11 @@ public class WorldGuardFlags implements Listener, Tickable {
       event.setCancelled(false);
   }
 
+  @EventHandler
+  public void onQuit(PlayerQuitEvent event) {
+    lastClearFireTaskByPlayerId.remove(event.getPlayer().getUniqueId());
+  }
+
   private <T> @Nullable Set<T> querySetFlagValueAt(Location location, SetFlag<T> flag) {
     var container = WorldGuard.getInstance().getPlatform().getRegionContainer();
     var query = container.createQuery();
@@ -242,25 +254,40 @@ public class WorldGuardFlags implements Listener, Tickable {
     return regions.queryValue(null, flag);
   }
 
-  private boolean isFlagDeniedForAt(@Nullable Player player, Location location, StateFlag flag) {
+  private boolean isFlagDeniedForAt(@Nullable Player player, Location location, StateFlag flag, FlagTestOption... options) {
+    if (options.length == 0)
+      return isFlagDeniedForAt(player, location, flag, EnumSet.noneOf(FlagTestOption.class));
+
+    return isFlagDeniedForAt(player, location, flag, EnumSet.of(options[0], options));
+  }
+
+  private boolean isFlagDeniedForAt(@Nullable Player player, Location location, StateFlag flag, EnumSet<FlagTestOption> options) {
     var container = WorldGuard.getInstance().getPlatform().getRegionContainer();
     var query = container.createQuery();
 
-    var regions = query.getApplicableRegions(BukkitAdapter.adapt(location));
+    var regionSet = query.getApplicableRegions(BukkitAdapter.adapt(location));
     var wgPlayer = player == null ? null : WorldGuardPlugin.inst().wrapPlayer(player);
 
-    var state = regions.queryState(wgPlayer, flag);
+    var state = regionSet.queryState(wgPlayer, flag);
 
-    if (state == StateFlag.State.DENY) {
-      var world = location.getWorld();
+    if (state != StateFlag.State.DENY)
+      return false;
 
-      if (world == null || player == null)
-        return true;
+    var world = location.getWorld();
 
-      return !player.hasPermission("worldguard.bypass." + world.getName());
+    if (world != null && player != null && !options.contains(FlagTestOption.NO_BYPASS_CHECK)) {
+      if (player.hasPermission("worldguard.bypass." + world.getName()))
+        return false;
     }
 
-    return false;
+    if (options.contains(FlagTestOption.DENIED_ON_ALL_REGIONS)) {
+      for (var applicableRegion : regionSet) {
+        if (applicableRegion.getFlag(flag) != StateFlag.State.DENY)
+          return false;
+      }
+    }
+
+    return true;
   }
 
   @Override
@@ -280,7 +307,7 @@ public class WorldGuardFlags implements Listener, Tickable {
       if (fireResistance != null && fireResistance.getDuration() > 20)
         continue;
 
-      if (!isFlagDeniedForAt(player, player.getLocation(), hurtByHeatFlag))
+      if (!isFlagDeniedForAt(player, player.getLocation(), hurtByHeatFlag, FlagTestOption.NO_BYPASS_CHECK))
         continue;
 
       player.addPotionEffect(new PotionEffect(
