@@ -2,10 +2,12 @@ package me.blvckbytes.bbtweaks.donor_symbol.command;
 
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.cm_mapper.section.command.CommandSection;
+import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.donor_symbol.main_display.DonorSymbolDisplayHandler;
 import me.blvckbytes.bbtweaks.donor_symbol.profile.DonorSymbolProfileStore;
+import me.blvckbytes.bbtweaks.util.PlayerUtil;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
@@ -55,17 +57,55 @@ public class DonorSymbolCommand implements CommandHandler {
       return true;
     }
 
-    if (!command.testPermission(player)) {
+    if (!hasCommandPermission(player)) {
       config.rootSection.donorSymbol.command.noPermission.sendMessage(sender);
       return true;
     }
 
-    displayHandler.show(player, profileStore.accessProfile(player));
+    if (args.length == 0) {
+      displayHandler.show(player, profileStore.accessProfile(player));
+      return true;
+    }
+
+    if (!hasCommandSubPermission(player, "others")) {
+      config.rootSection.donorSymbol.command.noPermissionOthers.sendMessage(sender);
+      return true;
+    }
+
+    if (args.length != 1) {
+      config.rootSection.donorSymbol.command.usageOthers.sendMessage(
+        sender,
+        new InterpretationEnvironment()
+          .withVariable("label", label)
+      );
+
+      return true;
+    }
+
+    var targetPlayer = PlayerUtil.getPlayerByName(args[0]);
+
+    if (targetPlayer == null) {
+      config.rootSection.donorSymbol.command.playerNotOnline.sendMessage(
+        sender,
+        new InterpretationEnvironment()
+          .withVariable("name", args[0])
+      );
+
+      return true;
+    }
+
+    displayHandler.show(player, profileStore.accessProfile(targetPlayer));
     return true;
   }
 
   @Override
   public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
+    if (!(sender instanceof Player player))
+      return List.of();
+
+    if (hasCommandSubPermission(player, "others") && args.length == 1)
+      return PlayerUtil.suggestPlayerNames(args[0], null);
+
     return List.of();
   }
 }

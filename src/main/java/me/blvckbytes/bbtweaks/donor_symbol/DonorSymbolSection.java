@@ -10,12 +10,10 @@ import me.blvckbytes.bbtweaks.donor_symbol.color_display.DonorSymbolColorDisplay
 import me.blvckbytes.bbtweaks.donor_symbol.command.DonorSymbolCommandSection;
 import me.blvckbytes.bbtweaks.donor_symbol.main_display.DonorSymbolDisplaySection;
 import me.blvckbytes.bbtweaks.donor_symbol.symbol_display.DonorSymbolSymbolDisplaySection;
+import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DonorSymbolSection extends ConfigSection {
 
@@ -26,12 +24,18 @@ public class DonorSymbolSection extends ConfigSection {
   public String defaultSymbol;
   public @CSIgnore SymbolSection _defaultSymbol;
 
+  public Map<String, String> defaultSymbolByPlayerName = new HashMap<>();
+  public @CSIgnore Map<String, SymbolSection> _defaultSymbolByPlayerNameLower = new HashMap<>();
+
   public Map<String, ColorSection> colors = new LinkedHashMap<>();
   public @CSIgnore Map<String, ColorSection> _colorByIdentifierLower = new LinkedHashMap<>();
   public @CSIgnore List<ColorSection> _colorsInOrder = new ArrayList<>();
 
   public String defaultColor;
   public @CSIgnore ColorSection _defaultColor;
+
+  public Map<String, String> defaultColorByPlayerName = new HashMap<>();
+  public @CSIgnore Map<String, ColorSection> _defaultColorByPlayerNameLower = new HashMap<>();
 
   @CSAlways
   public DonorSymbolCommandSection command;
@@ -47,6 +51,24 @@ public class DonorSymbolSection extends ConfigSection {
 
   public DonorSymbolSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
+  }
+
+  public SymbolSection getDefaultSymbol(Player player) {
+    var personalizedDefault = _defaultSymbolByPlayerNameLower.get(player.getName().toLowerCase());
+
+    if (personalizedDefault != null && personalizedDefault.hasPermission(player))
+      return personalizedDefault;
+
+    return _defaultSymbol;
+  }
+
+  public ColorSection getDefaultColor(Player player) {
+    var personalizedDefault = _defaultColorByPlayerNameLower.get(player.getName().toLowerCase());
+
+    if (personalizedDefault != null)
+      return personalizedDefault;
+
+    return _defaultColor;
   }
 
   @Override
@@ -71,6 +93,18 @@ public class DonorSymbolSection extends ConfigSection {
     if (_defaultSymbol == null)
       throw new MappingError("Property \"defaultSymbol\" specifies an unknown identifier");
 
+    for (var defaultSymbolEntry : defaultSymbolByPlayerName.entrySet()) {
+      var playerNameLower = defaultSymbolEntry.getKey().strip().toLowerCase();
+      var symbolNameLower = defaultSymbolEntry.getValue().strip().toLowerCase();
+      var symbol = _symbolByIdentifierLower.get(symbolNameLower);
+
+      if (symbol == null)
+        throw new MappingError("Could not find default-symbol \"" + symbolNameLower + "\" for player-default of \"" + playerNameLower + "\"");
+
+      if (_defaultSymbolByPlayerNameLower.put(playerNameLower, symbol) != null)
+        throw new MappingError("Duplicate player-name \"" + playerNameLower + "\" for symbol-defaults");
+    }
+
     for (var colorEntry : colors.entrySet()) {
       var color = colorEntry.getValue();
       color._identifierLower = colorEntry.getKey().strip().toLowerCase();
@@ -88,5 +122,17 @@ public class DonorSymbolSection extends ConfigSection {
 
     if (_defaultColor == null)
       throw new MappingError("Property \"defaultColor\" specifies an unknown identifier");
+
+    for (var defaultColorEntry : defaultColorByPlayerName.entrySet()) {
+      var playerNameLower = defaultColorEntry.getKey().strip().toLowerCase();
+      var colorNameLower = defaultColorEntry.getValue().strip().toLowerCase();
+      var color = _colorByIdentifierLower.get(colorNameLower);
+
+      if (color == null)
+        throw new MappingError("Could not find default-color \"" + colorNameLower + "\" for player-default of \"" + playerNameLower + "\"");
+
+      if (_defaultColorByPlayerNameLower.put(playerNameLower, color) != null)
+        throw new MappingError("Duplicate player-name \"" + playerNameLower + "\" for color-defaults");
+    }
   }
 }

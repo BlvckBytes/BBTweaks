@@ -8,6 +8,7 @@ import at.blvckbytes.cm_mapper.mapper.section.ConfigSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import at.blvckbytes.component_markup.util.logging.InterpreterLogger;
 import org.bukkit.Material;
+import org.bukkit.entity.Player;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -24,8 +25,17 @@ public class SymbolSection extends ConfigSection {
   public String javaValue;
   public String bedrockValue;
 
+  public boolean requirePermission;
+
   public SymbolSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
+  }
+
+  public boolean hasPermission(Player player) {
+    if (!requirePermission)
+      return true;
+
+    return player.hasPermission("bbtweaks.donor-symbol." + _identifierLower);
   }
 
   @Override

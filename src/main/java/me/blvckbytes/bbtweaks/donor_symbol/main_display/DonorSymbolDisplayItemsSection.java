@@ -13,6 +13,7 @@ public class DonorSymbolDisplayItemsSection extends ConfigSection {
   public GuiItemStackSection enabled;
   public GuiItemStackSection symbol;
   public GuiItemStackSection color;
+  public GuiItemStackSection info;
 
   public DonorSymbolDisplayItemsSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

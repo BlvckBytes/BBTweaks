@@ -138,6 +138,8 @@ public class DonorSymbolColorDisplay extends Display<ColorSelectionData> {
 
   private InterpretationEnvironment makeEnvironment() {
     return new InterpretationEnvironment()
+      .withVariable("is_editing_other", displayData.profile().player != player)
+      .withVariable("profile_name", displayData.profile().player.getName())
       .withVariable("is_floodgate", isFloodgate);
   }
 }

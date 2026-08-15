@@ -107,6 +107,9 @@ public class DonorSymbolSymbolDisplay extends Display<SymbolSelectionData> {
 
       var symbol = config.rootSection.donorSymbol._symbolsInOrder.get(currentItemIndex);
 
+      if (!symbol.hasPermission(player))
+        continue;
+
       symbolBySlotIndex.put((int) slot, symbol);
 
       itemConsumer.handle(
@@ -138,6 +141,8 @@ public class DonorSymbolSymbolDisplay extends Display<SymbolSelectionData> {
 
   private InterpretationEnvironment makeEnvironment() {
     return new InterpretationEnvironment()
-      .withVariable("is_floodgate", isFloodgate);
+      .withVariable("is_floodgate", isFloodgate)
+      .withVariable("is_editing_other", displayData.profile().player != player)
+      .withVariable("profile_name", displayData.profile().player.getName());
   }
 }

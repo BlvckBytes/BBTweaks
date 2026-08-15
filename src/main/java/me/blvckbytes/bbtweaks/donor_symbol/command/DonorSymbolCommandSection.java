@@ -11,6 +11,9 @@ public class DonorSymbolCommandSection extends CommandSection {
 
   public ComponentMarkup playersOnly;
   public ComponentMarkup noPermission;
+  public ComponentMarkup noPermissionOthers;
+  public ComponentMarkup usageOthers;
+  public ComponentMarkup playerNotOnline;
 
   public DonorSymbolCommandSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(INITIAL_NAME, baseEnvironment, interpreterLogger);

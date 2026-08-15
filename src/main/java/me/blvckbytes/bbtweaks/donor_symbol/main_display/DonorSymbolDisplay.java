@@ -44,6 +44,8 @@ public class DonorSymbolDisplay extends Display<DonorSymbolProfile> {
         .inheritFrom(environment, false)
         .inheritFrom(displayData.symbol.makeEnvironment(), false)
     );
+
+    config.rootSection.donorSymbol.mainDisplay.items.info.renderInto(itemConsumer, environment);
   }
 
   @Override
@@ -64,6 +66,8 @@ public class DonorSymbolDisplay extends Display<DonorSymbolProfile> {
   private InterpretationEnvironment makeEnvironment() {
     return new InterpretationEnvironment()
       .withVariable("is_floodgate", isFloodgate)
-      .withVariable("enabled", displayData.enabled);
+      .withVariable("enabled", displayData.enabled)
+      .withVariable("is_editing_other", displayData.player != player)
+      .withVariable("profile_name", displayData.player.getName());
   }
 }

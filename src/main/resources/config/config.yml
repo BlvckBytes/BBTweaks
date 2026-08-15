@@ -4069,7 +4069,15 @@ donorSymbol:
       iconType: 'BIG_DRIPLEAF'
       javaValue: '☘'
       bedrockValue: '☘'
+    dinosaur:
+      displayName: '<&a>Dinosaurier'
+      iconType: 'BONE'
+      javaValue: '🦖'
+      bedrockValue: '⭐'
+      requirePermission: true
   defaultSymbol: 'star'
+  defaultSymbolByPlayerName:
+    Cola1222: 'dinosaur'
   colors:
     gold:
       displayName: '<#EEC900>Gold'
@@ -4096,6 +4104,11 @@ donorSymbol:
       iconType: 'LIME_CONCRETE'
       javaValue: '#90EE90'
       bedrockValue: '&a'
+    dark_green:
+      displayName: '<#43CD80>Dunkelgrün'
+      iconType: 'GREEN_CONCRETE'
+      javaValue: '#43CD80'
+      bedrockValue: '&2'
     white:
       displayName: '<&f>Weiß'
       iconType: 'WHITE_CONCRETE'
@@ -4107,15 +4120,23 @@ donorSymbol:
       javaValue: '&7'
       bedrockValue: '&7'
   defaultColor: 'gold'
+  defaultColorByPlayerName:
+    Cola1222: 'dark_green'
   command:
     name: 'donorsymbol'
     aliases:
       - 'spendersymbol'
     playersOnly: '{lut.donor_symbol_prefix} <&c>Dieser Befehl ist nur Spielern zugänglich!'
     noPermission: '{lut.donor_symbol_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+    noPermissionOthers: '{lut.donor_symbol_prefix} <&c>Du hast keinen Zugriff auf die Einstellungen anderer Spieler!'
+    usageOthers: '{lut.donor_symbol_prefix} <&c>Benutze: /{label} [<&4>Spieler</>]'
+    playerNotOnline: '{lut.donor_symbol_prefix} <&c>Der Spieler <&4>{name}</> befindet sich aktuell nicht auf dem Server!'
   mainDisplay:
     rows: 3
-    title: '<&8>Spendersymbol'
+    title: |
+      <&8>Spendersymbol
+      <container *if="is_editing_other">
+        <space/>{profile_name}
     items:
       filler:
         slots: '0..last_slot'
@@ -4139,7 +4160,7 @@ donorSymbol:
             <&8>➥ <&e>Linksklick <&7>Anzeige {enabled then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
       symbol:
-        slots: '13'
+        slots: '12'
         type: '{icon_type}'
         hideAdditionalTooltips: true
         name: |
@@ -4159,7 +4180,7 @@ donorSymbol:
             <&8>➥ <&e>Linksklick <&7>Neues Symbol auswählen<br/>
             {lut.spacer}
       color:
-        slots: '16'
+        slots: '14'
         type: '{icon_type}'
         hideAdditionalTooltips: true
         name: |
@@ -4178,10 +4199,34 @@ donorSymbol:
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Neue Farbe auswählen<br/>
             {lut.spacer}
+      info:
+        slots: '16'
+        type: 'PAPER'
+        hideAdditionalTooltips: true
+        name: |
+          <reset>
+            <&8>» <&7>Information</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Wünsche und Verbesserungsvorschläge zu<br/>
+            Symbolen sowie Farben können per Discord<br/>
+            eingereicht werden; achte bitte darauf,<br/>
+            dass das Symbol auf Java sowie Bedrock<br/>
+            vernünftig dargestellt wird oder halte<br/>
+            ein Alternativsymbol für Bedrock bereit.<br/>
+            <br/>
+            Leider unterstützt der Bedrock-Client<br/>
+            nicht alle Farben sowie Symbole, weshalb<br/>
+            dir in der Vorschau hier im Menu auch<br/>
+            immer beide Versionen gezeigt werden.
   symbolDisplay:
     rows: 6
     paginationSlots: '0..44'
-    title: '<&8>Spendersymbol Symbolauswahl'
+    title: |
+      <&8>Symbolauswahl
+      <container *if="is_editing_other">
+        <space/>{profile_name}
     symbolSelected: '{lut.donor_symbol_prefix} <&7>Du hast das Symbol {display_name} ausgewählt.'
     symbolAlreadySelected: '{lut.donor_symbol_prefix} <&c>Das Symbol {display_name} ist bereits ausgewählt!'
     items:
@@ -4226,7 +4271,10 @@ donorSymbol:
   colorDisplay:
     rows: 6
     paginationSlots: '0..44'
-    title: '<&8>Spendersymbol Farbauswahl'
+    title: |
+      <&8>Farbauswahl
+      <container *if="is_editing_other">
+        <space/>{profile_name}
     colorSelected: '{lut.donor_symbol_prefix} <&7>Du hast die Farbe {display_name} ausgewählt.'
     colorAlreadySelected: '{lut.donor_symbol_prefix} <&c>Die Farbe {display_name} ist bereits ausgewählt!'
     items:

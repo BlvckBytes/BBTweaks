@@ -76,7 +76,7 @@ public class DonorSymbolProfileStore implements Listener {
     if (symbolIdentifier != null) {
       var symbol = config.rootSection.donorSymbol._symbolByIdentifierLower.get(symbolIdentifier);
 
-      if (symbol != null)
+      if (symbol != null && symbol.hasPermission(player))
         result.symbol = symbol;
     }
 

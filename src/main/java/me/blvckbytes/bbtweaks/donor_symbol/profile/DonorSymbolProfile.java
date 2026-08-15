@@ -28,8 +28,8 @@ public class DonorSymbolProfile {
     this.config = config;
 
     this.enabled = true;
-    this.symbol = config.rootSection.donorSymbol._defaultSymbol;
-    this.color = config.rootSection.donorSymbol._defaultColor;
+    this.symbol = config.rootSection.donorSymbol.getDefaultSymbol(player);
+    this.color = config.rootSection.donorSymbol.getDefaultColor(player);
   }
 
   public String renderJavaSymbolOrEmpty() {
@@ -57,10 +57,10 @@ public class DonorSymbolProfile {
 
   public void onConfigReload() {
     var newSymbol = config.rootSection.donorSymbol._symbolByIdentifierLower.get(symbol._identifierLower);
-    this.symbol = newSymbol != null ? newSymbol : config.rootSection.donorSymbol._defaultSymbol;
+    this.symbol = newSymbol != null ? newSymbol : config.rootSection.donorSymbol.getDefaultSymbol(player);
 
     var newColor = config.rootSection.donorSymbol._colorByIdentifierLower.get(color._identifierLower);
-    this.color = newColor != null ? newColor : config.rootSection.donorSymbol._defaultColor;
+    this.color = newColor != null ? newColor : config.rootSection.donorSymbol.getDefaultColor(player);
   }
 
   private static String prefixHexColorByAmpersand(String input) {
