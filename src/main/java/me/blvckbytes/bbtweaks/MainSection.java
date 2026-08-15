@@ -12,6 +12,7 @@ import me.blvckbytes.bbtweaks.auto_tool.AutoToolSection;
 import me.blvckbytes.bbtweaks.back.BackOverrideSection;
 import me.blvckbytes.bbtweaks.block_facing.BlockFacingSection;
 import me.blvckbytes.bbtweaks.bottlexp.BottleXpSection;
+import me.blvckbytes.bbtweaks.chat_format.ChatFormatSection;
 import me.blvckbytes.bbtweaks.clear_chat.ClearChatSection;
 import me.blvckbytes.bbtweaks.command_items.CommandItemsSection;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsSection;
@@ -96,6 +97,7 @@ public class MainSection extends ConfigSection {
   public ExperienceBottleYieldAdjustSection experienceBottleYieldAdjust;
   public WorldGuardFlagsSection worldGuardFlags;
   public DonorSymbolSection donorSymbol;
+  public ChatFormatSection chatFormat;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

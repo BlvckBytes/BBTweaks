@@ -4273,6 +4273,10 @@ donorSymbol:
               {lut.spacer}
             </container>
 
+chatFormat:
+  defaultFormat: "{prefix} {suffix} {donor-symbol} &r{username-color}{displayname}&r: {message-color}{message}"
+  squeezeSpaces: true
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'

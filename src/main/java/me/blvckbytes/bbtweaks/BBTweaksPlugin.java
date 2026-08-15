@@ -15,6 +15,7 @@ import me.blvckbytes.bbtweaks.block_facing.settings.BlockFacingSettingsStore;
 import me.blvckbytes.bbtweaks.block_facing.settings_display.BlockFacingSettingsDisplayHandler;
 import me.blvckbytes.bbtweaks.bottlexp.BottleXpCommand;
 import me.blvckbytes.bbtweaks.bottlexp.SingleBottleXpCommand;
+import me.blvckbytes.bbtweaks.chat_format.ChatFormatListener;
 import me.blvckbytes.bbtweaks.clear_chat.ClearChatCommand;
 import me.blvckbytes.bbtweaks.command_items.CommandItemListener;
 import me.blvckbytes.bbtweaks.container_ticket.RemoteOpenContainerTicketHandler;
@@ -240,6 +241,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(DonorSymbolColorDisplayHandler.class)
         .withSingleton(DonorSymbolDisplayHandler.class)
         .withSingleton(DonorSymbolCommand.class)
+        .withSingleton(ChatFormatListener.class)
         .withSingleton(PlaceholderApiExpansionLoader.class)
         .complete();
     } catch (Throwable e) {
