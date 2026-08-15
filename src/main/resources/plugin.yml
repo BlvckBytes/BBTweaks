@@ -110,6 +110,9 @@ commands:
   clearchat:
     description: 'Clears the chat of players by printing blank lines'
     permission: bbtweaks.clear-chat
+  donorsymbol:
+    description: 'Select a personal donor-symbol'
+    permission: bbtweaks.donor-symbol
   countentityspawnattempts:
     description: 'Admin-tool to count entity-spawn-attempts over a time-interval for a given world'
     permission: bbtweaks.countentityspawnattempts

@@ -15,6 +15,7 @@ import me.blvckbytes.bbtweaks.bottlexp.BottleXpSection;
 import me.blvckbytes.bbtweaks.clear_chat.ClearChatSection;
 import me.blvckbytes.bbtweaks.command_items.CommandItemsSection;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsSection;
+import me.blvckbytes.bbtweaks.donor_symbol.DonorSymbolSection;
 import me.blvckbytes.bbtweaks.durability_warnings.config.DurabilityWarningsSection;
 import me.blvckbytes.bbtweaks.entity_eggs.EntityEggsSection;
 import me.blvckbytes.bbtweaks.experience_bottle_yield_adjust.ExperienceBottleYieldAdjustSection;
@@ -94,6 +95,7 @@ public class MainSection extends ConfigSection {
   public WorldPlayersCommandSection worldPlayersCommand;
   public ExperienceBottleYieldAdjustSection experienceBottleYieldAdjust;
   public WorldGuardFlagsSection worldGuardFlags;
+  public DonorSymbolSection donorSymbol;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

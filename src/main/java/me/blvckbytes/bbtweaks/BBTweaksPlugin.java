@@ -20,6 +20,11 @@ import me.blvckbytes.bbtweaks.command_items.CommandItemListener;
 import me.blvckbytes.bbtweaks.container_ticket.RemoteOpenContainerTicketHandler;
 import me.blvckbytes.bbtweaks.count_entity_spawn_attempts.CountEntitySpawnAttemptsCommand;
 import me.blvckbytes.bbtweaks.custom_commands.CustomCommandsManager;
+import me.blvckbytes.bbtweaks.donor_symbol.color_display.DonorSymbolColorDisplayHandler;
+import me.blvckbytes.bbtweaks.donor_symbol.command.DonorSymbolCommand;
+import me.blvckbytes.bbtweaks.donor_symbol.main_display.DonorSymbolDisplayHandler;
+import me.blvckbytes.bbtweaks.donor_symbol.profile.DonorSymbolProfileStore;
+import me.blvckbytes.bbtweaks.donor_symbol.symbol_display.DonorSymbolSymbolDisplayHandler;
 import me.blvckbytes.bbtweaks.durability_warnings.DurabilityWarningsListener;
 import me.blvckbytes.bbtweaks.durability_warnings.WarningsProfileStore;
 import me.blvckbytes.bbtweaks.durability_warnings.command.DurabilityWarningCommand;
@@ -227,6 +232,11 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(WorldPlayersCommand.class)
         .withSingleton(ExperienceBottleYieldAdjust.class)
         .withSingleton(SingleBottleXpCommand.class)
+        .withSingleton(DonorSymbolProfileStore.class)
+        .withSingleton(DonorSymbolSymbolDisplayHandler.class)
+        .withSingleton(DonorSymbolColorDisplayHandler.class)
+        .withSingleton(DonorSymbolDisplayHandler.class)
+        .withSingleton(DonorSymbolCommand.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);

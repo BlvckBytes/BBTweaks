@@ -4022,6 +4022,257 @@ experienceBottleYieldAdjust:
 worldGuardFlags:
   unusedVehicleDurationSeconds: 60 * 60
 
+donorSymbol:
+  symbols:
+    star:
+      displayName: '<&a>Stern'
+      iconType: 'NETHER_STAR'
+      javaValue: '⭐'
+      bedrockValue: '⭐'
+    stars:
+      displayName: '<&a>Sternchen'
+      iconType: 'NETHER_STAR'
+      javaValue: '✨'
+      bedrockValue: '⭐'
+    heart:
+      displayName: '<&a>Herz'
+      iconType: 'HEART_OF_THE_SEA'
+      javaValue: '❤'
+      bedrockValue: '❤'
+    hearts:
+      displayName: '<&a>Herzchen'
+      iconType: 'HEART_OF_THE_SEA'
+      javaValue: '💕'
+      bedrockValue: '❤'
+    paw:
+      displayName: '<&a>Pfote'
+      iconType: 'RABBIT_FOOT'
+      javaValue: 'ฅ'
+      bedrockValue: 'ฅ'
+    paws:
+      displayName: '<&a>Pfötchen'
+      iconType: 'RABBIT_FOOT'
+      javaValue: '🐾'
+      bedrockValue: 'ฅ'
+    flower:
+      displayName: '<&a>Blume'
+      iconType: 'POPPY'
+      javaValue: '❀'
+      bedrockValue: '❀'
+    penguin:
+      displayName: '<&a>Pinguin'
+      iconType: 'SNOWBALL'
+      javaValue: '🐧'
+      bedrockValue: '?'
+    peace:
+      displayName: '<&a>Peace-Hand'
+      iconType: 'OAK_SIGN'
+      javaValue: '✌'
+      bedrockValue: '✌'
+    clover:
+      displayName: '<&a>Kleeblatt'
+      iconType: 'BIG_DRIPLEAF'
+      javaValue: '☘'
+      bedrockValue: '☘'
+  defaultSymbol: 'star'
+  colors:
+    gold:
+      displayName: '<#EEC900>Gold'
+      iconType: 'YELLOW_CONCRETE'
+      javaValue: '#EEC900'
+      bedrockValue: '&6'
+    magenta:
+      displayName: '<#FF82AB>Magenta'
+      iconType: 'MAGENTA_CONCRETE'
+      javaValue: '#FF82AB'
+      bedrockValue: '&5'
+    pink:
+      displayName: '<#FFBBFF>Pink'
+      iconType: 'PINK_CONCRETE'
+      javaValue: '#FFBBFF'
+      bedrockValue: '&d'
+    light_blue:
+      displayName: '<#00BFFF>Hellblau'
+      iconType: 'LIGHT_BLUE_CONCRETE'
+      javaValue: '#00BFFF'
+      bedrockValue: '&b'
+    light_green:
+      displayName: '<#90EE90>Hellgrün'
+      iconType: 'LIME_CONCRETE'
+      javaValue: '#90EE90'
+      bedrockValue: '&a'
+    white:
+      displayName: '<&f>Weiß'
+      iconType: 'WHITE_CONCRETE'
+      javaValue: '&f'
+      bedrockValue: '&f'
+    gray:
+      displayName: '<&7>Grau'
+      iconType: 'LIGHT_GRAY_CONCRETE'
+      javaValue: '&7'
+      bedrockValue: '&7'
+  defaultColor: 'gold'
+  command:
+    name: 'donorsymbol'
+    aliases:
+      - 'spendersymbol'
+    playersOnly: '{lut.donor_symbol_prefix} <&c>Dieser Befehl ist nur Spielern zugänglich!'
+    noPermission: '{lut.donor_symbol_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  mainDisplay:
+    rows: 3
+    title: '<&8>Spendersymbol'
+    items:
+      filler:
+        slots: '0..last_slot'
+        type: BLACK_STAINED_GLASS_PANE
+        name: ' '
+      enabled:
+        slots: '10'
+        type: '{enabled then "GREEN_CONCRETE" else "RED_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>»<space/>
+            <&a *if="enabled">Symbol wird angezeigt</>
+            <&c *else>Symbol wird nicht angezeigt</>
+            <space/><&8>«
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob das Spenderzeichen in der<br/>
+            Spielerliste sowie im Chat angezeigt wird.<br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Anzeige {enabled then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      symbol:
+        slots: '13'
+        type: '{icon_type}'
+        hideAdditionalTooltips: true
+        name: |
+          <reset>
+            <&8>» <&7>Aktuelles Symbol:</> {display_name} «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Das gewählte Spendersymbol, welches<br/>
+            in der Spielerliste sowie im Chat<br/>
+            angezeigt wird.<br/>
+            <br/>
+            <&8>♦ <&7>Anzeige auf Java-Clients: <color [java_color]>{java_symbol}<br/>
+            <&8>♦ <&7>Anzeige auf Bedrock-Clients: <color [bedrock_color]>{bedrock_symbol}<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Neues Symbol auswählen<br/>
+            {lut.spacer}
+      color:
+        slots: '16'
+        type: '{icon_type}'
+        hideAdditionalTooltips: true
+        name: |
+          <reset>
+            <&8>» <&7>Aktuelle Farbe:</> {display_name} «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Die Farbe, in welcher das Spendersymbol<br/>
+            in der Spielerliste sowie im Chat<br/>
+            angezeigt wird.<br/>
+            <br/>
+            <&8>♦ <&7>Anzeige auf Java-Clients: <color [java_color]>{java_symbol}<br/>
+            <&8>♦ <&7>Anzeige auf Bedrock-Clients: <color [bedrock_color]>{bedrock_symbol}<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Neue Farbe auswählen<br/>
+            {lut.spacer}
+  symbolDisplay:
+    rows: 6
+    paginationSlots: '0..44'
+    title: '<&8>Spendersymbol Symbolauswahl'
+    symbolSelected: '{lut.donor_symbol_prefix} <&7>Du hast das Symbol {display_name} ausgewählt.'
+    symbolAlreadySelected: '{lut.donor_symbol_prefix} <&c>Das Symbol {display_name} ist bereits ausgewählt!'
+    items:
+      filler:
+        slots: '45..last_slot'
+        type: BLACK_STAINED_GLASS_PANE
+        name: ' '
+      backButton:
+        slots: 'last_slot - 4'
+        type: PLAYER_HEAD
+        textures: '{lut.textures["ARROW_LEFT_BLACK"]}'
+        name: |
+          <reset>
+            <&8>» <&6>Zurück <&8>«
+        lore: |
+          <reset>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Gelange zum Hauptmenü<br/>
+            {lut.spacer}
+      symbol:
+        type: '{icon_type}'
+        hideAdditionalTooltips: true
+        glint: 'selected'
+        name: |
+          <reset>
+            <&8>» <&7>Symbol:</> {display_name} «
+        lore: |
+          <reset>
+            <br/>
+            <&8>♦ <&7>Anzeige auf Java-Clients: <color [java_color]>{java_symbol}<br/>
+            <&8>♦ <&7>Anzeige auf Bedrock-Clients: <color [bedrock_color]>{bedrock_symbol}<br/>
+            <container *if="selected">
+              <br/>
+              <&a>Dieses Symbol ist aktuell ausgewählt.
+            </container>
+            <container *else>
+              <br/>
+              {lut.spacer}<br/>
+              <&8>➥ <&e>Linksklick <&7>Symbol auswählen<br/>
+              {lut.spacer}
+            </container>
+  colorDisplay:
+    rows: 6
+    paginationSlots: '0..44'
+    title: '<&8>Spendersymbol Farbauswahl'
+    colorSelected: '{lut.donor_symbol_prefix} <&7>Du hast die Farbe {display_name} ausgewählt.'
+    colorAlreadySelected: '{lut.donor_symbol_prefix} <&c>Die Farbe {display_name} ist bereits ausgewählt!'
+    items:
+      filler:
+        slots: '45..last_slot'
+        type: BLACK_STAINED_GLASS_PANE
+        name: ' '
+      backButton:
+        slots: 'last_slot - 4'
+        type: PLAYER_HEAD
+        textures: '{lut.textures["ARROW_LEFT_BLACK"]}'
+        name: |
+          <reset>
+            <&8>» <&6>Zurück <&8>«
+        lore: |
+          <reset>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Gelange zum Hauptmenü<br/>
+            {lut.spacer}
+      color:
+        type: '{icon_type}'
+        hideAdditionalTooltips: true
+        glint: 'selected'
+        name: |
+          <reset>
+            <&8>» <&7>Farbe:</> {display_name} «
+        lore: |
+          <reset>
+            <br/>
+            <&8>♦ <&7>Anzeige auf Java-Clients: <color [java_color]>{java_symbol}<br/>
+            <&8>♦ <&7>Anzeige auf Bedrock-Clients: <color [bedrock_color]>{bedrock_symbol}<br/>
+            <br/>
+            <container *if="selected">
+              <&a>Diese Farbe ist aktuell ausgewählt.
+            </container>
+            <container *else>
+              {lut.spacer}<br/>
+              <&8>➥ <&e>Linksklick <&7>Farbe auswählen<br/>
+              {lut.spacer}
+            </container>
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -4058,6 +4309,7 @@ cLut:
   item_notifier_prefix: '<&7>[<&6>ItemNotifier<&7>]'
   entity_eggs_prefix: '<&7>[<&6>EntityEggs<&7>]'
   clear_chat_prefix: '<&7>[<&6>ClearChat<&7>]'
+  donor_symbol_prefix: '<&7>[<&6>Spendersymbol<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}
