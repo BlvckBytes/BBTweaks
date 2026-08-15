@@ -38,6 +38,7 @@ import me.blvckbytes.bbtweaks.hotbar_randomizer.command.HotbarRandomizerCommand;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.settings_display.HotbarRandomizerSettingsDisplayHandler;
 import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteLavaBucketListener;
 import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteWaterBucketListener;
+import me.blvckbytes.bbtweaks.integration.luckperms.LuckPermsIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.mc_mmo.McMMOIntegrationLoader;
 import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
@@ -139,6 +140,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(IPPIntegrationLoader.class)
         .withSingleton(McMMOIntegrationLoader.class)
         .withSingleton(FloodgateIntegrationLoader.class)
+        .withSingleton(LuckPermsIntegrationLoader.class)
         .withSingleton(ArmIntegrationLoader.class)
         .withSingleton(DiscordIntegrationLoader.class)
         .withSingleton(ActionBarSleepMessage.class)

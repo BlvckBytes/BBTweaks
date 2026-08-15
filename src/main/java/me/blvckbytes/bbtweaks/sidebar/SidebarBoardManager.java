@@ -61,6 +61,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
   private final InvFilterProfileStore invFilterProfileStore;
   private final AutoToolCommand autoToolCommand;
   private final ArmIntegration armIntegration;
+  private final LuckPerms luckPerms;
   private final FloodgateIntegration floodgateIntegration;
   private final SidebarPreferencesStore sidebarPreferencesStore;
   private final AutoPickupContainerListener autoPickupContainerListener;
@@ -68,7 +69,6 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
   private final HotbarRandomizerSettingsStore hotbarRandomizerSettingsStore;
   private final McMMOIntegration mcMMOIntegration;
   private final PlaytimeRewardsAPI playtimeRewards;
-  private final LuckPerms luckPerms;
   private final IEssentials essentials;
 
   private final ConfigKeeper<MainSection> config;
@@ -87,6 +87,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     AutoToolCommand autoToolCommand,
     ArmIntegration armIntegration,
     FloodgateIntegration floodgateIntegration,
+    LuckPerms luckPerms,
     SidebarPreferencesStore sidebarPreferencesStore,
     AutoPickupContainerListener autoPickupContainerListener,
     BlockFacingSettingsStore blockFacingSettingsStore,
@@ -100,6 +101,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     this.autoToolCommand = autoToolCommand;
     this.armIntegration = armIntegration;
     this.floodgateIntegration = floodgateIntegration;
+    this.luckPerms = luckPerms;
     this.sidebarPreferencesStore = sidebarPreferencesStore;
     this.autoPickupContainerListener = autoPickupContainerListener;
     this.blockFacingSettingsStore = blockFacingSettingsStore;
@@ -110,13 +112,6 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
 
     if (playtimeRegistration == null)
       throw new IllegalStateException("Could not locate registration for the playtime API");
-
-    var luckPermsProvider = Bukkit.getServicesManager().getRegistration(LuckPerms.class);
-
-    if (luckPermsProvider == null)
-      throw new IllegalStateException("Could not locate registration for the LuckPerms API");
-
-    this.luckPerms = luckPermsProvider.getProvider();
 
     this.essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
 
