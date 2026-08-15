@@ -44,6 +44,7 @@ import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegrationLoader;
+import me.blvckbytes.bbtweaks.integration.placeholder_api.PlaceholderApiExpansionLoader;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterListener;
 import me.blvckbytes.bbtweaks.inv_filter.command.InvFilterCommand;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
@@ -239,6 +240,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(DonorSymbolColorDisplayHandler.class)
         .withSingleton(DonorSymbolDisplayHandler.class)
         .withSingleton(DonorSymbolCommand.class)
+        .withSingleton(PlaceholderApiExpansionLoader.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);

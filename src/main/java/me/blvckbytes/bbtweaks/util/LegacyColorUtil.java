@@ -16,6 +16,20 @@ public class LegacyColorUtil {
     return enableColors(input, true, true);
   }
 
+  public static String stripColors(String input) {
+    var inputLength = input.length();
+    var result = new StringBuilder(inputLength);
+
+    tokenize(
+      input, false,
+      result::append,
+      _ -> {},
+      (_, _, _, _, _, _) -> {}
+    );
+
+    return result.toString();
+  }
+
   public static String enableColors(String input, boolean enableLegacyColors, boolean enableHexColors) {
     var inputLength = input.length();
     var result = new StringBuilder(inputLength);

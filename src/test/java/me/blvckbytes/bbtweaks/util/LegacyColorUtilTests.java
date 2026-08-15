@@ -1,5 +1,6 @@
 package me.blvckbytes.bbtweaks.util;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -56,5 +57,11 @@ public class LegacyColorUtilTests {
 
   private static void makeEnableColorsCase(String input, boolean allowVanilla, boolean allowHex, String expectedOutput) {
     assertEquals(expectedOutput, LegacyColorUtil.enableColors(input, allowVanilla, allowHex));
+  }
+
+  @Test
+  public void shouldStripColorSequences() {
+    Assertions.assertEquals("Hello, world", LegacyColorUtil.stripColors("&aHello, world"));
+    Assertions.assertEquals("Hello, world", LegacyColorUtil.stripColors("Hello, &#112233world"));
   }
 }

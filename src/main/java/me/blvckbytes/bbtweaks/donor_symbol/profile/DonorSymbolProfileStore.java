@@ -3,6 +3,8 @@ package me.blvckbytes.bbtweaks.donor_symbol.profile;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.cm_mapper.ConfigKeeperReloadEvent;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_wirer.LateWired;
+import me.blvckbytes.bbtweaks.donor_symbol.command.DonorSymbolCommand;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -22,6 +24,9 @@ public class DonorSymbolProfileStore implements Listener {
   private final Map<UUID, DonorSymbolProfile> profileByPlayerId;
 
   private final NamespacedKey keyEnabled, keySelectedSymbol, keySelectedColor;
+
+  @LateWired
+  private DonorSymbolCommand donorSymbolCommand;
 
   public DonorSymbolProfileStore(
     ConfigKeeper<MainSection> config,
@@ -58,7 +63,7 @@ public class DonorSymbolProfileStore implements Listener {
   }
 
   private DonorSymbolProfile load(Player player) {
-    var result = new DonorSymbolProfile(player, config);
+    var result = new DonorSymbolProfile(player, donorSymbolCommand.getCommand(), config);
     var pdc = player.getPersistentDataContainer();
 
     var enabledValue = pdc.get(keyEnabled, PersistentDataType.BOOLEAN);
