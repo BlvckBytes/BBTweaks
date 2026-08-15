@@ -4058,7 +4058,7 @@ donorSymbol:
       displayName: '<&a>Pinguin'
       iconType: 'SNOWBALL'
       javaValue: '🐧'
-      bedrockValue: '?'
+      bedrockValue: '⭐'
     peace:
       displayName: '<&a>Peace-Hand'
       iconType: 'OAK_SIGN'
