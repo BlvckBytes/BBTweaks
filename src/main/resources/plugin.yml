@@ -181,3 +181,7 @@ permissions:
     description: 'Allows to use the infinite water-bucket'
   bbtweaks.infinite-lavabucket:
     description: 'Allows to use the infinite lava-bucket'
+  bbtweaks.chat-format.legacy-colors:
+    description: 'Allows to use legacy ampersand-colors in chat-messages'
+  bbtweaks.chat-format.hex-colors:
+    description: 'Allows to use hexadecimal ampersand-colors in chat-messages'
