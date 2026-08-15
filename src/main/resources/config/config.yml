@@ -4044,11 +4044,6 @@ donorSymbol:
       iconType: 'HEART_OF_THE_SEA'
       javaValue: '💕'
       bedrockValue: '❤'
-    paw:
-      displayName: '<&a>Pfote'
-      iconType: 'RABBIT_FOOT'
-      javaValue: 'ฅ'
-      bedrockValue: 'ฅ'
     paws:
       displayName: '<&a>Pfötchen'
       iconType: 'RABBIT_FOOT'
