@@ -4277,6 +4277,1102 @@ chatFormat:
   defaultFormat: "{prefix} {suffix} {donor-symbol} &r{username-color}{displayname}&r: {message-color}{message}"
   squeezeSpaces: true
 
+emotion:
+  mainCommand:
+    name: 'emotion'
+    allSentinels:
+      - All
+      - Alle
+    paginationSize: 5
+    aliases:
+      - emo
+      - emotions
+  settingsCommand:
+    name: 'emotionsettings'
+    aliases:
+      - emotionctl
+      - emoctl
+      - emosettings
+  settingsDisplay:
+    title: '<&8>Emotionseinstellungen'
+    rows: 6
+    items:
+      filler:
+        type: 'BLACK_STAINED_GLASS_PANE'
+        name: ' '
+        slots: '0..last_slot'
+      information:
+        slots: '25'
+        type: 'OAK_SIGN'
+        name: '<reset><&8>» <&6>🛈 Informationen 🛈</> «'
+        lore: |
+          <reset>
+            <br/>
+            <&7>In diesem Menü kannst du ganz gezielt an- bzw.<br/>
+            abwählen, welche Teile der Benachrichtigungen von<br/>
+            Emotionen (<&e>/emo</>) dir angezeigt werden sollen.<br/>
+            <br/>
+            Alle Emotionen senden ihre Nachricht per Chat<br/>
+            sowie Hotbar zugleich, sodass individuell gewählt<br/>
+            werden kann, welche Anzeige bevorzugt wird.
+      descriptionChatPart:
+        slots: '1'
+        type: 'PAPER'
+        name: '<reset><&8>» <&6>Chat</> «'
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Spalte</> geben an, ob du<br/>
+            Emotionsbenachrichtigungen im <&e>Chat</> erhältst.
+      descriptionActionBarPart:
+        slots: '2'
+        type: 'DIAMOND_PICKAXE'
+        hideAdditionalTooltips: true
+        name: '<reset><&8>» <&6>Hotbar</> «'
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Spalte</> geben an, ob du<br/>
+            Emotionsbenachrichtigungen über der <&e>Hotbar</><br/>
+            erhältst.
+      descriptionTitlePart:
+        slots: '3'
+        type: 'BEACON'
+        name: '<reset><&8>» <&6>Bildschirmtext</> «'
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Spalte</> geben an, ob du<br/>
+            Emotionsbenachrichtigungen als <&e>Bildschirmtext</><br/>
+            erhältst.
+      descriptionSoundPart:
+        slots: '4'
+        type: 'NOTE_BLOCK'
+        name: '<reset><&8>» <&6>Klänge</> «'
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Spalte</> geben an, ob bei<br/>
+            Emotionsbenachrichtigungen ein <&e>Klang</><br/>
+            abgespielt werden soll.
+      descriptionEffectPart:
+        slots: '5'
+        type: 'FIREWORK_ROCKET'
+        hideAdditionalTooltips: true
+        name: '<reset><&8>» <&6>Partikeleffekte</> «'
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Spalte</> geben an, ob bei<br/>
+            Emotionsbenachrichtigungen <&e>Partikeleffekte</><br/>
+            abgespielt werden sollen.
+      descriptionAllOrigin:
+        slots: '9'
+        type: 'BELL'
+        name: '<reset><&8>» <&6>An alle</> «'
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Zeile</> geben an, ob die<br/>
+            zugehörige Anzeige (Spalte) bei einer Emotion, die<br/>
+            an <&e>alle Spieler</> gerichtet wurde, ausgegeben werden soll.
+      descriptionDirectOrigin:
+        slots: '18'
+        type: 'NAME_TAG'
+        name: '<reset><&8>» <&6>An dich</> «'
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Zeile</> geben an, ob die<br/>
+            zugehörige Anzeige (Spalte) bei einer Emotion, die<br/>
+            an <&e>dich</> gerichtet wurde, ausgegeben werden soll.
+      descriptionIsSenderOrigin:
+        slots: '27'
+        type: 'ARROW'
+        name: '<reset><&8>» <&6>Von dir versandt</> «'
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Zeile</> geben an, ob die<br/>
+            zugehörige Anzeige (Spalte) bei einer Emotion, die<br/>
+            <&e>du versendet</> hast, ausgegeben werden soll.
+      descriptionBroadcastOrigin:
+        slots: '36'
+        type: 'WIND_CHARGE'
+        name: '<reset><&8>» <&6>Rundruf</> «'
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Zeile</> geben an, ob die<br/>
+            zugehörige Anzeige (Spalte) bei einer Emotion, die<br/>
+            <&e>in die Runde gerufen</> wird, ausgegeben werden soll.
+      statusButtons:
+        slots: '[10,19,28,37,11,20,29,38,12,21,30,39,13,22,31,40,14,23,32,41]'
+        type: '{enabled then "GREEN_CONCRETE" else "RED_CONCRETE"}'
+        name: '<reset><&8>» <&c><&a *use="enabled">{lut.emotion.notification_part[notification_part]} <&7>-</> {lut.emotion.notification_origin[notification_origin]} <&8>«'
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob dieser Teil einer von<br/>
+            Emotionen versandten Benachrichtigung<br/>
+            bei dir angezeigt werden soll.<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Empfang {enabled then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+  playersOnly: '{lut.emotion.prefix} <&c>Dieser Befehl ist nur Spielern zugänglich!'
+  noPermission: '{lut.emotion.prefix} <&c>Dir fehlen die nötigen Zugriffsrechte um diese Funktion zu nutzen!'
+  unknownEmotion: '{lut.emotion.prefix} <&c>Die Emotion <&4>{input}</> existiert nicht!'
+  missingEmotionPermission: '{lut.emotion.prefix} Dir fehlt das Recht, die Emotion <&4>{emotion_identifier}</> auszuführen!'
+  awaitRemainingCooldown: |
+    {lut.emotion.prefix} <&c>Bitte warte<space/>
+    <&4><duration [value]="remaining_time * 1000" units="hms" unit-renderer={<number [value] format="0.#" locale="de_DE" />{unit}} /></&4>
+    , bevor du die Emotion <&4>{emotion_identifier}</> erneut ausführst!
+  unsupportedAllTarget: '{lut.emotion.prefix} <&c>Die Emotion <&4>{emotion_identifier}</> unterstützt das Versenden an <&4>alle</> Spieler nicht!'
+  cannotCombineAllSentinelWithNames: '{lut.emotion.prefix} <&c>Der <&4>{all_sentinel}-Platzhalter</> kann nicht mit <&4>individuellen Spielernamen</> kombiniert werden!'
+  noReceivingPlayersOnline: '{lut.emotion.prefix} <&c>Es befindet sich kein Spieler auf dem Server, der die Emotion <&4>{emotion_identifier}</> empfangen könnte!'
+  unsupportedOtherTarget: '{lut.emotion.prefix} <&c>Die Emotion <&4>{emotion_identifier}</> unterstützt das Versenden an <&4>andere Spieler</> nicht!'
+  receivingPlayerNotOnline: '{lut.emotion.prefix} <&c>Der Spieler <&4>{target_player}</> befindet sich nicht auf dem Server!'
+  receiverCannotBeSelf: '{lut.emotion.prefix} <&c>Du kannst dir selbst keine Emotion senden! Emotionen, die an dir selbst angewandt werden können, einfach ohne Namensangabe ausführen.'
+  receivingPlayerDuplicate: '{lut.emotion.prefix} <&c>Der Spieler <&4>{target_player}</> befindet sich nicht auf dem Server!'
+  maximumNumberOfTargetsExceeded: '{lut.emotion.prefix} <&c>Die Emotion <&4>{emotion_identifier}</> unterstützt maximal <&4>{maximum_count} Empfänger</>!'
+  unsupportedPlayingOnSelf: '{lut.emotion.prefix} <&c>Die Emotion <&4>{emotion_identifier}</> kann nicht an <&4>dir selbst</> angewandt werden!'
+  noAccessToAnyEmotion: '{lut.emotion.prefix} <&c>Du hast auf keine der existierenden Emotionen Zugriff!'
+  commandEmotionHelpScreen: |
+    <container
+      *let-primary="lut.emotion.primary"
+      *let-highlight="lut.emotion.highlight"
+    >
+      <&8><&m>{" " ** 25}</>[<$primary>Emotionen</>]<&m>{" " ** 25}</><br/>
+      <&7>Seite <$highlight>{current_page}</>/<$highlight>{number_of_pages}</> - Nutze /{label} \<Seite><br/>
+      <br/>
+      <container *for-emotion="emotions" *for-separator={<br/><br/>} *for-empty={<&c>Noch keine Emotionen konfiguriert<br/>}>
+        <&8>> <&7>/{label} <$highlight>{emotion.identifier}
+        <container *if="emotion.supports_others">
+          <space/>
+          <container *if="emotion.supports_all">
+             <container *if="emotion.supports_self">
+               [<$highlight>Spieler</>/<$highlight>{all_sentinel}</>]
+             </container>
+             <container *else>
+               \<<$highlight>Spieler</>/<$highlight>{all_sentinel}</>>
+             </container>
+          </container>
+          <container *else>
+            <container *if="emotion.supports_self">
+              [<$highlight>Spieler</>]
+            </container>
+            <container *else>
+              \<<$highlight>Spieler</>>
+            </container>
+          </container>
+        </container>
+        <&7> - {emotion.description}<br/>
+        <&8>> <&7>Aliase:<space/>
+        <container
+          *for-alias="emotion.aliases"
+          *for-separator={,<space/>}
+          *for-empty={<&c>Keine Aliase verfügbar}
+        >
+          <$highlight>/{alias}
+        </container>
+      </container>
+      <br/>
+  emotionByIdentifier:
+    Umarmen:
+      tryRegisterDirectly: true
+      directAliases:
+        - hug
+      description: Umarme jemanden
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: CAT_PURR
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: HEART
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>🫂 Umarmung 🫂'
+          subTitleMessage: '<&7>Du umarmst <$lut.emotion.highlight>dich selbst</>'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>🫂 Umarmung 🫂'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>umarmt sich selbst'
+          chatMessage: '<&7>* (🫂) <$lut.emotion.sender_name/> umarmt <$lut.emotion.highlight>sich selbst</>!'
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>🫂 Umarmung 🫂'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>🫂 Umarmung 🫂'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (🫂) <$lut.emotion.sender_name/> umarmt <$lut.emotion.receiver_list/>!'
+    Händeschütteln:
+      tryRegisterDirectly: true
+      doesNoTargetEqualsAll: true
+      directAliases:
+        - handshake
+      description: Hand zur Begrüßung schütteln
+      cooldownSeconds: 30
+      supportsSelf: false
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: ENTITY_VILLAGER_TRADE
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 40
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: HAPPY_VILLAGER
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>✌ Händeschütteln ✌'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>✌ Händeschütteln ✌'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (✌) <$lut.emotion.sender_name/> schüttelt die Hand von <$lut.emotion.receiver_list/>!'
+    Schlagen:
+      tryRegisterDirectly: true
+      directAliases:
+        - punch
+      description: Schlage jemanden
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: ENTITY_PLAYER_HURT
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: ANGRY_VILLAGER
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>☠ Schlagen ☠'
+          subTitleMessage: '<&7>Du schlägst <$lut.emotion.highlight>dich selbst</>'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>☠ Schlagen ☠'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>schlägt sich selbst'
+          chatMessage: '<&7>* (☠) <$lut.emotion.sender_name/> schlägt <$lut.emotion.highlight>sich selbst</>!'
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>☠ Schlagen ☠'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>☠ Schlagen ☠'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (☠) <$lut.emotion.sender_name/> schlägt <$lut.emotion.receiver_list/>!'
+    Küssen:
+      tryRegisterDirectly: true
+      doesNoTargetEqualsAll: true
+      directAliases:
+        - kiss
+      description: Küsse jemanden
+      cooldownSeconds: 30
+      supportsSelf: false
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: ENTITY_CAT_PURREOW
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: HEART
+        - displayType: CLOUD
+          cloudRadius: 1.3
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: SMALL_FLAME
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>❤ Küssen ❤'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>❤ Küssen ❤'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (❤) <$lut.emotion.sender_name/> küsst <$lut.emotion.receiver_list/>!'
+    Popcorn:
+      tryRegisterDirectly: true
+      directAliases:
+        - pop
+      description: Wirf Popcorn auf jemanden
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: ENTITY_CHICKEN_EGG
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: VILLAGER_ANGRY
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>☄ Wirft Popcorn ☄'
+          subTitleMessage: '<&7>Auf <$lut.emotion.highlight>dich selbst</>'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>☄ Wirft Popcorn ☄'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>wirft auf sich selbst'
+          chatMessage: '<&7>* (☄) <$lut.emotion.sender_name/> wirft Popcorn auf <$lut.emotion.highlight>sich selbst</>!'
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>☄ Wirft Popcorn ☄'
+          subTitleMessage: '<&7>Auf <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>☄ Wirft Popcorn ☄'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (☄) <$lut.emotion.sender_name/> wirft Popcorn auf <$lut.emotion.receiver_list/>!'
+    Traurig:
+      tryRegisterDirectly: true
+      directAliases:
+        - sad
+      description: Sei Traurig
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: false
+      supportsAll: false
+      broadcastToConsole: true
+      sound: ENTITY_BAT_HURT
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.3
+          cloudParticleCount: 40
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: DRIPPING_WATER
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>☹ Traurig ☹'
+          subTitleMessage: '<$lut.emotion.highlight>Trauer erfüllt dich'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>☹ Traurig ☹'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>ist traurig'
+          chatMessage: '<&7>* (☹) <$lut.emotion.sender_name/> verkündet seine/ihre Traurigkeit!'
+    Glücklich:
+      tryRegisterDirectly: true
+      directAliases:
+        - happy
+      description: Sei Glücklich
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: false
+      supportsAll: false
+      broadcastToConsole: true
+      sound: BLOCK_NOTE_BLOCK_CHIME
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.3
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: REDSTONE
+          particleColor: 255 8 0
+        - displayType: CLOUD
+          cloudRadius: 1.3
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: REDSTONE
+          particleColor: 255 164 0
+        - displayType: CLOUD
+          cloudRadius: 1.3
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: REDSTONE
+          particleColor: 250 255 0
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>☺ Glücklich ☺'
+          subTitleMessage: '<$lut.emotion.highlight>Glück erfüllt dich'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>☺ Glücklich ☺'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>ist glücklich'
+          chatMessage: '<&7>* (☺) <$lut.emotion.sender_name/> verkündet seine/ihre Glücklichkeit!'
+    GuteNacht:
+      tryRegisterDirectly: true
+      directAliases:
+        - goodnight
+        - guna
+      description: Wünsche jemandem eine gute Nacht
+      cooldownSeconds: 30
+      supportsSelf: false
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: BLOCK_AMETHYST_BLOCK_CHIME
+      effects:
+        - displayType: HELIX
+          yOffset: 0.1
+          helixHeight: 2
+          helixRadius: 0.8
+          helixWindings: 3
+          numberOfHelixCurves: 1
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: REDSTONE
+          particleColor: 77 60 245
+          particleSize: 1
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 35
+          yOffset: 1.6
+          frequencyTicks: 7
+          numberOfExecutions: 4
+          particle: BUBBLE_POP
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>☯ Gute Nacht ☯'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>☯ Gute Nacht ☯'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (☯) <$lut.emotion.sender_name/> wünscht <$lut.emotion.receiver_list/> eine gute Nacht!'
+    Bedanken:
+      tryRegisterDirectly: true
+      directAliases:
+        - danke
+        - thanks
+        - thx
+      description: Bedanke dich bei jemandem
+      cooldownSeconds: 30
+      supportsSelf: false
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: ENTITY_VILLAGER_YES
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.3
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 25
+          numberOfExecutions: 1
+          particle: HAPPY_VILLAGER
+        - displayType: CLOUD
+          cloudRadius: 1.2
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: HEART
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>✿ Bedanken ✿'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>✿ Bedanken ✿'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (✿) <$lut.emotion.sender_name/> bedankt sich bei <$lut.emotion.receiver_list/>!'
+    Lachen:
+      tryRegisterDirectly: true
+      directAliases:
+        - laugh
+      description: Verkünde dein Lachen
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: false
+      supportsAll: false
+      broadcastToConsole: true
+      sound: ENTITY_WITCH_CELEBRATE
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 40
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: NOTE
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>😂 Lachen 😂'
+          subTitleMessage: '<$lut.emotion.highlight>Du lachst'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>😂 Lachen 😂'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>lacht'
+          chatMessage: '<&7>* (😂) <$lut.emotion.sender_name/> lacht!'
+    Jubeln:
+      tryRegisterDirectly: true
+      directAliases:
+        - yay
+      description: Jemandem zujubeln
+      cooldownSeconds: 30
+      supportsSelf: false
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: ENTITY_VINDICATOR_CELEBRATE
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.2
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: FIREWORK
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>👊 Jubeln 👊'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>👊 Jubeln 👊'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (👊) <$lut.emotion.sender_name/> jubelt mit <$lut.emotion.receiver_list add-n/>!'
+    Glückwunsch:
+      tryRegisterDirectly: true
+      directAliases:
+        - gw
+        - congratz
+      description: Jemanden beglückwünschen
+      cooldownSeconds: 30
+      supportsSelf: false
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: ENTITY_FIREWORK_ROCKET_LAUNCH
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.2
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: CHERRY_LEAVES
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>🌺 Glückwunsch 🌺'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>🌺 Glückwunsch 🌺'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (🌺) <$lut.emotion.sender_name/> beglückwünscht <$lut.emotion.receiver_list/>!'
+    Hilfe:
+      tryRegisterDirectly: true
+      directAliases:
+        - helpme
+        - hilfmir
+      description: Um Hilfe bitten
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: BLOCK_BELL_USE
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.2
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: DAMAGE_INDICATOR
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>❔ Hilferuf ❔'
+          subTitleMessage: '<$lut.emotion.highlight>Du rufst nach Hilfe'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>❔ Hilferuf ❔'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>benötigt Hilfe'
+          chatMessage: '<&7>* (❔) <$lut.emotion.sender_name/> benötigt Hilfe!'
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>❔ Hilferuf ❔'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>❔ Hilferuf ❔'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (❔) <$lut.emotion.sender_name/> bittet <$lut.emotion.receiver_list/> um Hilfe!'
+    Keks:
+      tryRegisterDirectly: true
+      directAliases:
+        - cookie
+      description: Einen Keks verschenken
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: ENTITY_PLAYER_BURP
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.2
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: COMPOSTER
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>🍪 Keks 🍪'
+          subTitleMessage: '<$lut.emotion.highlight>Du isst einen Keks'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>🍪 Keks 🍪'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>isst einen Keks'
+          chatMessage: '<&7>* (🍪) <$lut.emotion.sender_name/> isst einen Keks!'
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>🍪 Keks 🍪'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>🍪 Keks 🍪'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (🍪) <$lut.emotion.sender_name/> gibt <$lut.emotion.receiver_list add-n/> einen Keks!'
+    Rüsten:
+      tryRegisterDirectly: true
+      directAliases:
+        - ready
+      description: Mitteilen, dass man für den Kampf gerüstet ist
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: false
+      supportsAll: false
+      broadcastToConsole: true
+      sound: ITEM_ARMOR_EQUIP_NETHERITE
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 40
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: DUST_PLUME
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>🪖 Gerüstet 🪖'
+          subTitleMessage: '<$lut.emotion.highlight>Du bist für den Kampf gerüstet'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>🪖 Gerüstet 🪖'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>ist für den Kampf gerüstet'
+          chatMessage: '<&7>* (🪖) <$lut.emotion.sender_name/> ist für den Kampf gerüstet!'
+    Nase-Anstupsen:
+      tryRegisterDirectly: true
+      directAliases:
+        - boop
+      description: Stupse jemands Nase an
+      cooldownSeconds: 30
+      supportsSelf: false
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: false
+      broadcastToConsole: true
+      sound: ENCHANT_THORNS_HIT
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.2
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: ELECTRIC_SPARK
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>👆 Boop 👆'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>👆 Boop 👆'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          copyChatToActionBar: true
+          chatMessage: '<&7>* (👆) <$lut.emotion.sender_name/> stupst die Nase von <$lut.emotion.receiver_list add-n/> an!'
+    HighFive:
+      tryRegisterDirectly: true
+      directAliases:
+        - high5
+        - abklatschen
+      description: Jemandem ein High-Five geben
+      cooldownSeconds: 30
+      supportsSelf: false
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: ENTITY_PLAYER_BIG_FALL
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.2
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: TOTEM_OF_UNDYING
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>🖐 High-Five 🖐'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>🖐 High-Five 🖐'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (🖐) <$lut.emotion.sender_name/> gibt <$lut.emotion.receiver_list add-n/> ein High-Five!'
+    Enttäuscht:
+      tryRegisterDirectly: true
+      directAliases:
+        - entsetzt
+        - facepalm
+      description: Enttäuschung ausdrücken
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: ENTITY_PLAYER_DEATH
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.2
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: RAID_OMEN
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>🤦 Enttäuscht 🤦'
+          subTitleMessage: '<$lut.emotion.highlight>Du bist enttäuscht'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>🤦 Enttäuscht 🤦'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>ist enttäuscht'
+          chatMessage: '<&7> * (🤦) <$lut.emotion.sender_name/> ist enttäuscht!'
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>🤦 Enttäuscht 🤦'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>🤦 Enttäuscht 🤦'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (🤦) <$lut.emotion.sender_name/> ist von <$lut.emotion.receiver_list add-n/> enttäuscht!'
+    Winken:
+      tryRegisterDirectly: true
+      directAliases:
+        - wave
+      description: Winke jemandem zu
+      cooldownSeconds: 30
+      supportsSelf: false
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: true
+      broadcastToConsole: true
+      sound: BLOCK_NOTE_BLOCK_BELL
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.2
+          cloudParticleCount: 40
+          yOffset: 1.6
+          frequencyTicks: 10
+          numberOfExecutions: 3
+          particle: BUBBLE_COLUMN_UP
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>👋 Winken 👋'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>👋 Winken 👋'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (👋) <$lut.emotion.sender_name/> winkt <$lut.emotion.receiver_list add-n/> zu!'
+    BaumUmarmen:
+      tryRegisterDirectly: true
+      directAliases:
+        - treehug
+        - baumhug
+      description: Umarme einen Baum
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: false
+      supportsAll: false
+      broadcastToConsole: true
+      sound: BLOCK_AZALEA_STEP
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 40
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: BLOCK_CRACK
+          particleMaterial: OAK_LEAVES
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>🌳 Baum Umarmen 🌳'
+          subTitleMessage: '<$lut.emotion.highlight>Du umarmst einen Baum'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>🌳 Baum Umarmen 🌳'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>umarmt einen Baum'
+          chatMessage: '<&7>* (🌳) <$lut.emotion.sender_name/> umarmt einen Baum!'
+    WillkommenZurück:
+      tryRegisterDirectly: true
+      directAliases:
+        - welcomeback
+        - weba
+      description: Heiße jemanden willkommen zurück
+      cooldownSeconds: 30
+      supportsSelf: false
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: false
+      broadcastToConsole: true
+      sound: BLOCK_NOTE_BLOCK_CHIME
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.2
+          cloudParticleCount: 35
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: NOTE
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>✌ Willkommen Zurück ✌'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>✌ Willkommen Zurück ✌'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        toDiscord: '✌ {sender_display_name} heißt <container *for-name="receivers_display_names" *for-separator={,<space/>}>{name}</> willkommen zurück!'
+        asBroadcast:
+          chatMessage: '<&7>* (✌) <$lut.emotion.sender_name/> heißt <$lut.emotion.receiver_list/> willkommen zurück!'
+    Seufzer:
+      tryRegisterDirectly: true
+      directAliases:
+        - sigh
+      description: Stoße einen Seufzer aus
+      cooldownSeconds: 60
+      supportsSelf: true
+      supportsOthers: false
+      supportsAll: false
+      broadcastToConsole: true
+      sound: ENTITY_PILLAGER_DEATH
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.2
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: DAMAGE_INDICATOR
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>😪 Seufzer 😪'
+          subTitleMessage: '<$lut.emotion.highlight>Du stößt einen Seufzer aus'
+        asBroadcast:
+          chatMessage: '* (😪) <$lut.emotion.sender_name/> stößt einen Seufzer aus!'
+    Snickers:
+      tryRegisterDirectly: true
+      description: Jemand ist eine Diva? Gib Ihm/Ihr ein Snickers!
+      cooldownSeconds: 30
+      supportsSelf: false
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: false
+      broadcastToConsole: true
+      sound: ENTITY_TURTLE_EGG_CRACK
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: ANGRY_VILLAGER
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>🍫 Snickers 🍫'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>🍫 Snickers 🍫'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (🍫) <$lut.emotion.sender_name/> gibt der Diva <$lut.emotion.receiver_list/> ein Snickers!'
+    Unschuldig:
+      tryRegisterDirectly: true
+      description: Verkünde deine Unschuld, oder die eines Anderen.
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: false
+      broadcastToConsole: true
+      sound: ENTITY_VILLAGER_YES
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 30
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: DRIPPING_WATER
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>😅 Unschuldig 😅'
+          subTitleMessage: '<$lut.emotion.highlight>Du bekennst deine Unschuld'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>😅 Unschuldig 😅'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>ist unschuldig'
+          chatMessage: '<&7>* (😅) <$lut.emotion.sender_name/> bekennt seine/ihre Unschuld!'
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>😅 Unschuldig 😅'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>😅 Unschuldig 😅'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (😅) <$lut.emotion.sender_name/> bekennt die Unschuld von <$lut.emotion.receiver_list/>!'
+    Überrascht:
+      tryRegisterDirectly: true
+      directAliases:
+        - surprised
+        - ueberrascht
+      description: Teile mit, dass du überrascht bist.
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: false
+      broadcastToConsole: true
+      sound: ENTITY_VILLAGER_TRADE
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 5
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: EXPLOSION_LARGE
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>😱 Überrascht 😱'
+          subTitleMessage: '<$lut.emotion.highlight>Du bist überrascht'
+        toDiscord: '😱 {sender_display_name} ist überrascht!'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>😱 Überrascht 😱'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>ist überrascht'
+          chatMessage: '<&7>* (😱) <$lut.emotion.sender_name/> ist überrascht!'
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>😱 Überrascht 😱'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>😱 Überrascht 😱'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        toDiscord: '😱 {sender_display_name} ist von <container *for-name="receivers_display_names" *for-separator={,<space/>}>{name}</> überrascht!'
+        asBroadcast:
+          chatMessage: '<&7>* (😱) <$lut.emotion.sender_name/> ist von <$lut.emotion.receiver_list add-n/> überrascht!'
+    GrasAnfassen:
+      directAliases:
+        - touchgrass
+      tryRegisterDirectly: true
+      description: Jemand sollte mal Gras anfassen? Sag's Ihm/Ihr!
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: true
+      maximumNumberOfTargets: 3
+      supportsAll: false
+      broadcastToConsole: true
+      sound: BLOCK_GRASS_BREAK
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.5
+          cloudParticleCount: 35
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: SNEEZE
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>⸙ Gras anfassen ⸙'
+          subTitleMessage: '<$lut.emotion.highlight>Du musst mal Gras anfassen'
+        toDiscord: '⸙ {sender_display_name} muss jetzt zur Beruhigung mal Gras anfassen gehen!'
+        asBroadcast:
+          chatMessage: '<&7>* (⸙) <$lut.emotion.sender_name/> muss jetzt zur Beruhigung mal Gras anfassen gehen!'
+      atOthersMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>⸙ Gras anfassen ⸙'
+          subTitleMessage: '<&7>An <$lut.emotion.receiver_list/>'
+        toReceiver:
+          titleMessage: '<$lut.emotion.primary>⸙ Gras anfassen ⸙'
+          subTitleMessage: '<&7>Von <$lut.emotion.sender_name/>'
+        asBroadcast:
+          chatMessage: '<&7>* (⸙) <$lut.emotion.sender_name/> denkt, dass <$lut.emotion.receiver_list/> mal Gras anfassen gehen sollte!'
+    Müde:
+      tryRegisterDirectly: true
+      directAliases:
+        - tired
+      description: Sei Müde
+      cooldownSeconds: 30
+      supportsSelf: true
+      supportsOthers: false
+      supportsAll: false
+      broadcastToConsole: true
+      sound: ENTITY_FOX_SLEEP
+      effects:
+        - displayType: CLOUD
+          cloudRadius: 1.3
+          cloudParticleCount: 40
+          yOffset: 1.6
+          frequencyTicks: 15
+          numberOfExecutions: 2
+          particle: DRIPPING_WATER
+      atSelfMessages:
+        toSender:
+          titleMessage: '<$lut.emotion.primary>😴 Müde 😴'
+          subTitleMessage: '<$lut.emotion.highlight>Du bist müde'
+        asBroadcast:
+          titleMessage: '<$lut.emotion.primary>😴 Müde 😴'
+          subTitleMessage: '<$lut.emotion.sender_name/> <&7>ist müde'
+          chatMessage: '<&7>* (😴) <$lut.emotion.sender_name/> verkündet seine/ihre Müdigkeit!'
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -4314,6 +5410,28 @@ cLut:
   entity_eggs_prefix: '<&7>[<&6>EntityEggs<&7>]'
   clear_chat_prefix: '<&7>[<&6>ClearChat<&7>]'
   donor_symbol_prefix: '<&7>[<&6>Spendersymbol<&7>]'
+  emotion:
+    prefix: '<&7>[<$lut.emotion.primary>Emotionen</><&7>]'
+    primary: '<#6E49C9><content/>'
+    highlight: '<#AB82FF><content/>'
+    notification_part:
+      CHAT: 'Chat'
+      ACTION_BAR: 'Hotbar'
+      TITLE: 'Bildschirmtext'
+      SOUND: 'Klänge'
+      EFFECT: 'Partikeleffekte'
+    notification_origin:
+      TARGETED_VIA_ALL: 'An alle'
+      TARGETED_DIRECTLY: 'An dich'
+      IS_SENDER: 'Von dir versandt'
+      BROADCAST: 'Rundruf'
+    receiver_list: |
+      <$lut.emotion.highlight>
+        <container *if="is_at_all">
+          alle{add-n then "n"} Spieler{add-n then "n"}
+        </container>
+        <container *else *for-name="receivers_display_names" *for-separator={,<space/>}>{name}</>
+    sender_name: '<$lut.emotion.highlight>{sender_display_name}'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}
