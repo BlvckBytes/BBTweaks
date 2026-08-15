@@ -13,14 +13,34 @@ public class LegacyColorUtil {
   }
 
   public static String enableColors(String input) {
+    return enableColors(input, true, true);
+  }
+
+  public static String enableColors(String input, boolean enableLegacyColors, boolean enableHexColors) {
     var inputLength = input.length();
     var result = new StringBuilder(inputLength);
 
     tokenize(
       input, false,
       result::append,
-      colorChar -> result.append("§").append(colorChar),
+      colorChar -> {
+        if (!enableLegacyColors) {
+          result.append('&').append(colorChar);
+          return;
+        }
+
+        result.append('§').append(colorChar);
+      },
       (r1, r2, g1, g2, b1, b2) -> {
+        if (!enableHexColors) {
+          result.append('&').append('#')
+            .append(r1).append(r2)
+            .append(g1).append(g2)
+            .append(b1).append(b2);
+
+          return;
+        }
+
         result
           .append('§').append('x')
           .append('§').append(r1)
