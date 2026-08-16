@@ -23,6 +23,10 @@ import java.util.UUID;
 
 public class DurabilityWarningsListener implements Listener {
 
+  // TODO: Selectable mode (sound, title, chat)
+  // TODO: Filter for which tools it applies to, that then overrides the configured default.
+  // TODO: Toggleable percentages, maybe?
+
   private final WarningsProfileStore profileStore;
   private final ConfigKeeper<MainSection> config;
   private final Plugin plugin;
