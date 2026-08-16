@@ -5,9 +5,10 @@ import at.blvckbytes.cm_mapper.section.command.CommandSection;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
-import me.blvckbytes.bbtweaks.util.PlayerUtil;
+import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import me.blvckbytes.syllables_matcher.NormalizedConstant;
 import net.kyori.adventure.text.Component;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -17,6 +18,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Objects;
@@ -97,7 +99,7 @@ public class ClearChatCommand implements CommandHandler {
         }
 
         var targetName = args[1];
-        var target = PlayerUtil.getPlayerByName(targetName);
+        var target = getPlayerByName(targetName);
 
         if (target == null) {
           config.rootSection.clearChat.targetNotOnline.sendMessage(
@@ -186,10 +188,8 @@ public class ClearChatCommand implements CommandHandler {
       }
 
       case OTHER -> {
-        if (args.length == 2) {
-          var self = sender instanceof Player player ? player : null;
-          return PlayerUtil.suggestPlayerNames(args[1], candidate -> self != candidate);
-        }
+        if (args.length == 2)
+          return suggestPlayerNames(args[1], sender instanceof Player player ? player : null);
 
         tryParseFlagsAndGetIfFailed(sender, args, 2, true, flags);
         return CommandFlag.createCompletions(args, flags);
@@ -204,6 +204,39 @@ public class ClearChatCommand implements CommandHandler {
 
     for (var i = 0; i < config.rootSection.clearChat.blankLineCount; ++i)
       player.sendMessage(blankLine);
+  }
+
+  private List<String> suggestPlayerNames(String input, @Nullable Player exception) {
+    var result = new ArrayList<String>();
+
+    for (var player : Bukkit.getOnlinePlayers()) {
+      if (player == exception)
+        continue;
+
+      if (StringUtils.startsWithIgnoreCase(player.getName(), input))
+        result.add(player.getName());
+
+      var displayName = ComponentUtil.asTrimmedText(player.displayName());
+
+      if (StringUtils.startsWithIgnoreCase(displayName, input))
+        result.add(displayName);
+    }
+
+    return result;
+  }
+
+  private @Nullable Player getPlayerByName(String name) {
+    for (var player : Bukkit.getOnlinePlayers()) {
+      if (player.getName().equalsIgnoreCase(name))
+        return player;
+
+      var displayName = ComponentUtil.asTrimmedText(player.displayName());
+
+      if (displayName.equalsIgnoreCase(name))
+        return player;
+    }
+
+    return null;
   }
 
   private boolean tryParseFlagsAndGetIfFailed(CommandSender sender, String[] args, int firstArgIndex, boolean forSuggestions, EnumSet<CommandFlag> output) {
