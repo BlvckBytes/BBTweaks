@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.inv_filter.command.CommandAction;
 import me.blvckbytes.bbtweaks.inv_filter.command.InvFilterCommand;
 import me.blvckbytes.bbtweaks.inv_magnet.PreAttractItemEvent;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -51,6 +52,10 @@ public class InvFilterListener implements Listener {
   @EventHandler
   public void onJoin(PlayerJoinEvent event) {
     var player = event.getPlayer();
+
+    if (player.getGameMode() != GameMode.SURVIVAL)
+      return;
+
     var profile = profileStore.access(player);
     var activeFilter = profile.getCurrentFilterIfEnabled();
 
@@ -71,6 +76,9 @@ public class InvFilterListener implements Listener {
   }
 
   private boolean isExcludedByFilter(Player player, ItemStack item) {
+    if (player.getGameMode() != GameMode.SURVIVAL)
+      return false;
+
     var filter = profileStore.access(player).getCurrentFilterIfEnabled();
 
     if (filter == null)
