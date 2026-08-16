@@ -247,6 +247,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(DonorSymbolCommand.class)
         .withSingleton(ChatFormatListener.class)
         .withSingleton(PlaceholderApiExpansionLoader.class)
+        .withSingleton(EssentialsVanishFakeJoinLeave.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);
