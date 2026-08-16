@@ -91,6 +91,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     FloodgateIntegration floodgateIntegration,
     TempFlyIntegration tempFlyIntegration,
     LuckPerms luckPerms,
+    IEssentials essentials,
     SidebarPreferencesStore sidebarPreferencesStore,
     AutoPickupContainerListener autoPickupContainerListener,
     BlockFacingSettingsStore blockFacingSettingsStore,
@@ -117,10 +118,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     if (playtimeRegistration == null)
       throw new IllegalStateException("Could not locate registration for the playtime API");
 
-    this.essentials = (IEssentials) Bukkit.getPluginManager().getPlugin("Essentials");
-
-    if (essentials == null)
-      throw new IllegalStateException("Expected Essentials to be loaded");
+    this.essentials = essentials;
 
     this.hasJobs = Bukkit.getPluginManager().isPluginEnabled("Jobs");
 
