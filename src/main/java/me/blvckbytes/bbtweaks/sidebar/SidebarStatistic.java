@@ -68,6 +68,7 @@ public enum SidebarStatistic {
   MCMMO_TRIDENTS_LEVEL,
   MCMMO_UNARMED_LEVEL,
   MCMMO_WOODCUTTING_LEVEL,
+  TEMP_FLY_REMAINING_TIME,
   ;
 
   public final boolean isSpacer;

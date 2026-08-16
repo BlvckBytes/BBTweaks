@@ -2714,6 +2714,25 @@ sidebar:
             <$lut.sidebar.skill_level_renderer />
           }
         />
+    TEMP_FLY_REMAINING_TIME:
+      iconData:
+        name: 'Verbleibende Flugzeit'
+        description: |
+          Die verbleibende Flugzeit des temporären<br/>
+          Flugmodus, zu benutzen mittels /tfly.
+        iconType: 'FEATHER'
+      defaultLabelStyle:
+        color: 'LIGHT_BLUE'
+      defaultValueStyle:
+        color: 'WHITE'
+      render: |
+        <$lut.sidebar.statistic_renderer
+          icon="⌛" label="Flugzeit"
+          value={
+            <container *if="time < 60">{time}s</container>
+            <duration *else [value]="time * 1000" units="dmh" />
+          }
+        />
   colorDisplay:
     title: |
       <&8>Farbauswahl<space/>

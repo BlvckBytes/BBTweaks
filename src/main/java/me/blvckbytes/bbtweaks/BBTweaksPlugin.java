@@ -50,6 +50,7 @@ import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.placeholder_api.PlaceholderApiExpansionLoader;
+import me.blvckbytes.bbtweaks.integration.temp_fly.TempFlyIntegrationLoader;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterListener;
 import me.blvckbytes.bbtweaks.inv_filter.command.InvFilterCommand;
 import me.blvckbytes.bbtweaks.auto_pickup_container.AutoPickupContainerListener;
@@ -149,6 +150,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(LuckPermsIntegrationLoader.class)
         .withSingleton(ArmIntegrationLoader.class)
         .withSingleton(DiscordIntegrationLoader.class)
+        .withSingleton(TempFlyIntegrationLoader.class)
         .withSingleton(ActionBarSleepMessage.class)
         .withSingleton(RDBreakerListener.class)
         .withSingleton(LavaSponge.class)

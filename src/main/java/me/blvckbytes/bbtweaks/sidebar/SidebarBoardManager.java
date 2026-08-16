@@ -21,6 +21,7 @@ import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerSettingsStore;
 import me.blvckbytes.bbtweaks.integration.floodgate.FloodgateIntegration;
 import me.blvckbytes.bbtweaks.integration.mc_mmo.McMMOIntegration;
 import me.blvckbytes.bbtweaks.integration.mc_mmo.McMMOSpecifics;
+import me.blvckbytes.bbtweaks.integration.temp_fly.TempFlyIntegration;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterProfileStore;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
 import me.blvckbytes.bbtweaks.multi_break.BlockDirections;
@@ -63,6 +64,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
   private final ArmIntegration armIntegration;
   private final LuckPerms luckPerms;
   private final FloodgateIntegration floodgateIntegration;
+  private final TempFlyIntegration tempFlyIntegration;
   private final SidebarPreferencesStore sidebarPreferencesStore;
   private final AutoPickupContainerListener autoPickupContainerListener;
   private final BlockFacingSettingsStore blockFacingSettingsStore;
@@ -87,6 +89,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     AutoToolCommand autoToolCommand,
     ArmIntegration armIntegration,
     FloodgateIntegration floodgateIntegration,
+    TempFlyIntegration tempFlyIntegration,
     LuckPerms luckPerms,
     SidebarPreferencesStore sidebarPreferencesStore,
     AutoPickupContainerListener autoPickupContainerListener,
@@ -102,6 +105,7 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
     this.armIntegration = armIntegration;
     this.floodgateIntegration = floodgateIntegration;
     this.luckPerms = luckPerms;
+    this.tempFlyIntegration = tempFlyIntegration;
     this.sidebarPreferencesStore = sidebarPreferencesStore;
     this.autoPickupContainerListener = autoPickupContainerListener;
     this.blockFacingSettingsStore = blockFacingSettingsStore;
@@ -733,6 +737,14 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
         return new EnvironmentAndSortingValue(
           environment
             .withVariable("world_name", player.getWorld().getName().toLowerCase()),
+          0
+        );
+      }
+
+      case TEMP_FLY_REMAINING_TIME -> {
+        return new EnvironmentAndSortingValue(
+          environment
+            .withVariable("time", tempFlyIntegration.getRemainingTimeSeconds(player)),
           0
         );
       }
