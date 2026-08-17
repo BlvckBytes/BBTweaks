@@ -7,6 +7,7 @@ import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.multi_break.DamageableHotbarItem;
+import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
 import org.bukkit.NamespacedKey;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
@@ -27,15 +28,20 @@ import java.util.UUID;
 public class AutoToolCommand implements CommandHandler, Listener {
 
   private final PluginCommand command;
+
+  private final MultiBreakParametersStore multiBreakParametersStore;
   private final ConfigKeeper<MainSection> config;
   private final NamespacedKey keyEnabled;
   private final Object2BooleanMap<UUID> enabledStateByPlayerId;
 
   public AutoToolCommand(
     JavaPlugin plugin,
+    MultiBreakParametersStore multiBreakParametersStore,
     ConfigKeeper<MainSection> config
   ) {
     this.command = Objects.requireNonNull(plugin.getCommand(AutoToolCommandSection.INITIAL_NAME));
+    this.multiBreakParametersStore = multiBreakParametersStore;
+
     this.config = config;
     this.keyEnabled = new NamespacedKey(plugin, "auto-tool-enabled");
     this.enabledStateByPlayerId = new Object2BooleanOpenHashMap<>();
@@ -75,6 +81,11 @@ public class AutoToolCommand implements CommandHandler, Listener {
     return enabledStateByPlayerId.getOrDefault(player.getUniqueId(), false);
   }
 
+  private boolean isEnabledThroughMultiBreak(Player player) {
+    var parametersSlots = multiBreakParametersStore.accessParametersSlots(player);
+    return parametersSlots.enabled && parametersSlots.autoTool;
+  }
+
   @EventHandler
   public void onJoin(PlayerJoinEvent event) {
     var player = event.getPlayer();
@@ -96,10 +107,12 @@ public class AutoToolCommand implements CommandHandler, Listener {
 
   @EventHandler
   public void onBlockDamage(BlockDamageEvent event) {
-    if (!isEnabled(event.getPlayer()))
+    var player = event.getPlayer();
+
+    if (!isEnabled(player) && !isEnabledThroughMultiBreak(player))
       return;
 
-    var playerInventory = event.getPlayer().getInventory();
+    var playerInventory = player.getInventory();
     var block = event.getBlock();
 
     if (DamageableHotbarItem.isRightToolForBlock(playerInventory.getItemInMainHand(), block))

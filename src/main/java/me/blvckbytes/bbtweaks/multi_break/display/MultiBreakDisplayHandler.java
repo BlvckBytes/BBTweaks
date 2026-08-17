@@ -34,11 +34,11 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
 
   @Override
   protected void handleClick(Player player, MultiBreakDisplay display, ClickType clickType, int slot) {
-    if (handleSlotClickAndGetIfRender(player, display, clickType, slot))
+    if (handleSlotClickAndGetIfShouldUpdate(player, display, clickType, slot))
       display.updateItems();
   }
 
-  private boolean handleSlotClickAndGetIfRender(Player player, MultiBreakDisplay display, ClickType clickType, int slot) {
+  private boolean handleSlotClickAndGetIfShouldUpdate(Player player, MultiBreakDisplay display, ClickType clickType, int slot) {
     var parametersSlots = display.displayData.parametersSlots();
     var selectedParameters = parametersSlots.getSelectedParameters();
 
@@ -94,6 +94,49 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
     if (config.rootSection.multiBreak.display.items.toggleEnabled.getDisplaySlots().contains(slot)) {
       if (clickType == ClickType.LEFT) {
         parametersSlots.setEnabled(null);
+        return true;
+      }
+
+      return false;
+    }
+
+    if (config.rootSection.multiBreak.display.items.minY.getDisplaySlots().contains(slot)) {
+      if (isRightClick) {
+        if (parametersSlots.minY == null)
+          return false;
+
+        parametersSlots.minY = null;
+        return true;
+      }
+
+      if (clickType == ClickType.LEFT) {
+        parametersSlots.minY = player.getLocation().getBlockY();
+        return true;
+      }
+
+      return false;
+    }
+
+    if (config.rootSection.multiBreak.display.items.maxY.getDisplaySlots().contains(slot)) {
+      if (isRightClick) {
+        if (parametersSlots.maxY == null)
+          return false;
+
+        parametersSlots.maxY = null;
+        return true;
+      }
+
+      if (clickType == ClickType.LEFT) {
+        parametersSlots.maxY = player.getLocation().getBlockY();
+        return true;
+      }
+
+      return false;
+    }
+
+    if (config.rootSection.multiBreak.display.items.toggleAutoTool.getDisplaySlots().contains(slot)) {
+      if (clickType == ClickType.LEFT) {
+        parametersSlots.autoTool ^= true;
         return true;
       }
 

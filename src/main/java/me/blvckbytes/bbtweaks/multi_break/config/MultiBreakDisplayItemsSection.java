@@ -19,6 +19,10 @@ public class MultiBreakDisplayItemsSection extends ConfigSection {
   public GuiItemStackSection sneakMode;
   public GuiItemStackSection toggleEnabled;
 
+  public GuiItemStackSection minY;
+  public GuiItemStackSection maxY;
+  public GuiItemStackSection toggleAutoTool;
+
   public GuiItemStackSection parametersSlot;
 
   public GuiItemStackSection filler;

@@ -1074,7 +1074,7 @@ multiBreak:
             <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Wert erhöhen<br/>
             {lut.spacer}
       currentFilter:
-        slots: 22
+        slots: 13
         type: '{filter_predicate neq null then "PURPLE_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
         glint: 'filter_predicate neq null and filter_enabled'
         name: |
@@ -1098,7 +1098,7 @@ multiBreak:
             <&8>➥ <&e>{filter_set_command} <&7>Filter setzen<br/>
             {lut.spacer}
       sneakMode:
-        slots: 23
+        slots: 14
         type: 'LIGHT_BLUE_CONCRETE'
         name: |
           <reset>
@@ -1115,7 +1115,7 @@ multiBreak:
             <&8>➥ <&e>Linksklick <&7>Nächsten Modus wählen<br/>
             {lut.spacer}
       toggleEnabled:
-        slots: 24
+        slots: 15
         name: |
           <reset>
             <&8>»<space/>
@@ -1130,6 +1130,69 @@ multiBreak:
             <&7>Schalte die MultiBreak-Funktion ein oder aus.<br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Umschalten<br/>
+            {lut.spacer}
+      minY:
+        slots: 31
+        name: |
+          <reset>
+            <&8>» <&7><&d *use="min_y neq null">Y-Untergrenze</> <&8>«
+        type: '{min_y neq null then "MAGENTA_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Konfiguriere eine Untergrenze des Y-Wertes,<br/>
+            unterhalb welcher die MultiBreak-Funktion<br/>
+            nicht mehr ausgeführt werden soll.<br/>
+            <br/>
+            <&8>♦ <&e>Y-Untergrenze: <&6 *if="min_y neq null">{min_y}</><&c *else>/</><br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Auf aktuelle Höhe setzen
+            <container *if="min_y neq null">
+              <br/>
+              <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Begrenzung entfernen
+            </container>
+            <br/>
+            {lut.spacer}
+      maxY:
+        slots: 32
+        name: |
+          <reset>
+            <&8>» <&7><&d *use="max_y neq null">Y-Obergrenze</> <&8>«
+        type: '{max_y neq null then "MAGENTA_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Konfiguriere eine Obergrenze des Y-Wertes,<br/>
+            oberhalb welcher die MultiBreak-Funktion<br/>
+            nicht mehr ausgeführt werden soll.<br/>
+            <br/>
+            <&8>♦ <&e>Y-Obergrenze: <&6 *if="max_y neq null">{max_y}</><&c *else>/</><br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Auf aktuelle Höhe setzen
+            <container *if="max_y neq null">
+              <br/>
+              <&8>➥ <&e>{is_floodgate then "Werfen" else "Rechtsklick"} <&7>Begrenzung entfernen
+            </container>
+            <br/>
+            {lut.spacer}
+      toggleAutoTool:
+        slots: 33
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="auto_tool">Automatische Werkzeugauswahl</> <&8>«
+        type: '{auto_tool then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Schalte um, ob beim Abbauen des Ursprungs-<br/>
+            blocks automatisch das richtige Werkzeug aus<br/>
+            deiner Hotbar ausgewählt werden soll.<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Auswahl {auto_tool then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
       parametersSlot:
         slots: '[8, 8+9, 8+9*2, 8+9*3, 8+9*4]'

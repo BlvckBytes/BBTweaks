@@ -18,6 +18,11 @@ public class MultiBreakParametersSlots {
 
   public boolean enabled;
 
+  public boolean autoTool;
+
+  public @Nullable Integer minY;
+  public @Nullable Integer maxY;
+
   private int selectedSlotIndex;
 
   private MultiBreakLimits limits;

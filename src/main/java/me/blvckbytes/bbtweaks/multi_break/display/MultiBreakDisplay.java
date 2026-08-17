@@ -39,6 +39,10 @@ public class MultiBreakDisplay extends Display<MultiBreakDisplayData> {
     config.rootSection.multiBreak.display.items.sneakMode.renderInto(itemConsumer, environment);
     config.rootSection.multiBreak.display.items.toggleEnabled.renderInto(itemConsumer, environment);
 
+    config.rootSection.multiBreak.display.items.minY.renderInto(itemConsumer, environment);
+    config.rootSection.multiBreak.display.items.maxY.renderInto(itemConsumer, environment);
+    config.rootSection.multiBreak.display.items.toggleAutoTool.renderInto(itemConsumer, environment);
+
     renderSlotSelectionItems(itemConsumer, environment);
   }
 
@@ -78,6 +82,9 @@ public class MultiBreakDisplay extends Display<MultiBreakDisplayData> {
   private InterpretationEnvironment createEnvironment() {
     return displayData.parametersSlots().getSelectedParameters().makeEnvironment()
       .withVariable("is_floodgate", isFloodgate)
-      .withVariable("filter_set_command", "/" + displayData.commandLabel() + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER));
+      .withVariable("filter_set_command", "/" + displayData.commandLabel() + " " + CommandAction.matcher.getNormalizedName(CommandAction.SET_FILTER))
+      .withVariable("auto_tool", displayData.parametersSlots().autoTool)
+      .withVariable("min_y", displayData.parametersSlots().minY)
+      .withVariable("max_y", displayData.parametersSlots().maxY);
   }
 }

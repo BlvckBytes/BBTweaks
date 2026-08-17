@@ -35,8 +35,7 @@ public class MultiBreakParametersStore implements Disableable, Listener {
   public static final int PARAMETERS_SLOTS_COUNT = 5;
 
   private final NamespacedKey[] keysSneakMode, keysExtents, keysFilterPredicate, keysFilterLanguage, keysFilterEnabled, keysLocked;
-  private final NamespacedKey keySelectedSlotIndex;
-  private final NamespacedKey keyEnabled;
+  private final NamespacedKey keySelectedSlotIndex, keyEnabled, keyAutoTool, keyMinY, keyMaxY;
 
   private final Plugin plugin;
   private final IPPIntegration ippIntegration;
@@ -58,6 +57,9 @@ public class MultiBreakParametersStore implements Disableable, Listener {
 
     this.keySelectedSlotIndex = new NamespacedKey(plugin, "multi-break-selected-slot-index");
     this.keyEnabled = new NamespacedKey(plugin, "multi-break-enabled");
+    this.keyAutoTool = new NamespacedKey(plugin, "multi-break-auto-tool");
+    this.keyMinY = new NamespacedKey(plugin, "multi-break-min-y");
+    this.keyMaxY = new NamespacedKey(plugin, "multi-break-max-y");
 
     for (var slotIndex = 0; slotIndex < PARAMETERS_SLOTS_COUNT; ++slotIndex) {
       var baseKey = "multi-break";
@@ -152,6 +154,14 @@ public class MultiBreakParametersStore implements Disableable, Listener {
     if (enabledValue != null)
       slots.enabled = enabledValue;
 
+    var autoToolValue = pdc.get(keyAutoTool, PersistentDataType.BOOLEAN);
+
+    if (autoToolValue != null)
+      slots.autoTool = autoToolValue;
+
+    slots.minY = pdc.get(keyMinY, PersistentDataType.INTEGER);
+    slots.maxY = pdc.get(keyMaxY, PersistentDataType.INTEGER);
+
     return slots;
   }
 
@@ -244,6 +254,17 @@ public class MultiBreakParametersStore implements Disableable, Listener {
 
     pdc.set(keySelectedSlotIndex, PersistentDataType.INTEGER, parametersSlots.getSelectedSlotIndex());
     pdc.set(keyEnabled, PersistentDataType.BOOLEAN, parametersSlots.enabled);
+    pdc.set(keyAutoTool, PersistentDataType.BOOLEAN, parametersSlots.autoTool);
+
+    if (parametersSlots.minY == null)
+      pdc.remove(keyMinY);
+    else
+      pdc.set(keyMinY, PersistentDataType.INTEGER, parametersSlots.minY);
+
+    if (parametersSlots.maxY == null)
+      pdc.remove(keyMaxY);
+    else
+      pdc.set(keyMaxY, PersistentDataType.INTEGER, parametersSlots.maxY);
   }
 
   private void saveParameters(Player player, MultiBreakParameters parameters) {

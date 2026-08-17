@@ -131,6 +131,12 @@ public class MultiBreakListener implements Listener {
       if (!block.isSolid())
         return;
 
+      if (parametersSlots.minY != null && block.getY() < parametersSlots.minY)
+        return;
+
+      if (parametersSlots.maxY != null && block.getY() > parametersSlots.maxY)
+        return;
+
       var blockType = block.getType();
 
       if (config.rootSection.multiBreak.isBlockExcluded(blockType)) {
