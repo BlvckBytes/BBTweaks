@@ -15,8 +15,12 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DonorSymbolSymbolDisplay extends Display<SymbolSelectionData> {
 
+  private final List<SymbolSection> accessibleSymbols;
   private final Int2ObjectMap<SymbolSection> symbolBySlotIndex;
 
   private int numberOfPages;
@@ -32,6 +36,7 @@ public class DonorSymbolSymbolDisplay extends Display<SymbolSelectionData> {
   ) {
     super(player, displayData, config, floodgateIntegration, plugin);
 
+    this.accessibleSymbols = new ArrayList<>();
     this.symbolBySlotIndex = new Int2ObjectOpenHashMap<>();
   }
 
@@ -78,8 +83,15 @@ public class DonorSymbolSymbolDisplay extends Display<SymbolSelectionData> {
   }
 
   private void updateNumberOfPages() {
+    accessibleSymbols.clear();
+
+    for (var symbol : config.rootSection.donorSymbol._symbolsInOrder) {
+      if (symbol.hasPermission(player))
+        accessibleSymbols.add(symbol);
+    }
+
     var numberOfDisplaySlots = config.rootSection.donorSymbol.symbolDisplay.getPaginationSlots().size();
-    this.numberOfPages = Math.max(1, (int) Math.ceil(config.rootSection.donorSymbol._symbolsInOrder.size() / (double) numberOfDisplaySlots));
+    this.numberOfPages = Math.max(1, (int) Math.ceil(accessibleSymbols.size() / (double) numberOfDisplaySlots));
 
     if (currentPage > numberOfPages)
       currentPage = numberOfPages;
@@ -93,7 +105,7 @@ public class DonorSymbolSymbolDisplay extends Display<SymbolSelectionData> {
 
     var displaySlots = config.rootSection.donorSymbol.symbolDisplay.getPaginationSlots();
     var itemsIndex = (currentPage - 1) * displaySlots.size();
-    var numberOfItems = config.rootSection.donorSymbol._symbolsInOrder.size();
+    var numberOfItems = accessibleSymbols.size();
 
     symbolBySlotIndex.clear();
 
@@ -105,10 +117,7 @@ public class DonorSymbolSymbolDisplay extends Display<SymbolSelectionData> {
         continue;
       }
 
-      var symbol = config.rootSection.donorSymbol._symbolsInOrder.get(currentItemIndex);
-
-      if (!symbol.hasPermission(player))
-        continue;
+      var symbol = accessibleSymbols.get(currentItemIndex);
 
       symbolBySlotIndex.put((int) slot, symbol);
 
