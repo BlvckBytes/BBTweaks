@@ -33,6 +33,7 @@ import me.blvckbytes.bbtweaks.entity_eggs.EntityEggsListener;
 import me.blvckbytes.bbtweaks.experience_bottle_yield_adjust.ExperienceBottleYieldAdjust;
 import me.blvckbytes.bbtweaks.frame_locking.FrameLockingHandler;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
+import me.blvckbytes.bbtweaks.get_username.GetUsernameCommand;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerListener;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerSettingsStore;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.command.HotbarRandomizerCommand;
@@ -248,6 +249,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(ChatFormatListener.class)
         .withSingleton(PlaceholderApiExpansionLoader.class)
         .withSingleton(EssentialsVanishFakeJoinLeave.class)
+        .withSingleton(GetUsernameCommand.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);

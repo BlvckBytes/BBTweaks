@@ -23,6 +23,7 @@ import me.blvckbytes.bbtweaks.experience_bottle_yield_adjust.ExperienceBottleYie
 import me.blvckbytes.bbtweaks.frame_locking.FrameLockingSection;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelSection;
 import me.blvckbytes.bbtweaks.get_exp.GetExpSection;
+import me.blvckbytes.bbtweaks.get_username.GetUsernameSection;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidSection;
 import me.blvckbytes.bbtweaks.hotbar_randomizer.HotbarRandomizerSection;
 import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteLavaBucketSection;
@@ -59,6 +60,7 @@ public class MainSection extends ConfigSection {
   public BackOverrideSection backOverride;
   public FurnaceLevelSection furnaceLevel;
   public GetUuidSection getUuid;
+  public GetUsernameSection getUsername;
   public PingSection ping;
   public AdditionalRecipesSection additionalRecipes;
   public UnCraftSection unCraft;

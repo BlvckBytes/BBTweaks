@@ -15,6 +15,9 @@ commands:
   getuuid:
     description: 'resolve the UUID of any given name'
     permission: bbtweaks.getuuid
+  getusername:
+    description: 'resolve the username of any given UUID'
+    permission: bbtweaks.getusername
   back:
     description: 'Teleport to a previous location'
     permission: essentials.back

@@ -78,6 +78,26 @@ getUuid:
           {uuid}
     </u><&7>!
 
+getUsername:
+  command:
+    name: 'getusername'
+  noPermission: '{lut.main_prefix} <&c>Du hast keinen Zugriff auf diesen Befehl!'
+  commandUsage: '{lut.main_prefix} <&c>Benutzung: /{command_label} \<UUID>'
+  malformedUuid: '{lut.main_prefix} <&c>Die Zeichenkette <&4>{input}</> ist keine valide UUID!'
+  unknownFloodgateId: '{lut.main_prefix} <&c>Die UUID <&4>{uuid}</> ist eine Floodgate-Id und kann somit nicht über Mojang aufgelöst werden, jedoch dem Server aktuell unbekannt - keine Auskunft möglich!'
+  noMojangResult: '{lut.main_prefix} <&c>Die UUID <&4>{uuid}</> konnte bei Mojang nicht gefunden werden!'
+  fetchErrorOccurred: '{lut.main_prefix} <&c>Beim Abfragen von Mojang ist ein interner Fehler aufgetreten; siehe Konsole!'
+  usernameResult: |
+    {lut.main_prefix} <&7>Der Name zur UUID <&a><u>
+      <hover-text value={<&a>Klicke, um die UUID zu kopieren!}>
+        <to-clipboard value=`{uuid}`>
+          {uuid}
+    </u></> ist <&a><u>
+      <hover-text value={<&a>Klicke, um den Namen zu kopieren!}>
+        <to-clipboard value=`{username}`>
+          {username}
+    </u></>!
+
 ping:
   command:
     name: 'ping'
