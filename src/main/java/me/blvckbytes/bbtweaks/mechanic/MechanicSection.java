@@ -11,6 +11,7 @@ import me.blvckbytes.bbtweaks.mechanic.auto_dispose.AutoDisposeSection;
 import me.blvckbytes.bbtweaks.mechanic.command.CommandSignSection;
 import me.blvckbytes.bbtweaks.mechanic.hidden_switch.HiddenSwitchSection;
 import me.blvckbytes.bbtweaks.mechanic.inv_move.InvMoveSection;
+import me.blvckbytes.bbtweaks.mechanic.item_compress.ItemCompressSection;
 import me.blvckbytes.bbtweaks.mechanic.item_notifier.ItemNotifierSection;
 import me.blvckbytes.bbtweaks.mechanic.lever_array.LeverArraySection;
 import me.blvckbytes.bbtweaks.mechanic.magnet.config.MagnetSection;
@@ -43,6 +44,7 @@ public class MechanicSection extends ConfigSection {
   public PoolCrafterSection poolCrafter;
   public CommandSignSection commandSign;
   public TeleporterSection teleporter;
+  public ItemCompressSection itemCompress;
 
   public ComponentMarkup noWallOrStandingSign;
 

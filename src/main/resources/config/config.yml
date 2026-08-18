@@ -568,6 +568,15 @@ mechanic:
     unknownFlag: '{lut.mechanic_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="known_flags" *for-separator={,<space/>}>{flag}</>.'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der Teleporter bei <&a>{x} {y} {z}</> zu <&a><number format="#.#" [target_x] /> <number format="#.#" [target_y] /> <number format="#.#" [target_z] /></> in Blickrichtung <&a>{lut.teleporter.facing[target_facing]}</> wurde erstellt.'
     teleported: '{lut.mechanic_prefix} <&7>Du wurdest zu <&a><number format="#.#" [target_x] /> <number format="#.#" [target_y] /> <number format="#.#" [target_z] /></> teleportiert.'
+  itemCompress:
+    maxCompressedAmount: 64*6*9*25
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte um ein ItemCompress zu erstellen!'
+    noChest: '{lut.mechanic_prefix} <&c>Ein ItemCompress kann nur an einer Truhe angebracht werden!'
+    existingSign: '{lut.mechanic_prefix} <&c>An der Truhe bei <&4>{x} {y} {z} <&c>befindet sich bereits ein ItemCompress!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Das ItemCompress bei <&a>{x} {y} {z}</> wurde erfolgreich erstellt.'
+    compressedStackLore: |
+      <reset>
+        <&5>Komprimierte Gesamtanzahl: <&d *let-display_dks>{lut.pipes.amount_display}</>
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
