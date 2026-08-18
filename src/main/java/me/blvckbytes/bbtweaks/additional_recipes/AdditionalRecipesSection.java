@@ -41,20 +41,20 @@ public class AdditionalRecipesSection extends ConfigSection {
 
       var shapeLines = recipeSection.shape.stream().map(it -> it.asPlainString(null)).toList();
 
-      if (shapeLines.size() != 3) {
-        plugin.getLogger().warning("Shape for recipe \"" + recipeName + "\" has " + shapeLines.size() + " rows instead of three");
+      if (shapeLines.size() < 2) {
+        plugin.getLogger().warning("Shape for recipe \"" + recipeName + "\" has less than two lines");
         continue;
       }
 
       var requiredIngredients = new HashSet<Character>();
 
       for (var shapeLine : shapeLines) {
-        if (shapeLine.length() != 3) {
-          plugin.getLogger().warning("Malformed shape for recipe \"" + recipeName + "\": shape-lines must be exactly three chars long");
+        if (shapeLine.length() < 2) {
+          plugin.getLogger().warning("Malformed shape for recipe \"" + recipeName + "\": less than two shape-lines encountered");
           continue recipeLoop;
         }
 
-        for (var index = 0; index < 3; ++index) {
+        for (var index = 0; index < shapeLine.length(); ++index) {
           var c = shapeLine.charAt(index);
 
           if (c >= 'A' && c <= 'Z') {
