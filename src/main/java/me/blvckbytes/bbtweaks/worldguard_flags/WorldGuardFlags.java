@@ -19,6 +19,7 @@ import org.bukkit.*;
 import org.bukkit.damage.DamageType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Vehicle;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -58,12 +59,18 @@ public class WorldGuardFlags implements Listener, Tickable {
   private final StateFlag mobSpawningFlag;
   private final StateFlag naturalSpawning;
   private final StateFlag vehicleCollide;
+  private final StateFlag decoratedPotPut;
 
   private final SetFlag<EntityType> allowSpawnFlag;
   private final SetFlag<EntityType> denySpawnFlag;
   private final SetFlag<EntityType> removeUnusedVehicles;
 
   private final NamespacedKey keyLastVehicleUse;
+
+  // Used to keep track of events in the priority call-sequence. If we cancel an event
+  // before WorldGuard encounters it, we can bypass its calculations and thereby
+  // selectively allow certain interactions based on additional flags of a region.
+  private final Set<PlayerInteractEvent> temporarilyCancelledInteractEvents;
 
   private final Plugin plugin;
 
@@ -84,6 +91,7 @@ public class WorldGuardFlags implements Listener, Tickable {
     shelfInteractFlag = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("shelf-interact", true));
     naturalSpawning = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("natural-spawning", true));
     vehicleCollide = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("vehicle-collide", true));
+    decoratedPotPut = tryRegisterStateFlagOrFail(flagRegistry, new StateFlag("decorated-pot-put", false));
 
     if (!(flagRegistry.get("mob-spawning") instanceof StateFlag _mobSpawningFlag))
       throw new IllegalStateException("Expected the WG-flag \"mob-spawning\" to be a registered StateFlag");
@@ -101,6 +109,8 @@ public class WorldGuardFlags implements Listener, Tickable {
     removeUnusedVehicles = tryRegisterSetFlagOrFail(flagRegistry, new SetFlag<>("remove-unused-vehicles", new RegistryFlag<>(null, EntityType.REGISTRY)));
 
     keyLastVehicleUse = new NamespacedKey(plugin, "last-vehicle-use");
+
+    this.temporarilyCancelledInteractEvents = new HashSet<>();
 
     this.plugin = plugin;
 
@@ -154,8 +164,38 @@ public class WorldGuardFlags implements Listener, Tickable {
       event.setCancelled(true);
   }
 
-  @EventHandler(ignoreCancelled = true)
-  public void onInteract(PlayerInteractEvent event) {
+  @EventHandler(priority = EventPriority.LOW)
+  public void onPreWorldGuardInteract(PlayerInteractEvent event) {
+    if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
+      return;
+
+    var clickedBlock = event.getClickedBlock();
+
+    if (clickedBlock == null)
+      return;
+
+    // A plugin other than WorldGuard denied interaction - do not override later on.
+    if (event.useInteractedBlock() == Event.Result.DENY)
+      return;
+
+    var player = event.getPlayer();
+    var blockType = clickedBlock.getType();
+
+    if (blockType == Material.DECORATED_POT) {
+      // Temporarily cancel at the early stage before WorldGuard sees it as to avoid
+      // the chat-message telling the player that they cannot do that here.
+      if (isFlagAllowedAt(player, clickedBlock.getLocation(), decoratedPotPut)) {
+        temporarilyCancelledInteractEvents.add(event);
+        event.setCancelled(true);
+      }
+    }
+  }
+
+  @EventHandler(priority = EventPriority.HIGHEST)
+  public void onPostWorldGuardInteract(PlayerInteractEvent event) {
+    // Always remove, ahead of all else, as to absolutely avoid leaking memory. Cheap enough.
+    var wasTemporarilyCancelled = temporarilyCancelledInteractEvents.remove(event);
+
     if (event.getAction() != Action.RIGHT_CLICK_BLOCK)
       return;
 
@@ -166,6 +206,24 @@ public class WorldGuardFlags implements Listener, Tickable {
 
     var player = event.getPlayer();
     var blockType = clickedBlock.getType();
+
+    if (blockType == Material.DECORATED_POT) {
+      if (wasTemporarilyCancelled) {
+        if (event.useInteractedBlock() == Event.Result.DENY) {
+          if (isFlagAllowedAt(player, clickedBlock.getLocation(), decoratedPotPut))
+            event.setCancelled(false);
+
+          return;
+        }
+
+        return;
+      }
+
+      if (isFlagDeniedForAt(player, clickedBlock.getLocation(), decoratedPotPut))
+        event.setCancelled(true);
+
+      return;
+    }
 
     if (blockType == Material.SPAWNER) {
       var heldItem = event.getItem();
@@ -190,6 +248,18 @@ public class WorldGuardFlags implements Listener, Tickable {
       if (isFlagDeniedForAt(player, clickedBlock.getLocation(), shelfInteractFlag))
         event.setCancelled(true);
     }
+  }
+
+  private boolean isFlagAllowedAt(Player player, Location location, StateFlag stateFlag) {
+    var query = WorldGuard.getInstance()
+      .getPlatform()
+      .getRegionContainer()
+      .createQuery();
+
+    var wgPlayer = WorldGuardPlugin.inst().wrapPlayer(player);
+    var wgLocation = BukkitAdapter.adapt(location);
+
+    return query.testBuild(wgLocation, wgPlayer, stateFlag);
   }
 
   @EventHandler(ignoreCancelled = true)
