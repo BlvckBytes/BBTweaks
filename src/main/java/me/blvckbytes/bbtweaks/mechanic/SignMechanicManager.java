@@ -26,6 +26,7 @@ import me.blvckbytes.bbtweaks.mechanic.sign_flipper.SignFlipperMechanic;
 import me.blvckbytes.bbtweaks.mechanic.teleporter.TeleporterMechanic;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.ReceiverMechanic;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.TransmitterMechanic;
+import me.blvckbytes.bbtweaks.mechanic.wet_sponge.WetSpongeMechanic;
 import me.blvckbytes.bbtweaks.util.BooleanConsumer;
 import me.blvckbytes.bbtweaks.util.ComponentUtil;
 import org.bukkit.Bukkit;
@@ -92,6 +93,7 @@ public class SignMechanicManager implements Disableable, Listener {
     registerMechanic(autoWirer.withSingletonAndGet(PoolCrafterMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(CommandSignMechanic.class));
     registerMechanic(autoWirer.withSingletonAndGet(TeleporterMechanic.class));
+    registerMechanic(autoWirer.withSingletonAndGet(WetSpongeMechanic.class));
   }
 
   @Override

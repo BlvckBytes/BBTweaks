@@ -22,6 +22,7 @@ import me.blvckbytes.bbtweaks.mechanic.showcase.ShowcaseSection;
 import me.blvckbytes.bbtweaks.mechanic.sign_flipper.SignFlipperSection;
 import me.blvckbytes.bbtweaks.mechanic.teleporter.TeleporterSection;
 import me.blvckbytes.bbtweaks.mechanic.transmitter_receiver.TransmitterReceiverSection;
+import me.blvckbytes.bbtweaks.mechanic.wet_sponge.WetSpongeSection;
 
 @CSAlways
 public class MechanicSection extends ConfigSection {
@@ -43,6 +44,7 @@ public class MechanicSection extends ConfigSection {
   public PoolCrafterSection poolCrafter;
   public CommandSignSection commandSign;
   public TeleporterSection teleporter;
+  public WetSpongeSection wetSponge;
 
   public ComponentMarkup noWallOrStandingSign;
 

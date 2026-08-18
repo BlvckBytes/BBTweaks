@@ -568,6 +568,30 @@ mechanic:
     unknownFlag: '{lut.mechanic_prefix} <&c>Unbekannte Option <&4>{unknown_flag}</>; wähle aus: <&4 *for-flag="known_flags" *for-separator={,<space/>}>{flag}</>.'
     creationSuccess: '{lut.mechanic_prefix} <&7>Der Teleporter bei <&a>{x} {y} {z}</> zu <&a><number format="#.#" [target_x] /> <number format="#.#" [target_y] /> <number format="#.#" [target_z] /></> in Blickrichtung <&a>{lut.teleporter.facing[target_facing]}</> wurde erstellt.'
     teleported: '{lut.mechanic_prefix} <&7>Du wurdest zu <&a><number format="#.#" [target_x] /> <number format="#.#" [target_y] /> <number format="#.#" [target_z] /></> teleportiert.'
+  wetSponge:
+    noPermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte um ein WetSponge zu erstellen!'
+    noUsePermission: '{lut.mechanic_prefix} <&c>Dir fehlen die Zugriffsrechte um ein WetSponge zu benutzen!'
+    creationSuccess: '{lut.mechanic_prefix} <&7>Das <&a>WetSponge</> bei <&a>{x} {y} {z}</> wurde erfolgreich erstellt!'
+    notHoldingSponges: '{lut.mechanic_prefix} <&c>Du hältst keine Schwämme in deiner Haupthand!'
+    heldSpongesAlreadyWet: |
+      {lut.mechanic_prefix}<space/>
+      <container *if="count eq 1">
+        <&c>Der <&4>Schwamm</> in deiner Haupthand <&4>ist bereits befeuchtet</>!
+      </container>
+      <container *else>
+        <&c>Die <&4>{count} Schwämme</> in deiner Haupthand <&4>sind bereits befeuchtet</>!
+      </container>
+    heldSpongesHaveBeenWetted: |
+      {lut.mechanic_prefix}<space/>
+      <container *if="count eq 1">
+        <&7>Der <&a>Schwamm</> in deiner Haupthand wurde <&a>befeuchtet</>.
+      </container>
+      <container *else>
+        <&7>Die <&a>{count} Schwämme</> in deiner Haupthand wurden <&a>befeuchtet</>.
+      </container>
+    noSpongesInInventory: '{lut.mechanic_prefix} <&c>In deinem Inventar befinden sich keine Schwämme!'
+    allSpongesInInventoryAlreadyWet: '{lut.mechanic_prefix} <&c>Alle <&4>{count} Schwämme</> in deinem Inventar <&4>sind bereits befeuchtet</>!'
+    allSpongesInInventoryHaveBeenWetted: '{lut.mechanic_prefix} <&7>Es wurden <&a>{count} Schwämme</> in deinem Inventar <&a>befeuchtet</>.'
 
 seedOverride:
   playersOnly: '{lut.seed_prefix} <&c>Dieser Befehl steht nur Spielern zur Verfügung!'
