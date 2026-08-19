@@ -188,3 +188,5 @@ permissions:
     description: 'Allows to use legacy ampersand-colors in chat-messages'
   bbtweaks.chat-format.hex-colors:
     description: 'Allows to use hexadecimal ampersand-colors in chat-messages'
+  bbtweaks.mechanic.wet-sponge:
+    description: 'Allows to create and use the wet-sponge mechanic'
