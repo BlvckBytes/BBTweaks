@@ -40,9 +40,32 @@ public class AdditionalRecipes implements Listener {
   }
 
   private void addRecipesFromConfig() {
-    for (var shapedRecipe : config.rootSection.additionalRecipes._shapedRecipes) {
-      Bukkit.addRecipe(shapedRecipe);
+    for (var shapedRecipeEntry : config.rootSection.additionalRecipes.shapedRecipes.entrySet()) {
+      var shapedRecipe = shapedRecipeEntry.getValue().buildRecipe(plugin, shapedRecipeEntry.getKey());
+
+      if (shapedRecipe == null)
+        continue;
+
+      if (!Bukkit.addRecipe(shapedRecipe)) {
+        plugin.getLogger().warning("Could not add shaped recipe " + shapedRecipe.getKey() + " - is it conflicting with existing recipes?");
+        continue;
+      }
+
       recipeKeys.add(shapedRecipe.getKey());
+    }
+
+    for (var shapelessRecipeEntry : config.rootSection.additionalRecipes.shapelessRecipes.entrySet()) {
+      var shapelessRecipe = shapelessRecipeEntry.getValue().buildRecipe(plugin, shapelessRecipeEntry.getKey());
+
+      if (shapelessRecipe == null)
+        continue;
+
+      if (!Bukkit.addRecipe(shapelessRecipe)) {
+        plugin.getLogger().warning("Could not add shapeless recipe " + shapelessRecipe.getKey() + " - is it conflicting with existing recipes?");
+        continue;
+      }
+
+      recipeKeys.add(shapelessRecipe.getKey());
     }
   }
 

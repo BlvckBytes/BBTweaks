@@ -1,7 +1,6 @@
 package me.blvckbytes.bbtweaks;
 
 import me.blvckbytes.bbtweaks.ab_sleep.ActionBarSleepMessage;
-import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipesSection;
 import me.blvckbytes.bbtweaks.auto_fly.AutoFlyCommand;
 import me.blvckbytes.bbtweaks.auto_pickup_container.command.AutoPickupContainerCommand;
 import me.blvckbytes.bbtweaks.auto_pickup_container.settings.AutoPickupContainerSettingsStore;
@@ -134,8 +133,6 @@ public class BBTweaksPlugin extends JavaPlugin {
 
   @Override
   public void onEnable() {
-    AdditionalRecipesSection.plugin = this;
-
     try {
       if (loadError != null)
         throw loadError;
