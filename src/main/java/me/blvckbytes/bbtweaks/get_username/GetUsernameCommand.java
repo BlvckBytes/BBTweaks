@@ -161,6 +161,7 @@ public class GetUsernameCommand implements CommandHandler {
         .map(player -> player.getUniqueId().toString().replace("-", ""))
         .filter(idString -> StringUtils.startsWithIgnoreCase(idString, typedId))
         .limit(15)
+        .map(this::potentiallyFixUpUuidDashes)
         .toList();
     }
 
