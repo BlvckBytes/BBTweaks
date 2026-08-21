@@ -121,6 +121,9 @@ commands:
     permission: bbtweaks.countentityspawnattempts
   worldplayers:
     description: 'Prints the current player-counts per world'
+  locateentities:
+    description: 'Locate chunk-clusters with high entity-counts'
+    permission: bbtweaks.locateentities
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

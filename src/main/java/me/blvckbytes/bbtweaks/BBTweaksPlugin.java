@@ -60,6 +60,7 @@ import me.blvckbytes.bbtweaks.itemdata.ItemDataCommand;
 import me.blvckbytes.bbtweaks.itemdata.display.ItemDataDisplayHandler;
 import me.blvckbytes.bbtweaks.lava_sponge.LavaSponge;
 import me.blvckbytes.bbtweaks.list_chunk_tickets.ListChunkTicketsCommand;
+import me.blvckbytes.bbtweaks.locate_entities.LocateEntitiesCommand;
 import me.blvckbytes.bbtweaks.main_command.MainCommand;
 import me.blvckbytes.bbtweaks.markers_menu.MarkersCommand;
 import me.blvckbytes.bbtweaks.markers_menu.SetMarkerCommand;
@@ -247,6 +248,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(PlaceholderApiExpansionLoader.class)
         .withSingleton(EssentialsVanishFakeJoinLeave.class)
         .withSingleton(GetUsernameCommand.class)
+        .withSingleton(LocateEntitiesCommand.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);
