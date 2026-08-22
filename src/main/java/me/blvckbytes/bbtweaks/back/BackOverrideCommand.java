@@ -6,6 +6,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.CommandHandler;
 import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -111,6 +112,11 @@ public class BackOverrideCommand implements CommandHandler, Listener, Tickable {
       return;
 
     if (player.hasMetadata("NPC") || !(event.getCause() == PlayerTeleportEvent.TeleportCause.PLUGIN || event.getCause() == PlayerTeleportEvent.TeleportCause.COMMAND))
+      return;
+
+    var gameMode = player.getGameMode();
+
+    if (gameMode != GameMode.SURVIVAL && gameMode != GameMode.CREATIVE)
       return;
 
     //noinspection deprecation - f you, Paper!
