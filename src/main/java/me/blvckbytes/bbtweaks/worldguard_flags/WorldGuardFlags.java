@@ -11,6 +11,7 @@ import com.sk89q.worldguard.protection.flags.SetFlag;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.flags.registry.FlagConflictException;
 import com.sk89q.worldguard.protection.flags.registry.FlagRegistry;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import io.papermc.paper.event.player.PlayerInsertLecternBookEvent;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.LateWired;
@@ -40,6 +41,7 @@ import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class WorldGuardFlags implements Listener, Tickable {
 
@@ -394,9 +396,27 @@ public class WorldGuardFlags implements Listener, Tickable {
     if (config.rootSection.worldGuardFlags.unusedVehicleDurationSeconds <= 0)
       return;
 
+    var container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+
     for (var world : Bukkit.getWorlds()) {
-      for (var vehicle : world.getEntitiesByClass(Vehicle.class))
-        removeUnusedVehicleIfApplicable(vehicle);
+      var manager = container.get(BukkitAdapter.adapt(world));
+
+      if (manager == null)
+        continue;
+
+      for (var region : manager.getRegions().values()) {
+        var vehicleTypes = region.getFlag(removeUnusedVehicles);
+
+        if (vehicleTypes == null || vehicleTypes.isEmpty())
+          continue;
+
+        forEachVehicleInRegion(region, world, vehicle -> {
+          if (!vehicleTypes.contains(BukkitAdapter.adapt(vehicle.getType())))
+            return;
+
+          removeUnusedVehicleIfApplicable(vehicle);
+        });
+      }
     }
   }
 
@@ -430,16 +450,6 @@ public class WorldGuardFlags implements Listener, Tickable {
       return;
     }
 
-    var removedEntities = querySetFlagValueAt(vehicle.getLocation(), removeUnusedVehicles);
-
-    if (removedEntities == null)
-      return;
-
-    var weEntityType = BukkitAdapter.adapt(vehicle.getType());
-
-    if (!removedEntities.contains(weEntityType))
-      return;
-
     var lastUseValue = vehiclePdc.get(keyLastVehicleUse, PersistentDataType.LONG);
 
     if (lastUseValue == null) {
@@ -457,5 +467,47 @@ public class WorldGuardFlags implements Listener, Tickable {
 
   private void touchLastVehicleUseValue(PersistentDataContainer pdc) {
     pdc.set(keyLastVehicleUse, PersistentDataType.LONG, System.currentTimeMillis());
+  }
+
+  private static void forEachVehicleInRegion(ProtectedRegion region, World world, Consumer<Vehicle> handler) {
+    var min = region.getMinimumPoint();
+    var max = region.getMaximumPoint();
+
+    var minX = min.getBlockX();
+    var maxX = max.getBlockX();
+
+    var minY = min.getBlockY();
+    var maxY = max.getBlockY();
+
+    var minZ = min.getBlockZ();
+    var maxZ = max.getBlockZ();
+
+    for (var chunkX = minX >> 4; chunkX <= maxX >> 4; chunkX++) {
+      for (var chunkZ = minZ >> 4; chunkZ <= maxZ >> 4; chunkZ++) {
+        if (!world.isChunkLoaded(chunkX, chunkZ))
+          continue;
+
+        var chunk = world.getChunkAt(chunkX, chunkZ);
+
+        for (var entity : chunk.getEntities()) {
+          if (!(entity instanceof Vehicle vehicle))
+            continue;
+
+          var x = vehicle.getX();
+          if (x < minX || x > maxX)
+            continue;
+
+          var y = vehicle.getY();
+          if (y < minY || y > maxY)
+            continue;
+
+          var z = vehicle.getZ();
+          if (z < minZ || z > maxZ)
+            continue;
+
+          handler.accept(vehicle);
+        }
+      }
+    }
   }
 }
