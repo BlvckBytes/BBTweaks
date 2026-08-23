@@ -716,9 +716,18 @@ public class SidebarBoardManager implements Listener, Tickable, StatisticEnviron
       }
 
       case PLAYER_COUNT -> {
+        var count = 0;
+
+        for (var onlinePlayer : Bukkit.getOnlinePlayers()) {
+          if (onlinePlayer != player && !player.canSee(onlinePlayer))
+            continue;
+
+          ++count;
+        }
+
         return new EnvironmentAndSortingValue(
           environment
-            .withVariable("player_count", Bukkit.getOnlinePlayers().size()),
+            .withVariable("player_count", count),
           0
         );
       }
