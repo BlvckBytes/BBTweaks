@@ -3,6 +3,7 @@ package me.blvckbytes.bbtweaks.multi_break;
 import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
+import me.blvckbytes.bbtweaks.auto_tool.AutoToolExternalEnableEvent;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParameters;
@@ -50,6 +51,24 @@ public class MultiBreakListener implements Listener {
     this.parametersStore = parametersStore;
     this.furnaceLevelDisplay = furnaceLevelDisplay;
     this.config = config;
+  }
+
+  @EventHandler
+  public void onAutoToolExternalEnable(AutoToolExternalEnableEvent event) {
+    if (event.shouldEnable())
+      return;
+
+    var parametersSlots = parametersStore.accessParametersSlots(event.player);
+
+    if (!parametersSlots.autoTool)
+      return;
+
+    var parameters = parametersSlots.getSelectedParameters();
+
+    if (parameters.doesBlockMismatchFilter(event.hitBlock))
+      return;
+
+    event.setShouldEnable();
   }
 
   @EventHandler(ignoreCancelled = true, priority = EventPriority.MONITOR)
