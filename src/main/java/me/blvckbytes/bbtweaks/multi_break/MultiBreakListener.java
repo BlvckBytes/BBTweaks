@@ -8,6 +8,7 @@ import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParameters;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
+import me.blvckbytes.bbtweaks.util.ItemUtil;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -237,16 +238,18 @@ public class MultiBreakListener implements Listener {
     BlockState blockState,
     BlockBreakEvent breakEvent
   ) {
-    var pickupDelay = config.rootSection.multiBreak.customPickupDelay;
+    var customPickupDelay = config.rootSection.multiBreak.customPickupDelay;
     var world = block.getWorld();
+
+    var blockData = block.getBlockData();
+    var blockType = blockData.getMaterial();
+    var dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
 
     if (breakEvent.isDropItems()) {
       var droppedItems = block.getDrops(toolUsed, player);
-      var dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
-
       var itemEntities = new ArrayList<Item>();
 
-      for (ItemStack droppedItem : droppedItems) {
+      for (var droppedItem : droppedItems) {
         var itemEntity = world.createEntity(dropLocation, Item.class);
 
         itemEntity.setItemStack(droppedItem);
@@ -255,16 +258,36 @@ public class MultiBreakListener implements Listener {
         itemEntities.add(itemEntity);
       }
 
+      // Shulkers persist their contents, so there's no need to drop anything.
+      if (!Tag.SHULKER_BOXES.isTagged(blockType) && blockState instanceof Container container) {
+        var containerInventory = container.getInventory();
+
+        for (var containerItem : containerInventory.getContents()) {
+          if (!ItemUtil.isStackValid(containerItem))
+            continue;
+
+          var itemEntity = world.createEntity(dropLocation, Item.class);
+
+          itemEntity.setItemStack(containerItem);
+          itemEntity.setPickupDelay(10);
+
+          itemEntities.add(itemEntity);
+        }
+
+        // Always clear the inventory, in case that it does keep items, like shulkers do, as to avoid duplication.
+        // We never know what types of containers future updates may bring - better safe than sorry.
+        containerInventory.clear();
+      }
+
       //noinspection UnstableApiUsage
       var dropEvent = new BlockDropItemEvent(block, block.getState(), player, itemEntities);
 
       Bukkit.getPluginManager().callEvent(dropEvent);
 
       if (!dropEvent.isCancelled()) {
-
-        for (Item item : dropEvent.getItems()) {
-          if (pickupDelay >= 0)
-            item.setPickupDelay(pickupDelay);
+        for (var item : dropEvent.getItems()) {
+          if (customPickupDelay >= 0)
+            item.setPickupDelay(customPickupDelay);
 
           if (!item.isInWorld())
             world.addEntity(item);
@@ -273,31 +296,8 @@ public class MultiBreakListener implements Listener {
     }
 
     if (breakEvent.getExpToDrop() > 0) {
-      var dropLocation = block.getLocation().add(0.5, 0.5, 0.5);
       var expOrb = world.spawn(dropLocation, ExperienceOrb.class);
       expOrb.setExperience(breakEvent.getExpToDrop());
-    }
-
-    var blockData = block.getBlockData();
-    var blockType = blockData.getMaterial();
-
-    // Shulkers persist their contents, so there's no need to drop anything.
-    if (!Tag.SHULKER_BOXES.isTagged(blockType) && blockState instanceof Container container) {
-      var containerInventory = container.getInventory();
-
-      for (var containerItem : containerInventory.getContents()) {
-        if (containerItem == null || containerItem.getType().isAir())
-          continue;
-
-        var item = world.dropItem(block.getLocation(), containerItem);
-
-        if (pickupDelay >= 0)
-          item.setPickupDelay(pickupDelay);
-      }
-
-      // Always clear the inventory, in case that it does keep items, like shulkers do, as to avoid duplication.
-      // We never know what types of containers future updates may bring - better safe than sorry.
-      containerInventory.clear();
     }
 
     player.incrementStatistic(Statistic.MINE_BLOCK, blockType);
