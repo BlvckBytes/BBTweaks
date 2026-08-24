@@ -6,11 +6,13 @@ import me.blvckbytes.bbtweaks.util.MutableInt;
 import org.bukkit.Bukkit;
 import org.bukkit.Chunk;
 import org.bukkit.World;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.EnumMap;
+import java.util.function.Predicate;
 
 public class EntityScanSession {
 
@@ -18,6 +20,7 @@ public class EntityScanSession {
 
   public final World world;
   public final @Nullable EntityType targetEntityType;
+  private final Predicate<Entity> predicate;
 
   private final Chunk[] loadedChunks;
 
@@ -26,9 +29,14 @@ public class EntityScanSession {
 
   private int nextChunkIndex;
 
-  public EntityScanSession(World world, @Nullable EntityType targetEntityType) {
+  public EntityScanSession(
+    World world,
+    @Nullable EntityType targetEntityType,
+    Predicate<Entity> predicate
+  ) {
     this.world = world;
     this.targetEntityType = targetEntityType;
+    this.predicate = predicate;
 
     this.loadedChunks = world.getLoadedChunks();
 
@@ -52,6 +60,9 @@ public class EntityScanSession {
       var chunkTuple = IntTuple.create(chunk.getX(), chunk.getZ());
 
       for (var entity : chunk.getEntities()) {
+        if (!predicate.test(entity))
+          continue;
+
         if (countByChunkTuple != null) {
           if (entity.getType() == targetEntityType)
             countByChunkTuple.addTo(chunkTuple, 1);
