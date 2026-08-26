@@ -14,6 +14,7 @@ import me.blvckbytes.bbtweaks.auto_wirer.Tickable;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
 import me.blvckbytes.bbtweaks.inv_magnet.InvMagnetListener;
 import me.blvckbytes.bbtweaks.inv_magnet.PreAttractItemEvent;
+import me.blvckbytes.bbtweaks.item_piling.ItemPilingListener;
 import me.blvckbytes.bbtweaks.shulker_accessor.PostShulkerAccessorWriteEvent;
 import me.blvckbytes.bbtweaks.shulker_accessor.ShulkerAccessorListener;
 import me.blvckbytes.bbtweaks.shulker_accessor.PreShulkerAccessorWriteEvent;
@@ -118,6 +119,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
   private final AutoPickupContainerSettingsStore settingsStore;
   private final ShulkerAccessorListener shulkerAccessor;
   private final InvMagnetListener invMagnetListener;
+  private final ItemPilingListener itemPilingListener;
   private final IPPIntegration ippIntegration;
   private final ConfigKeeper<MainSection> config;
 
@@ -138,6 +140,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     AutoPickupContainerSettingsStore settingsStore,
     ShulkerAccessorListener shulkerAccessor,
     InvMagnetListener invMagnetListener,
+    ItemPilingListener itemPilingListener,
     IPPIntegration ippIntegration,
     ConfigKeeper<MainSection> config
   ) {
@@ -145,6 +148,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     this.settingsStore = settingsStore;
     this.shulkerAccessor = shulkerAccessor;
     this.invMagnetListener = invMagnetListener;
+    this.itemPilingListener = itemPilingListener;
     this.ippIntegration = ippIntegration;
     this.config = config;
 
@@ -572,7 +576,7 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
     event.markCanHoldSome();
   }
 
-  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGHEST)
+  @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
   public void onPickupAttempt(PlayerAttemptPickupItemEvent event) {
     var player = event.getPlayer();
     var settings = settingsStore.accessSettings(event.getPlayer());
@@ -581,53 +585,49 @@ public class AutoPickupContainerListener implements Listener, Tickable, FilterPr
       return;
 
     var itemEntity = event.getItem();
-    var pickedUpStack = itemEntity.getItemStack();
+    var itemPile = itemPilingListener.getPile(itemEntity);
+    var unitStack = itemPile.getUnitStack();
 
-    if (settings.didFailAttemptAndNotSucceedOnceRecently(pickedUpStack, relativeTime)) {
+    if (settings.didFailAttemptAndNotSucceedOnceRecently(unitStack, relativeTime)) {
       clearVelocityIfAttractedRecently(itemEntity, player);
       return;
     }
 
     var session = makePickupSession(player, true);
 
-    var availableAmount = pickedUpStack.getAmount();
-    var addedAmount = session.tryAddItemToContainersAndGetAddedAmount(pickedUpStack);
+    var didFailAny = false;
+
+    var totalAddedAmount = 0;
+
+    for (var individualStack : itemPile.getIndividualStacks()) {
+      var availableAmount = individualStack.getAmount();
+      var addedAmount = session.tryAddItemToContainersAndGetAddedAmount(individualStack);
+
+      totalAddedAmount += addedAmount;
+
+      if (addedAmount < availableAmount) {
+        didFailAny = true;
+        break;
+      }
+    }
 
     session.onCompletion();
 
-    // Had no space to add any amount of the item to any of the containers carried by the player.
-    if (addedAmount == 0) {
+    if (didFailAny) {
       clearVelocityIfAttractedRecently(itemEntity, player);
-      settings.submitFailedAttempt(pickedUpStack, relativeTime);
-      return;
+      settings.submitFailedAttempt(unitStack, relativeTime);
     }
 
-    settings.submitSuccessfulAttempt(pickedUpStack, relativeTime);
+    else if (totalAddedAmount > 0)
+      settings.submitSuccessfulAttempt(unitStack, relativeTime);
 
     // Cancelling prevents the default pickup-behavior from being executed, but sets the fly-at-player
     // flag to false, so we need to explicitly set it again; then, the pickup-animation will be played.
-    event.setCancelled(true);
-    event.setFlyAtPlayer(true);
-
-    // We cannot immediately remove the entity, seeing how the pickup-animation packet is sent after this
-    // event completes; if we remove the entity ahead of time, the client disposes of it before playing
-    // said animation; therefore, let's just make it non-pickup-able in the meantime and remove it next tick.
-    itemEntity.setPickupDelay(1024);
-    Bukkit.getScheduler().runTaskLater(plugin, itemEntity::remove, 1L);
-
-    if (addedAmount >= availableAmount)
-      return;
-
-    var remainderStack = new ItemStack(pickedUpStack);
-    remainderStack.setAmount(availableAmount - addedAmount);
-
-    var remainderItem = itemEntity.getWorld().spawn(itemEntity.getLocation(), Item.class);
-    remainderItem.setItemStack(remainderStack);
-
-    // Since we've only spliced-off a part of the stack, which itself was pickupable, the remainder
-    // may also mimic that; also, as to not make it bounce around, let's clear its initial velocity.
-    remainderItem.setPickupDelay(0);
-    remainderItem.setVelocity(new Vector(0, 0, 0));
+    if (totalAddedAmount > 0) {
+      itemPile.reduceBy(totalAddedAmount, true);
+      event.setCancelled(true);
+      event.setFlyAtPlayer(true);
+    }
   }
 
   // Sometimes, we attract an entity whose stack can only partially be picked up; so, after taking

@@ -31,6 +31,7 @@ import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteWaterBucketSection;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordSection;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterSection;
 import me.blvckbytes.bbtweaks.inv_magnet.config.InvMagnetSection;
+import me.blvckbytes.bbtweaks.item_piling.ItemPilingSection;
 import me.blvckbytes.bbtweaks.itemdata.ItemDataSection;
 import me.blvckbytes.bbtweaks.lava_sponge.LavaSpongeSection;
 import me.blvckbytes.bbtweaks.list_chunk_tickets.ListChunkTicketsSection;
@@ -100,6 +101,7 @@ public class MainSection extends ConfigSection {
   public WorldGuardFlagsSection worldGuardFlags;
   public DonorSymbolSection donorSymbol;
   public ChatFormatSection chatFormat;
+  public ItemPilingSection itemPiling;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

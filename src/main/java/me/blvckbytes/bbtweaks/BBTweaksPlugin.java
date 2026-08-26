@@ -41,12 +41,14 @@ import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteLavaBucketListener;
 import me.blvckbytes.bbtweaks.infinite_bucket.InfiniteWaterBucketListener;
 import me.blvckbytes.bbtweaks.integration.essentials.EssentialsIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.luckperms.LuckPermsIntegrationLoader;
+import me.blvckbytes.bbtweaks.integration.lwc.LWCIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.mc_mmo.McMMOIntegrationLoader;
 import me.blvckbytes.bbtweaks.get_exp.GetExpCommand;
 import me.blvckbytes.bbtweaks.get_uuid.GetUuidCommand;
 import me.blvckbytes.bbtweaks.integration.discord.DiscordIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.placeholder_api.PlaceholderApiExpansionLoader;
+import me.blvckbytes.bbtweaks.integration.protocollib.ProtocolLibIntegrationLoader;
 import me.blvckbytes.bbtweaks.integration.temp_fly.TempFlyIntegrationLoader;
 import me.blvckbytes.bbtweaks.inv_filter.InvFilterListener;
 import me.blvckbytes.bbtweaks.inv_filter.command.InvFilterCommand;
@@ -56,6 +58,11 @@ import me.blvckbytes.bbtweaks.inv_filter.display.InvFilterDisplayHandler;
 import me.blvckbytes.bbtweaks.inv_magnet.InvMagnetListener;
 import me.blvckbytes.bbtweaks.inv_magnet.command.InvMagnetCommand;
 import me.blvckbytes.bbtweaks.inv_magnet.parameters.InvMagnetParametersStore;
+import me.blvckbytes.bbtweaks.item_piling.ItemPilingEntityNamePatcher;
+import me.blvckbytes.bbtweaks.item_piling.ItemPilingListener;
+import me.blvckbytes.bbtweaks.item_piling.command.ItemPilingCommand;
+import me.blvckbytes.bbtweaks.item_piling.display.ItemPilingDisplayHandler;
+import me.blvckbytes.bbtweaks.item_piling.preferences.ItemPilingPreferencesStore;
 import me.blvckbytes.bbtweaks.itemdata.ItemDataCommand;
 import me.blvckbytes.bbtweaks.itemdata.display.ItemDataDisplayHandler;
 import me.blvckbytes.bbtweaks.lava_sponge.LavaSponge;
@@ -148,6 +155,13 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(DiscordIntegrationLoader.class)
         .withSingleton(TempFlyIntegrationLoader.class)
         .withSingleton(EssentialsIntegrationLoader.class)
+        .withSingleton(ProtocolLibIntegrationLoader.class)
+        .withSingleton(LWCIntegrationLoader.class)
+        .withSingleton(ItemPilingPreferencesStore.class)
+        .withSingleton(ItemPilingListener.class)
+        .withSingleton(ItemPilingEntityNamePatcher.class)
+        .withSingleton(ItemPilingDisplayHandler.class)
+        .withSingleton(ItemPilingCommand.class)
         .withSingleton(ActionBarSleepMessage.class)
         .withSingleton(RDBreakerListener.class)
         .withSingleton(LavaSponge.class)

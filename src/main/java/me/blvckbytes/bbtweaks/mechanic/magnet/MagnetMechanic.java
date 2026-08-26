@@ -4,6 +4,7 @@ import at.blvckbytes.cm_mapper.ConfigKeeper;
 import at.blvckbytes.component_markup.expression.interpreter.InterpretationEnvironment;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.integration.ipp.IPPIntegration;
+import me.blvckbytes.bbtweaks.item_piling.ItemPilingListener;
 import me.blvckbytes.bbtweaks.mechanic.PredicateMechanic;
 import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.MagnetEditDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.util.Cuboid;
@@ -24,6 +25,7 @@ import org.bukkit.event.entity.ItemSpawnEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.Nullable;
 
@@ -36,6 +38,7 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
   // TODO: Stop visualization on destroy
 
   private final MagnetEditDisplayHandler magnetEditDisplayHandler;
+  private final ItemPilingListener itemPilingListener;
 
   protected final CacheByPosition<MagnetInstance> instanceByMountBlockPosition;
   private final CuboidMechanicRegistry<MagnetInstance> instanceCuboidRegistry;
@@ -46,7 +49,8 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
     JavaPlugin plugin,
     ConfigKeeper<MainSection> config,
     IPPIntegration ippIntegration,
-    MagnetEditDisplayHandler magnetEditDisplayHandler
+    MagnetEditDisplayHandler magnetEditDisplayHandler,
+    ItemPilingListener itemPilingListener
   ) {
     super(
       plugin, config, ippIntegration,
@@ -55,6 +59,7 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
     );
 
     this.magnetEditDisplayHandler = magnetEditDisplayHandler;
+    this.itemPilingListener = itemPilingListener;
 
     this.instanceByMountBlockPosition = new CacheByPosition<>();
     this.instanceCuboidRegistry = new CuboidMechanicRegistry<>();
@@ -97,26 +102,33 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
         if (!(entity instanceof Item item))
           continue;
 
-        // We're explicitly not accounting for the pickup-delay as of now, because magnets do not
-        // compete with players about who can pick an item up first - it's a helper-mechanic, and I
-        // want to save on as many needless item-entity-ticks as possible, since that's the main goal.
-
-        if (item.isDead())
+        if (item.getPickupDelay() > 0)
           continue;
+
+        if (item.isDead() || !item.isValid())
+          continue;
+
+        var itemPile = itemPilingListener.getPile(item);
+        var unitStack = itemPile.getUnitStack();
 
         var itemLocation = item.getLocation();
-        var itemStack = item.getItemStack();
-
-        if (itemStack.getAmount() <= 0)
-          continue;
-
-        var targetMagnet = instanceCuboidRegistry.lookupClosest(entries, itemLocation, candidate -> candidate.acceptsItem(itemStack));
+        var targetMagnet = instanceCuboidRegistry.lookupClosest(entries, itemLocation, candidate -> candidate.acceptsItem(unitStack));
 
         if (targetMagnet == null)
           continue;
 
-        targetMagnet.addItem(itemStack);
-        item.remove();
+        var totalAddedAmount = 0;
+
+        for (var individualStack : itemPile.getIndividualStacks()) {
+          var addedAmount = targetMagnet.addItemAndGetAddedAmount(individualStack);
+
+          if (addedAmount <= 0)
+            break;
+
+          totalAddedAmount += addedAmount;
+        }
+
+        itemPile.reduceBy(totalAddedAmount, false);
       }
     });
   }
@@ -459,7 +471,22 @@ public class MagnetMechanic extends PredicateMechanic<MagnetInstance> implements
     // been dropped by the block; the spawn-event is called in-between dropping the item and thus
     // calling this event and decrementing the slot - so if we add it immediately, we end up with
     // a net-zero, thereby a loss of the item at hand.
-    Bukkit.getScheduler().runTaskLater(plugin, () -> targetMagnet.addItem(itemStack), 1);
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      var availableAmount = itemStack.getAmount();
+      var addedAmount = targetMagnet.addItemAndGetAddedAmount(itemStack);
+      var remainingAmount = availableAmount - addedAmount;
+
+      if (remainingAmount <= 0)
+        return;
+
+      var remainderStack = new ItemStack(itemStack);
+      remainderStack.setAmount(remainingAmount);
+
+      var remainderEntity = itemEntity.getWorld().dropItem(itemLocation, remainderStack);
+
+      remainderEntity.setPickupDelay(itemEntity.getPickupDelay());
+      remainderEntity.setVelocity(itemEntity.getVelocity());
+    }, 1);
   }
 
   @EventHandler

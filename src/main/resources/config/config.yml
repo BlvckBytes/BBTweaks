@@ -4446,6 +4446,258 @@ chatFormat:
   defaultFormat: "{prefix} {suffix} {donor-symbol} &r{username-color}{displayname}&r: {message-color}{message}"
   squeezeSpaces: true
 
+itemPiling:
+  periodTicks: 20
+  blockRadius: 8
+  minimumAgeTicks: 30
+  minimumAgeTicksDroppedByPlayer: 20 * 10
+  command:
+    name: 'itempiling'
+    aliases:
+      - 'itemstapler'
+  display:
+    title: '<&8>Item-Piling'
+    rows: 6
+    items:
+      filler:
+        type: BLACK_STAINED_GLASS_PANE
+        name: ' '
+        slots: '0..last_slot'
+      itemCountIcon:
+        slots: '11'
+        type: 'LADDER'
+        name: |
+          <reset>
+            <&8>» <&6>Item-Anzahl</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Spalte</> geben an, ob die<br/>
+            <&e>Anzahl</> herumliegender Items angezeigt<br/>
+            werden soll.
+      itemMaterialIcon:
+        slots: '12'
+        type: 'NAME_TAG'
+        name: |
+          <reset>
+            <&8>» <&6>Item-Material</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Spalte</> geben an, ob das<br/>
+            <&e>Material</> herumliegender Items angezeigt<br/>
+            werden soll.
+      unitStackIcon:
+        slots: '19'
+        type: 'STONE_BUTTON'
+        name: |
+          <reset>
+            <&8>» <&6>Einzelitems</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Zeile</> betreffen<br/>
+            herumliegende Items mit der Anzahl <&e>Eins</>.
+      vanillaStackIcon:
+        slots: '28'
+        type: 'DECORATED_POT'
+        name: |
+          <reset>
+            <&8>» <&6>Normale Stapel</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Zeile</> betreffen<br/>
+            herumliegende Items mit einer Anzahl <&e>kleiner<br/>
+            oder gleich</> der <&e>maximalen vanilla Stackgröße</>.
+      piledStackIcon:
+        slots: '37'
+        type: 'BARREL'
+        name: |
+          <reset>
+            <&8>» <&6>Gehäufte Stapel</> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Auswahlen in dieser <&e>Zeile</> betreffen<br/>
+            herumliegende Items mit einer Anzahl, welche<br/>
+            die <&e>maximalen vanilla Stackgröße überschreitet</>.
+      showItemCountForUnitStacks:
+        slots: '20'
+        type: '{show_item_count_for_unit_stacks then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="show_item_count_for_unit_stacks">Item-Anzahl bei Einzelitems</&7> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob die Anzahl eines herumliegenden<br/>
+            Items angezeigt werden soll, wenn diese <&e>Eins</> ist.<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Anzeige {show_item_count_for_unit_stacks then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      showItemCountForVanillaStacks:
+        slots: '29'
+        type: '{show_item_count_for_vanilla_stacks then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="show_item_count_for_vanilla_stacks">Item-Anzahl bei normalen Stapeln</&7> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob die Anzahl eines herumliegenden<br/>
+            Items angezeigt werden soll, wenn diese <&e>kleiner<br/>
+            order gleich</> der <&e>maximalen vanilla Stackgröße</> ist.<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Anzeige {show_item_count_for_vanilla_stacks then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      showItemCountForPiledStacks:
+        slots: '38'
+        type: '{show_item_count_for_piled_stacks then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="show_item_count_for_piled_stacks">Item-Anzahl bei gehäuften Stapeln</&7> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob die Anzahl eines herumliegenden<br/>
+            Items angezeigt werden soll, wenn diese die <&e>maximale<br/>
+            vanilla Stackgröße überschreitet</>.<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Anzeige {show_item_count_for_piled_stacks then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      showItemMaterialForUnitStacks:
+        slots: '21'
+        type: '{show_item_material_for_unit_stacks then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="show_item_material_for_unit_stacks">Item-Material bei Einzelitems</&7> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob das Material eines herumliegenden<br/>
+            Items angezeigt werden soll, wenn dessen Anzahl<br/>
+            <&e>Eins</> ist.<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Anzeige {show_item_material_for_unit_stacks then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      showItemMaterialForVanillaStacks:
+        slots: '30'
+        type: '{show_item_material_for_vanilla_stacks then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="show_item_material_for_vanilla_stacks">Item-Material bei normalen Stapeln</&7> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob das Material eines herumliegenden<br/>
+            Items angezeigt werden soll, wenn dessen Anzahl<br/>
+            <&e>kleiner oder gleich</> der <&e>maximalen vanilla<br/>
+            Stackgröße</> ist.<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Anzeige {show_item_material_for_vanilla_stacks then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      showItemMaterialForPiledStacks:
+        slots: '39'
+        type: '{show_item_material_for_piled_stacks then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="show_item_material_for_piled_stacks">Item-Material bei gehäuften Stapeln</&7> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob das Material eines herumliegenden<br/>
+            Items angezeigt werden soll, wenn dessen Anzahl<br/>
+            die <&e>maximale vanilla Stackgröße überschreitet</>.<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Anzeige {show_item_material_for_piled_stacks then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      formatItemCountToStacks:
+        slots: '23'
+        type: '{format_item_count_to_stacks then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="format_item_count_to_stacks">Item-Anzahl in vielfachen von Stacks anzeigen</&7> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob die Anzahl eines herumliegenden<br/>
+            Items in vielfachen von Stacks angezeigt werden<br/>
+            soll. Beispiel: <&e>5x 64</> statt <&e>320</>.<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Format {format_item_count_to_stacks then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      immediatelyStackBlockBreakItems:
+        slots: '25'
+        type: '{immediately_stack_block_break_items then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="immediately_stack_block_break_items">Abgebaute Blöcke sofort zusammensammeln</&7> «
+        lore: |
+          <reset>
+            <br/>
+            <&7>Gibt an, ob Items die aus von dir abgebauten<br/>
+            Blöcken stammen, sofort zusammengesammelt<br/>
+            werden sollen. Im Verbund mit MultiBreak (/mb)<br/>
+            kann hiermit die Übersichtlichkeit erhöht<br/>
+            sowie der Client entlastet werden.<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Zusammensammeln {immediately_stack_block_break_items then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+  itemEntityName: |
+    <&e
+      *let-material={<&7><translate [type_key] />}
+    >
+      <container *if="total_amount > stack_size">
+        <separate
+          separator={<space/>}
+          value={
+            <container *if="show_item_count_for_piled_stacks">
+              <container *if="format_item_count_to_stacks">
+                <container *if="stack_count > 1">
+                  {stack_count}x<space/>
+                </container>
+                {stack_size}
+                <container *if="piece_count > 0">
+                  <space/>+ {piece_count}
+                </container>
+              </container>
+              <container *else>
+                {total_amount}
+              </container>
+          }
+          value={<$material *if="show_item_material_for_piled_stacks"/>}
+        />
+      </container>
+      <container *else-if="total_amount > 1">
+        <separate
+          separator={<space/>}
+          value={
+           <container *if="show_item_count_for_vanilla_stacks">
+             {total_amount}
+          }
+          value={<$material *if="show_item_material_for_vanilla_stacks"/>}
+        />
+      </container>
+      <container *else>
+        <separate
+          separator={<space/>}
+          value={
+            <container *if="show_item_count_for_unit_stacks">
+              {total_amount}
+          }
+          value={<$material *if="show_item_material_for_unit_stacks"/>}
+        />
+      </container>
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'

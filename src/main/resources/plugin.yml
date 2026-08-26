@@ -3,8 +3,8 @@ main: me.blvckbytes.bbtweaks.BBTweaksPlugin
 version: ${project.version}
 author: BlvckBytes
 api-version: 26.1
-depend: [ItemPredicateParser, WorldGuard, Essentials, PlaytimeRewards, LuckPerms]
-softdepend: [mcMMO, floodgate, EssentialsDiscord, Jobs, mcMMO, AdvancedRegionMarket, Multiverse-Core, PlaceholderAPI, TempFly]
+depend: [ItemPredicateParser, WorldGuard, Essentials, PlaytimeRewards, LuckPerms, ProtocolLib]
+softdepend: [mcMMO, floodgate, EssentialsDiscord, Jobs, mcMMO, AdvancedRegionMarket, Multiverse-Core, PlaceholderAPI, TempFly, LWC]
 commands:
   bbtweaks:
     description: 'Administrative base-command of this plugin'
@@ -124,6 +124,8 @@ commands:
   locateentities:
     description: 'Locate chunk-clusters with high entity-counts'
     permission: bbtweaks.locateentities
+  itempiling:
+    description: 'Configure the behavior and appearance of the item-piling feature'
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

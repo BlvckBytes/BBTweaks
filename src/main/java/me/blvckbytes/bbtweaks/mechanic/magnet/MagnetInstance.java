@@ -45,7 +45,7 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
     this.filter = filter;
   }
 
-  private boolean canHold(ItemStack item) {
+  private boolean canHoldSomeOf(ItemStack item) {
     if (inventory == null)
       return false;
 
@@ -54,8 +54,6 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
       if (inventory.getItem(slot) == null)
         return true;
     }
-
-    var remainingAmount = item.getAmount();
 
     for (var slot = 0; slot < inventory.getSize(); ++slot) {
       var currentItem = inventory.getItem(slot);
@@ -69,12 +67,7 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
 
       var remainingSpace = currentItem.getMaxStackSize() - currentItem.getAmount();
 
-      if (remainingSpace <= 0)
-        continue;
-
-      remainingAmount -= remainingSpace;
-
-      if (remainingAmount <= 0)
+      if (remainingSpace > 0)
         return true;
     }
 
@@ -93,24 +86,30 @@ public class MagnetInstance extends SISOInstance implements CuboidMechanicInstan
     if (filter != null && !filter.test(item))
       return false;
 
-    return canHold(item);
+    return canHoldSomeOf(item);
   }
 
-  public void addItem(ItemStack item) {
+  public int addItemAndGetAddedAmount(ItemStack item) {
     possiblyUpdateInventoryReference();
 
     // Unreachable, given that the caller made use of #acceptsItem.
     if (inventory == null)
-      return;
+      return 0;
 
-    // Remainders are also unreachable, given the above, but just to make absolutely sure.
-    inventory.addItem(item)
-      .values()
-      // TODO: Rather drop at the original location of the item (require it as a parameter)
-      // TODO: Also, keep them in a local buffer, stack them up and only drop every N ticks
-      .forEach(remainder -> mountBlock.getWorld().dropItem(mountBlock.getLocation(), remainder));
+    var availableAmount = item.getAmount();
+    var remainingAmount = 0;
+
+    for (var remainingStack : inventory.addItem(item).values())
+      remainingAmount += remainingStack.getAmount();
+
+    var addedAmount = availableAmount - remainingAmount;
+
+    if (addedAmount <= 0)
+      return 0;
 
     didAddItems = true;
+
+    return addedAmount;
   }
 
   @Override
