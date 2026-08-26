@@ -11,6 +11,7 @@ import me.blvckbytes.bbtweaks.item_piling.preferences.PreferenceFlag;
 import me.blvckbytes.bbtweaks.util.CompactId;
 import me.blvckbytes.bbtweaks.util.ItemUtil;
 import org.bukkit.Bukkit;
+import org.bukkit.World;
 import org.bukkit.block.Container;
 import org.bukkit.entity.Item;
 import org.bukkit.entity.Player;
@@ -78,7 +79,7 @@ public class ItemPilingListener implements Listener, Tickable, PileEntityMetadat
   public void tick(long relativeTime) {
     if (relativeTime % config.rootSection.itemPiling.periodTicks == 0) {
       for (var world : Bukkit.getWorlds())
-        tryPileItems(world.getEntitiesByClass(Item.class));
+        tryPileItems(world, world.getEntitiesByClass(Item.class));
     }
   }
 
@@ -114,7 +115,7 @@ public class ItemPilingListener implements Listener, Tickable, PileEntityMetadat
 
     vehicleInventory.clear();
 
-    pileAndPossiblyRemoveItems(itemsToDrop, false);
+    pileAndPossiblyRemoveItems(vehicle.getWorld(), itemsToDrop, false);
 
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       for (var itemToDrop : itemsToDrop) {
@@ -135,10 +136,10 @@ public class ItemPilingListener implements Listener, Tickable, PileEntityMetadat
       stackWithExisting = preferences.flags.contains(PreferenceFlag.IMMEDIATELY_STACK_BLOCK_BREAK_ITEMS);
     }
 
-    pileAndPossiblyRemoveItems(event.getItems(), stackWithExisting);
+    pileAndPossiblyRemoveItems(event.getBlock().getWorld(), event.getItems(), stackWithExisting);
   }
 
-  private void pileAndPossiblyRemoveItems(List<Item> items, boolean stackWithExisting) {
+  private void pileAndPossiblyRemoveItems(World world, List<Item> items, boolean stackWithExisting) {
     var buckets = new ArrayList<ItemStackBucket>();
 
     for (var currentItem : items) {
@@ -179,11 +180,11 @@ public class ItemPilingListener implements Listener, Tickable, PileEntityMetadat
     }
 
     if (pilesToStackWithExisting != null)
-      tryAddNewPilesToExistingPiles(pilesToStackWithExisting, addedPile -> items.remove(addedPile.getItemEntity()));
+      tryAddNewPilesToExistingPiles(world, pilesToStackWithExisting, addedPile -> items.remove(addedPile.getItemEntity()));
   }
 
-  private void tryAddNewPilesToExistingPiles(List<ItemPile> newPilesToAdd, Consumer<ItemPile> afterNewPileAddToExisting) {
-    var blockRadius = config.rootSection.itemPiling.blockRadius;
+  private void tryAddNewPilesToExistingPiles(World world, List<ItemPile> newPilesToAdd, Consumer<ItemPile> afterNewPileAddToExisting) {
+    var blockRadius = config.rootSection.itemPiling.getBlockRadius(world);
 
     for (var newPile : newPilesToAdd) {
       var newEntity = newPile.getItemEntity();
@@ -277,7 +278,7 @@ public class ItemPilingListener implements Listener, Tickable, PileEntityMetadat
     }, 1);
   }
 
-  private void tryPileItems(Collection<Item> items) {
+  private void tryPileItems(World world, Collection<Item> items) {
     var itemPiles = new ArrayList<ItemPile>(items.size());
 
     for (var item : items) {
@@ -308,7 +309,7 @@ public class ItemPilingListener implements Listener, Tickable, PileEntityMetadat
       pileBucketByChunkId.computeIfAbsent(chunkId, _ -> new ArrayList<>()).add(pile);
     }
 
-    var blockRadius = config.rootSection.itemPiling.blockRadius;
+    var blockRadius = config.rootSection.itemPiling.getBlockRadius(world);
     var chunkRadius = (blockRadius + 15) / 16;
 
     var processedEntityIds = new IntOpenHashSet();

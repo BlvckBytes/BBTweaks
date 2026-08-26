@@ -4448,9 +4448,11 @@ chatFormat:
 
 itemPiling:
   periodTicks: 20
-  blockRadius: 8
   minimumAgeTicks: 30
   minimumAgeTicksDroppedByPlayer: 20 * 10
+  defaultWorldBlockRadius: 3
+  blockRadiusByWorldName:
+    world: 6
   command:
     name: 'itempiling'
     aliases:
