@@ -105,17 +105,17 @@ public class ItemPilingEntityNamePatcher extends PacketAdapter implements Disabl
     return true;
   }
 
-  private void modifyOrAppendDataValue(List<WrappedDataValue> values, int index, WrappedDataWatcher.Serializer serializer, Object value) {
+  private void modifyOrAppendDataValue(List<WrappedDataValue> values, int index, WrappedDataWatcher.Serializer serializer, Object possiblyWrappedValue) {
     for (var dataValue : values) {
       var dataValueIndex = dataValue.getIndex();
 
       if (dataValueIndex == index) {
-        dataValue.setValue(value);
+        dataValue.setValue(possiblyWrappedValue);
         return;
       }
     }
 
-    values.add(new WrappedDataValue(index, serializer, value));
+    values.add(WrappedDataValue.fromWrappedValue(index, serializer, possiblyWrappedValue));
   }
 
   @Override
