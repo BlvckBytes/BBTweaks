@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.AfterStartup;
 import me.blvckbytes.bbtweaks.no_ai.TimeCache;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
@@ -17,6 +18,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.persistence.PersistentDataType;
 import org.bukkit.plugin.Plugin;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -29,7 +31,7 @@ public abstract class BehaviorSimulator<MobType extends Mob> implements Listener
   public final EntityType entityType;
   protected final List<MobType> simulatedMobs;
 
-  private final NamespacedKey keyBehaviorSimulated;
+  private final NamespacedKey keyBehaviorSimulated, keyLastMakeLook;
 
   protected BehaviorSimulator(
     Plugin plugin,
@@ -44,6 +46,7 @@ public abstract class BehaviorSimulator<MobType extends Mob> implements Listener
     this.simulatedMobs = new ArrayList<>();
 
     this.keyBehaviorSimulated = new NamespacedKey(plugin, "behavior-simulated");
+    this.keyLastMakeLook = new NamespacedKey(plugin, "last-make-look");
   }
 
   public abstract void sendStatusMessage(Player player, Entity entity);
@@ -72,6 +75,47 @@ public abstract class BehaviorSimulator<MobType extends Mob> implements Listener
 
     if (isHandledInstance(entity))
       removeSimulated(entity, false);
+  }
+
+  public void makeLook(Player player, Entity entity) {
+    ensureIsInstance(entity);
+
+    var mob = mobType.cast(entity);
+
+    var lookLocation = mob.getEyeLocation();
+    lookLocation.setDirection(player.getEyeLocation().toVector().subtract(lookLocation.toVector()));
+    entity.setRotation(lookLocation.getYaw(), lookLocation.getPitch());
+
+    writeLastMakeLook(entity, lookLocation);
+  }
+
+  private void writeLastMakeLook(Entity entity, Location location) {
+    var buffer = ByteBuffer.allocate(2 * Float.BYTES);
+
+    buffer.putFloat(location.getYaw());
+    buffer.putFloat(location.getPitch());
+
+    entity.getPersistentDataContainer().set(keyLastMakeLook, PersistentDataType.BYTE_ARRAY, buffer.array());
+  }
+
+  private void applyLastLookNextTickIfSet(Entity entity) {
+    var data = entity.getPersistentDataContainer().get(keyLastMakeLook, PersistentDataType.BYTE_ARRAY);
+
+    if (data == null)
+      return;
+
+    var buffer = ByteBuffer.wrap(data);
+
+    float yaw, pitch;
+
+    try {
+      yaw = buffer.getFloat();
+      pitch = buffer.getFloat();
+    } catch (Throwable e) {
+      return;
+    }
+
+    Bukkit.getScheduler().runTaskLater(plugin, () -> entity.setRotation(yaw, pitch), 1L);
   }
 
   public boolean isHandledInstance(Entity entity) {
@@ -108,6 +152,8 @@ public abstract class BehaviorSimulator<MobType extends Mob> implements Listener
     var mob = mobType.cast(entity);
 
     mob.setAware(false);
+
+    applyLastLookNextTickIfSet(entity);
 
     simulatedMobs.add(mob);
   }

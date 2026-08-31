@@ -163,14 +163,7 @@ public class NoAiCommand implements CommandHandler, Tickable {
       }
 
       case MAKE_LOOK -> {
-        // Unreachable, as a matching simulator was found.
-        if (!(rayTracedEntity instanceof Mob mob))
-          return true;
-
-        var entityLocation = mob.getEyeLocation();
-        entityLocation.setDirection(player.getEyeLocation().toVector().subtract(entityLocation.toVector()));
-        rayTracedEntity.setRotation(entityLocation.getYaw(), entityLocation.getPitch());
-
+        targetBehaviorSimulator.makeLook(player, rayTracedEntity);
         config.rootSection.noAi.entityIsNowLookingAtExecutor.sendMessage(player, environment);
       }
     }
