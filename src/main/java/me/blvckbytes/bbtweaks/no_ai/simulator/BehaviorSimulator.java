@@ -5,6 +5,7 @@ import com.destroystokyo.paper.event.entity.EntityAddToWorldEvent;
 import com.destroystokyo.paper.event.entity.EntityRemoveFromWorldEvent;
 import me.blvckbytes.bbtweaks.MainSection;
 import me.blvckbytes.bbtweaks.auto_wirer.AfterStartup;
+import me.blvckbytes.bbtweaks.auto_wirer.Disableable;
 import me.blvckbytes.bbtweaks.no_ai.TimeCache;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 
-public abstract class BehaviorSimulator<MobType extends Mob> implements Listener, AfterStartup {
+public abstract class BehaviorSimulator<MobType extends Mob> implements Listener, AfterStartup, Disableable {
 
   protected final Plugin plugin;
   protected final ConfigKeeper<MainSection> config;
@@ -52,6 +53,12 @@ public abstract class BehaviorSimulator<MobType extends Mob> implements Listener
   public abstract void sendStatusMessage(Player player, Entity entity);
 
   protected abstract void simulate(MobType mob, TimeCache timeCache);
+
+  @Override
+  public void disable() {
+    for (var entity : new ArrayList<>(simulatedMobs))
+      removeSimulated(entity, false);
+  }
 
   @Override
   public void afterStartup() {
