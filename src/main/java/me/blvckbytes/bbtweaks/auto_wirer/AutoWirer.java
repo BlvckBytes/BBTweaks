@@ -27,6 +27,7 @@ public class AutoWirer implements Listener {
   private final List<DependencyInstance> instantiatedDependencies;
   private final List<Tickable> tickableInstances;
   private final List<Disableable> disableableInstances;
+  private final List<AfterStartup> afterStartupInstances;
   private final List<PendingLateWire> pendingLateWires;
 
   private boolean didComplete;
@@ -38,6 +39,7 @@ public class AutoWirer implements Listener {
     this.instantiatedDependencies = new ArrayList<>();
     this.tickableInstances = new ArrayList<>();
     this.disableableInstances = new ArrayList<>();
+    this.afterStartupInstances = new ArrayList<>();
     this.pendingLateWires = new ArrayList<>();
   }
 
@@ -75,6 +77,11 @@ public class AutoWirer implements Listener {
       for (var tickable : tickableInstances)
         tickable.tick(relativeTime);
     }, 0, 0);
+
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      for (var afterStartup : afterStartupInstances)
+        afterStartup.afterStartup();
+    }, 10);
 
     plugin.getLogger().info("Wired " + instantiatedDependencies.size() + " instances");
   }
@@ -211,6 +218,9 @@ public class AutoWirer implements Listener {
 
     if (dependencyInstance.instance() instanceof Disableable disableable)
       disableableInstances.add(disableable);
+
+    if (dependencyInstance.instance() instanceof AfterStartup afterStartup)
+      afterStartupInstances.add(afterStartup);
   }
 
   public void onDisable() {
