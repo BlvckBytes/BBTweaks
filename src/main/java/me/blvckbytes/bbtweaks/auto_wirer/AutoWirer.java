@@ -81,7 +81,7 @@ public class AutoWirer implements Listener {
     Bukkit.getScheduler().runTaskLater(plugin, () -> {
       for (var afterStartup : afterStartupInstances)
         afterStartup.afterStartup();
-    }, 10);
+    }, 3);
 
     plugin.getLogger().info("Wired " + instantiatedDependencies.size() + " instances");
   }
