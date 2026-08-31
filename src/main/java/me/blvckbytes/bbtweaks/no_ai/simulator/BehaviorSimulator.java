@@ -122,7 +122,12 @@ public abstract class BehaviorSimulator<MobType extends Mob> implements Listener
       return;
     }
 
-    Bukkit.getScheduler().runTaskLater(plugin, () -> entity.setRotation(yaw, pitch), 1L);
+    Bukkit.getScheduler().runTaskLater(plugin, () -> {
+      if (!entity.isValid())
+        return;
+
+      entity.setRotation(yaw, pitch);
+    }, 1L);
   }
 
   public boolean isHandledInstance(Entity entity) {
