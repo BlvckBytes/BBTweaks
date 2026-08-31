@@ -81,6 +81,7 @@ import me.blvckbytes.bbtweaks.multi_break.display.MultiBreakDisplayHandler;
 import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceHandler;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportCommand;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportResetCommand;
+import me.blvckbytes.bbtweaks.no_ai.NoAiCommand;
 import me.blvckbytes.bbtweaks.ping.PingCommand;
 import me.blvckbytes.bbtweaks.additional_recipes.AdditionalRecipes;
 import me.blvckbytes.bbtweaks.pipes.*;
@@ -263,6 +264,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(EssentialsVanishFakeJoinLeave.class)
         .withSingleton(GetUsernameCommand.class)
         .withSingleton(LocateEntitiesCommand.class)
+        .withSingleton(NoAiCommand.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);

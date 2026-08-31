@@ -126,6 +126,8 @@ commands:
     permission: bbtweaks.locateentities
   itempiling:
     description: 'Configure the behavior and appearance of the item-piling feature'
+  noai:
+    description: 'Toggle the AI of entities'
 permissions:
   bbtweaks.uncraft.all:
     description: 'Uncraft all available items similar to the one held in one go'

@@ -4700,6 +4700,34 @@ itemPiling:
         />
       </container>
 
+noAi:
+  command:
+    name: 'noai'
+  playersOnly: '{lut.no_ai_prefix} <&c>Dieser Befehl ist nur für Spieler zugänglich!'
+  notLookingAtAnEntity: '{lut.no_ai_prefix} <&c>Bitte richte dein Fadenkreuz vor Ausführung des Befehls auf ein Lebewesen aus!'
+  cannotBuildHere: '{lut.no_ai_prefix} <&c>Du hast am Ort dieses Lebewesens keine Baurechte; breche ab!'
+  notLookingAtSupportedEntity: '{lut.no_ai_prefix} <&c>Das Lebewesen <&4><translate [unsupported_entity_key] /></> ist nicht Teil der Liste an unterstützten Arten: <&4 *for-supported_entity_key="supported_entity_keys"><translate [supported_entity_key] /></>.'
+  aiNowDisabled: '{lut.no_ai_prefix} <&7>Die AI vom <&a><translate [entity_key] /></> bei <&a>{x} {y} {z}</> ist nun <&c>deaktiviert</>.'
+  aiNowEnabled: '{lut.no_ai_prefix} <&7>Die AI vom <&a><translate [entity_key] /></> bei <&a>{x} {y} {z}</> ist nun <&a>aktiviert</>.'
+  commandActionUsage: '{lut.no_ai_prefix} <&c>Benutzung: /{label} [<&4 *for-action="actions" *for-separator={,<space/>}>{action}</>]'
+  entityIsNowLookingAtExecutor: '{lut.no_ai_prefix} <&7>Die Blickrichtung vom <&a><translate [entity_key] /></> bei <&a>{x} {y} {z}</> ist nun auf dich gerichtet.'
+  entityIsNotSimulated: '{lut.no_ai_prefix} <&c>Die AI vom <&4><translate [entity_key] /></> bei <&4>{x} {y} {z}</> ist aktuell <&4>aktiviert</> und wird von Minecraft verwaltet.'
+  villagerStatusMessage: |
+    {lut.no_ai_prefix} <&7>Aktuelle Daten vom <&a><translate [entity_key] /></> bei <&a>{x} {y} {z}</>:<br/>
+    - Level: <&a>{level}</><br/>
+    - Erfahrungspunkte: <&a>{experience}</><br/>
+    - Arbeitszeitfenster aktiv: <&a *if="within_working_window">Ja</><&c *else>Nein</><br/>
+    - Heutige Wiederauffüllungen: <&a>{restocks_today}</>/<&a>{max_restocks_per_day}</><br/>
+    - Nächste Wiederauffüllung in:<space/>
+    <container *if="restocks_today >= max_restocks_per_day or not within_working_window">
+      <&c>morgen</>
+    </container>
+    <container *else>
+      <&a><duration [value]="remaining_restock_millis" units="ms" [zeroes]="remaining_restock_millis <= 1000 then 's'" /></>
+    </container>
+    <br/>
+    - Rezeptanzahlen (Benutzt, Ausverkauft, Total): <&a>{used_recipe_count}</>, <&a>{used_up_recipe_count}</>, <&a>{total_recipe_count}</>
+
 sLut:
   textures:
     ARROW_LEFT: 'eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvODU1MGI3Zjc0ZTllZDc2MzNhYTI3NGVhMzBjYzNkMmU4N2FiYjM2ZDRkMWY0Y2E2MDhjZDQ0NTkwY2NlMGIifX19'
@@ -4737,6 +4765,7 @@ cLut:
   entity_eggs_prefix: '<&7>[<&6>EntityEggs<&7>]'
   clear_chat_prefix: '<&7>[<&6>ClearChat<&7>]'
   donor_symbol_prefix: '<&7>[<&6>Spendersymbol<&7>]'
+  no_ai_prefix: '<&7>[<&6>NoAi<&7>]'
   spacer: |
     <container *if="is_floodgate">
       <&8>{"-" ** 45}

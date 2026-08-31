@@ -41,6 +41,7 @@ import me.blvckbytes.bbtweaks.mechanic.MechanicSection;
 import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakSection;
 import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceSection;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportSection;
+import me.blvckbytes.bbtweaks.no_ai.NoAiSection;
 import me.blvckbytes.bbtweaks.ping.PingSection;
 import me.blvckbytes.bbtweaks.pipes.PipesSection;
 import me.blvckbytes.bbtweaks.rd_breaker.RDBreakerSection;
@@ -102,6 +103,7 @@ public class MainSection extends ConfigSection {
   public DonorSymbolSection donorSymbol;
   public ChatFormatSection chatFormat;
   public ItemPilingSection itemPiling;
+  public NoAiSection noAi;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);
