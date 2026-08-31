@@ -10,13 +10,12 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.EntityType;
-import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.entity.Mob;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -34,8 +33,6 @@ public class LocateEntitiesCommand implements CommandHandler {
 
   private final Plugin plugin;
 
-  private final NamespacedKey keyIsLobotomized;
-
   private @Nullable EntityScanSession scanSession;
 
   public LocateEntitiesCommand(
@@ -44,9 +41,6 @@ public class LocateEntitiesCommand implements CommandHandler {
     this.command = Objects.requireNonNull(plugin.getCommand("locateentities"));
 
     this.plugin = plugin;
-
-    // Yes... There's literally a typo in that, xD
-    this.keyIsLobotomized = new NamespacedKey("villagerlobotimizer", "islobotomized");
   }
 
   @Override
@@ -109,10 +103,8 @@ public class LocateEntitiesCommand implements CommandHandler {
     }
 
     this.scanSession = new EntityScanSession(world, type, entity -> {
-      if (flags.contains(LocateFlag.IGNORE_LOBOTOMIZED)) {
-        var lobotomizedState = entity.getPersistentDataContainer().get(keyIsLobotomized, PersistentDataType.BOOLEAN);
-        return lobotomizedState == null || !lobotomizedState;
-      }
+      if (flags.contains(LocateFlag.IGNORE_DISABLED_AWARENESS))
+        return !(entity instanceof Mob mob) || mob.isAware();
 
       return true;
     });
