@@ -8,10 +8,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.inventory.*;
+import org.bukkit.plugin.Plugin;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class PipesInventoryUtil {
 
@@ -30,7 +32,9 @@ public class PipesInventoryUtil {
   private final Set<Material> smokerIngredients;
   private final Set<Material> potionIngredientTypes;
 
-  public PipesInventoryUtil() {
+  public PipesInventoryUtil(
+    Plugin plugin
+  ) {
     furnaceIngredients = new HashSet<>();
     blastFurnaceIngredients = new HashSet<>();
     smokerIngredients = new HashSet<>();
@@ -60,6 +64,18 @@ public class PipesInventoryUtil {
     potionIngredientTypes = new HashSet<>();
 
     try {
+      discoverPotionIngredientsViaPotionBrewer();
+    } catch (Throwable _) {
+      // Allow other plugins to register brewing-recipes, if that's a thing.
+      Bukkit.getScheduler().runTaskLater(plugin, () -> {
+        discoverPotionIngredientsViaBrewingRecipes(plugin.getLogger());
+      }, 1L);
+    }
+  }
+
+  // TODO: Remove legacy way of discovering ingredients as soon as we've officially upgraded to 26.3.
+  private void discoverPotionIngredientsViaPotionBrewer() {
+    try {
       var bukkitServer = Bukkit.getServer();
       var getServerMethod = Objects.requireNonNull(ReflectUtil.tryLocateNonStaticMember(bukkitServer.getClass(), Class::getDeclaredMethods, method -> method.getName().equals("getServer")));
       var minecraftServer = getServerMethod.invoke(bukkitServer);
@@ -84,6 +100,22 @@ public class PipesInventoryUtil {
 
     potionIngredientTypes.add(Material.GUNPOWDER);
     potionIngredientTypes.add(Material.DRAGON_BREATH);
+  }
+
+  private void discoverPotionIngredientsViaBrewingRecipes(Logger logger) {
+    for (var recipeIterator = Bukkit.recipeIterator(); recipeIterator.hasNext();) {
+      if (!(recipeIterator.next() instanceof BrewingRecipe brewingRecipe))
+        continue;
+
+      var ingredient = brewingRecipe.getIngredient();
+
+      if (!(ingredient instanceof RecipeChoice.MaterialChoice materialChoice)) {
+        logger.warning("Could not extract ingredients from brewing-recipe with key=" + brewingRecipe.getKey());
+        continue;
+      }
+
+      potionIngredientTypes.addAll(materialChoice.getChoices());
+    }
   }
 
   private boolean isAPotionIngredient(ItemStack item) {
