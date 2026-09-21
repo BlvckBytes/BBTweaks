@@ -60,34 +60,26 @@ public class PipesInventoryUtil {
     potionIngredientTypes = new HashSet<>();
 
     try {
-      potionIngredientTypes.addAll(Tag.ITEMS_BREWING_POTION_INPUTS.getValues());
-    }
+      var bukkitServer = Bukkit.getServer();
+      var getServerMethod = Objects.requireNonNull(ReflectUtil.tryLocateNonStaticMember(bukkitServer.getClass(), Class::getDeclaredMethods, method -> method.getName().equals("getServer")));
+      var minecraftServer = getServerMethod.invoke(bukkitServer);
 
-    // NoSuchFieldError if on 26.2, as ITEMS_BREWING_POTION_INPUTS does not yet exist.
-    // TODO: Delete this whole intricate process as soon as we've officially upgraded to 26.3.
-    catch (Throwable _) {
-      try {
-        var bukkitServer = Bukkit.getServer();
-        var getServerMethod = Objects.requireNonNull(ReflectUtil.tryLocateNonStaticMember(bukkitServer.getClass(), Class::getDeclaredMethods, method -> method.getName().equals("getServer")));
-        var minecraftServer = getServerMethod.invoke(bukkitServer);
+      var potionBrewingMethod = Objects.requireNonNull(ReflectUtil.tryLocateNonStaticMember(minecraftServer.getClass(), Class::getDeclaredMethods, method -> StringUtils.containsIgnoreCase(method.getName(), "potion") && StringUtils.containsIgnoreCase(method.getName(), "brew")));
+      var potionBrewing = potionBrewingMethod.invoke(minecraftServer);
 
-        var potionBrewingMethod = Objects.requireNonNull(ReflectUtil.tryLocateNonStaticMember(minecraftServer.getClass(), Class::getDeclaredMethods, method -> StringUtils.containsIgnoreCase(method.getName(), "potion") && StringUtils.containsIgnoreCase(method.getName(), "brew")));
-        var potionBrewing = potionBrewingMethod.invoke(minecraftServer);
+      var isPotionIngredientMethod = Objects.requireNonNull(ReflectUtil.tryLocateNonStaticMember(potionBrewing.getClass(), Class::getDeclaredMethods, method -> method.getName().equals("isPotionIngredient")));
 
-        var isPotionIngredientMethod = Objects.requireNonNull(ReflectUtil.tryLocateNonStaticMember(potionBrewing.getClass(), Class::getDeclaredMethods, method -> method.getName().equals("isPotionIngredient")));
+      for (Material material : Material.values()) {
+        if (!material.isItem())
+          continue;
 
-        for (Material material : Material.values()) {
-          if (!material.isItem())
-            continue;
+        var nmsStack = ReflectUtil.asNMSCopy(new ItemStack(material));
 
-          var nmsStack = ReflectUtil.asNMSCopy(new ItemStack(material));
-
-          if ((boolean) isPotionIngredientMethod.invoke(potionBrewing, nmsStack))
-            potionIngredientTypes.add(material);
-        }
-      } catch (Throwable e) {
-        throw new IllegalStateException("Could not access the potion-brewing registry of the server", e);
+        if ((boolean) isPotionIngredientMethod.invoke(potionBrewing, nmsStack))
+          potionIngredientTypes.add(material);
       }
+    } catch (Throwable e) {
+      throw new IllegalStateException("Could not access the potion-brewing registry of the server", e);
     }
 
     potionIngredientTypes.add(Material.GUNPOWDER);
