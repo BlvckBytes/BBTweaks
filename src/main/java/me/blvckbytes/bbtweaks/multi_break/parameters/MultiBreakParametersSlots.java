@@ -19,6 +19,7 @@ public class MultiBreakParametersSlots {
   public boolean enabled;
 
   public boolean autoTool;
+  public boolean constrainOriginBlockBreak;
 
   public @Nullable Integer minY;
   public @Nullable Integer maxY;

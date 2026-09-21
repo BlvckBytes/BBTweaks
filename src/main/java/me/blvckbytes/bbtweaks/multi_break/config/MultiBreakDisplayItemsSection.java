@@ -22,6 +22,7 @@ public class MultiBreakDisplayItemsSection extends ConfigSection {
   public GuiItemStackSection minY;
   public GuiItemStackSection maxY;
   public GuiItemStackSection toggleAutoTool;
+  public GuiItemStackSection toggleConstrainOriginBlockBreak;
 
   public GuiItemStackSection parametersSlot;
 

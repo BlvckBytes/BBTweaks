@@ -1004,6 +1004,8 @@ multiBreak:
   maxYSetToCurrent: '{lut.multi_break_prefix} <&7>Die <&a>Y-Obergrenze</> wurde auf deine aktuelle Höhe von <&a>{current_y}</> gesetzt.'
   maxYRemoved: '{lut.multi_break_prefix} <&7>Die <&a>Y-Obergrenze</> wurde <&a>entfernt</>.'
   maxYNotSet: '{lut.multi_break_prefix} <&c>Es ist aktuell keine <&4>Y-Obergrenze</> gesetzt, die entfernt werden kann!'
+  constrainOriginBlockBreakFilterMismatchHotbar: '<&c>Blockabbau verhindert: aktiver Filter'
+  constrainOriginBlockBreakOutsideMinMaxYHotbar: '<&c>Blockabbau verhindert: aktive Y-Grenze(n)'
   enabledJoinWarning:
     enabled: true
     title: '<&4>Achtung: Multi-Break'
@@ -1243,6 +1245,24 @@ multiBreak:
             <br/>
             {lut.spacer}<br/>
             <&8>➥ <&e>Linksklick <&7>Auswahl {auto_tool then "deaktivieren" else "aktivieren"}<br/>
+            {lut.spacer}
+      toggleConstrainOriginBlockBreak:
+        slots: 23
+        name: |
+          <reset>
+            <&8>» <&7><&a *use="constrain_origin_block_break">Abbau des Ursprungsblocks einschränken</> <&8>«
+        type: '{constrain_origin_block_break then "GREEN_CONCRETE" else "LIGHT_GRAY_CONCRETE"}'
+        lore: |
+          <reset>
+            <br/>
+            {lut.spacer}<br/>
+            <&7>Schalte um, ob das manuelle Abbauen des<br/>
+            Ursprungsblocks durch Zusatzeinstellungen<br/>
+            wie Filter sowie der Y Ober-/Untergrenze<br/>
+            eingeschränkt (verhindert) werden soll.<br/>
+            <br/>
+            {lut.spacer}<br/>
+            <&8>➥ <&e>Linksklick <&7>Einschränkung {constrain_origin_block_break then "deaktivieren" else "aktivieren"}<br/>
             {lut.spacer}
       parametersSlot:
         slots: '[8, 8+9, 8+9*2, 8+9*3, 8+9*4]'

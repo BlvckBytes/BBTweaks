@@ -143,6 +143,15 @@ public class MultiBreakDisplayHandler extends DisplayHandler<MultiBreakDisplay, 
       return false;
     }
 
+    if (config.rootSection.multiBreak.display.items.toggleConstrainOriginBlockBreak.getDisplaySlots().contains(slot)) {
+      if (clickType == ClickType.LEFT) {
+        parametersSlots.constrainOriginBlockBreak ^= true;
+        return true;
+      }
+
+      return false;
+    }
+
     var slotsSlotIndices = config.rootSection.multiBreak.display.items.parametersSlot.getDisplaySlots();
 
     if (slotsSlotIndices.contains(slot)) {

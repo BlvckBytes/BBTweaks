@@ -7,6 +7,7 @@ import me.blvckbytes.bbtweaks.auto_tool.AutoToolExternalEnableEvent;
 import me.blvckbytes.bbtweaks.furnace_level_display.FurnaceLevelDisplay;
 import me.blvckbytes.bbtweaks.multi_break.parameters.BreakExtent;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParameters;
+import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersSlots;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
 import me.blvckbytes.bbtweaks.util.ItemUtil;
 import org.bukkit.*;
@@ -135,8 +136,20 @@ public class MultiBreakListener implements Listener {
     if (!originBlock.isSolid())
       return;
 
-    if (selectedParameters.doesBlockMismatchFilter(originBlock))
+    if (selectedParameters.doesBlockMismatchFilter(originBlock)) {
+      if (parametersSlots.constrainOriginBlockBreak) {
+        config.rootSection.multiBreak.constrainOriginBlockBreakFilterMismatchHotbar.sendActionBar(player);
+        event.setCancelled(true);
+      }
+
       return;
+    }
+
+    if (parametersSlots.constrainOriginBlockBreak && isBlockOutsideOfMinOrMaxY(parametersSlots, originBlock)) {
+      config.rootSection.multiBreak.constrainOriginBlockBreakOutsideMinMaxYHotbar.sendActionBar(player);
+      event.setCancelled(true);
+      return;
+    }
 
     var playerInventory = player.getInventory();
 
@@ -154,10 +167,7 @@ public class MultiBreakListener implements Listener {
       if (!block.isSolid())
         return;
 
-      if (parametersSlots.minY != null && block.getY() < parametersSlots.minY)
-        return;
-
-      if (parametersSlots.maxY != null && block.getY() > parametersSlots.maxY)
+      if (isBlockOutsideOfMinOrMaxY(parametersSlots, block))
         return;
 
       var blockType = block.getType();
@@ -232,6 +242,13 @@ public class MultiBreakListener implements Listener {
 
     // Notify delayed, as to shadow jobs-messages within the action-bar.
     Bukkit.getScheduler().runTaskLater(plugin, () -> config.rootSection.multiBreak.hotbarNotification.sendActionBar(player, environment), 5);
+  }
+
+  private boolean isBlockOutsideOfMinOrMaxY(MultiBreakParametersSlots parametersSlots, Block block) {
+    if (parametersSlots.minY != null && block.getY() < parametersSlots.minY)
+      return true;
+
+    return parametersSlots.maxY != null && block.getY() > parametersSlots.maxY;
   }
 
   public void simulateBlockBreak(

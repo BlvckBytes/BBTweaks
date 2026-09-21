@@ -35,7 +35,7 @@ public class MultiBreakParametersStore implements Disableable, Listener {
   public static final int PARAMETERS_SLOTS_COUNT = 5;
 
   private final NamespacedKey[] keysSneakMode, keysExtents, keysFilterPredicate, keysFilterLanguage, keysFilterEnabled, keysLocked;
-  private final NamespacedKey keySelectedSlotIndex, keyEnabled, keyAutoTool, keyMinY, keyMaxY;
+  private final NamespacedKey keySelectedSlotIndex, keyEnabled, keyAutoTool, keyConstrainOriginBlockBreak, keyMinY, keyMaxY;
 
   private final Plugin plugin;
   private final IPPIntegration ippIntegration;
@@ -58,6 +58,7 @@ public class MultiBreakParametersStore implements Disableable, Listener {
     this.keySelectedSlotIndex = new NamespacedKey(plugin, "multi-break-selected-slot-index");
     this.keyEnabled = new NamespacedKey(plugin, "multi-break-enabled");
     this.keyAutoTool = new NamespacedKey(plugin, "multi-break-auto-tool");
+    this.keyConstrainOriginBlockBreak = new NamespacedKey(plugin, "multi-break-constrain-origin-block-break");
     this.keyMinY = new NamespacedKey(plugin, "multi-break-min-y");
     this.keyMaxY = new NamespacedKey(plugin, "multi-break-max-y");
 
@@ -159,6 +160,11 @@ public class MultiBreakParametersStore implements Disableable, Listener {
     if (autoToolValue != null)
       slots.autoTool = autoToolValue;
 
+    var constrainOriginBlockBreakValue = pdc.get(keyConstrainOriginBlockBreak, PersistentDataType.BOOLEAN);
+
+    if (constrainOriginBlockBreakValue != null)
+      slots.constrainOriginBlockBreak = constrainOriginBlockBreakValue;
+
     slots.minY = pdc.get(keyMinY, PersistentDataType.INTEGER);
     slots.maxY = pdc.get(keyMaxY, PersistentDataType.INTEGER);
 
@@ -255,6 +261,7 @@ public class MultiBreakParametersStore implements Disableable, Listener {
     pdc.set(keySelectedSlotIndex, PersistentDataType.INTEGER, parametersSlots.getSelectedSlotIndex());
     pdc.set(keyEnabled, PersistentDataType.BOOLEAN, parametersSlots.enabled);
     pdc.set(keyAutoTool, PersistentDataType.BOOLEAN, parametersSlots.autoTool);
+    pdc.set(keyConstrainOriginBlockBreak, PersistentDataType.BOOLEAN, parametersSlots.constrainOriginBlockBreak);
 
     if (parametersSlots.minY == null)
       pdc.remove(keyMinY);

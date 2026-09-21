@@ -63,6 +63,8 @@ public class MultiBreakSection extends ConfigSection {
   public ComponentMarkup maxYSetToCurrent;
   public ComponentMarkup maxYRemoved;
   public ComponentMarkup maxYNotSet;
+  public ComponentMarkup constrainOriginBlockBreakFilterMismatchHotbar;
+  public ComponentMarkup constrainOriginBlockBreakOutsideMinMaxYHotbar;
 
   public EnabledJoinWarningSection enabledJoinWarning;
 
