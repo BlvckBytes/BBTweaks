@@ -16,6 +16,10 @@ public enum CommandAction implements MatchableEnum {
   DISABLE_FILTER,
   TOGGLE_FILTER,
   SELECT_SLOT,
+  SET_MIN_Y,
+  REMOVE_MIN_Y,
+  SET_MAX_Y,
+  REMOVE_MAX_Y,
   ;
 
   public static final EnumMatcher<CommandAction> matcher = new EnumMatcher<>(values());

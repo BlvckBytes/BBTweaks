@@ -998,6 +998,12 @@ multiBreak:
   slotIsLocked: '{lut.multi_break_prefix} <&c>Der <&4>Einstellungsslot {slot_index + 1}</> ist für Änderungen gesperrt!'
   slotNowLocked: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist nun für Änderungen <&c>gesperrt</>.'
   slotNowUnlocked: '{lut.multi_break_prefix} <&7>Der <&6>Einstellungsslot {slot_index + 1}</> ist nun für Änderungen <&a>entsperrt</>.'
+  minYSetToCurrent: '{lut.multi_break_prefix} <&7>Die <&a>Y-Untergrenze</> wurde auf deine aktuelle Höhe von <&a>{current_y}</> gesetzt.'
+  minYRemoved: '{lut.multi_break_prefix} <&7>Die <&a>Y-Untergrenze</> wurde <&a>entfernt</>.'
+  minYNotSet: '{lut.multi_break_prefix} <&c>Es ist aktuell keine <&4>Y-Untergrenze</> gesetzt, die entfernt werden kann!'
+  maxYSetToCurrent: '{lut.multi_break_prefix} <&7>Die <&a>Y-Obergrenze</> wurde auf deine aktuelle Höhe von <&a>{current_y}</> gesetzt.'
+  maxYRemoved: '{lut.multi_break_prefix} <&7>Die <&a>Y-Obergrenze</> wurde <&a>entfernt</>.'
+  maxYNotSet: '{lut.multi_break_prefix} <&c>Es ist aktuell keine <&4>Y-Obergrenze</> gesetzt, die entfernt werden kann!'
   enabledJoinWarning:
     enabled: true
     title: '<&4>Achtung: Multi-Break'

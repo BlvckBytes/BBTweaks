@@ -313,6 +313,50 @@ public class MultiBreakCommand implements CommandHandler {
         parametersSlots.setSelectedSlotIndex(slot - 1, true);
         return true;
       }
+
+      case SET_MIN_Y -> {
+        var currentY = player.getLocation().getBlockY();
+        parametersSlots.minY = currentY;
+
+        config.rootSection.multiBreak.minYSetToCurrent.sendMessage(
+          player,
+          new InterpretationEnvironment()
+            .withVariable("current_y", currentY)
+        );
+      }
+
+      case REMOVE_MIN_Y -> {
+        if (parametersSlots.minY == null) {
+          config.rootSection.multiBreak.minYNotSet.sendMessage(player);
+          return true;
+        }
+
+        parametersSlots.minY = null;
+        config.rootSection.multiBreak.minYRemoved.sendMessage(player);
+        return true;
+      }
+
+      case SET_MAX_Y -> {
+        var currentY = player.getLocation().getBlockY();
+        parametersSlots.maxY = currentY;
+
+        config.rootSection.multiBreak.maxYSetToCurrent.sendMessage(
+          player,
+          new InterpretationEnvironment()
+            .withVariable("current_y", currentY)
+        );
+      }
+
+      case REMOVE_MAX_Y -> {
+        if (parametersSlots.maxY == null) {
+          config.rootSection.multiBreak.maxYNotSet.sendMessage(player);
+          return true;
+        }
+
+        parametersSlots.maxY = null;
+        config.rootSection.multiBreak.maxYRemoved.sendMessage(player);
+        return true;
+      }
     }
 
     return true;
