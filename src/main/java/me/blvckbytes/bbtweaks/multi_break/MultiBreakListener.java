@@ -61,6 +61,9 @@ public class MultiBreakListener implements Listener {
 
     var parametersSlots = parametersStore.accessParametersSlots(event.player);
 
+    if (!parametersSlots.enabled)
+      return;
+
     if (!parametersSlots.autoTool)
       return;
 
