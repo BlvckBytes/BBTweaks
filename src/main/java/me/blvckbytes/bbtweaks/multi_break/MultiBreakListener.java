@@ -153,85 +153,85 @@ public class MultiBreakListener implements Listener {
 
     var playerInventory = player.getInventory();
 
-    if (!DamageableHotbarItem.isRightToolForBlock(playerInventory.getItemInMainHand(), originBlock))
-      return;
-
-    lastOriginBlockBreakEvent = event;
-
-    var directions = BlockDirections.determine(player);
-
     var missingToolsForBlockTypes = new HashSet<Material>();
     var excludedBlockTypes = new HashSet<Material>();
 
-    forEachBlockWithinParameters(originBlock, directions, selectedParameters, block -> {
-      if (!block.isSolid())
-        return;
+    if (DamageableHotbarItem.isRightToolForBlock(playerInventory.getItemInMainHand(), originBlock)) {
+      lastOriginBlockBreakEvent = event;
 
-      if (isBlockOutsideOfMinOrMaxY(parametersSlots, block))
-        return;
-
-      var blockType = block.getType();
-
-      if (config.rootSection.multiBreak.isBlockExcluded(blockType)) {
-        excludedBlockTypes.add(blockType);
-        return;
-      }
-
-      if (selectedParameters.doesBlockMismatchFilter(block))
-        return;
-
-      var toolUsed = DamageableHotbarItem.determineToolFromHotbar(block, playerInventory);
-
-      if (toolUsed == null) {
-        missingToolsForBlockTypes.add(blockType);
-        return;
-      }
-
-      // We're on the main thread, so there's no need for a list, seeing how events are processed strictly sequentially.
-      if (ignoredBreakEvent != null)
-        throw new IllegalStateException("Expected the currently ignored break-event to be null");
-
-      var priorSlotIndex = playerInventory.getHeldItemSlot();
-
-      // Let's also change over to the auto-selected tool, if applicable, seeing how plugins like
-      // mcMMO internally often call #getItemInMainHand, which would point to the wrong item otherwise.
-      if (toolUsed.slotIndex() != priorSlotIndex)
-        playerInventory.setHeldItemSlot(toolUsed.slotIndex());
-
-      var blockState = block.getState();
-
-      //noinspection UnstableApiUsage
-      var breakEvent = new BlockBreakEvent(block, player);
-
-      var expToDrop = 0;
-
-      if (!toolUsed.hasSilkTouch())
-        expToDrop += getRandomizedExperienceForBlockType(blockType);
-
-      if (blockState instanceof Furnace furnace)
-        expToDrop += (int) furnaceLevelDisplay.calculateExperience(player, furnace.getRecipesUsed());
-
-      breakEvent.setExpToDrop(expToDrop);
-
-      ignoredBreakEvent = breakEvent;
-      Bukkit.getPluginManager().callEvent(breakEvent);
-      ignoredBreakEvent = null;
-
-      if (breakEvent.isCancelled())
-        return;
-
-      var decreaseChance = config.rootSection.multiBreak.perAdditionalBlockDurabilityDecreaseChance;
-
-      if (decreaseChance > 0 && Math.random() <= decreaseChance / 100.0) {
-        if (!toolUsed.safelyIncrementDamageAndSet(player))
+      forEachBlockWithinParameters(originBlock, BlockDirections.determine(player), selectedParameters, block -> {
+        if (!block.isSolid())
           return;
-      }
 
-      simulateBlockBreak(player, toolUsed.item(), block, blockState, breakEvent);
+        if (isBlockOutsideOfMinOrMaxY(parametersSlots, block))
+          return;
 
-      if (toolUsed.slotIndex() != priorSlotIndex)
-        playerInventory.setHeldItemSlot(priorSlotIndex);
-    });
+        var blockType = block.getType();
+
+        if (config.rootSection.multiBreak.isBlockExcluded(blockType)) {
+          excludedBlockTypes.add(blockType);
+          return;
+        }
+
+        if (selectedParameters.doesBlockMismatchFilter(block))
+          return;
+
+        var toolUsed = DamageableHotbarItem.determineToolFromHotbar(block, playerInventory);
+
+        if (toolUsed == null) {
+          missingToolsForBlockTypes.add(blockType);
+          return;
+        }
+
+        // We're on the main thread, so there's no need for a list, seeing how events are processed strictly sequentially.
+        if (ignoredBreakEvent != null)
+          throw new IllegalStateException("Expected the currently ignored break-event to be null");
+
+        var priorSlotIndex = playerInventory.getHeldItemSlot();
+
+        // Let's also change over to the auto-selected tool, if applicable, seeing how plugins like
+        // mcMMO internally often call #getItemInMainHand, which would point to the wrong item otherwise.
+        if (toolUsed.slotIndex() != priorSlotIndex)
+          playerInventory.setHeldItemSlot(toolUsed.slotIndex());
+
+        var blockState = block.getState();
+
+        //noinspection UnstableApiUsage
+        var breakEvent = new BlockBreakEvent(block, player);
+
+        var expToDrop = 0;
+
+        if (!toolUsed.hasSilkTouch())
+          expToDrop += getRandomizedExperienceForBlockType(blockType);
+
+        if (blockState instanceof Furnace furnace)
+          expToDrop += (int) furnaceLevelDisplay.calculateExperience(player, furnace.getRecipesUsed());
+
+        breakEvent.setExpToDrop(expToDrop);
+
+        ignoredBreakEvent = breakEvent;
+        Bukkit.getPluginManager().callEvent(breakEvent);
+        ignoredBreakEvent = null;
+
+        if (breakEvent.isCancelled())
+          return;
+
+        var decreaseChance = config.rootSection.multiBreak.perAdditionalBlockDurabilityDecreaseChance;
+
+        if (decreaseChance > 0 && Math.random() <= decreaseChance / 100.0) {
+          if (!toolUsed.safelyIncrementDamageAndSet(player))
+            return;
+        }
+
+        simulateBlockBreak(player, toolUsed.item(), block, blockState, breakEvent);
+
+        if (toolUsed.slotIndex() != priorSlotIndex)
+          playerInventory.setHeldItemSlot(priorSlotIndex);
+      });
+    }
+
+    else
+      missingToolsForBlockTypes.add(originBlock.getType());
 
     if (missingToolsForBlockTypes.isEmpty() && excludedBlockTypes.isEmpty())
       return;
