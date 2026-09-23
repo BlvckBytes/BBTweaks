@@ -4,6 +4,8 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
+import org.bukkit.block.data.type.Skull;
+import org.bukkit.block.data.type.WallSkull;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerItemDamageEvent;
@@ -12,11 +14,70 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.Damageable;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
+
 public record DamageableHotbarItem(int slotIndex, ItemStack item, Damageable itemMeta, boolean hasSilkTouch) {
 
   // One point will always be removed after the origin-block's break-event returns.
   // Let's rather keep some tolerance on this than to try and maximize usage.
   private static final int MIN_TOOL_HEALTH = 10;
+
+  private static final EnumSet<Material> ANY_TOOL_BLOCK_TYPES;
+
+  static {
+    ANY_TOOL_BLOCK_TYPES = EnumSet.noneOf(Material.class);
+
+    // There are so many exceptions... But we cannot just allow all of them, as they also contain
+    // blocks which absolutely must not be batch-destroyable with multi-break. For now, this
+    // explicit, manually maintained list must do.
+
+    ANY_TOOL_BLOCK_TYPES.addAll(Tag.BEDS.getValues());
+    ANY_TOOL_BLOCK_TYPES.addAll(Tag.SAPLINGS.getValues());
+    ANY_TOOL_BLOCK_TYPES.addAll(Tag.CANDLES.getValues());
+    ANY_TOOL_BLOCK_TYPES.addAll(Tag.CANDLE_CAKES.getValues());
+    ANY_TOOL_BLOCK_TYPES.addAll(Tag.FLOWER_POTS.getValues());
+    ANY_TOOL_BLOCK_TYPES.addAll(Tag.FLOWERS.getValues());
+    ANY_TOOL_BLOCK_TYPES.addAll(Tag.CROPS.getValues());
+
+    ANY_TOOL_BLOCK_TYPES.add(Material.SLIME_BLOCK);
+    ANY_TOOL_BLOCK_TYPES.add(Material.SEA_LANTERN);
+    ANY_TOOL_BLOCK_TYPES.add(Material.GLOWSTONE);
+    ANY_TOOL_BLOCK_TYPES.add(Material.TNT);
+    ANY_TOOL_BLOCK_TYPES.add(Material.LEVER);
+    ANY_TOOL_BLOCK_TYPES.add(Material.LEAF_LITTER);
+    ANY_TOOL_BLOCK_TYPES.add(Material.POWDER_SNOW);
+    ANY_TOOL_BLOCK_TYPES.add(Material.SCAFFOLDING);
+    ANY_TOOL_BLOCK_TYPES.add(Material.REDSTONE_LAMP);
+    ANY_TOOL_BLOCK_TYPES.add(Material.REDSTONE_TORCH);
+    ANY_TOOL_BLOCK_TYPES.add(Material.REDSTONE_WALL_TORCH);
+    ANY_TOOL_BLOCK_TYPES.add(Material.REDSTONE_WIRE);
+    ANY_TOOL_BLOCK_TYPES.add(Material.REPEATER);
+    ANY_TOOL_BLOCK_TYPES.add(Material.COMPARATOR);
+    ANY_TOOL_BLOCK_TYPES.add(Material.TORCH);
+    ANY_TOOL_BLOCK_TYPES.add(Material.WALL_TORCH);
+    ANY_TOOL_BLOCK_TYPES.add(Material.SOUL_TORCH);
+    ANY_TOOL_BLOCK_TYPES.add(Material.SOUL_WALL_TORCH);
+    ANY_TOOL_BLOCK_TYPES.add(Material.COPPER_TORCH);
+    ANY_TOOL_BLOCK_TYPES.add(Material.COPPER_WALL_TORCH);
+    ANY_TOOL_BLOCK_TYPES.add(Material.RESIN_BLOCK);
+    ANY_TOOL_BLOCK_TYPES.add(Material.RESIN_CLUMP);
+
+    for (var material : Material.values()) {
+      if (!material.isBlock())
+        continue;
+
+      if (material.name().contains("FROGLIGHT")) {
+        ANY_TOOL_BLOCK_TYPES.add(material);
+        continue;
+      }
+
+      var blockData = material.createBlockData();
+
+      // This then properly includes skulls, wall-skulls, player-head, etc.
+      if (blockData instanceof Skull || blockData instanceof WallSkull)
+        ANY_TOOL_BLOCK_TYPES.add(material);
+    }
+  }
 
   public boolean safelyIncrementDamageAndSet(Player player) {
     if (itemMeta.isUnbreakable())
@@ -98,31 +159,48 @@ public record DamageableHotbarItem(int slotIndex, ItemStack item, Damageable ite
 
   @SuppressWarnings("BooleanMethodIsAlwaysInverted")
   public static boolean isRightToolForBlock(ItemStack tool, Block block) {
+    if (tool.getType().isAir())
+      return false;
+
     var blockType = block.getType();
 
-    if (tool.getType() == Material.SHEARS) {
-      return (
-        Tag.LEAVES.isTagged(blockType)
-          || Tag.WOOL.isTagged(blockType)
-          || Tag.WOOL_CARPETS.isTagged(blockType)
-          || blockType == Material.COBWEB
-      );
-    }
-
-    if (Tag.MINEABLE_AXE.isTagged(blockType) && Tag.ITEMS_AXES.isTagged(tool.getType()))
+    if (ANY_TOOL_BLOCK_TYPES.contains(blockType))
       return true;
 
-    if (Tag.MINEABLE_PICKAXE.isTagged(blockType) && Tag.ITEMS_PICKAXES.isTagged(tool.getType())) {
-      // Make sure to not drop, say, diamonds when breaking diamond-ore with a wooden-pickaxe.
+    var requiredToolType = ToolType.determineForBlock(blockType);
+
+    if (requiredToolType == null) {
+      var toolSpeed = getToolSpeed(tool, blockType);
+      return toolSpeed != null && toolSpeed > 1;
+    }
+
+    if (!requiredToolType.isRepresentedByItemType(tool.getType()))
+      return false;
+
+    // Make sure to not drop, say, diamonds when breaking diamond-ore with a wooden pickaxe.
+    if (requiredToolType == ToolType.PICKAXE)
       return block.isPreferredTool(tool);
+
+    return true;
+  }
+
+  @SuppressWarnings("UnstableApiUsage")
+  private static @Nullable Float getToolSpeed(ItemStack item, Material block) {
+    var meta = item.getItemMeta();
+
+    if (!meta.hasTool())
+      return null;
+
+    for (var rule : meta.getTool().getRules()) {
+      if (!rule.getBlocks().contains(block))
+        continue;
+
+      var speed = rule.getSpeed();
+
+      if (speed != null)
+        return speed;
     }
 
-    if (Tag.MINEABLE_SHOVEL.isTagged(blockType) && Tag.ITEMS_SHOVELS.isTagged(tool.getType()))
-      return true;
-
-    if (Tag.MINEABLE_HOE.isTagged(blockType) && Tag.ITEMS_HOES.isTagged(tool.getType()))
-      return true;
-
-    return Tag.SWORD_INSTANTLY_MINES.isTagged(blockType) && Tag.ITEMS_SWORDS.isTagged(tool.getType());
+    return null;
   }
 }
