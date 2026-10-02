@@ -25,6 +25,7 @@ public class ObstructedContainerOpener implements Listener {
     SUPPORTED_CONTAINER_TYPES.add(Material.CHEST);
     SUPPORTED_CONTAINER_TYPES.add(Material.TRAPPED_CHEST);
     SUPPORTED_CONTAINER_TYPES.addAll(Tag.SHULKER_BOXES.getValues());
+    SUPPORTED_CONTAINER_TYPES.addAll(Tag.COPPER_CHESTS.getValues());
   }
 
   private final Plugin plugin;
