@@ -31,6 +31,7 @@ commands:
     permission: bbtweaks.mechanic.magnet
   seed:
     description: 'Displays the seed of the current world'
+    permission: bbtweaks.seed
   invfilter:
     description: 'Configure and toggle inventory-filters regarding picked-up items'
     permission: bbtweaks.invfilter
