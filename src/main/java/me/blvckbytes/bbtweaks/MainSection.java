@@ -38,6 +38,7 @@ import me.blvckbytes.bbtweaks.list_chunk_tickets.ListChunkTicketsSection;
 import me.blvckbytes.bbtweaks.main_command.MainCommandSection;
 import me.blvckbytes.bbtweaks.markers_menu.MarkersMenuSection;
 import me.blvckbytes.bbtweaks.mechanic.MechanicSection;
+import me.blvckbytes.bbtweaks.mspt_monitoring.MsptMonitoringSection;
 import me.blvckbytes.bbtweaks.multi_break.config.MultiBreakSection;
 import me.blvckbytes.bbtweaks.newbie_announce.NewbieAnnounceSection;
 import me.blvckbytes.bbtweaks.newbie_teleport.NewbieTeleportSection;
@@ -104,6 +105,7 @@ public class MainSection extends ConfigSection {
   public ChatFormatSection chatFormat;
   public ItemPilingSection itemPiling;
   public NoAiSection noAi;
+  public MsptMonitoringSection msptMonitoring;
 
   public MainSection(InterpretationEnvironment baseEnvironment, InterpreterLogger interpreterLogger) {
     super(baseEnvironment, interpreterLogger);

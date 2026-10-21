@@ -74,6 +74,7 @@ import me.blvckbytes.bbtweaks.markers_menu.SetMarkerCommand;
 import me.blvckbytes.bbtweaks.markers_menu.display.MarkerDisplayHandler;
 import me.blvckbytes.bbtweaks.mechanic.SignMechanicManager;
 import me.blvckbytes.bbtweaks.mechanic.magnet.edit_display.MagnetEditDisplayHandler;
+import me.blvckbytes.bbtweaks.mspt_monitoring.MsptMonitoring;
 import me.blvckbytes.bbtweaks.multi_break.command.MultiBreakCommand;
 import me.blvckbytes.bbtweaks.multi_break.MultiBreakListener;
 import me.blvckbytes.bbtweaks.multi_break.parameters.MultiBreakParametersStore;
@@ -265,6 +266,7 @@ public class BBTweaksPlugin extends JavaPlugin {
         .withSingleton(GetUsernameCommand.class)
         .withSingleton(LocateEntitiesCommand.class)
         .withSingleton(NoAiCommand.class)
+        .withSingleton(MsptMonitoring.class)
         .complete();
     } catch (Throwable e) {
       getLogger().log(Level.SEVERE, "An error occurred while trying to set up the plugin", e);
